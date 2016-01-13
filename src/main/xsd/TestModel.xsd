@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+		xmlns:tm="http://nds.rub.de/oidc/test-model"
+		targetNamespace="http://nds.rub.de/oidc/test-model"
+		elementFormDefault="qualified"
+		attributeFormDefault="unqualified"
+		version="1.0.0">
+
+	<!-- Test Object -->
+
+	<element name="TestObject" type="tm:TestObjectType" />
+	<complexType name="TestObjectType">
+		<sequence>
+			<choice>
+				<element name="TestRPConfig" type="tm:TestRPConfigType" />
+				<element name="TestOPConfig" type="tm:TestOPConfigType" />
+			</choice>
+			<element name="TestReport" type="tm:TestReportType" minOccurs="0" />
+		</sequence>
+		<attribute name="TestId" type="NCName" use="required" />
+		<attribute name="TestPlanReference" type="normalizedString" use="required" />
+	</complexType>
+
+	<complexType name="TestRPConfigType">
+		<sequence>
+			<element name="StartUrl" type="anyURI" />
+			<element name="FormularId" type="NCName" minOccurs="0" />
+			<element name="SeleniumScript" type="string" minOccurs="0" />
+			<element name="FinalValidUrl" type="anyURI" minOccurs="0" />
+			<element name="ProfileInfo" type="string" minOccurs="0" />
+			<element name="ProfileUrl" type="anyURI" minOccurs="0" />
+			<element name="FinalInvalidUrl" type="anyURI" minOccurs="0" />
+			<element name="InvalidReturnCode" type="nonNegativeInteger" minOccurs="0" />
+		</sequence>
+	</complexType>
+
+	<complexType name="TestOPConfigType">
+		<sequence>
+			<element name="OPUrl" type="anyURI" />
+			<element name="UserCredentials" type="tm:UserCredentialsType" />
+			<element name="CodeRequestUrl" type="anyURI" />
+			<element name="TokenRequestUrl" type="anyURI" />
+			<element name="ClientCredentials" type="tm:ClientCredentialsType" />
+			<element name="LoginFormHelp" type="string" minOccurs="0" />
+		</sequence>
+	</complexType>
+
+	<complexType name="UserCredentialsType">
+		<choice>
+			<sequence>
+				<element name="Username" type="string" />
+				<element name="Password" type="string" />
+			</sequence>
+		</choice>
+	</complexType>
+
+	<complexType name="ClientCredentialsType">
+		<choice>
+			<sequence>
+				<element name="ClientId" type="string" />
+				<element name="ClientSecret" type="string" />
+			</sequence>
+		</choice>
+	</complexType>
+
+
+	<!-- Test Report -->
+
+	<complexType name="TestReportType">
+		<sequence>
+			<element name="TestStepResult" type="tm:TestStepResultType" minOccurs="0" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<complexType name="TestStepResultType">
+		<sequence>
+			<element name="StepReference" type="tm:TestStepType" />
+			<element name="Result" type="tm:TestStepResult" />
+			<element name="LogEntry" type="tm:LogEntryType" minOccurs="0" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<simpleType name="TestStepResult">
+		<restriction base="string">
+			<enumeration value="NOT_RUN" />
+			<enumeration value="PASS" />
+			<enumeration value="FAIL" />
+			<enumeration value="UNDETERMINED" />
+		</restriction>
+	</simpleType>
+
+	<complexType name="LogEntryType">
+		<sequence>
+			<element name="Date" type="dateTime" />
+			<choice>
+				<element name="Text" type="string" />
+				<element name="Screenshot" type="tm:ScreenshotEntryType" />
+				<element name="HttpRequest" type="tm:HttpRequestEntryType" />
+				<element name="HttpResponse" type="tm:HttpResponseEntryType" />
+			</choice>
+		</sequence>
+	</complexType>
+
+	<complexType name="ScreenshotEntryType">
+		<sequence>
+			<element name="Data" type="base64Binary" />
+			<element name="MimeType" type="token" />
+		</sequence>
+	</complexType>
+
+	<complexType name="HttpRequestEntryType">
+		<sequence>
+			<element name="Status" type="nonNegativeInteger" />
+			<element name="Header" type="tm:HeaderType" minOccurs="0" maxOccurs="unbounded" />
+			<element name="Body" type="string" minOccurs="0" />
+		</sequence>
+	</complexType>
+
+	<complexType name="HttpResponseEntryType">
+		<sequence>
+			<element name="RequestLine" type="normalizedString" />
+			<element name="Header" type="tm:HeaderType" minOccurs="0" maxOccurs="unbounded" />
+			<element name="Body" type="string" minOccurs="0" />
+		</sequence>
+	</complexType>
+
+	<complexType name="HeaderType">
+		<simpleContent>
+			<extension base="string">
+				<attribute name="Key" type="string" use="required" />
+			</extension>
+		</simpleContent>
+	</complexType>
+
+
+	<!-- Test Plan -->
+
+	<element name="TestPlan" type="tm:TestPlanType" />
+	<complexType name="TestPlanType">
+		<sequence>
+			<element name="TestStep" type="tm:TestStepType" maxOccurs="unbounded" />
+		</sequence>
+		<attribute name="Name" type="normalizedString" use="required" />
+	</complexType>
+
+	<complexType name="TestStepType">
+		<sequence>
+			<element name="Description" minOccurs="0">
+				<complexType mixed="true">
+					<sequence>
+						<any minOccurs="0" maxOccurs="unbounded" processContents="skip" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="SeleniumScript" type="tm:SeleniumScriptType" />
+			<choice>
+				<sequence>
+					<element name="OPConfig-1" type="tm:OPConfigType" />
+					<element name="OPConfig-2" type="tm:OPConfigType" />
+				</sequence>
+				<element name="RPConfig" type="tm:RPConfigType" />
+			</choice>
+		</sequence>
+		<attribute name="Name" type="normalizedString" use="required" />
+	</complexType>
+
+	<complexType name="SeleniumScriptType">
+		<sequence>
+			<element name="BrowserSimulatorClass" type="normalizedString" />
+		</sequence>
+	</complexType>
+
+	<complexType name="OPConfigType">
+		<sequence>
+			<element name="OPImplementationClass" type="normalizedString" />
+		</sequence>
+	</complexType>
+
+	<complexType name="RPConfigType">
+		<sequence>
+			<element name="RPImplementationClass" type="normalizedString" />
+		</sequence>
+	</complexType>
+
+</schema>

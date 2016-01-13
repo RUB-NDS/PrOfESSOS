@@ -83,4 +83,30 @@
 		</dependency>
 	</dependencies>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.jvnet.jaxb2.maven2</groupId>
+				<artifactId>maven-jaxb2-plugin</artifactId>
+				<version>0.13.1</version>
+				<executions>
+					<!-- rest -->
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<schemaDirectory>src/main/xsd</schemaDirectory>
+							<bindingFiles>
+								<bindingFile>${wsdl.source}/serialization.xjc</bindingFile>
+							</bindingFiles>
+							<specVersion>2.2</specVersion>
+							<packageLevelAnnotations>false</packageLevelAnnotations>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
 </project>
