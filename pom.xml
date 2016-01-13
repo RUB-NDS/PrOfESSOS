@@ -32,6 +32,14 @@
 			<version>5.1.1</version>
 		</dependency>
 
+		<!-- use jbrowserdriver when it is more mature -->
+		<!--
+		<dependency>
+			<groupId>com.machinepublishers.jbrowserdriver</groupId>
+			<artifactId>jbrowserdriver</artifactId>
+			<version>0.7.0</version>
+		</dependency>
+		-->
 		<dependency>
 			<groupId>com.github.detro</groupId>
 			<artifactId>phantomjsdriver</artifactId>
@@ -58,6 +66,13 @@
 					<artifactId>selenium-htmlunit-driver</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>annotations</artifactId>
+			<version>3.0.1u2</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
