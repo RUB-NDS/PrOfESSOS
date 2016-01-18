@@ -9,3 +9,7 @@ buildNumber.properties
 .idea/
 *.iml
 nb-configuration.xml
+/node
+/npm-debug.log
+/node_modules
+/bower_components
