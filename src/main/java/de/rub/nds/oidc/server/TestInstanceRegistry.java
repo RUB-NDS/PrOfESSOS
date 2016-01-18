@@ -1,18 +1,17 @@
 /****************************************************************************
- * Copyright (C) 2016 Tobias Wich
+ * Copyright 2016 Ruhr-Universität Bochum.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ***************************************************************************/
 
 package de.rub.nds.oidc.server;
@@ -21,6 +20,8 @@ import de.rub.nds.oidc.server.op.OPInstance;
 import de.rub.nds.oidc.server.rp.RPInstance;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import javax.enterprise.context.ApplicationScoped;
 
 /**
@@ -52,34 +53,54 @@ public class TestInstanceRegistry {
 		rps.put(testId, inst);
 	}
 
+	private <T> Supplier<ServerInstance<T>> getInstance(Map<String, ServerInstance<T>> reg, String testId) {
+		return () -> reg.get(testId);
+	}
+
+	private <T> Function<String, ServerInstance<T>> getInstances(Map<String, ServerInstance<T>> reg) {
+		return (testId) -> reg.get(testId);
+	}
+
 	public ServerInstance<OPInstance> getOP1(String testId) throws ServerInstanceMissingException {
-		ServerInstance<OPInstance> result = op1s.get(testId);
+		ServerInstance<OPInstance> result = getOP1Supplier().apply(testId);
 		if (result == null) {
-			throw createExc("OP-1", testId);
+			throw createException("OP-1", testId);
 		} else {
 			return result;
 		}
+	}
+
+	public Function<String, ServerInstance<OPInstance>> getOP1Supplier() {
+		return getInstances(op1s);
 	}
 
 	public ServerInstance<OPInstance> getOP2(String testId) throws ServerInstanceMissingException {
-		ServerInstance<OPInstance> result = op2s.get(testId);
+		ServerInstance<OPInstance> result = getOP2Supplier().apply(testId);
 		if (result == null) {
-			throw createExc("OP-2", testId);
+			throw createException("OP-2", testId);
 		} else {
 			return result;
 		}
+	}
+
+	public Function<String, ServerInstance<OPInstance>> getOP2Supplier() {
+		return getInstances(op2s);
 	}
 
 	public ServerInstance<RPInstance> getRP(String testId) throws ServerInstanceMissingException {
-		ServerInstance<RPInstance> result = rps.get(testId);
+		ServerInstance<RPInstance> result = getRPSupplier().apply(testId);
 		if (result == null) {
-			throw createExc("RP", testId);
+			throw createException("RP", testId);
 		} else {
 			return result;
 		}
 	}
 
-	private ServerInstanceMissingException createExc(String name, String testId) {
+	public Function<String, ServerInstance<RPInstance>> getRPSupplier() {
+		return getInstances(rps);
+	}
+
+	private ServerInstanceMissingException createException(String name, String testId) {
 		String msg = String.format("%s instance for id %s is missing in the registry.", name, testId);
 		ServerInstanceMissingException ex = new ServerInstanceMissingException(msg);
 		return ex;

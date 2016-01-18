@@ -16,20 +16,30 @@
 
 package de.rub.nds.oidc.utils;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Base64;
+import javax.enterprise.context.ApplicationScoped;
+
 /**
  *
  * @author Tobias Wich
  */
-public class ImplementationLoader {
+@ApplicationScoped
+public class ValueGenerator {
 
-	public static <T> T loadClassInstance(String clazz, Class<T> iface) throws ImplementationLoadException {
-		try {
-			Class<?> classInst = ImplementationLoader.class.getClassLoader().loadClass(clazz);
-			Object newInstance = classInst.newInstance();
-			return iface.cast(newInstance);
-		} catch (ClassNotFoundException | IllegalAccessException | InstantiationException ex) {
-			throw new ImplementationLoadException("Failed to instantiate class.", ex);
-		}
+	private final SecureRandom rand;
+
+	public ValueGenerator() throws NoSuchAlgorithmException {
+		rand = new SecureRandom();
+	}
+
+
+	public String generateTestId() {
+		byte[] data = new byte[16];
+		rand.nextBytes(data);
+		String testId = Base64.getUrlEncoder().withoutPadding().encodeToString(data);
+		return testId;
 	}
 
 }

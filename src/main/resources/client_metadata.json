@@ -1,0 +1,10 @@
+{
+  "redirect_uris"    : ["/api/login/code", "/api/login/implicit"],
+  "response_types"   : ["code", "token"],
+  "grant_types"      : ["authorization_code", "implicit"],
+  "application_type" : "web",
+  "client_name"      : "OIDC honest Client",
+
+  "client_id"        : "oidc-honest-client",
+  "client_secret"    : "secret"
+}

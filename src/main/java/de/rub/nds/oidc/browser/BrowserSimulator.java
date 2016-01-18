@@ -14,22 +14,30 @@
  * limitations under the License.
  ***************************************************************************/
 
-package de.rub.nds.oidc.utils;
+package de.rub.nds.oidc.browser;
+
+import de.rub.nds.oidc.test_model.TestObjectType;
+import org.openqa.selenium.phantomjs.PhantomJSDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 /**
  *
  * @author Tobias Wich
  */
-public class ImplementationLoader {
+public abstract class BrowserSimulator {
 
-	public static <T> T loadClassInstance(String clazz, Class<T> iface) throws ImplementationLoadException {
-		try {
-			Class<?> classInst = ImplementationLoader.class.getClassLoader().loadClass(clazz);
-			Object newInstance = classInst.newInstance();
-			return iface.cast(newInstance);
-		} catch (ClassNotFoundException | IllegalAccessException | InstantiationException ex) {
-			throw new ImplementationLoadException("Failed to instantiate class.", ex);
-		}
+	protected final TestObjectType testObj;
+	protected final RemoteWebDriver driver;
+
+	public BrowserSimulator(TestObjectType testObject) {
+		driver = new PhantomJSDriver();
+		this.testObj = testObject;
+	}
+
+	public abstract void run();
+
+	public void quit() {
+		driver.quit();
 	}
 
 }

@@ -1,25 +1,26 @@
 /****************************************************************************
- * Copyright (C) 2016 Tobias Wich
+ * Copyright 2016 Ruhr-Universität Bochum.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ***************************************************************************/
 
 package de.rub.nds.oidc.server;
 
+import de.rub.nds.oidc.server.op.OPImplementation;
 import de.rub.nds.oidc.server.op.OPInstance;
 import de.rub.nds.oidc.server.rp.RPInstance;
 import java.io.IOException;
+import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -52,17 +53,18 @@ public class RequestDispatcher extends HttpServlet {
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String serverName = req.getServerName();
 		RequestPath path = new RequestPath(req);
+		String testId = path.getTestId(); // may not be the
 
 		try {
 			switch (serverName) {
 				case OP1_HOST:
-					handleOP(registry.getOP1(path.getTestId()));
+					handleOP(path, () -> registry.getOP1Supplier().apply(testId));
 					break;
 				case OP2_HOST:
-					handleOP(registry.getOP2(path.getTestId()));
+					handleOP(path, () -> registry.getOP2Supplier().apply(testId));
 					break;
 				case RP_HOST:
-					handleRP(registry.getRP(path.getTestId()));
+					handleRP(path, () -> registry.getRPSupplier().apply(testId));
 					break;
 				default:
 					String msg = "Servername (" + serverName + ") is not handled by the dispatcher.";
@@ -76,12 +78,51 @@ public class RequestDispatcher extends HttpServlet {
 	}
 
 
-	private void handleOP(ServerInstance<OPInstance> inst) {
+	private void handleOP(RequestPath path, Supplier<ServerInstance<OPInstance>> instSupplier)
+			throws ServerInstanceMissingException {
+		String fullResource = path.getFullResource();
 
+		// process known resources
+		if (fullResource.startsWith(".well-known/webfinger")) {
+			// TODO: implement webfinger and other common logic
+		} else {
+			// let the dispatcher handle everything else
+			String testId = path.getTestId();
+			String resource = path.getStrippedResource();
+			ServerInstance<OPInstance> inst = instSupplier.get();
+			if (inst == null) {
+				String msg = String.format("OP instance for id %s is missing in the registry.", testId);
+				throw new ServerInstanceMissingException(msg);
+			} else {
+				OPImplementation impl = inst.getInst().getImpl();
+				switch (resource) {
+					// TODO: match resources and call impl functions
+					default:
+
+				}
+			}
+		}
 	}
 
-	private void handleRP(ServerInstance<RPInstance> inst) {
+	private void handleRP(RequestPath path, Supplier<ServerInstance<RPInstance>> instSupplier)
+			throws ServerInstanceMissingException {
+		String fullResource = path.getFullResource();
 
+		// process known resources
+		if (fullResource.startsWith(".well-known/webfinger")) {
+			// TODO: implement webfinger and other common logic
+		} else {
+			// let the dispatcher handle everything else
+			String testId = path.getTestId();
+			String resource = path.getStrippedResource();
+			ServerInstance<RPInstance> inst = instSupplier.get();
+			if (inst == null) {
+				String msg = String.format("RP instance for id %s is missing in the registry.", testId);
+				throw new ServerInstanceMissingException(msg);
+			} else {
+
+			}
+		}
 	}
 
 }

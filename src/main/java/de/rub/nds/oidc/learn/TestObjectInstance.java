@@ -14,22 +14,31 @@
  * limitations under the License.
  ***************************************************************************/
 
-package de.rub.nds.oidc.utils;
+package de.rub.nds.oidc.learn;
+
+import de.rub.nds.oidc.test_model.TestObjectType;
+import de.rub.nds.oidc.test_model.TestPlanType;
 
 /**
  *
  * @author Tobias Wich
  */
-public class ImplementationLoader {
+public class TestObjectInstance {
 
-	public static <T> T loadClassInstance(String clazz, Class<T> iface) throws ImplementationLoadException {
-		try {
-			Class<?> classInst = ImplementationLoader.class.getClassLoader().loadClass(clazz);
-			Object newInstance = classInst.newInstance();
-			return iface.cast(newInstance);
-		} catch (ClassNotFoundException | IllegalAccessException | InstantiationException ex) {
-			throw new ImplementationLoadException("Failed to instantiate class.", ex);
-		}
+	private final TestObjectType testObj;
+	private final TestPlanType testPlan;
+
+	public TestObjectInstance(TestObjectType testObj, TestPlanType testPlan) {
+		this.testObj = testObj;
+		this.testPlan = testPlan;
+	}
+
+	public TestObjectType getTestObj() {
+		return testObj;
+	}
+
+	public TestPlanType getTestPlan() {
+		return testPlan;
 	}
 
 }

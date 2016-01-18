@@ -14,22 +14,16 @@
  * limitations under the License.
  ***************************************************************************/
 
-package de.rub.nds.oidc.utils;
+package de.rub.nds.oidc.learn;
 
 /**
  *
  * @author Tobias Wich
  */
-public class ImplementationLoader {
+class NoSuchTestObject extends Exception {
 
-	public static <T> T loadClassInstance(String clazz, Class<T> iface) throws ImplementationLoadException {
-		try {
-			Class<?> classInst = ImplementationLoader.class.getClassLoader().loadClass(clazz);
-			Object newInstance = classInst.newInstance();
-			return iface.cast(newInstance);
-		} catch (ClassNotFoundException | IllegalAccessException | InstantiationException ex) {
-			throw new ImplementationLoadException("Failed to instantiate class.", ex);
-		}
+	public NoSuchTestObject(String msg) {
+		super(msg);
 	}
 
 }
