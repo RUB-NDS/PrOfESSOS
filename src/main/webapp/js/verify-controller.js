@@ -30,14 +30,14 @@ var OPIV = (function(module) {
 
 	module.createRPTestPlan = function() {
 		// request new test id
-		$.post("learn/rp/create-test-object", initTestObject);
+		$.post("api/rp/create-test-object", initTestObject);
 	};
 
 	module.learnRP = function() {
 		updateRPConfig();
 		// call learning function
 		$.post({
-			url: "learn/rp/" + testId + "/learn",
+			url: "api/rp/" + testId + "/learn",
 			data: JSON.stringify(testRPConfig),
 			contentType: "application/json",
 			success: processLearnResponse
@@ -48,7 +48,7 @@ var OPIV = (function(module) {
 		updateRPConfig();
 		// call test function
 		$.post({
-			url: "learn/rp/" + testId + "/test/" + stepId,
+			url: "api/rp/" + testId + "/test/" + stepId,
 			data: JSON.stringify(testRPConfig),
 			contentType: "application/json",
 			success: function(data) { processTestResponse(stepContainer, data); }
@@ -105,24 +105,8 @@ var OPIV = (function(module) {
 		desc.style.visibility = "hidden";
 		desc.className = "step-description";
 		desc.innerHTML = testDef.Description;
-		var hideImg = document.createElement("img");
-		hideImg.src = "img/arrow-right.png";
-		hideImg.width = 20;
-		var hideImgLink = document.createElement("a");
-		hideImgLink.href = "#";
-		hideImgLink.innerHTML = "Description";
-		hideImgLink.onclick = function() {
-			if (desc.style.visibility === "hidden") {
-				desc.style.visibility = "visible";
-				hideImg.src = "img/arrow-down.png";
-			} else {
-				desc.style.visibility = "hidden";
-				hideImg.src = "img/arrow-right.png";
-			}
-		};
 
-		hideImgLink.appendChild(hideImg);
-		descContainer.appendChild(hideImgLink);
+		descContainer.appendChild(createHideImage(desc));
 		descContainer.appendChild(desc);
 		container.appendChild(descContainer);
 
@@ -131,6 +115,27 @@ var OPIV = (function(module) {
 		container.appendChild(logContainer);
 
 		return container;
+	}
+
+	function createHideImage(containerToHide) {
+		var hideImg = document.createElement("img");
+		hideImg.src = "img/arrow-right.png";
+		hideImg.width = 20;
+		var hideImgLink = document.createElement("a");
+		hideImgLink.appendChild(hideImg);
+		hideImgLink.href = "#";
+		hideImgLink.innerHTML = "Description";
+		hideImgLink.onclick = function() {
+			if (containerToHide.style.visibility === "hidden") {
+				containerToHide.style.visibility = "visible";
+				hideImg.src = "img/arrow-down.png";
+			} else {
+				containerToHide.style.visibility = "hidden";
+				hideImg.src = "img/arrow-right.png";
+			}
+		};
+
+		return hideImgLink;
 	}
 
 	function createResultImage(code) {
@@ -189,11 +194,77 @@ var OPIV = (function(module) {
 	}
 
 	function createHttpRequestLogEntry(req) {
-		// TODO
+		var result = document.createDocumentFragment();
+
+		var type = document.createElement("h3");
+		type.innerHTML = "HTTP Request";
+		result.appendChild(type);
+
+		var status = document.createElement("div");
+		status.appendChild(document.createTextNode(req.RequestLine));
+		result.appendChild(status);
+
+		result.appendChild(createHttpHeaders(req.Header));
+		result.appendChild(createHttpBody(req.Body));
+
+		return result;
 	}
 
 	function createHttpResponseLogEntry(res) {
-		// TODO
+		var result = document.createDocumentFragment();
+
+		var type = document.createElement("h3");
+		type.innerHTML = "HTTP Response";
+		result.appendChild(type);
+
+		var status = document.createElement("div");
+		status.appendChild(document.createTextNode(res.Status));
+		result.appendChild(status);
+
+		result.appendChild(createHttpHeaders(res.Header));
+		result.appendChild(createHttpBody(res.Body));
+
+		return result;
+	}
+
+	function createHttpHeaders(headers) {
+		var doc = document.createDocumentFragment();
+
+		var caption = document.createElement("b");
+		caption.innerHTML = "Headers";
+		doc.appendChild(caption);
+
+		var dl = document.createElement("dl");
+		doc.appendChild(createHideImage(dl));
+		doc.appendChild(dl);
+
+		if (headers) {
+			for (var i = 0; i < headers.length; i++) {
+				var entry = headers[i];
+				var dt = document.createElement("dt");
+				dt.appendChild(document.createTextNode(entry.Key));
+				dl.appendChild(dt);
+				var dd = document.createElement("dd");
+				dd.appendChild(document.createTextNode(entry.value));
+				dl.appendChild(dd);
+			}
+		}
+
+		return doc;
+	}
+
+	function createHttpBody(body) {
+		var doc = document.createDocumentFragment();
+
+		var caption = document.createElement("b");
+		caption.innerHTML = "Body";
+		doc.appendChild(caption);
+
+		var container = document.createElement("pre");
+		container.appendChild(document.createTextNode(body));
+		doc.appendChild(container);
+
+		return doc;
 	}
 
 	function updateRPConfig() {

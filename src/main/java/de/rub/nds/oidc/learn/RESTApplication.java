@@ -23,7 +23,7 @@ import javax.ws.rs.core.Application;
  *
  * @author Tobias Wich
  */
-@ApplicationPath("/learn")
-public class LearningApplication extends Application {
+@ApplicationPath("/api")
+public class RESTApplication extends Application {
 
 }

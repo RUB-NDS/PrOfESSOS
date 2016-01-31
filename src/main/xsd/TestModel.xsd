@@ -126,7 +126,7 @@ limitations under the License.
 
 	<complexType name="HttpRequestEntryType">
 		<sequence>
-			<element name="Status" type="nonNegativeInteger" />
+			<element name="RequestLine" type="normalizedString" />
 			<element name="Header" type="tm:HeaderType" minOccurs="0" maxOccurs="unbounded" />
 			<element name="Body" type="string" minOccurs="0" />
 		</sequence>
@@ -134,7 +134,7 @@ limitations under the License.
 
 	<complexType name="HttpResponseEntryType">
 		<sequence>
-			<element name="RequestLine" type="normalizedString" />
+			<element name="Status" type="nonNegativeInteger" />
 			<element name="Header" type="tm:HeaderType" minOccurs="0" maxOccurs="unbounded" />
 			<element name="Body" type="string" minOccurs="0" />
 		</sequence>
