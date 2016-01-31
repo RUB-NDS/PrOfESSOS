@@ -39,9 +39,13 @@ public class TestStepLogger {
 	private final TestStepResultType stepResult;
 	protected final DatatypeFactory df;
 
-	public TestStepLogger(TestStepResultType stepResult) throws DatatypeConfigurationException {
-		this.stepResult = stepResult;
-		this.df = DatatypeFactory.newInstance();
+	public TestStepLogger(TestStepResultType stepResult) {
+		try {
+			this.stepResult = stepResult;
+			this.df = DatatypeFactory.newInstance();
+		} catch (DatatypeConfigurationException ex) {
+			throw new RuntimeException("JAXB datatype conversion not available.", ex);
+		}
 	}
 
 	protected LogEntryType createLogEntry() {
@@ -69,6 +73,8 @@ public class TestStepLogger {
 		ScreenshotEntryType se = new ScreenshotEntryType();
 		se.setData(screenshot);
 		se.setMimeType(mimeType);
+		e.setScreenshot(se);
+		log(e);
 	}
 
 	public void logHttpRequest(HttpRequestEntryType req) {

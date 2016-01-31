@@ -17,30 +17,44 @@
 package de.rub.nds.oidc.server.op;
 
 import de.rub.nds.oidc.log.TestStepLogger;
-import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.OPConfigType;
 import de.rub.nds.oidc.test_model.ParameterType;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.stream.Collectors;
 
 /**
  *
  * @author Tobias Wich
  */
-public interface OPImplementation {
+public abstract class AbstractOPImplementation implements OPImplementation {
 
-	void setConfig(OPConfigType cfg);
+	protected OPConfigType cfg;
+	protected TestStepLogger logger;
+	protected Map<String, ?> suiteCtx;
+	protected Map<String, ?> stepCtx;
+	protected Map<String, String> params;
 
-	void setLogger(TestStepLogger logger);
+	@Override
+	public void setConfig(OPConfigType cfg) {
+		this.cfg = cfg;
+	}
 
-	void setContext(Map<String, ?> suiteCtx, Map<String, ?> stepCtx);
+	@Override
+	public void setLogger(TestStepLogger logger) {
+		this.logger = logger;
+	}
 
-	void setParameters(List<ParameterType> params);
+	@Override
+	public void setContext(Map<String, ?> suiteCtx, Map<String, ?> stepCtx) {
+		this.suiteCtx = suiteCtx;
+		this.stepCtx = stepCtx;
+	}
 
-
-	void webfinger(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+	@Override
+	public void setParameters(List<ParameterType> params) {
+		this.params = params.stream()
+				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+	}
 
 }

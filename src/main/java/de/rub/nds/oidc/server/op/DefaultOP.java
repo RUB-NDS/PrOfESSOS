@@ -16,13 +16,10 @@
 
 package de.rub.nds.oidc.server.op;
 
-import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.RequestPath;
-import de.rub.nds.oidc.test_model.OPConfigType;
-import de.rub.nds.oidc.test_model.ParameterType;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import javax.json.Json;
+import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -30,17 +27,25 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Tobias Wich
  */
-public interface OPImplementation {
+public class DefaultOP extends AbstractOPImplementation {
 
-	void setConfig(OPConfigType cfg);
-
-	void setLogger(TestStepLogger logger);
-
-	void setContext(Map<String, ?> suiteCtx, Map<String, ?> stepCtx);
-
-	void setParameters(List<ParameterType> params);
-
-
-	void webfinger(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+	@Override
+	public void webfinger(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		String rel = req.getParameter("rel");
+		String resource = req.getParameter("resource");
+		String host = req.getParameter("host");
+		if ("http://openid.net/specs/connect/1.0/issuer".equals(rel)) {
+			JsonObject result = Json.createObjectBuilder()
+					.add("subject", resource)
+					.add("links", Json.createArrayBuilder().add(Json.createObjectBuilder()
+					.add("rel", "http://openid.net/specs/connect/1.0/issuer")
+					.add("href", path.getServerHost().toString())))
+					.build();
+			Json.createWriter(resp.getOutputStream()).writeObject(result);
+			resp.setContentType("application/json; charset=UTF-8");
+		} else {
+			// return not handled
+		}
+	}
 
 }

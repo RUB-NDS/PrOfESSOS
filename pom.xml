@@ -36,7 +36,7 @@
 	</properties>
 
 	<dependencies>
-		<dependency>
+	 <dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
 			<version>7.0</version>
@@ -83,6 +83,12 @@
 					<artifactId>selenium-htmlunit-driver</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity</artifactId>
+			<version>1.7</version>
 		</dependency>
 
 		<dependency>

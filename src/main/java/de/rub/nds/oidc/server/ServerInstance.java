@@ -37,4 +37,8 @@ public class ServerInstance <T> {
 		return inst;
 	}
 
+	public TestStepLogger getLogger() {
+		return logger;
+	}
+
 }

@@ -14,31 +14,12 @@
  * limitations under the License.
  ***************************************************************************/
 
-package de.rub.nds.oidc.learn;
-
-import de.rub.nds.oidc.test_model.TestObjectType;
-import de.rub.nds.oidc.test_model.TestPlanType;
+package de.rub.nds.oidc.client;
 
 /**
  *
  * @author Tobias Wich
  */
-public class TestObjectInstance {
-
-	private final TestObjectType testObj;
-	private final TestPlanType testPlan;
-
-	public TestObjectInstance(TestObjectType testObj, TestPlanType testPlan) {
-		this.testObj = testObj;
-		this.testPlan = testPlan;
-	}
-
-	public TestObjectType getTestObj() {
-		return testObj;
-	}
-
-	public TestPlanType getTestPlan() {
-		return testPlan;
-	}
+public class TestTestPlan {
 
 }

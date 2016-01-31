@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2016 Ruhr-Universität Bochum, Lehrstuhl für Netz- und Datensicherheit.
+ * Copyright 2016 Ruhr-Universität Bochum.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 package de.rub.nds.oidc.learn;
 
+import de.rub.nds.oidc.server.TestInstanceRegistry;
+import de.rub.nds.oidc.test_model.LearnResultType;
 import de.rub.nds.oidc.test_model.ObjectFactory;
 import de.rub.nds.oidc.test_model.TestObjectType;
 import de.rub.nds.oidc.test_model.TestRPConfigType;
+import de.rub.nds.oidc.utils.ImplementationLoadException;
 import de.rub.nds.oidc.utils.ValueGenerator;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -38,7 +41,8 @@ import javax.xml.bind.JAXBElement;
 public class RPLearner {
 
 	private ValueGenerator valueGenerator;
-	private TestObjectRegistry testObjs;
+	private TestRunnerRegistry testObjs;
+	private TestInstanceRegistry testInsts;
 
 	@Inject
 	public void setValueGenerator(ValueGenerator valueGenerator) {
@@ -46,8 +50,13 @@ public class RPLearner {
 	}
 
 	@Inject
-	public void setTestObjs(TestObjectRegistry testObjs) {
+	public void setTestObjs(TestRunnerRegistry testObjs) {
 		this.testObjs = testObjs;
+	}
+
+	@Inject
+	public void setTestInsts(TestInstanceRegistry testInsts) {
+		this.testInsts = testInsts;
 	}
 
 
@@ -61,23 +70,50 @@ public class RPLearner {
 	@Path("/{testId}/export")
 	@Produces({MediaType.APPLICATION_JSON})
 	public TestObjectType exportJson(@PathParam("testId") String testId) throws NoSuchTestObject {
-		TestObjectInstance obj = testObjs.getTestObject(testId);
+		TestRunner obj = testObjs.getTestObject(testId);
 		return obj.getTestObj();
 	}
 
 	@POST
 	@Path("/create-test-object")
-	public String createTestObject() {
+	public TestObjectType createTestObject() {
 		String testId = valueGenerator.generateTestId();
-		testObjs.createRPTestObject(testId);
-		return testId;
+		TestRunner runner = testObjs.createRPTestObject(testId);
+
+		return runner.getTestObj();
+	}
+
+	@POST
+	@Path("/{testId}/learn")
+	@Consumes({MediaType.APPLICATION_JSON})
+	public LearnResultType learn(@PathParam("testId") String testId, TestRPConfigType rpConfig)
+			throws NoSuchTestObject, ImplementationLoadException {
+		TestRunner runner = testObjs.getTestObject(testId);
+		runner.updateConfig(rpConfig);
+
+		LearnResultType result = runner.runLearningTest(testInsts);
+
+		return result;
+	}
+
+	@POST
+	@Path("/{testId}/test/{stepId}")
+	@Consumes({MediaType.APPLICATION_JSON})
+	public LearnResultType test(@PathParam("testId") String testId, @PathParam("stepId") String stepId,
+			TestRPConfigType rpConfig) throws NoSuchTestObject, ImplementationLoadException {
+		TestRunner runner = testObjs.getTestObject(testId);
+		runner.updateConfig(rpConfig);
+
+		LearnResultType result = runner.runTest(stepId, testInsts);
+
+		return result;
 	}
 
 	@GET
 	@Path("/{testId}/config")
 	@Produces(MediaType.APPLICATION_JSON)
 	public TestRPConfigType getConfig(@PathParam("testId") String testId) throws NoSuchTestObject {
-		TestObjectInstance obj = testObjs.getTestObject(testId);
+		TestRunner obj = testObjs.getTestObject(testId);
 		return obj.getTestObj().getTestRPConfig();
 	}
 
@@ -85,7 +121,7 @@ public class RPLearner {
 	@Path("/{testId}/config")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void setConfig(@PathParam("testId") String testId, TestRPConfigType config) throws NoSuchTestObject {
-		TestObjectInstance obj = testObjs.getTestObject(testId);
+		TestRunner obj = testObjs.getTestObject(testId);
 		obj.getTestObj().setTestRPConfig(config);
 	}
 

@@ -14,12 +14,16 @@
  * limitations under the License.
  ***************************************************************************/
 
-package de.rub.nds.oidc;
+package de.rub.nds.oidc.utils;
 
 /**
  *
  * @author Tobias Wich
+ * @param <T>
  */
-public class TestRunner {
+@FunctionalInterface
+public interface Func<T> {
+
+	T call();
 
 }

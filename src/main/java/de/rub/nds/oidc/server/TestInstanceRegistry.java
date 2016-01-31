@@ -53,6 +53,18 @@ public class TestInstanceRegistry {
 		rps.put(testId, inst);
 	}
 
+	public void removeOP1(String testId) {
+		op1s.remove(testId);
+	}
+
+	public void removeOP2(String testId) {
+		op2s.remove(testId);
+	}
+
+	public void removeRP(String testId) {
+		rps.remove(testId);
+	}
+
 	private <T> Supplier<ServerInstance<T>> getInstance(Map<String, ServerInstance<T>> reg, String testId) {
 		return () -> reg.get(testId);
 	}

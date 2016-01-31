@@ -16,13 +16,16 @@
 
 package de.rub.nds.oidc.server;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.UriBuilder;
 
 /**
  *
@@ -34,16 +37,17 @@ public class RequestPath {
 	private final String servletPath;
 	private final String resourcePath;
 	private final List<String> segments;
+	private final URI originalRequestUri;
 
 	public RequestPath(HttpServletRequest req) {
 		// resources look like this /<ctx>/<servlet>/<testId>/<resource>
-		// or /<ctx>/<servlet>/<testId>/<resource>
-		ctxPath = req.getContextPath(); // "" or "/foo"
+		// or /<servlet>/<testId>/<resource>
+		ctxPath = req.getContextPath();      // "" or "/foo"
 		servletPath = req.getServletPath();  // "" or "/bar"
 		String fullPath = req.getRequestURI();
 
 		// seperate out the prefix
-		String regexp = String.format("^%s%s(/.+*)$", Pattern.quote(ctxPath), Pattern.quote(servletPath));
+		String regexp = String.format("^%s%s(/.*)$", Pattern.quote(ctxPath), Pattern.quote(servletPath));
 		Pattern p = Pattern.compile(regexp);
 		Matcher m = p.matcher(fullPath);
 		m.matches();
@@ -56,12 +60,14 @@ public class RequestPath {
 				.collect(Collectors.toList());
 
 		segments = Collections.unmodifiableList(segmentList);
+		originalRequestUri = UriBuilder.fromUri(req.getRequestURL().toString()).build();
 	}
 
 	public List<String> getSegments() {
 		return segments;
 	}
 
+	@Nonnull
 	public String getTestId() {
 		// assume the first element is the testId, if it is not, then there will be no match in the registry
 		return segments.stream().findFirst().orElse("");
@@ -72,8 +78,21 @@ public class RequestPath {
 	}
 
 	public String getStrippedResource() {
-		return getSegments().stream().skip(1)
-				.reduce("", (current, next) -> current.concat(next));
+		String result = getSegments().stream().skip(1)
+				.reduce("", (current, next) -> current.concat("/" + next));
+		return "".equals(result) ? "/" : result;
+	}
+
+	public URI getStrippedRequestUri() {
+		URI result = UriBuilder.fromUri(originalRequestUri).replacePath(getStrippedResource()).build();
+		return result;
+	}
+
+	public URI getServerHost() {
+		return UriBuilder.fromUri(originalRequestUri)
+				.replacePath(null)
+				.replaceQuery(null)
+				.build();
 	}
 
 }

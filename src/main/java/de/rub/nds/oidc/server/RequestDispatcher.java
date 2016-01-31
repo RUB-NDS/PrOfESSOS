@@ -20,8 +20,12 @@ import de.rub.nds.oidc.server.op.OPImplementation;
 import de.rub.nds.oidc.server.op.OPInstance;
 import de.rub.nds.oidc.server.rp.RPInstance;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.function.Supplier;
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -37,15 +41,17 @@ import javax.servlet.http.HttpServletResponse;
 })
 public class RequestDispatcher extends HttpServlet {
 
-	private final String OP1_HOST = "op1.example.com";
-	private final String OP2_HOST = "op2.example.com";
-	private final String RP_HOST = "rp.example.com";
-
 	private TestInstanceRegistry registry;
+	private EndpointHosts hosts;
 
 	@Inject
 	public void setRegistry(TestInstanceRegistry registry) {
 		this.registry = registry;
+	}
+
+	@Inject
+	public void setHosts(EndpointHosts hosts) {
+		this.hosts = hosts;
 	}
 
 
@@ -56,19 +62,15 @@ public class RequestDispatcher extends HttpServlet {
 		String testId = path.getTestId(); // may not be the
 
 		try {
-			switch (serverName) {
-				case OP1_HOST:
-					handleOP(path, () -> registry.getOP1Supplier().apply(testId));
-					break;
-				case OP2_HOST:
-					handleOP(path, () -> registry.getOP2Supplier().apply(testId));
-					break;
-				case RP_HOST:
-					handleRP(path, () -> registry.getRPSupplier().apply(testId));
-					break;
-				default:
-					String msg = "Servername (" + serverName + ") is not handled by the dispatcher.";
-					throw new UnknownEndpointException(msg);
+			if (hosts.getOP1Host().equals(serverName)) {
+				handleOP(path, () -> registry.getOP1Supplier().apply(testId), req, resp);
+			} else if (hosts.getOP2Host().equals(serverName)) {
+				handleOP(path, () -> registry.getOP2Supplier().apply(testId), req, resp);
+			} else if (hosts.getRPHost().equals(serverName)) {
+				handleRP(path, () -> registry.getRPSupplier().apply(testId), req, resp);
+			} else {
+				String msg = "Servername (" + serverName + ") is not handled by the dispatcher.";
+				throw new UnknownEndpointException(msg);
 			}
 		} catch (ServerInstanceMissingException ex) {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
@@ -78,50 +80,89 @@ public class RequestDispatcher extends HttpServlet {
 	}
 
 
-	private void handleOP(RequestPath path, Supplier<ServerInstance<OPInstance>> instSupplier)
-			throws ServerInstanceMissingException {
+	private void handleOP(RequestPath path, Supplier<ServerInstance<OPInstance>> instSupplier, HttpServletRequest req,
+			HttpServletResponse resp)
+			throws ServerInstanceMissingException, IOException {
 		String fullResource = path.getFullResource();
 
 		// process known resources
-		if (fullResource.startsWith(".well-known/webfinger")) {
-			// TODO: implement webfinger and other common logic
+		if (fullResource.startsWith("/.well-known/webfinger")) {
+			webfingerOP(req, resp);
 		} else {
 			// let the dispatcher handle everything else
 			String testId = path.getTestId();
 			String resource = path.getStrippedResource();
 			ServerInstance<OPInstance> inst = instSupplier.get();
+
 			if (inst == null) {
 				String msg = String.format("OP instance for id %s is missing in the registry.", testId);
 				throw new ServerInstanceMissingException(msg);
 			} else {
 				OPImplementation impl = inst.getInst().getImpl();
 				switch (resource) {
+					case "/.well-known/webfinger":
+						impl.webfinger(path, req, resp);
 					// TODO: match resources and call impl functions
 					default:
-
+						notFound(resource, resp);
 				}
 			}
 		}
 	}
 
-	private void handleRP(RequestPath path, Supplier<ServerInstance<RPInstance>> instSupplier)
+	private void handleRP(RequestPath path, Supplier<ServerInstance<RPInstance>> instSupplier, HttpServletRequest req,
+			HttpServletResponse resp)
 			throws ServerInstanceMissingException {
 		String fullResource = path.getFullResource();
 
 		// process known resources
 		if (fullResource.startsWith(".well-known/webfinger")) {
 			// TODO: implement webfinger and other common logic
+
 		} else {
 			// let the dispatcher handle everything else
 			String testId = path.getTestId();
 			String resource = path.getStrippedResource();
 			ServerInstance<RPInstance> inst = instSupplier.get();
+
 			if (inst == null) {
 				String msg = String.format("RP instance for id %s is missing in the registry.", testId);
 				throw new ServerInstanceMissingException(msg);
 			} else {
 
 			}
+		}
+	}
+
+	private void notFound(String resource, HttpServletResponse res) throws IOException {
+		String msg = "Resource '" + resource + "' is not available on the server.";
+		res.sendError(HttpServletResponse.SC_NOT_FOUND, msg);
+	}
+
+	private void webfingerOP(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		try {
+			String rel = req.getParameter("rel");
+			String resource = req.getParameter("resource");
+			String host = req.getHeader("Host");
+
+			// extract testId from resource
+			String testId = new URI(resource).getPath();
+
+			if ("http://openid.net/specs/connect/1.0/issuer".equals(rel)) {
+				JsonObject result = Json.createObjectBuilder()
+						.add("subject", resource)
+						.add("links", Json.createArrayBuilder().add(Json.createObjectBuilder()
+								.add("rel", "http://openid.net/specs/connect/1.0/issuer")
+								.add("href", "https://" + host + testId)))
+						.build();
+				Json.createWriter(resp.getOutputStream()).writeObject(result);
+				resp.setContentType("application/json; charset=UTF-8");
+			} else {
+				// return not handled
+				resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Unknown webfinger request.");
+			}
+		} catch (URISyntaxException ex) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Only URIs containing the testId allowed as resource.");
 		}
 	}
 

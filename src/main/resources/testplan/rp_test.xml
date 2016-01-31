@@ -2,6 +2,18 @@
 <TestPlan xmlns="http://nds.rub.de/oidc/test-model"
 		  Name="RP-Test-Plan">
 
+	<LearningStep Name="LearningStep">
+		<SeleniumScript>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.RPLearningBrowser</BrowserSimulatorClass>
+		</SeleniumScript>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-2>
+	</LearningStep>
+
 	<TestStep Name="Test1">
 		<Description>
 			<![CDATA[<img src="data:image/png;base64,
@@ -11,11 +23,11 @@ iVBORw0KGgoAAAANSUhEUgAAArwAAAIZCAYAAABEa+weAAAACXBIWXMAAAsTAAALEwEAmpwYAAAgAElE
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
 		</SeleniumScript>
 		<OPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.op.DefaultOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 			<Parameter key="tokeagen">-1d</Parameter>
 		</OPConfig-1>
 		<OPConfig-2>
-			<OPImplementationClass>de.rub.nds.oidc.op.DefaultOP</OPImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-2>
 	</TestStep>
 

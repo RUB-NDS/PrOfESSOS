@@ -16,9 +16,11 @@
 
 package de.rub.nds.oidc.server.op;
 
+import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.test_model.OPConfigType;
 import de.rub.nds.oidc.utils.ImplementationLoadException;
 import de.rub.nds.oidc.utils.ImplementationLoader;
+import java.util.Map;
 
 /**
  *
@@ -26,12 +28,14 @@ import de.rub.nds.oidc.utils.ImplementationLoader;
  */
 public class OPInstance {
 
-	private final OPConfigType config;
 	private final OPImplementation impl;
 
-	public OPInstance(OPConfigType config) throws ImplementationLoadException {
-		this.config = config;
+	public OPInstance(OPConfigType config, TestStepLogger logger, Map<String, ?> suiteCtx, Map<String, ?> stepCtx)
+			throws ImplementationLoadException {
 		impl = ImplementationLoader.loadClassInstance(config.getImplementationClass(), OPImplementation.class);
+		impl.setLogger(logger);
+		impl.setContext(suiteCtx, stepCtx);
+		impl.setParameters(config.getParameter());
 	}
 
 	public OPImplementation getImpl() {

@@ -38,8 +38,9 @@ limitations under the License.
 
 	<complexType name="TestRPConfigType">
 		<sequence>
-			<element name="StartUrl" type="anyURI" />
-			<element name="FormularId" type="NCName" minOccurs="0" />
+			<element name="WebfingerResourceId" type="normalizedString" />
+			<element name="UrlClientTarget" type="anyURI" minOccurs="0" />
+			<element name="InputFieldName" type="NCName" minOccurs="0" />
 			<element name="SeleniumScript" type="string" minOccurs="0" />
 			<element name="FinalValidUrl" type="anyURI" minOccurs="0" />
 			<element name="ProfileInfo" type="string" minOccurs="0" />
@@ -153,6 +154,7 @@ limitations under the License.
 	<element name="TestPlan" type="tm:TestPlanType" />
 	<complexType name="TestPlanType">
 		<sequence>
+			<element name="LearningStep" type="tm:TestStepType" />
 			<element name="TestStep" type="tm:TestStepType" maxOccurs="unbounded" />
 		</sequence>
 		<attribute name="Name" type="normalizedString" use="required" />
@@ -210,6 +212,20 @@ limitations under the License.
 				<attribute name="Key" type="string" use="required" />
 			</extension>
 		</simpleContent>
+	</complexType>
+
+
+	<!-- REST API -->
+
+	<element name="LearnResult" type="tm:LearnResultType" />
+	<complexType name="LearnResultType">
+		<sequence>
+			<choice>
+				<element name="TestRPConfig" type="tm:TestRPConfigType" />
+				<element name="TestOPConfig" type="tm:TestOPConfigType" />
+			</choice>
+			<element name="TestStepResult" type="tm:TestStepResultType" />
+		</sequence>
 	</complexType>
 
 </schema>
