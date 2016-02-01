@@ -43,10 +43,10 @@ limitations under the License.
 			<element name="InputFieldName" type="NCName" minOccurs="0" />
 			<element name="SeleniumScript" type="string" minOccurs="0" />
 			<element name="FinalValidUrl" type="anyURI" minOccurs="0" />
-			<element name="ProfileInfo" type="string" minOccurs="0" />
+			<element name="UserNeedle" type="string" minOccurs="0" />
 			<element name="ProfileUrl" type="anyURI" minOccurs="0" />
-			<element name="FinalInvalidUrl" type="anyURI" minOccurs="0" />
-			<element name="InvalidReturnCode" type="nonNegativeInteger" minOccurs="0" />
+			<!--<element name="FinalInvalidUrl" type="anyURI" minOccurs="0" />-->
+			<!--<element name="InvalidReturnCode" type="nonNegativeInteger" minOccurs="0" />-->
 		</sequence>
 	</complexType>
 

@@ -271,6 +271,9 @@ var OPIV = (function(module) {
 		 testRPConfig.UrlClientTarget = $("input[name='url-client-target']").val();
 		 testRPConfig.InputFieldName = $("input[name='input-field-name']").val();
 		 testRPConfig.SeleniumScript = $("textarea[name='selenium-script']").val();
+		 testRPConfig.FinalValidUrl = $("input[name='url-client-target-success']").val();
+		 testRPConfig.UserNeedle = $("input[name='user-needle']").val();
+		 testRPConfig.ProfileUrl = $("input[name='user-profile-url']").val();
 	}
 
 	function writeRPConfig(newTestRPConfig) {
@@ -280,6 +283,12 @@ var OPIV = (function(module) {
 		$("input[name='input-field-name']").val(testRPConfig.InputFieldName);
 		testRPConfig.SeleniumScript = newTestRPConfig.SeleniumScript;
 		$("textarea[name='selenium-script']").val(testRPConfig.SeleniumScript);
+		testRPConfig.FinalValidUrl = newTestRPConfig.FinalValidUrl;
+		$("input[name='url-client-target-success']").val(testRPConfig.FinalValidUrl);
+		testRPConfig.UserNeedle = newTestRPConfig.UserNeedle;
+		$("input[name='user-needle']").val(testRPConfig.UserNeedle);
+		testRPConfig.ProfileUrl = newTestRPConfig.ProfileUrl;
+		$("input[name='user-profile-url']").val(testRPConfig.ProfileUrl);
 	}
 
 	function processLearnResponse(learnResult) {
