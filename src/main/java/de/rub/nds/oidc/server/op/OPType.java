@@ -14,44 +14,15 @@
  * limitations under the License.
  ***************************************************************************/
 
-package de.rub.nds.oidc.server;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-import javax.enterprise.context.ApplicationScoped;
+package de.rub.nds.oidc.server.op;
 
 /**
  *
  * @author Tobias Wich
  */
-@ApplicationScoped
-public class EndpointHosts {
+public enum OPType {
 
-	public EndpointHosts() throws IOException {
-		InputStream hostsFile = EndpointHosts.class.getResourceAsStream("/servernames.properties");
-		Properties p = new Properties();
-		p.load(hostsFile);
-
-		OP1_HOST = p.getProperty("op1");
-		OP2_HOST = p.getProperty("op2");
-		RP_HOST = p.getProperty("rp");
-	}
-
-	private final String OP1_HOST;
-	private final String OP2_HOST;
-	private final String RP_HOST;
-
-	public String getOP1Host() {
-		return OP1_HOST;
-	}
-
-	public String getOP2Host() {
-		return OP2_HOST;
-	}
-
-	public String getRPHost() {
-		return RP_HOST;
-	}
+	HONEST,
+	EVIL;
 
 }

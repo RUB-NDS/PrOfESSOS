@@ -22,17 +22,25 @@ import de.rub.nds.oidc.test_model.HttpResponseEntryType;
 import de.rub.nds.oidc.test_model.LogEntryType;
 import de.rub.nds.oidc.test_model.ScreenshotEntryType;
 import de.rub.nds.oidc.test_model.TestStepResultType;
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.json.Json;
+import javax.json.JsonException;
+import javax.json.JsonStructure;
+import javax.json.stream.JsonGenerator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -78,6 +86,17 @@ public class TestStepLogger {
 		log(e);
 	}
 
+	public void log(String text, Throwable ex) {
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+
+		pw.println(text);
+		ex.printStackTrace(pw);
+		String fullText = sw.toString();
+
+		log(fullText);
+	}
+
 	public void log(byte[] screenshot, String mimeType) {
 		LogEntryType e = createLogEntry();
 		ScreenshotEntryType se = new ScreenshotEntryType();
@@ -101,7 +120,7 @@ public class TestStepLogger {
 			return Collections.list(req.getHeaders(key));
 		}));
 
-		entry.setBody(body);
+		entry.setBody(formatBody(req.getContentType(), body));
 
 		logHttpRequest(entry);
 	}
@@ -118,7 +137,7 @@ public class TestStepLogger {
 
 		entry.setStatus(BigInteger.valueOf(res.getStatus()));
 		entry.getHeader().addAll(readHeaders(res.getHeaderNames(), res::getHeaders));
-		entry.setBody(body);
+		entry.setBody(formatBody(res.getContentType(), body));
 
 		logHttpResponse(entry);
 	}
@@ -141,6 +160,27 @@ public class TestStepLogger {
 						return h;
 					});
 		}).collect(Collectors.toList());
+	}
+
+	private String formatBody(String contentType, String body) {
+		if (body != null && contentType != null) {
+			if (contentType.startsWith("application/json")) {
+				try {
+					JsonStructure json = Json.createReader(new StringReader(body)).read();
+					StringWriter w = new StringWriter();
+					HashMap<String, Object> p = new HashMap<>();
+					p.put(JsonGenerator.PRETTY_PRINTING, true);
+					Json.createWriterFactory(p).createWriter(w).write(json);
+					return w.toString();
+				} catch (JsonException ex) {
+					return body;
+				}
+			} else {
+				return body;
+			}
+		} else {
+			return null;
+		}
 	}
 
 }

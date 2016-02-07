@@ -21,6 +21,7 @@ import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.ServerInstance;
 import de.rub.nds.oidc.server.TestInstanceRegistry;
 import de.rub.nds.oidc.server.op.OPInstance;
+import de.rub.nds.oidc.server.op.OPType;
 import de.rub.nds.oidc.test_model.LearnResultType;
 import de.rub.nds.oidc.test_model.TestObjectType;
 import de.rub.nds.oidc.test_model.TestPlanType;
@@ -48,7 +49,7 @@ public class TestRunner {
 	private final TestPlanType testPlan;
 	private final TemplateEngine te;
 
-	private final Map<String, ?> testSuiteContext;
+	private final Map<String, Object> testSuiteCtx;
 
 	public TestRunner(TestObjectType testObj, TestPlanType testPlan, TemplateEngine te) {
 		this.testId = testObj.getTestId();
@@ -56,7 +57,7 @@ public class TestRunner {
 		this.testPlan = testPlan;
 		this.te = te;
 
-		this.testSuiteContext = Collections.synchronizedMap(new HashMap<>());
+		this.testSuiteCtx = Collections.synchronizedMap(new HashMap<>());
 	}
 
 	public TestObjectType getTestObj() {
@@ -109,22 +110,22 @@ public class TestRunner {
 		try {
 			// setup the test
 			TestStepType stepDef = result.getStepReference();
-			TestStepLogger logger = new TestStepLogger(result);
+			TestStepLogger log = new TestStepLogger(result);
 
-			Map<String, ?> testStepContext = Collections.synchronizedMap(new HashMap<>());
+			Map<String, Object> testStepCtx = Collections.synchronizedMap(new HashMap<>());
 
-			OPInstance op1Inst = new OPInstance(stepDef.getOPConfig1(), logger, testSuiteContext, testStepContext);
-			instReg.addOP1(testId, new ServerInstance<>(op1Inst, logger));
+			OPInstance op1Inst = new OPInstance(stepDef.getOPConfig1(), log, testSuiteCtx, testStepCtx, OPType.HONEST);
+			instReg.addOP1(testId, new ServerInstance<>(op1Inst, log));
 
-			OPInstance op2Inst = new OPInstance(stepDef.getOPConfig2(), logger, testSuiteContext, testStepContext);
-			instReg.addOP2(testId, new ServerInstance<>(op2Inst, logger));
+			OPInstance op2Inst = new OPInstance(stepDef.getOPConfig2(), log, testSuiteCtx, testStepCtx, OPType.EVIL);
+			instReg.addOP2(testId, new ServerInstance<>(op2Inst, log));
 
 			String browserClass = stepDef.getSeleniumScript().getBrowserSimulatorClass();
 			simulator = ImplementationLoader.loadClassInstance(browserClass, BrowserSimulator.class);
 			simulator.setRpConfig(getTestObj().getTestRPConfig());
 			simulator.setTemplateEngine(te);
-			simulator.setLogger(logger);
-			simulator.setContext(testSuiteContext, testStepContext);
+			simulator.setLogger(log);
+			simulator.setContext(testSuiteCtx, testStepCtx);
 
 			// run actual test
 			return f.apply(simulator);
@@ -146,7 +147,8 @@ public class TestRunner {
 		local.setUrlClientTarget(rpConfig.getUrlClientTarget());
 		local.setInputFieldName(rpConfig.getInputFieldName());
 		local.setSeleniumScript(rpConfig.getSeleniumScript());
-		// TODO: complete
+		local.setUserNeedle(rpConfig.getUserNeedle());
+		local.setProfileUrl(rpConfig.getProfileUrl());
 	}
 
 }

@@ -16,31 +16,15 @@
 
 package de.rub.nds.oidc.server.op;
 
-import de.rub.nds.oidc.log.TestStepLogger;
-import de.rub.nds.oidc.test_model.OPConfigType;
-import de.rub.nds.oidc.utils.ImplementationLoadException;
-import de.rub.nds.oidc.utils.ImplementationLoader;
-import java.util.Map;
-
 /**
  *
  * @author Tobias Wich
  */
-public class OPInstance {
+public class OPContextConstants {
 
-	private final OPImplementation impl;
+	private static final String PFX = "op.";
 
-	public OPInstance(OPConfigType cfg, TestStepLogger log, Map<String, Object> suiteCtx, Map<String, Object> stepCtx,
-			OPType type) throws ImplementationLoadException {
-		impl = ImplementationLoader.loadClassInstance(cfg.getImplementationClass(), OPImplementation.class);
-		impl.setLogger(log);
-		impl.setOPType(type);
-		impl.setContext(suiteCtx, stepCtx);
-		impl.setParameters(cfg.getParameter());
-	}
-
-	public OPImplementation getImpl() {
-		return impl;
-	}
+	public static final String REGISTERED_CLIENT_INFO_HONEST = PFX + "registered-client-info-honest";
+	public static final String REGISTERED_CLIENT_INFO_EVIL = PFX + "registered-client-info-evil";
 
 }

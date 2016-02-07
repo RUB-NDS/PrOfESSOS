@@ -17,10 +17,12 @@
 package de.rub.nds.oidc.server.op;
 
 import de.rub.nds.oidc.log.TestStepLogger;
+import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.OPConfigType;
 import de.rub.nds.oidc.test_model.ParameterType;
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -32,15 +34,42 @@ import javax.servlet.http.HttpServletResponse;
  */
 public interface OPImplementation {
 
-	void setConfig(OPConfigType cfg);
+	public static final String WEBFINGER_PATH = "/.well-known/webfinger";
+	public static final String PROVIDER_CONFIG_PATH = "/.well-known/openid-configuration";
+	public static final String JWKS_PATH = "/jwks";
+	public static final String REGISTER_CLIENT_PATH = "/register";
+	public static final String AUTH_REQUEST_PATH = "/auth-req";
+	public static final String TOKEN_REQUEST_PATH = "/token-req";
+	public static final String USER_INFO_REQUEST_PATH = "/user-info";
+
+
+	void setOPConfig(OPConfigType cfg);
+
+	void setOPIVConfig(OPIVConfig cfg);
 
 	void setLogger(TestStepLogger logger);
 
-	void setContext(Map<String, ?> suiteCtx, Map<String, ?> stepCtx);
+	void setBaseUri(URI baseUri);
+
+	void setOPType(OPType type);
+
+	void setContext(Map<String, Object> suiteCtx, Map<String, Object> stepCtx);
 
 	void setParameters(List<ParameterType> params);
 
 
 	void webfinger(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+
+	void providerConfiguration(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+
+	void jwks(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+
+	void registerClient(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+
+	void authRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+
+	void tokenRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+
+	void userInfoRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
 
 }

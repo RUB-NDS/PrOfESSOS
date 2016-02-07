@@ -102,11 +102,11 @@ var OPIV = (function(module) {
 		// description
 		var descContainer = document.createElement("div");
 		var desc = document.createElement("div");
-		desc.style.visibility = "hidden";
+		desc.style.display = "none";
 		desc.className = "step-description";
 		desc.innerHTML = testDef.Description;
 
-		descContainer.appendChild(createHideImage(desc));
+		descContainer.appendChild(createHideImage(desc, "Description"));
 		descContainer.appendChild(desc);
 		container.appendChild(descContainer);
 
@@ -117,30 +117,31 @@ var OPIV = (function(module) {
 		return container;
 	}
 
-	function createHideImage(containerToHide) {
+	function createHideImage(containerToHide, hideText) {
 		var hideImg = document.createElement("img");
 		hideImg.src = "img/arrow-right.png";
 		hideImg.width = 20;
 		var hideImgLink = document.createElement("a");
 		hideImgLink.appendChild(hideImg);
-		hideImgLink.href = "#";
-		hideImgLink.innerHTML = "Description";
+		hideImgLink.href = "javascript:;";
+		hideImgLink.innerHTML = hideText;
 		hideImgLink.onclick = function() {
-			if (containerToHide.style.visibility === "hidden") {
-				containerToHide.style.visibility = "visible";
+			if (containerToHide.style.display === "none") {
+				containerToHide.style.display = null;
 				hideImg.src = "img/arrow-down.png";
 			} else {
-				containerToHide.style.visibility = "hidden";
+				containerToHide.style.display = "none";
 				hideImg.src = "img/arrow-right.png";
 			}
 		};
+		containerToHide.style.display = "none";
 
 		return hideImgLink;
 	}
 
 	function createResultImage(code) {
 		var resultImg = document.createElement("img");
-		resultImg.class = "status-image";
+		resultImg.className = "status-image";
 		resultImg.src = "img/" + code + ".png";
 		resultImg.alt = code;
 		resultImg.width = "20";
@@ -235,7 +236,8 @@ var OPIV = (function(module) {
 		doc.appendChild(caption);
 
 		var dl = document.createElement("dl");
-		doc.appendChild(createHideImage(dl));
+		dl.className = "dl-horizontal";
+		doc.appendChild(createHideImage(dl, "->"));
 		doc.appendChild(dl);
 
 		if (headers) {
@@ -310,12 +312,12 @@ var OPIV = (function(module) {
 		var stepResult = learnResult.TestStepResult;
 
 		// update status
-		var statusImg = stepContainer.getElementsByClassName("status-image").item();
+		var statusImg = stepContainer.getElementsByClassName("status-image")[0];
 		statusImg.alt = stepResult.Result;
 		statusImg.src = "img/" + stepResult.Result + ".png";
 
 		// write log
-		var logContainer = stepContainer.getElementsByClassName("step-log").item();
+		var logContainer = stepContainer.getElementsByClassName("step-log")[0];
 		writeLog(logContainer, stepResult.LogEntry);
 	}
 

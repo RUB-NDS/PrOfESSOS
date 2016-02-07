@@ -17,7 +17,7 @@
 package de.rub.nds.oidc.learn;
 
 import de.rub.nds.oidc.TestPlanList;
-import de.rub.nds.oidc.server.EndpointHosts;
+import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.test_model.TestObjectType;
 import de.rub.nds.oidc.test_model.TestPlanType;
 import de.rub.nds.oidc.test_model.TestRPConfigType;
@@ -40,7 +40,7 @@ public class TestRunnerRegistry {
 
 	private final Map<String, TestRunner> testObjects;
 
-	private EndpointHosts hosts;
+	private OPIVConfig hosts;
 	private TestPlanList planList;
 	private TemplateEngine te;
 
@@ -49,7 +49,7 @@ public class TestRunnerRegistry {
 	}
 
 	@Inject
-	public void setHosts(EndpointHosts hosts) {
+	public void setHosts(OPIVConfig hosts) {
 		this.hosts = hosts;
 	}
 
@@ -116,7 +116,7 @@ public class TestRunnerRegistry {
 
 	private TestRPConfigType createTestRPConfig(String testId) {
 		TestRPConfigType testCfg = new TestRPConfigType();
-		testCfg.setWebfingerResourceId("https://" + hosts.getOP1Host() + "/" + testId);
+		testCfg.setWebfingerResourceId(hosts.getOP1Scheme() + "://" + hosts.getOP1Host() + "/" + testId);
 
 		return testCfg;
 	}

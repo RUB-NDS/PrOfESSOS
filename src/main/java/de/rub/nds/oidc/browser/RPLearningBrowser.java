@@ -103,6 +103,7 @@ public class RPLearningBrowser extends BrowserSimulator {
 		waitMillis(400);
 
 		// take a screenshot again to show the finished site
+		logger.log("Last URL seen in Browser: " + driver.getCurrentUrl());
 		logger.log("Finished login procedure, please check if it succeeded and correct the success URL and the user needle accordingly.");
 		logScreenshot();
 

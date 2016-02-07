@@ -95,4 +95,11 @@ public class RequestPath {
 				.build();
 	}
 
+	public URI getServerHostAndTestId() {
+		return UriBuilder.fromUri(originalRequestUri)
+				.replacePath(getTestId())
+				.replaceQuery(null)
+				.build();
+	}
+
 }
