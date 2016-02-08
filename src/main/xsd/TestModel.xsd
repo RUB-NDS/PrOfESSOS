@@ -169,6 +169,13 @@ limitations under the License.
 					</sequence>
 				</complexType>
 			</element>
+			<element name="TestParameters" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="Parameter" type="tm:ParameterType" minOccurs="0" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
 			<element name="SeleniumScript" type="tm:SeleniumScriptType" />
 			<choice>
 				<sequence>

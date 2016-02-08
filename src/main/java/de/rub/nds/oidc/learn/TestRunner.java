@@ -29,11 +29,13 @@ import de.rub.nds.oidc.test_model.TestRPConfigType;
 import de.rub.nds.oidc.test_model.TestStepResult;
 import de.rub.nds.oidc.test_model.TestStepResultType;
 import de.rub.nds.oidc.test_model.TestStepType;
+import de.rub.nds.oidc.test_model.TestStepType.TestParameters;
 import de.rub.nds.oidc.utils.ImplementationLoadException;
 import de.rub.nds.oidc.utils.ImplementationLoader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -113,6 +115,10 @@ public class TestRunner {
 			TestStepLogger log = new TestStepLogger(result);
 
 			Map<String, Object> testStepCtx = Collections.synchronizedMap(new HashMap<>());
+			// add parameters to step context
+			Optional.ofNullable(stepDef.getTestParameters()).ifPresent(tp -> {
+				tp.getParameter().forEach(p -> testStepCtx.put(p.getKey(), p.getValue()));
+			});
 
 			OPInstance op1Inst = new OPInstance(stepDef.getOPConfig1(), log, testSuiteCtx, testStepCtx, OPType.HONEST);
 			instReg.addOP1(testId, new ServerInstance<>(op1Inst, log));
