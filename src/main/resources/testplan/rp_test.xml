@@ -28,9 +28,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the code or token is accepted by the Client.
 		]]>
+		</Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -59,9 +61,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the code or token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -91,9 +95,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the code or token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -123,9 +129,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the code or token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">true</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -152,9 +160,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -180,9 +190,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -208,9 +220,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -236,9 +250,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -264,9 +280,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -292,9 +310,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -321,9 +341,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -383,9 +405,11 @@
             Injection and DoS attacks are considered out of scope for the tests provided by OPIV.
 
 		]]>
-            <Parameter key="discovery_support_needed">true</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">true</Parameter>	
         </Description>
+		<TestParameters>
+            <Parameter key="discovery_support_needed">true</Parameter>
+            <Parameter key="dynamic_client_registratiron_support_needed">true</Parameter>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -415,9 +439,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -441,9 +467,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -467,9 +495,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -493,9 +523,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -522,9 +554,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">true</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -559,9 +593,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -586,9 +622,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -616,9 +654,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the code or token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -645,9 +685,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the code or token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -677,9 +719,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -706,9 +750,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
@@ -736,9 +782,11 @@
             <h2>Result Evaluation.</h2>
             The test is successful if the token is accepted by the Client.
 		]]>
+        </Description>
+		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
             <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
-        </Description>
+		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
         </SeleniumScript>
