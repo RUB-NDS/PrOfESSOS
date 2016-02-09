@@ -18,6 +18,8 @@ package de.rub.nds.oidc.server.op;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
@@ -28,8 +30,10 @@ import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseMode;
 import com.nimbusds.oauth2.sdk.ResponseType;
+import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.client.ClientRegistrationErrorResponse;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
@@ -44,6 +48,7 @@ import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
+import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
@@ -62,11 +67,13 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Date;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.minidev.json.JSONObject;
 
 /**
  *
@@ -123,7 +130,23 @@ public class DefaultOP extends AbstractOPImplementation {
 
 	@Override
 	public void jwks(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		logger.log("JWK Set requested.");
+		logger.logHttpRequest(req, null);
+
+		ArrayList<JWK> jwks = new ArrayList<>();
+		jwks.add(getSigningJwk());
+
+		JWKSet result = new JWKSet(jwks);
+		JSONObject json = result.toJSONObject(true);
+		String jsonStr = json.toString();
+
+		resp.setContentType("application/json");
+		resp.setCharacterEncoding("UTF-8");
+		resp.getWriter().write(jsonStr);
+		resp.flushBuffer();
+
+		logger.log("Returning JWK set.");
+		logger.logHttpResponse(resp, jsonStr);
 	}
 
 	@Override
@@ -145,22 +168,34 @@ public class DefaultOP extends AbstractOPImplementation {
 				ClientID id = new ClientID();
 				Secret secret = new Secret();
 				info = new OIDCClientInformation(id, new Date(), clientMd, secret);
+
+				// replace some of the values with our own
+				info.getOIDCMetadata().setScope(Scope.parse("openid"));
+
 				if (type == OPType.HONEST) {
 					suiteCtx.put(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST, info);
 				} else {
 					suiteCtx.put(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL, info);
 				}
 
-				/// answer the response
+				// answer the response
 				OIDCClientInformationResponse regResp = new OIDCClientInformationResponse(info);
-				ServletUtils.applyHTTPResponse(regResp.toHTTPResponse(), resp);
+				HTTPResponse httpRes = regResp.toHTTPResponse();
+				ServletUtils.applyHTTPResponse(httpRes, resp);
 
 				resp.flushBuffer();
 				logger.log("Returning Client Information Response.");
 				logger.logHttpResponse(resp, regResp.toHTTPResponse().getContent());
 			} else {
 				// client is already registered
-				// TODO: what shall I do?
+				// answer the response
+				OIDCClientInformationResponse regResp = new OIDCClientInformationResponse(info);
+				HTTPResponse httpRes = regResp.toHTTPResponse();
+				ServletUtils.applyHTTPResponse(httpRes, resp);
+
+				resp.flushBuffer();
+				logger.log("Returning Client Information Response.");
+				logger.logHttpResponse(resp, regResp.toHTTPResponse().getContent());
 			}
 		} catch (ParseException ex) {
 			ErrorObject error = new ErrorObject("invalid_client_metadata", ex.getMessage());
@@ -184,6 +219,7 @@ public class DefaultOP extends AbstractOPImplementation {
 
 			URI redirectUri = authReq.getRedirectionURI();
 			State state = authReq.getState();
+			Nonce nonce = authReq.getNonce();
 			ResponseType responseType = authReq.getResponseType();
 
 			try {
@@ -210,6 +246,9 @@ public class DefaultOP extends AbstractOPImplementation {
 						at, state, null, ResponseMode.QUERY);
 				HTTPResponse httpRes = authRes.toHTTPResponse();
 				ServletUtils.applyHTTPResponse(httpRes, resp);
+
+				// save nonce for the token request
+				stepCtx.put(OPContextConstants.AUTH_REQ_NONCE, nonce);
 
 				resp.flushBuffer();
 				logger.log("Returning default Authorization Response.");
@@ -239,7 +278,8 @@ public class DefaultOP extends AbstractOPImplementation {
 			TokenRequest tokenReq = TokenRequest.parse(httpReq);
 			logger.logHttpRequest(req, httpReq.getQuery());
 
-			ClientID clientId = tokenReq.getClientID();
+			ClientAuthentication auth = tokenReq.getClientAuthentication();
+			ClientID clientId = auth != null ? auth.getClientID() : tokenReq.getClientID();
 			AuthorizationGrant grant = tokenReq.getAuthorizationGrant();
 			CodeHash cHash = null;
 			if (grant != null && grant.getType() == GrantType.AUTHORIZATION_CODE) {
@@ -250,7 +290,9 @@ public class DefaultOP extends AbstractOPImplementation {
 			AccessToken at = new BearerAccessToken();
 			AccessTokenHash atHash = AccessTokenHash.compute(at, JWSAlgorithm.RS256);
 
-			JWT idToken = getIdToken(clientId, null, atHash, cHash);
+			Nonce nonce = (Nonce) stepCtx.get(OPContextConstants.AUTH_REQ_NONCE);
+
+			JWT idToken = getIdToken(clientId, nonce, atHash, cHash);
 
 			OIDCTokens tokens = new OIDCTokens(idToken, at, null);
 			OIDCTokenResponse tokenRes = new OIDCTokenResponse(tokens);

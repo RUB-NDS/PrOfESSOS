@@ -27,4 +27,6 @@ public class OPContextConstants {
 	public static final String REGISTERED_CLIENT_INFO_HONEST = PFX + "registered-client-info-honest";
 	public static final String REGISTERED_CLIENT_INFO_EVIL = PFX + "registered-client-info-evil";
 
+	public static final String AUTH_REQ_NONCE = PFX + "auth-reg-nonce";
+
 }

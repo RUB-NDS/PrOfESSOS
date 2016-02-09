@@ -23,6 +23,7 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
@@ -54,6 +55,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.cert.CertificateEncodingException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
@@ -192,38 +194,60 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		JWTClaimsSet.Builder cb = new JWTClaimsSet.Builder(ui.toJWTClaimsSet());
 
 		cb.issuer(baseUri.toString());
-		cb.audience(clientId.toJSONString());
+		cb.audience(clientId.getValue());
 		cb.issueTime(new Date());
 		cb.expirationTime(Date.from(Instant.now().plus(Duration.ofMinutes(15))));
 
 		if (nonce != null) {
-			cb.claim("nonce", nonce.toJSONString());
+			cb.claim("nonce", nonce.getValue());
 		}
 		if (atHash != null) {
-			cb.claim("at_hash", atHash.toJSONString());
+			cb.claim("at_hash", atHash.getValue());
 		}
 		if (cHash != null) {
-			cb.claim("c_hash", cHash.toJSONString());
+			cb.claim("c_hash", cHash.getValue());
 		}
 
 		JWTClaimsSet claims = cb.build();
 
-		KeyStore.PrivateKeyEntry keyEntry = opivCfg.getSigningEntry();
-		RSAKey key = new RSAKey.Builder((RSAPublicKey) keyEntry.getCertificate().getPublicKey())
-				.algorithm(JWSAlgorithm.RS256)
-				.build();
+		RSAKey key = getSigningJwk();
 
 		JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
 				.type(JOSEObjectType.JWT)
-				.jwk(key)
+				.jwk(key.toPublicJWK())
 				.build();
 
-		SignedJWT jwt = new SignedJWT(header, claims);
+		SignedJWT signedJwt = new SignedJWT(header, claims);
 
-		JWSSigner signer = new RSASSASigner((RSAPrivateKey) keyEntry.getPrivateKey());
-		jwt.sign(signer);
+		JWSSigner signer = new RSASSASigner(key);
+		signedJwt.sign(signer);
 
-		return jwt;
+		return signedJwt;
+	}
+
+	protected RSAKey getSigningJwk() {
+		try {
+			KeyStore.PrivateKeyEntry keyEntry = opivCfg.getSigningEntry();
+			RSAPublicKey pubKey = (RSAPublicKey) keyEntry.getCertificate().getPublicKey();
+			RSAPrivateKey privKey = (RSAPrivateKey) keyEntry.getPrivateKey();
+			List<Base64> chain = Arrays.stream(keyEntry.getCertificateChain()).map(c -> {
+				try {
+					return Base64.encode(c.getEncoded());
+				} catch (CertificateEncodingException ex) {
+					throw new IllegalArgumentException("Failed to encode certificate.", ex);
+				}
+			}).collect(Collectors.toList());
+
+			RSAKey key = new RSAKey.Builder(pubKey)
+					.privateKey(privKey)
+					.x509CertChain(chain)
+					.algorithm(JWSAlgorithm.RS256)
+					.build();
+
+			return key;
+		} catch (GeneralSecurityException ex) {
+			throw new IllegalArgumentException("Failed to access keystore.", ex);
+		}
 	}
 
 }
