@@ -29,7 +29,6 @@ import de.rub.nds.oidc.test_model.TestRPConfigType;
 import de.rub.nds.oidc.test_model.TestStepResult;
 import de.rub.nds.oidc.test_model.TestStepResultType;
 import de.rub.nds.oidc.test_model.TestStepType;
-import de.rub.nds.oidc.test_model.TestStepType.TestParameters;
 import de.rub.nds.oidc.utils.ImplementationLoadException;
 import de.rub.nds.oidc.utils.ImplementationLoader;
 import java.util.Collections;
@@ -79,7 +78,7 @@ public class TestRunner {
 
 		result.setResult(runTestFun(instReg, result, (simulator) -> {
 			return simulator.run();
-		}));
+		}, TestStepResult.FAIL));
 
 		LearnResultType learnResult = new LearnResultType();
 		learnResult.setTestRPConfig(getTestObj().getTestRPConfig());
@@ -98,7 +97,7 @@ public class TestRunner {
 
 		result.setResult(runTestFun(instReg, result, (simulator) -> {
 			return simulator.run();
-		}));
+		}, TestStepResult.FAIL));
 
 		LearnResultType learnResult = new LearnResultType();
 		learnResult.setTestRPConfig(getTestObj().getTestRPConfig());
@@ -106,35 +105,39 @@ public class TestRunner {
 		return learnResult;
 	}
 
-	private <T> T runTestFun(TestInstanceRegistry instReg, TestStepResultType result, Function<BrowserSimulator, T> f)
+	private <T> T runTestFun(TestInstanceRegistry instReg, TestStepResultType result, Function<BrowserSimulator, T> f,
+			T errorResponse)
 			throws ImplementationLoadException {
 		BrowserSimulator simulator = null;
+		TestStepType stepDef = result.getStepReference();
+		TestStepLogger logger = new TestStepLogger(result);
+
 		try {
 			// setup the test
-			TestStepType stepDef = result.getStepReference();
-			TestStepLogger log = new TestStepLogger(result);
-
 			Map<String, Object> testStepCtx = Collections.synchronizedMap(new HashMap<>());
 			// add parameters to step context
 			Optional.ofNullable(stepDef.getTestParameters()).ifPresent(tp -> {
 				tp.getParameter().forEach(p -> testStepCtx.put(p.getKey(), p.getValue()));
 			});
 
-			OPInstance op1Inst = new OPInstance(stepDef.getOPConfig1(), log, testSuiteCtx, testStepCtx, OPType.HONEST);
-			instReg.addOP1(testId, new ServerInstance<>(op1Inst, log));
+			OPInstance op1Inst = new OPInstance(stepDef.getOPConfig1(), logger, testSuiteCtx, testStepCtx, OPType.HONEST);
+			instReg.addOP1(testId, new ServerInstance<>(op1Inst, logger));
 
-			OPInstance op2Inst = new OPInstance(stepDef.getOPConfig2(), log, testSuiteCtx, testStepCtx, OPType.EVIL);
-			instReg.addOP2(testId, new ServerInstance<>(op2Inst, log));
+			OPInstance op2Inst = new OPInstance(stepDef.getOPConfig2(), logger, testSuiteCtx, testStepCtx, OPType.EVIL);
+			instReg.addOP2(testId, new ServerInstance<>(op2Inst, logger));
 
 			String browserClass = stepDef.getSeleniumScript().getBrowserSimulatorClass();
 			simulator = ImplementationLoader.loadClassInstance(browserClass, BrowserSimulator.class);
 			simulator.setRpConfig(getTestObj().getTestRPConfig());
 			simulator.setTemplateEngine(te);
-			simulator.setLogger(log);
+			simulator.setLogger(logger);
 			simulator.setContext(testSuiteCtx, testStepCtx);
 
 			// run actual test
 			return f.apply(simulator);
+		} catch (Exception ex) {
+			logger.log("Error in simulated browser.", ex);
+			return errorResponse;
 		} finally {
 			// clean up test
 			instReg.removeOP1(testId);

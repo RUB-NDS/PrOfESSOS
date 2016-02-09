@@ -91,23 +91,28 @@ public class RequestDispatcher extends HttpServlet {
 			impl.setBaseUri(path.getServerHostAndTestId());
 			impl.setOPIVConfig(opivCfg);
 
-			if (resource.startsWith(OPImplementation.WEBFINGER_PATH)) {
-				impl.webfinger(path, req, resp);
-			} else if (resource.startsWith(OPImplementation.PROVIDER_CONFIG_PATH)) {
-				impl.providerConfiguration(path, req, resp);
-			} else if (resource.startsWith(OPImplementation.JWKS_PATH)) {
-				impl.jwks(path, req, resp);
-			} else if (resource.startsWith(OPImplementation.REGISTER_CLIENT_PATH)) {
-				impl.registerClient(path, req, resp);
-			} else if (resource.startsWith(OPImplementation.AUTH_REQUEST_PATH)) {
-				impl.authRequest(path, req, resp);
-			} else if (resource.startsWith(OPImplementation.TOKEN_REQUEST_PATH)) {
-				impl.tokenRequest(path, req, resp);
-			} else if (resource.startsWith(OPImplementation.USER_INFO_REQUEST_PATH)) {
-				impl.userInfoRequest(path, req, resp);
-			} else {
-				// TODO: match resources and call impl functions
-				notFound(resource, resp);
+			try {
+				if (resource.startsWith(OPImplementation.WEBFINGER_PATH)) {
+					impl.webfinger(path, req, resp);
+				} else if (resource.startsWith(OPImplementation.PROVIDER_CONFIG_PATH)) {
+					impl.providerConfiguration(path, req, resp);
+				} else if (resource.startsWith(OPImplementation.JWKS_PATH)) {
+					impl.jwks(path, req, resp);
+				} else if (resource.startsWith(OPImplementation.REGISTER_CLIENT_PATH)) {
+					impl.registerClient(path, req, resp);
+				} else if (resource.startsWith(OPImplementation.AUTH_REQUEST_PATH)) {
+					impl.authRequest(path, req, resp);
+				} else if (resource.startsWith(OPImplementation.TOKEN_REQUEST_PATH)) {
+					impl.tokenRequest(path, req, resp);
+				} else if (resource.startsWith(OPImplementation.USER_INFO_REQUEST_PATH)) {
+					impl.userInfoRequest(path, req, resp);
+				} else {
+					// TODO: match resources and call impl functions
+					notFound(resource, resp);
+				}
+			} catch (Exception ex) {
+				inst.getLogger().log("Failed to process request.", ex);
+				serverError(resource, resp);
 			}
 		}
 	}
@@ -131,6 +136,11 @@ public class RequestDispatcher extends HttpServlet {
 	private void notFound(String resource, HttpServletResponse res) throws IOException {
 		String msg = "Resource '" + resource + "' is not available on the server.";
 		res.sendError(HttpServletResponse.SC_NOT_FOUND, msg);
+	}
+
+	private void serverError(String resource, HttpServletResponse res) throws IOException {
+		String msg = "Resource '" + resource + "' produced an error.";
+		res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, msg);
 	}
 
 }
