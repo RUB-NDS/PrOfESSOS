@@ -28,10 +28,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.browserlaunchers.Sleeper;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
@@ -84,14 +84,13 @@ public abstract class BrowserSimulator {
 	}
 
 	protected final <T> T waitForPageLoad(Func<T> func) {
-		WebElement oldHtml = driver.findElement(By.tagName("html"));
+		RemoteWebElement oldHtml = (RemoteWebElement) driver.findElement(By.tagName("html"));
 
 		T result = func.call();
-
 		WebDriverWait wait = new WebDriverWait(driver, 30);
 		wait.until((WebDriver input) -> {
-			WebElement newHtml = driver.findElement(By.tagName("html"));
-			return ! oldHtml.equals(newHtml);
+			RemoteWebElement newHtml = (RemoteWebElement) driver.findElement(By.tagName("html"));
+			return ! newHtml.getId().equals(oldHtml.getId());
 		});
 
 		return result;
