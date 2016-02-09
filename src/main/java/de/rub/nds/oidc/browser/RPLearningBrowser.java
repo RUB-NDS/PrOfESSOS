@@ -34,7 +34,7 @@ import org.openqa.selenium.WebElement;
 public class RPLearningBrowser extends BrowserSimulator {
 
 	@Override
-	public TestStepResult run() {
+	public final TestStepResult run() {
 		String startUrl = rpConfig.getUrlClientTarget();
 		logger.log(String.format("Opening browser with URL '%s'.", startUrl));
 		driver.get(startUrl);
@@ -88,19 +88,21 @@ public class RPLearningBrowser extends BrowserSimulator {
 		}
 
 		// execute JS to start authentication
-		String submitScript = rpConfig.getSeleniumScript();
-		submitScript = te.eval(te.createContext(rpConfig), submitScript);
+		String submitScriptRaw = rpConfig.getSeleniumScript();
+		String submitScript = te.eval(te.createContext(rpConfig), submitScriptRaw);
 		//waitForPageLoad(() -> driver.executeScript(js));
-		driver.executeScript(submitScript);
-		// capture state where the text is entered
-		logger.log("Webfinger identity entered into the login form.");
-		logScreenshot();
 
-		// make sure the document is not in ready state anymore before waiting for the document ready state again
-		waitMillis(100);
-		waitForDocumentReady();
+		// wait until a new html element appears, indicating a page load
+		waitForPageLoad(() -> {
+			driver.executeScript(submitScript);
+			// capture state where the text is entered
+			logger.log("Webfinger identity entered into the login form.");
+			logScreenshot();
+			return null;
+		});
+		logger.log("HTML element found in Browser.");
 		// wait a bit more in case we have an angular app or some other JS heavy application
-		waitMillis(400);
+		waitMillis(1000);
 
 		// take a screenshot again to show the finished site
 		logger.log("Last URL seen in Browser: " + driver.getCurrentUrl());
