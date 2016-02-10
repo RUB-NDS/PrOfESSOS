@@ -40,7 +40,6 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.http.ServletUtils;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
@@ -74,7 +73,6 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.UriBuilder;
 import net.minidev.json.JSONObject;
 
 /**
@@ -82,17 +80,6 @@ import net.minidev.json.JSONObject;
  * @author Tobias Wich
  */
 public class DefaultOP extends AbstractOPImplementation {
-
-	@Override
-	protected Issuer getIssuer() {
-		URI opUri;
-		opUri = supplyHonestOrEvil(opivCfg::getHonestOPUri, opivCfg::getEvilOPUri);
-		URI issuerUri = UriBuilder.fromUri(opUri)
-				.path(testId)
-				.build();
-		return new Issuer(issuerUri);
-	}
-
 
 	@Override
 	public void webfinger(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -169,7 +156,9 @@ public class DefaultOP extends AbstractOPImplementation {
 		HTTPRequest httpReq = ServletUtils.createHTTPRequest(req);
 		logger.logHttpRequest(req, httpReq.getQuery());
 
-		OIDCClientInformation info = (OIDCClientInformation) suiteCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST);
+		OIDCClientInformation info = supplyHonestOrEvil(
+				() -> (OIDCClientInformation) suiteCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST),
+				() -> (OIDCClientInformation) suiteCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL));
 
 		// check if the client is already registered
 		try {

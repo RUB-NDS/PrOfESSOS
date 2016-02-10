@@ -49,9 +49,11 @@ import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
+import static de.rub.nds.oidc.server.op.OPParameterConstants.*;
 import de.rub.nds.oidc.test_model.OPConfigType;
 import de.rub.nds.oidc.test_model.ParameterType;
 import de.rub.nds.oidc.utils.InstanceParameters;
+import de.rub.nds.oidc.utils.SaveFunction;
 import java.io.IOException;
 import java.net.URI;
 import java.security.GeneralSecurityException;
@@ -148,7 +150,29 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		logger.logHttpResponse(resp, httpResp.getContent());
 	}
 
-	protected abstract Issuer getIssuer();
+	protected Issuer getIssuer() {
+		URI opUri;
+		if (params.getBool(FORCE_HONEST_TOKEN_ISS)) {
+			opUri = opivCfg.getHonestOPUri();
+		} else {
+			opUri = supplyHonestOrEvil(opivCfg::getHonestOPUri, opivCfg::getEvilOPUri);
+		}
+		URI issuerUri = UriBuilder.fromUri(opUri)
+				.path(testId)
+				.build();
+		return new Issuer(issuerUri);
+	}
+
+	protected Subject getSubject() {
+		Subject sub;
+		if (params.getBool(FORCE_HONEST_TOKEN_SUB)) {
+			sub = new Subject("honest-op-test-subject");
+		} else {
+			sub = supplyHonestOrEvil(() -> new Subject("honest-op-test-subject"),
+					() -> new Subject("evil-op-test-subject"));
+		}
+		return sub;
+	}
 
 	protected OIDCProviderMetadata getDefaultOPMetadata() throws ParseException {
 		Issuer issuer = getIssuer();
@@ -191,7 +215,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 	protected UserInfo getUserInfo() {
-		UserInfo ui = new UserInfo(new Subject("opiv-test-subject"));
+		UserInfo ui = new UserInfo(getSubject());
 
 		return ui;
 	}
@@ -261,6 +285,16 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 			return honestSupplier.get();
 		} else if (type == OPType.EVIL) {
 			return evilSupplier.get();
+		} else {
+			throw new IllegalStateException("OP is neither honest nor evil.");
+		}
+	}
+
+	protected final <T> void saveHonestOrEvil(T value, SaveFunction<T> honestSaveFunc, SaveFunction<T> evilSaveFunc) {
+		if (type == OPType.HONEST) {
+			honestSaveFunc.save(value);
+		} else if (type == OPType.EVIL) {
+			evilSaveFunc.save(value);
 		} else {
 			throw new IllegalStateException("OP is neither honest nor evil.");
 		}
