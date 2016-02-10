@@ -31,6 +31,7 @@ var OPIV = (function(module) {
 	module.createRPTestPlan = function() {
 		// request new test id
 		$.post("api/rp/create-test-object", initTestObject);
+
 	};
 
 	module.learnRP = function() {
@@ -191,12 +192,20 @@ var OPIV = (function(module) {
 	}
 
 	function createScreenshotLogEntry(screenshot) {
+		var container = document.createElement("div");
+		container.className = "log-entry";
+		
 		var img = document.createElement("img");
 		img.src = "data:" + screenshot.MimeType + ";base64," + screenshot.Data;
-		return img;
+		
+		container.appendChild(img);
+		return container;
 	}
 
 	function createHttpRequestLogEntry(req) {
+		var container = document.createElement("div");
+		container.className = "log-entry";
+		
 		var result = document.createDocumentFragment();
 
 		var type = document.createElement("h3");
@@ -210,10 +219,14 @@ var OPIV = (function(module) {
 		result.appendChild(createHttpHeaders(req.Header));
 		result.appendChild(createHttpBody(req.Body));
 
-		return result;
+		container.appendChild(result);
+		return container;
 	}
 
 	function createHttpResponseLogEntry(res) {
+		var container = document.createElement("div");
+		container.className = "log-entry";
+		
 		var result = document.createDocumentFragment();
 
 		var type = document.createElement("h3");
@@ -227,7 +240,8 @@ var OPIV = (function(module) {
 		result.appendChild(createHttpHeaders(res.Header));
 		result.appendChild(createHttpBody(res.Body));
 
-		return result;
+		container.appendChild(result);
+		return container;
 	}
 
 	function createHttpHeaders(headers) {
