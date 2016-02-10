@@ -43,6 +43,7 @@ public class TestInstanceRegistry {
 
 	public void addOP1(String testId, ServerInstance<OPInstance> inst) {
 		op1s.put(testId, inst);
+		inst.getInst().getImpl().setTestId(testId);
 	}
 
 	public void addOP2(String testId, ServerInstance<OPInstance> inst) {

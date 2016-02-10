@@ -49,6 +49,8 @@ public interface OPImplementation {
 
 	void setLogger(TestStepLogger logger);
 
+	void setTestId(String testId);
+
 	void setBaseUri(URI baseUri);
 
 	void setOPType(OPType type);

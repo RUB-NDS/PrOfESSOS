@@ -37,8 +37,8 @@ public class OPIVConfig {
 		Properties p = new Properties();
 		p.load(hostsFile);
 
-		OP1_URL = new URI(p.getProperty("op1"));
-		OP2_URL = new URI(p.getProperty("op2"));
+		HONEST_OP_URL = new URI(p.getProperty("honest-op"));
+		EVIL_OP_URL = new URI(p.getProperty("evil-op"));
 		RP_URL = new URI(p.getProperty("rp"));
 
 		InputStream keystoreFile = OPIVConfig.class.getResourceAsStream("/keystore.jks");
@@ -46,32 +46,41 @@ public class OPIVConfig {
 		keyStore.load(keystoreFile, keystorePass.toCharArray());
 	}
 
-	private final URI OP1_URL;
-	private final URI OP2_URL;
+	private final URI HONEST_OP_URL;
+	private final URI EVIL_OP_URL;
 	private final URI RP_URL;
 
 	// TODO: read from config
-	private final String signatureAlias = "opiv token signer";
+	private final String honestSigAlias = "opiv honest token signer";
+	private final String evilSigAlias = "opiv evil token signer";
 	private final String keystorePass = "pass";
 	private final KeyStore keyStore;
 
-	public String getOP1Scheme() {
-		return OP1_URL.getScheme();
+	public URI getHonestOPUri() {
+		return HONEST_OP_URL;
 	}
 
-	public String getOP1Host() {
-		String host = OP1_URL.getHost();
-		int port = OP1_URL.getPort();
+	public String getHonestOPScheme() {
+		return HONEST_OP_URL.getScheme();
+	}
+
+	public String getHonestOPHost() {
+		String host = HONEST_OP_URL.getHost();
+		int port = HONEST_OP_URL.getPort();
 		return host + (port == -1 ? "" : ":" + port);
 	}
 
-	public String getOP2Scheme() {
-		return OP2_URL.getScheme();
+	public URI getEvilOPUri() {
+		return EVIL_OP_URL;
 	}
 
-	public String getOP2Host() {
-		String host = OP2_URL.getHost();
-		int port = OP2_URL.getPort();
+	public String getEvilOPScheme() {
+		return EVIL_OP_URL.getScheme();
+	}
+
+	public String getEvilOPHost() {
+		String host = EVIL_OP_URL.getHost();
+		int port = EVIL_OP_URL.getPort();
 		return host + (port == -1 ? "" : ":" + port);
 	}
 
@@ -86,10 +95,24 @@ public class OPIVConfig {
 	}
 
 
-	public KeyStore.PrivateKeyEntry getSigningEntry() throws GeneralSecurityException {
-		KeyStore.ProtectionParameter pp = new KeyStore.PasswordProtection(keystorePass.toCharArray());
-		KeyStore.PrivateKeyEntry entry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(signatureAlias, pp);
-		return entry;
+	public KeyStore.PrivateKeyEntry getHonestOPSigningEntry() {
+		try {
+			KeyStore.ProtectionParameter pp = new KeyStore.PasswordProtection(keystorePass.toCharArray());
+			KeyStore.PrivateKeyEntry entry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(honestSigAlias, pp);
+			return entry;
+		} catch (GeneralSecurityException ex) {
+			throw new IllegalArgumentException("Failed to access keystore.", ex);
+		}
+	}
+
+	public KeyStore.PrivateKeyEntry getEvilOPSigningEntry() {
+		try {
+			KeyStore.ProtectionParameter pp = new KeyStore.PasswordProtection(keystorePass.toCharArray());
+			KeyStore.PrivateKeyEntry entry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(evilSigAlias, pp);
+			return entry;
+		} catch (GeneralSecurityException ex) {
+			throw new IllegalArgumentException("Failed to access keystore.", ex);
+		}
 	}
 
 }

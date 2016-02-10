@@ -64,6 +64,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -79,6 +80,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	protected OPConfigType cfg;
 	protected OPIVConfig opivCfg;
 	protected TestStepLogger logger;
+	protected String testId;
 	protected URI baseUri;
 	protected OPType type;
 	protected Map<String, Object> suiteCtx;
@@ -98,6 +100,11 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	@Override
 	public void setLogger(TestStepLogger logger) {
 		this.logger = logger;
+	}
+
+	@Override
+	public void setTestId(String testId) {
+		this.testId = testId;
 	}
 
 	@Override
@@ -141,8 +148,10 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		logger.logHttpResponse(resp, httpResp.getContent());
 	}
 
+	protected abstract Issuer getIssuer();
+
 	protected OIDCProviderMetadata getDefaultOPMetadata() throws ParseException {
-		Issuer issuer = new Issuer(baseUri);
+		Issuer issuer = getIssuer();
 		List<SubjectType> subjectTypes = Arrays.asList(SubjectType.PUBLIC);
 		URI jwksUri = UriBuilder.fromUri(baseUri).path(JWKS_PATH).build();
 		OIDCProviderMetadata md = new OIDCProviderMetadata(issuer, subjectTypes, jwksUri);
@@ -226,27 +235,34 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 	protected RSAKey getSigningJwk() {
-		try {
-			KeyStore.PrivateKeyEntry keyEntry = opivCfg.getSigningEntry();
-			RSAPublicKey pubKey = (RSAPublicKey) keyEntry.getCertificate().getPublicKey();
-			RSAPrivateKey privKey = (RSAPrivateKey) keyEntry.getPrivateKey();
-			List<Base64> chain = Arrays.stream(keyEntry.getCertificateChain()).map(c -> {
-				try {
-					return Base64.encode(c.getEncoded());
-				} catch (CertificateEncodingException ex) {
-					throw new IllegalArgumentException("Failed to encode certificate.", ex);
-				}
-			}).collect(Collectors.toList());
+		KeyStore.PrivateKeyEntry keyEntry = supplyHonestOrEvil(opivCfg::getHonestOPSigningEntry, opivCfg::getEvilOPSigningEntry);
 
-			RSAKey key = new RSAKey.Builder(pubKey)
-					.privateKey(privKey)
-					.x509CertChain(chain)
-					.algorithm(JWSAlgorithm.RS256)
-					.build();
+		RSAPublicKey pubKey = (RSAPublicKey) keyEntry.getCertificate().getPublicKey();
+		RSAPrivateKey privKey = (RSAPrivateKey) keyEntry.getPrivateKey();
+		List<Base64> chain = Arrays.stream(keyEntry.getCertificateChain()).map(c -> {
+			try {
+				return Base64.encode(c.getEncoded());
+			} catch (CertificateEncodingException ex) {
+				throw new IllegalArgumentException("Failed to encode certificate.", ex);
+			}
+		}).collect(Collectors.toList());
 
-			return key;
-		} catch (GeneralSecurityException ex) {
-			throw new IllegalArgumentException("Failed to access keystore.", ex);
+		RSAKey key = new RSAKey.Builder(pubKey)
+				.privateKey(privKey)
+				.x509CertChain(chain)
+				.algorithm(JWSAlgorithm.RS256)
+				.build();
+
+		return key;
+	}
+
+	protected final <T> T supplyHonestOrEvil(Supplier<T> honestSupplier, Supplier<T> evilSupplier) {
+		if (type == OPType.HONEST) {
+			return honestSupplier.get();
+		} else if (type == OPType.EVIL) {
+			return evilSupplier.get();
+		} else {
+			throw new IllegalStateException("OP is neither honest nor evil.");
 		}
 	}
 

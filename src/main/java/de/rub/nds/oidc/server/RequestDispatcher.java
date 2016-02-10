@@ -58,9 +58,9 @@ public class RequestDispatcher extends HttpServlet {
 		String testId = path.getTestId(); // may not be the
 
 		try {
-			if ((opivCfg.getOP1Scheme() + "://" + opivCfg.getOP1Host()).equals(serverName)) {
+			if ((opivCfg.getHonestOPScheme() + "://" + opivCfg.getHonestOPHost()).equals(serverName)) {
 				handleOP(path, () -> registry.getOP1Supplier().apply(testId), req, resp);
-			} else if ((opivCfg.getOP2Scheme() + "://" + opivCfg.getOP2Host()).equals(serverName)) {
+			} else if ((opivCfg.getEvilOPScheme() + "://" + opivCfg.getEvilOPHost()).equals(serverName)) {
 				handleOP(path, () -> registry.getOP2Supplier().apply(testId), req, resp);
 			} else if ((opivCfg.getRPScheme() + "://" + opivCfg.getRPHost()).equals(serverName)) {
 				handleRP(path, () -> registry.getRPSupplier().apply(testId), req, resp);
