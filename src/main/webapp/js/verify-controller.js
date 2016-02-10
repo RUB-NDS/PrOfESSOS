@@ -250,7 +250,7 @@ var OPIV = (function(module) {
 		var resStatus = document.createElement("mark");
 		resStatus.innerHTML = res.Status;
 		
-		if (res.Status != 200) {
+		if (res.Status >= 400) {
 			resStatus.className = "err";
 		}
 		
@@ -266,16 +266,16 @@ var OPIV = (function(module) {
 	}
 
 	function createHttpHeaders(headers) {
-		var doc = document.createDocumentFragment();
+		var container = document.createElement("div");
 
 		var caption = document.createElement("b");
 		caption.innerHTML = "Headers";
-		doc.appendChild(caption);
+		container.appendChild(caption);
 
 		var dl = document.createElement("dl");
 		dl.className = "dl-horizontal";
-		doc.appendChild(createHideImage(dl, "->"));
-		doc.appendChild(dl);
+		container.appendChild(createHideImage(dl, "->"));
+		container.appendChild(dl);
 
 		if (headers) {
 			for (var i = 0; i < headers.length; i++) {
@@ -289,21 +289,21 @@ var OPIV = (function(module) {
 			}
 		}
 
-		return doc;
+		return container;
 	}
 
 	function createHttpBody(body) {
-		var doc = document.createDocumentFragment();
+		var container = document.createElement("div");
 
 		var caption = document.createElement("b");
 		caption.innerHTML = "Body";
-		doc.appendChild(caption);
+		container.appendChild(caption);
 
-		var container = document.createElement("pre");
-		container.appendChild(document.createTextNode(body));
-		doc.appendChild(container);
+		var content = document.createElement("pre");
+		content.appendChild(document.createTextNode(body));
+		container.appendChild(content);
 
-		return doc;
+		return container;
 	}
 
 	function updateRPConfig() {
