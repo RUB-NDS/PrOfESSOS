@@ -57,24 +57,71 @@ limitations under the License.
 				<h1>Client Verifier</h1>
 				<p class="lead"></p>
 			</div>
+			<div class="row">
+				<div class="learn-controls col-sm-12">
+					<p>Test ID: <tt id="test-id-display">not-loaded</tt><br>
+					OP Identity: <tt id="op-id-display">not-loaded</tt></p>
 
-			<div class="learn-controls">
-				<p>Test ID: <tt id="test-id-display">not-loaded</tt><br>
-				OP Identity: <tt id="op-id-display">not-loaded</tt></p>
+					
 
-				<fieldset>
-					<legend>Client Parameters</legend>
-					Login-Site URL: <input type="url" name="url-client-target" form="rp-learn-form" required size="80"><br>
-					Input-Field Name: <input type="text" name="input-field-name" form="rp-learn-form" size="80"><br>
-					Selenium Script: <textarea name="selenium-script" form="rp-learn-form" rows="10" cols="80"></textarea><br>
-					Success URL: <input type="url" name="url-client-target-success" size="80"><br>
-					User Needle: <input type="text" name="user-needle" size="80"><br>
-					User Profile URL: <input type="text" name="user-profile-url" size="80"><br>
-				</fieldset>
-
-				<form id="rp-learn-form" action="javascript:;" onsubmit="javascript:OPIV.learnRP();">
-					<input type="submit" value="Learn">
-				</form>
+					<form id="rp-learn-form" action="javascript:;" onsubmit="javascript:OPIV.learnRP();">
+						<fieldset>
+							<legend>Client Parameters</legend>
+							<div class="form-group">
+								<div class="col-sm-2">
+									<label for="url-client-target">Login-Site URL:</label>
+								</div>
+								<div class="col-sm-10">
+									<input class="form-control" type="url" name="url-client-target" form="rp-learn-form" required size="80">
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-2">
+									<label for="input-field-name">Input-Field Name:</label>
+								</div>
+								<div class="col-sm-10">
+									<input class="form-control" type="text" name="input-field-name" form="rp-learn-form" size="80">
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-2">
+									<label for="selenium-script">Selenium Script:</label>
+								</div>
+								<div class="col-sm-10">
+									<textarea class="form-control" name="selenium-script" form="rp-learn-form" rows="10" cols="80"></textarea>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-2">
+									<label for="url-client-target-success">Success URL:</label>
+								</div>
+								<div class="col-sm-10">
+									<input class="form-control" type="url" name="url-client-target-success" size="80">
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-2">
+									<label for="user-needle">User Needle:</label>
+								</div>
+								<div class="col-sm-10">
+									<input class="form-control" type="text" name="user-needle" size="80">
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-2">
+									<label for="user-profile-url">User Profile URL:</label>
+								</div>
+								<div class="col-sm-10">
+									<input class="form-control" type="text" name="user-profile-url" size="80">
+								</div>
+							</div>
+							<div class="col-sm-2"></div>
+							<div class="col-sm-10">
+								<button class="btn btn-default" type="submit" value="Learn">Learn</button>
+							</div>
+						</fieldset>
+					</form>
+				</div>
 			</div>
 
 			<div id="learn-report">
