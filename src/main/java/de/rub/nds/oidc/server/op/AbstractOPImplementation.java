@@ -51,6 +51,7 @@ import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.test_model.OPConfigType;
 import de.rub.nds.oidc.test_model.ParameterType;
+import de.rub.nds.oidc.utils.InstanceParameters;
 import java.io.IOException;
 import java.net.URI;
 import java.security.GeneralSecurityException;
@@ -85,7 +86,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	protected OPType type;
 	protected Map<String, Object> suiteCtx;
 	protected Map<String, Object> stepCtx;
-	protected Map<String, String> params;
+	protected InstanceParameters params;
 
 	@Override
 	public void setOPConfig(OPConfigType cfg) {
@@ -125,8 +126,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 
 	@Override
 	public void setParameters(List<ParameterType> params) {
-		this.params = params.stream()
-				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+		this.params = new InstanceParameters(params);
 	}
 
 

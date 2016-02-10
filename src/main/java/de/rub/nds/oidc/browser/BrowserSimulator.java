@@ -27,7 +27,6 @@ import de.rub.nds.oidc.utils.InstanceParameters;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
@@ -83,8 +82,7 @@ public abstract class BrowserSimulator {
 	}
 
 	public void setParameters(List<ParameterType> params) {
-		this.params = new InstanceParameters(params.stream()
-				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue())));
+		this.params = new InstanceParameters(params);
 	}
 
 	public abstract TestStepResult run();
