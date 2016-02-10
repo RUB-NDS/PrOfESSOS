@@ -159,10 +159,10 @@ var OPIV = (function(module) {
 			
 			// create entries
 			var entryContainer = document.createElement("div");
-			entryContainer.className = "log-entry-wrapper " + i % 2 === 0 ? "even" : "odd";
+			entryContainer.className = "log-entry-wrapper " + (i % 2 === 0 ? "even" : "odd");
 			logContainer.appendChild(entryContainer);
 
-			var dateContainer = document.createElement("i");
+			var dateContainer = document.createElement("em");
 			dateContainer.innerHTML = date.toString();
 			entryContainer.appendChild(dateContainer);
 			entryContainer.appendChild(document.createElement("br"));
