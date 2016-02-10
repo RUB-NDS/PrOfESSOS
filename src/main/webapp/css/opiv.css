@@ -38,3 +38,19 @@ body {
 .log-entry {
 	padding-left: 15px;
 }
+
+.log-entry strong {
+	font-size: 20px;
+}
+
+.log-entry mark {
+	background-color: #666666;
+	border-radius: 5px;
+	padding: 2px;
+	color: #fff;
+}
+
+mark.err {
+	background-color: #cccccc;
+	color: red;
+}

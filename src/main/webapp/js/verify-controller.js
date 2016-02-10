@@ -31,7 +31,7 @@ var OPIV = (function(module) {
 	module.createRPTestPlan = function() {
 		// request new test id
 		$.post("api/rp/create-test-object", initTestObject);
-
+		
 	};
 
 	module.learnRP = function() {
@@ -208,12 +208,23 @@ var OPIV = (function(module) {
 		
 		var result = document.createDocumentFragment();
 
-		var type = document.createElement("h3");
+		var type = document.createElement("strong");
 		type.innerHTML = "HTTP Request";
 		result.appendChild(type);
 
 		var status = document.createElement("div");
-		status.appendChild(document.createTextNode(req.RequestLine));
+		status.className = "log-entry";
+		
+		var method = req.RequestLine.substr(0,req.RequestLine.indexOf(" "));
+		var url = req.RequestLine.substr(req.RequestLine.indexOf(" "));
+		var methodDoc = document.createElement("mark");
+		methodDoc.innerHTML = method;
+		var urlDoc = document.createTextNode(url);
+		
+		//status.appendChild(document.createTextNode(req.RequestLine));
+		status.appendChild(methodDoc);
+		status.appendChild(urlDoc);
+		
 		result.appendChild(status);
 
 		result.appendChild(createHttpHeaders(req.Header));
@@ -229,12 +240,22 @@ var OPIV = (function(module) {
 		
 		var result = document.createDocumentFragment();
 
-		var type = document.createElement("h3");
+		var type = document.createElement("strong");
 		type.innerHTML = "HTTP Response";
 		result.appendChild(type);
 
 		var status = document.createElement("div");
-		status.appendChild(document.createTextNode(res.Status));
+		status.className = "log-entry";
+		
+		var resStatus = document.createElement("mark");
+		resStatus.innerHTML = res.Status;
+		
+		if (res.Status != 200) {
+			resStatus.className = "err";
+		}
+		
+		//status.appendChild(document.createTextNode(res.Status));
+		status.appendChild(resStatus);
 		result.appendChild(status);
 
 		result.appendChild(createHttpHeaders(res.Header));
