@@ -159,9 +159,10 @@ var OPIV = (function(module) {
 			
 			// create entries
 			var entryContainer = document.createElement("div");
+			
 			logContainer.appendChild(entryContainer);
 
-			var dateContainer = document.createElement("it");
+			var dateContainer = document.createElement("i");
 			dateContainer.innerHTML = date.toString();
 			entryContainer.appendChild(dateContainer);
 			entryContainer.appendChild(document.createElement("br"));
