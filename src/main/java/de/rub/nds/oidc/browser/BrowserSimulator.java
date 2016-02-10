@@ -27,6 +27,7 @@ import de.rub.nds.oidc.utils.InstanceParameters;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.apache.velocity.context.Context;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
@@ -50,8 +51,8 @@ public abstract class BrowserSimulator {
 	protected TemplateEngine te;
 
 	protected TestStepLogger logger;
-	protected Map<String, ?> suiteCtx;
-	protected Map<String, ?> stepCtx;
+	protected Map<String, Object> suiteCtx;
+	protected Map<String, Object> stepCtx;
 	protected InstanceParameters params;
 
 	public BrowserSimulator() {
@@ -76,13 +77,31 @@ public abstract class BrowserSimulator {
 		this.logger = logger;
 	}
 
-	public void setContext(Map<String, ?> suiteCtx, Map<String, ?> stepCtx) {
+	public void setContext(Map<String, Object> suiteCtx, Map<String, Object> stepCtx) {
 		this.suiteCtx = suiteCtx;
 		this.stepCtx = stepCtx;
 	}
 
 	public void setParameters(List<ParameterType> params) {
 		this.params = new InstanceParameters(params);
+	}
+
+	protected Context createRPContext() {
+		Context teCtx = te.createContext(rpConfig);
+		enrichContext(teCtx);
+		return teCtx;
+	}
+
+	protected Context createOPContext() {
+		Context teCtx = te.createContext(opConfig);
+		enrichContext(teCtx);
+		return teCtx;
+	}
+
+	private void enrichContext(Context teCtx) {
+		teCtx.put("suite", suiteCtx);
+		teCtx.put("step", stepCtx);
+		teCtx.put("params", params.getMap());
 	}
 
 	public abstract TestStepResult run();

@@ -17,31 +17,39 @@
 package de.rub.nds.oidc.utils;
 
 import de.rub.nds.oidc.test_model.ParameterType;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 
 /**
  *
  * @author Tobias Wich
  */
+@Immutable
 public class InstanceParameters {
 
 	private final Map<String, String> params;
 
 	public InstanceParameters(Map<String, String> params) {
-		this.params = params;
+		this.params = Collections.unmodifiableMap(params);
 	}
 
 	public InstanceParameters(List<ParameterType> params) {
-		this.params = params.stream()
-				.collect(Collectors.toMap(ParameterType::getKey, ParameterType::getValue));
+		this.params = Collections.unmodifiableMap(params.stream()
+				.collect(Collectors.toMap(ParameterType::getKey, ParameterType::getValue)));
 	}
 
 	public boolean containsKey(String key) {
 		return params.containsKey(key);
+	}
+
+	public Map<String, String> getMap() {
+		return params;
 	}
 
 	@Nullable
@@ -52,6 +60,10 @@ public class InstanceParameters {
 	@Nonnull
 	public boolean getBool(String key) {
 		return Boolean.parseBoolean(get(key));
+	}
+
+	public void forEach(BiConsumer<? super String, ? super String> action) {
+		params.forEach(action);
 	}
 
 }

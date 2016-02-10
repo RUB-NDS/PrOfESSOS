@@ -5,6 +5,7 @@
 	<LearningStep Name="LearningStep">
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.RPLearningBrowser</BrowserSimulatorClass>
+			<Parameter Key="browser.input.op_url">HONEST</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>

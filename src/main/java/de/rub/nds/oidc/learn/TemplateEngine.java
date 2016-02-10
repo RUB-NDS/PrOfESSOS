@@ -16,6 +16,7 @@
 
 package de.rub.nds.oidc.learn;
 
+import de.rub.nds.oidc.test_model.TestOPConfigType;
 import de.rub.nds.oidc.test_model.TestRPConfigType;
 import java.io.Reader;
 import java.io.StringReader;
@@ -46,6 +47,12 @@ public class TemplateEngine {
 	public Context createContext(TestRPConfigType rpCfg) {
 		VelocityContext ctx = new VelocityContext();
 		ctx.put("rp", rpCfg);
+		return ctx;
+	}
+
+	public Context createContext(TestOPConfigType opCfg) {
+		VelocityContext ctx = new VelocityContext();
+		ctx.put("op", opCfg);
 		return ctx;
 	}
 

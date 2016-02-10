@@ -62,7 +62,8 @@ var OPIV = (function(module) {
 		testRPConfig = testObject.TestRPConfig;
 		testReport = testObject.TestReport;
 		$("#test-id-display").html(document.createTextNode(testId));
-		$("#op-id-display").html(document.createTextNode(testRPConfig.WebfingerResourceId));
+		$("#honest-op-id-display").html(document.createTextNode(testRPConfig.HonestWebfingerResourceId));
+		$("#evil-op-id-display").html(document.createTextNode(testRPConfig.EvilWebfingerResourceId));
 
 		loadTestReport();
 	}

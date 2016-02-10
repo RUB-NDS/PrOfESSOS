@@ -33,7 +33,7 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 
 		// execute JS to start authentication
 		String submitScript = rpConfig.getSeleniumScript();
-		submitScript = te.eval(te.createContext(rpConfig), submitScript);
+		submitScript = te.eval(createRPContext(), submitScript);
 		//waitForPageLoad(() -> driver.executeScript(js));
 		driver.executeScript(submitScript);
 		// capture state where the text is entered

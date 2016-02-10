@@ -119,6 +119,19 @@ public class TestRunner {
 			Optional.ofNullable(stepDef.getTestParameters()).ifPresent(tp -> {
 				tp.getParameter().forEach(p -> testStepCtx.put(p.getKey(), p.getValue()));
 			});
+			// resolve OP URL
+			String startOpType = stepDef.getSeleniumScript().getParameter().stream()
+					.filter(e -> e.getKey().equals("browser.input.op_url"))
+					.map(e -> e.getValue())
+					.findFirst().orElse("EVIL");
+			if (startOpType.equals("HONEST")) {
+				testStepCtx.put("browser.input.op_url", getTestObj().getTestRPConfig().getHonestWebfingerResourceId());
+			} else if (startOpType.equals("EVIL")) {
+				testStepCtx.put("browser.input.op_url", getTestObj().getTestRPConfig().getEvilWebfingerResourceId());
+			} else {
+				logger.log("Invalid Browser parameter in test specification.");
+				return errorResponse;
+			}
 
 			OPInstance op1Inst = new OPInstance(stepDef.getOPConfig1(), logger, testSuiteCtx, testStepCtx, OPType.HONEST);
 			instReg.addOP1(testId, new ServerInstance<>(op1Inst, logger));
@@ -153,7 +166,8 @@ public class TestRunner {
 	public void updateConfig(TestRPConfigType rpConfig) {
 		TestRPConfigType local = getTestObj().getTestRPConfig();
 
-		local.setWebfingerResourceId(rpConfig.getWebfingerResourceId());
+		local.setHonestWebfingerResourceId(rpConfig.getHonestWebfingerResourceId());
+		local.setEvilWebfingerResourceId(rpConfig.getEvilWebfingerResourceId());
 		local.setUrlClientTarget(rpConfig.getUrlClientTarget());
 		local.setInputFieldName(rpConfig.getInputFieldName());
 		local.setSeleniumScript(rpConfig.getSeleniumScript());

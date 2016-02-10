@@ -89,7 +89,7 @@ public class RPLearningBrowser extends BrowserSimulator {
 
 		// execute JS to start authentication
 		String submitScriptRaw = rpConfig.getSeleniumScript();
-		String submitScript = te.eval(te.createContext(rpConfig), submitScriptRaw);
+		String submitScript = te.eval(createRPContext(), submitScriptRaw);
 		//waitForPageLoad(() -> driver.executeScript(js));
 
 		// wait until a new html element appears, indicating a page load
@@ -125,11 +125,9 @@ public class RPLearningBrowser extends BrowserSimulator {
 		logger.log("Found input field with name '" + inputName + "'.");
 
 		// eval template
-		Reader r = new InputStreamReader(getClass().getResourceAsStream("/submit-form.js"), StandardCharsets.UTF_8);
-		Context ctx = te.createContext(rpConfig);
+		Reader r = new InputStreamReader(getClass().getResourceAsStream("/submit-form.vlt"), StandardCharsets.UTF_8);
+		Context ctx = createRPContext();
 		ctx.put("input-field", inputName);
-		 // we want the real webfinger url there at a later time, so set the actual variable in the first evaluation
-		ctx.put("webfinger-placeholder", "${rp.WebfingerResourceId}");
 		String result = te.eval(ctx, r);
 
 		logger.log("Created Selenium script based on found input field '" + inputName + "'.");

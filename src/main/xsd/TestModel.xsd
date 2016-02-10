@@ -38,7 +38,8 @@ limitations under the License.
 
 	<complexType name="TestRPConfigType">
 		<sequence>
-			<element name="WebfingerResourceId" type="normalizedString" />
+			<element name="HonestWebfingerResourceId" type="normalizedString" />
+			<element name="EvilWebfingerResourceId" type="normalizedString" />
 			<element name="UrlClientTarget" type="anyURI" minOccurs="0" />
 			<element name="InputFieldName" type="NCName" minOccurs="0" />
 			<element name="SeleniumScript" type="string" minOccurs="0" />
