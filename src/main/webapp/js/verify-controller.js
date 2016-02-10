@@ -82,7 +82,7 @@ var OPIV = (function(module) {
 
 		var container = document.createElement("div");
 		container.id = "step-result-" + testDef.Name;
-		container.className = "step-container";
+		container.className = ("step-container " + testResult.Result);
 
 		// name and result image
 		var head = document.createElement("div");

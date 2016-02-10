@@ -54,3 +54,49 @@ mark.err {
 	background-color: #cccccc;
 	color: red;
 }
+
+.step-container {
+	border: 0px;
+	border-left: 2px;
+	border-radius: 15px;
+	border-style: solid;
+	border-color: #cccccc;
+	
+	padding: 5px;
+	margin-top: 10px;
+}
+
+.step-container.FAIL {
+	border-color: red;
+}
+
+.step-container.PASS {
+	border-color: green;
+}
+
+.step-container.NOT_RUN {
+	border-color: #4c3ab6;
+}
+
+.step-container a {
+	color: black;
+	text-decoration: underline;
+}
+
+.step-head form{
+	margin-bottom: 10px;
+	padding-left: 5px;
+}
+
+.step-description {
+	padding-left: 10px;
+	border: 0px;
+	border-left: 1px;
+	border-radius: 15px;
+	border-style: dotted;
+	border-color: black;
+}
+
+.step-description h1 {
+	margin-top: 2px;
+}
