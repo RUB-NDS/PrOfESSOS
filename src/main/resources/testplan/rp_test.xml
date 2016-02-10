@@ -26,12 +26,12 @@
 	    The OPIV issues invalid ID token containing victim's identity in the "sub".
 
             <h2>Result Evaluation.</h2>
-            The test is successful if the code or token is accepted by the Client.
+            The attack is successful if the code or token is accepted by the Client.
 		]]>
 		</Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -43,11 +43,11 @@
             <ImplementationClass>de.rub.nds.oidc.server.op.IDSpoofingOP</ImplementationClass>
 
             <!-- gets the "sub" configured in the Honest OP" -->
-	    <Parameter key="honest_idtoken_iss">false</Parameter>
-            <Parameter key="honest_idtoken_sub">true</Parameter>
-	    <Parameter key="honest_idtoken_name">false</Parameter>
-            <Parameter key="honest_idtoken_username">false</Parameter>
-            <Parameter key="honest_idtoken_email">false</Parameter>
+	    <Parameter key="force_honest_idtoken_iss">false</Parameter>
+            <Parameter key="force_honest_idtoken_sub">true</Parameter>
+	    <Parameter key="force_honest_idtoken_name">false</Parameter>
+            <Parameter key="force_honest_idtoken_username">false</Parameter>
+            <Parameter key="force_honest_idtoken_email">false</Parameter>
         </OPConfig-2>
     </TestStep>
 
@@ -63,12 +63,12 @@
 	    The OPIV issues invalid ID token containing victim's identity in the "sub" and the Honest OP as "iss".
 
             <h2>Result Evaluation.</h2>
-            The test is successful if the code or token is accepted by the Client.
+            The attack is successful if the code or token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -80,11 +80,11 @@
             <ImplementationClass>de.rub.nds.oidc.server.op.IDSpoofingOP</ImplementationClass>
 
             <!-- gets the "iss" and "sub" configured in the Honest OP" -->
-            <Parameter key="honest_idtoken_iss">true</Parameter>
-            <Parameter key="honest_idtoken_sub">true</Parameter>
-	    <Parameter key="honest_idtoken_name">false</Parameter>
-            <Parameter key="honest_idtoken_username">false</Parameter>
-            <Parameter key="honest_idtoken_email">false</Parameter>
+            <Parameter key="force_honest_idtoken_iss">true</Parameter>
+            <Parameter key="force_honest_idtoken_sub">true</Parameter>
+	    <Parameter key="force_honest_idtoken_name">false</Parameter>
+            <Parameter key="force_honest_idtoken_username">false</Parameter>
+            <Parameter key="force_honest_idtoken_email">false</Parameter>
         </OPConfig-2>
     </TestStep>
 
@@ -100,12 +100,12 @@
 	    The OPIV issues valid ID token containing victim's identity as subclaims.
 
             <h2>Result Evaluation.</h2>
-            The test is successful if the code or token is accepted by the Client.
+            The attack is successful if the code or token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -116,11 +116,11 @@
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.IDSpoofingOP</ImplementationClass>
             <!-- gets the "name", "username" and "email" configured in the Honest OP" -->
-            <Parameter key="honest_idtoken_iss">false</Parameter>
-            <Parameter key="honest_idtoken_sub">false</Parameter>
-	    <Parameter key="honest_idtoken_name">true</Parameter>
-            <Parameter key="honest_idtoken_username">true</Parameter>
-            <Parameter key="honest_idtoken_email">true</Parameter>
+            <Parameter key="force_honest_idtoken_iss">false</Parameter>
+            <Parameter key="force_honest_idtoken_sub">false</Parameter>
+	    <Parameter key="force_honest_idtoken_name">true</Parameter>
+            <Parameter key="force_honest_idtoken_username">true</Parameter>
+            <Parameter key="force_honest_idtoken_email">true</Parameter>
         </OPConfig-2>
     </TestStep>
 
@@ -136,12 +136,12 @@
 	    The OPIV returns invalid "issuer" parameters during Discovery.
 
             <h2>Result Evaluation.</h2>
-            The test is successful if the code or token is accepted by the Client.
+            The attack is successful if the code or token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">true</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -151,9 +151,9 @@
         </OPConfig-1>
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.IssuerConfusionOP</ImplementationClass>
-            <Parameter key="honest_discovery_issuer">true</Parameter>
-            <Parameter key="honest_idtoken_issuer">true</Parameter>
-            <Parameter key="honest_idtoken_sub">true</Parameter>
+            <Parameter key="force_honest_discovery_issuer">true</Parameter>
+            <Parameter key="force_honest_idtoken_issuer">true</Parameter>
+            <Parameter key="force_honest_idtoken_sub">true</Parameter>
         </OPConfig-2>
     </TestStep>
 
@@ -168,12 +168,12 @@
 	    The key is referenced by the "kid" parameter.
 
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -185,7 +185,7 @@
             <ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
 	    
 	    
-            <Parameter key="idtoken_header_kid">true</Parameter>
+            <Parameter key="force_idtoken_header_kid_untrusted_key">true</Parameter>
         </OPConfig-2>
     </TestStep>
 
@@ -200,12 +200,12 @@
 	    The key is referenced by the "x5u" parameter.
 	    
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -216,7 +216,7 @@
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
 			
-            <Parameter key="idtoken_header_x5u">true</Parameter>
+            <Parameter key="force_idtoken_header_x5u_untrusted_key">true</Parameter>
         </OPConfig-2>
     </TestStep>
 
@@ -231,12 +231,12 @@
 	    The key is referenced by the "x5c" parameter.
 	    
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -247,7 +247,7 @@
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
 			
-            <Parameter key="idtoken_header_x5c">true</Parameter>
+            <Parameter key="force_idtoken_header_x5c_untrusted_key">true</Parameter>
         </OPConfig-2>
     </TestStep>
 
@@ -262,12 +262,12 @@
 	    The key is referenced by the "jku" parameter.
 	    
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -278,7 +278,7 @@
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
 			
-            <Parameter key="idtoken_header_jku">true</Parameter>
+            <Parameter key="force_idtoken_header_jku_untrusted_key">true</Parameter>
         </OPConfig-2>
     </TestStep>
 
@@ -293,12 +293,12 @@
 	    The key is referenced by the "jwk" parameter.
 	    
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -309,7 +309,7 @@
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
 			
-            <Parameter key="idtoken_header_jwk">true</Parameter>
+            <Parameter key="force_idtoken_header_jwk_untrusted_key">true</Parameter>
         </OPConfig-2>
     </TestStep>
 
@@ -332,12 +332,12 @@
 	    Step 4: stops the timeout on the honest OP and sends the Authentication Response (code or idtoken/access token)
 	    
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">true</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">true</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">true</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -350,9 +350,9 @@
 		  
             <ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
 	    
-            <Parameter key="idtoken_header_alg_hmac">true</Parameter>
-            <Parameter key="honest_idtoken_iss">true</Parameter>
-            <Parameter key="honest_idtoken_sub">true</Parameter>
+            <Parameter key="force_idtoken_header_alg_hmac">true</Parameter>
+            <Parameter key="force_honest_idtoken_iss">true</Parameter>
+            <Parameter key="force_honest_idtoken_sub">true</Parameter>
             
         </OPConfig-2>
     </TestStep>
@@ -381,7 +381,7 @@
 
             <h2>Result Evaluation.</h2>
             The goal of this test is to verify whether the End-User authentication can
-            be broken. The test is successful if the Attacker OP receives any secret information, for example,
+            be broken. The attack is successful if the Attacker OP receives any secret information, for example,
             client_id, client_secret,code or access token, generated by the Honest OP.
             Injection and DoS attacks are considered out of scope for the tests provided by OPIV.
 
@@ -389,7 +389,7 @@
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">true</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">true</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">true</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -400,11 +400,11 @@
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.MaliciousEndpointOP</ImplementationClass>
 					
-            <Parameter key="honest_discovery_issuer">false</Parameter>
-            <Parameter key="honest_discovery_registrationEP">true</Parameter>
-            <Parameter key="honest_discovery_authorizationEP">true</Parameter>
-            <Parameter key="honest_discovery_tokenEP">false</Parameter>
-            <Parameter key="honest_discovery_userinfoEP">false</Parameter>
+            <Parameter key="force_honest_discovery_issuer">false</Parameter>
+            <Parameter key="force_honest_discovery_registrationEP">true</Parameter>
+            <Parameter key="force_honest_discovery_authorizationEP">true</Parameter>
+            <Parameter key="force_honest_discovery_tokenEP">false</Parameter>
+            <Parameter key="force_honest_discovery_userinfoEP">false</Parameter>
         </OPConfig-2>
     </TestStep>
 
@@ -418,12 +418,12 @@
 	    The OPIV issues an ID token containing expired "exp" timestamp.
 
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -433,7 +433,7 @@
         </OPConfig-1>
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.ReplayOP</ImplementationClass>
-            <Parameter key="idtoken_exp_day">true</Parameter>
+            <Parameter key="force_idtoken_exp_oneday">true</Parameter>
         </OPConfig-2>
     </TestStep>
     
@@ -447,12 +447,12 @@
 	    The OPIV issues an ID token containing expired "exp" timestamp.
 
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -462,7 +462,7 @@
         </OPConfig-1>
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.ReplayOP</ImplementationClass>
-            <Parameter key="idtoken_exp_year">true</Parameter>
+            <Parameter key="force_idtoken_exp_oneyear">true</Parameter>
         </OPConfig-2>
     </TestStep>
     
@@ -476,12 +476,12 @@
 	    The OPIV issues an ID token containing invalid "iat" timestamp.
 
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -491,7 +491,7 @@
         </OPConfig-1>
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.ReplayOP</ImplementationClass>
-            <Parameter key="idtoken_iat_day">true</Parameter>
+            <Parameter key="force_idtoken_iat_oneday">true</Parameter>
         </OPConfig-2>
     </TestStep>
     
@@ -505,12 +505,12 @@
 	    The OPIV issues an ID token containing invalid "iat" timestamp.
 
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -520,7 +520,7 @@
         </OPConfig-1>
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.ReplayOP</ImplementationClass>
-            <Parameter key="idtoken_iat_year">true</Parameter>
+            <Parameter key="force_idtoken_iat_oneyear">true</Parameter>
         </OPConfig-2>
     </TestStep>
     
@@ -534,12 +534,12 @@
 	    The OPIV issues an ID token containing constant “nonce” value.
 
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -549,7 +549,7 @@
         </OPConfig-1>
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.ReplayOP</ImplementationClass>
-            <Parameter key="idtoken_nonce_invalidValue">true</Parameter>
+            <Parameter key="force_idtoken_nonce_invalidValue">true</Parameter>
         </OPConfig-2>
     </TestStep>
     
@@ -563,12 +563,12 @@
 	    The OPIV issues an ID token without a “nonce” parameter.
 
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -579,7 +579,7 @@
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.ReplayOP</ImplementationClass>
 			
-            <Parameter key="idtoken_nonce_excluded">true</Parameter>
+            <Parameter key="force_idtoken_nonce_excluded">true</Parameter>
         </OPConfig-2>
     </TestStep>
 
@@ -598,12 +598,12 @@
 	    Step 4: stops the timeout on the honest OP and sends the Authentication Response (code or idtoken/access token)
 	    
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">true</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -627,12 +627,12 @@
 	    The OPIV issues an ID token containing wrong signature.
 
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -642,7 +642,7 @@
         </OPConfig-1>
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.SignatureManipulationOP</ImplementationClass>
-            <Parameter key="idtoken_signature_invalidValue">true</Parameter>
+            <Parameter key="force_idtoken_signature_invalidValue">true</Parameter>
         </OPConfig-2>
     </TestStep>
 
@@ -656,12 +656,12 @@
 	    The OPIV issues an ID token containing invalid signature and "none" alogirthm.
 
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -672,8 +672,8 @@
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.SignatureManipulationOP</ImplementationClass>
 			
-            <Parameter key="idtoken_header_alg_none">true</Parameter>
-            <Parameter key="idtoken_signature_invalidValue">true</Parameter>
+            <Parameter key="force_idtoken_header_alg_none">true</Parameter>
+            <Parameter key="force_idtoken_signature_invalidValue">true</Parameter>
         </OPConfig-2>
     </TestStep>
 
@@ -688,12 +688,12 @@
 	    The OPIV returns invalid "state" parameter.
 
             <h2>Result Evaluation.</h2>
-            The test is successful if the code or token is accepted by the Client.
+            The attack is successful if the code or token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -704,7 +704,7 @@
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.InvalidStateOP</ImplementationClass>
 			
-            <Parameter key="state_invalidValue">true</Parameter>
+            <Parameter key="force_state_invalidValue">true</Parameter>
         </OPConfig-2>
     </TestStep>
 
@@ -720,12 +720,12 @@
 	    Step 1: Starts the browser, initiates the authentication with the MaliciousOP and gets the received state parameter
 	    Step 2: OP uses the received "state" parameter in a new browser session
             <h2>Result Evaluation.</h2>
-            The test is successful if the code or token is accepted by the Client.
+            The attack is successful if the code or token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -736,7 +736,7 @@
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.InvalidStateOP</ImplementationClass>
 
-            <Parameter key="state_fromotherSession">true</Parameter>
+            <Parameter key="force_state_fromotherSession">true</Parameter>
         </OPConfig-2>
     </TestStep>
     
@@ -753,12 +753,12 @@
 	    Step 1: Starts the browser, initiates the authentication with the MaliciousOP and gets the received state parameter
 	    Step 2: OP uses the received "state" parameter in a new browser session
             <h2>Result Evaluation.</h2>
-            The test is successful if the code or token is accepted by the Client.
+            The attack is successful if the code or token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -769,7 +769,7 @@
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.InvalidStateOP</ImplementationClass>
 
-            <Parameter key="state_excluded">true</Parameter>
+            <Parameter key="force_force_state_excluded">true</Parameter>
         </OPConfig-2>
     </TestStep>
 
@@ -784,12 +784,12 @@
 	    The OPIV issues an ID token,which does not contain an "audience" parameter.
 
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -800,7 +800,7 @@
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.trcOP</ImplementationClass>
 			
-            <Parameter key="idtoken_aud_excluded">true</Parameter>
+            <Parameter key="force_idtoken_aud_excluded">true</Parameter>
         </OPConfig-2>
     </TestStep>
 
@@ -815,12 +815,12 @@
 	    The OPIV issues an ID token,which contains invalid "aud" parameter.
 
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -831,7 +831,7 @@
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.trcOP</ImplementationClass>
 			
-            <Parameter key="idtoken_aud_invalidValue">true</Parameter>
+            <Parameter key="force_idtoken_aud_invalidValue">true</Parameter>
         </OPConfig-2>
     </TestStep>
 
@@ -847,12 +847,12 @@
 	    The OPIV issues an ID token,which contains invalid "aud" parameter.
 
             <h2>Result Evaluation.</h2>
-            The test is successful if the token is accepted by the Client.
+            The attack is successful if the token is accepted by the Client.
 		]]>
         </Description>
 		<TestParameters>
             <Parameter key="discovery_support_needed">false</Parameter>
-            <Parameter key="dynamic_client_registratiron_support_needed">false</Parameter>
+            <Parameter key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
         <SeleniumScript>
             <BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
@@ -863,7 +863,7 @@
         <OPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.op.trcOP</ImplementationClass>
 			
-            <Parameter key="honest_idtoken_aud">true</Parameter>
+            <Parameter key="force_honest_idtoken_aud">true</Parameter>
         </OPConfig-2>
     </TestStep>
 
