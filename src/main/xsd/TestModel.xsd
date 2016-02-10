@@ -191,6 +191,7 @@ limitations under the License.
 	<complexType name="SeleniumScriptType">
 		<sequence>
 			<element name="BrowserSimulatorClass" type="normalizedString" />
+			<element name="Parameter" type="tm:ParameterType" minOccurs="0" maxOccurs="unbounded" />
 		</sequence>
 	</complexType>
 

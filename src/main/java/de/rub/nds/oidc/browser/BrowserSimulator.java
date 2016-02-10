@@ -18,12 +18,16 @@ package de.rub.nds.oidc.browser;
 
 import de.rub.nds.oidc.learn.TemplateEngine;
 import de.rub.nds.oidc.log.TestStepLogger;
+import de.rub.nds.oidc.test_model.ParameterType;
 import de.rub.nds.oidc.test_model.TestOPConfigType;
 import de.rub.nds.oidc.test_model.TestRPConfigType;
 import de.rub.nds.oidc.test_model.TestStepResult;
 import de.rub.nds.oidc.utils.Func;
+import de.rub.nds.oidc.utils.InstanceParameters;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
@@ -49,6 +53,7 @@ public abstract class BrowserSimulator {
 	protected TestStepLogger logger;
 	protected Map<String, ?> suiteCtx;
 	protected Map<String, ?> stepCtx;
+	protected InstanceParameters params;
 
 	public BrowserSimulator() {
 		driver = new PhantomJSDriver();
@@ -75,6 +80,11 @@ public abstract class BrowserSimulator {
 	public void setContext(Map<String, ?> suiteCtx, Map<String, ?> stepCtx) {
 		this.suiteCtx = suiteCtx;
 		this.stepCtx = stepCtx;
+	}
+
+	public void setParameters(List<ParameterType> params) {
+		this.params = new InstanceParameters(params.stream()
+				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue())));
 	}
 
 	public abstract TestStepResult run();

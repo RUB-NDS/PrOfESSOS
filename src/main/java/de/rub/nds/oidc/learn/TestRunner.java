@@ -132,6 +132,7 @@ public class TestRunner {
 			simulator.setTemplateEngine(te);
 			simulator.setLogger(logger);
 			simulator.setContext(testSuiteCtx, testStepCtx);
+			simulator.setParameters(stepDef.getSeleniumScript().getParameter());
 
 			// run actual test
 			return f.apply(simulator);
