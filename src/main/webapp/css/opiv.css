@@ -6,3 +6,35 @@ body {
   padding: 40px 15px;
   text-align: center;
 }
+
+#learn-log img {
+	border: 2px;
+	border-style: groove;
+	border-radius: 5px;
+	margin: 2px;
+	padding: 5px;
+}
+
+.log-entry-wrapper {
+	padding-top: 5px;
+	padding-left: 5px;
+	border: 0px;
+}
+
+.log-entry-wrapper.even {
+	border-left: 2px;
+	border-color: #cccccc;
+	border-style: solid;
+	border-radius: 15px;
+}
+
+.log-entry-wrapper.odd {
+	border-left: 2px;
+	border-color: #999999;
+	border-style: solid;
+	border-radius: 15px;
+}
+
+.log-entry {
+	padding-left: 15px;
+}

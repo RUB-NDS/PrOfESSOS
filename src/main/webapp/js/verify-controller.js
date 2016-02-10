@@ -159,7 +159,7 @@ var OPIV = (function(module) {
 			
 			// create entries
 			var entryContainer = document.createElement("div");
-			
+			entryContainer.className = "log-entry-wrapper " + i % 2 === 0 ? "even" : "odd";
 			logContainer.appendChild(entryContainer);
 
 			var dateContainer = document.createElement("i");
@@ -183,6 +183,7 @@ var OPIV = (function(module) {
 	function createTextLogEntry(text) {
 		// TODO: check XSS attack vector
 		var textContainer = document.createElement("div");
+		textContainer.className = "log-entry";
 		//var textNode = document.createTextNode(text.replace(/\n/, "<br>"));
 		//textContainer.appendChild(textNode);
 		textContainer.innerHTML = text.replace(/\n/g, "<br>");
