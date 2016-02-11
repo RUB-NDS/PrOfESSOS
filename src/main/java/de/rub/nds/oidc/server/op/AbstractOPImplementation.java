@@ -150,32 +150,51 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		logger.logHttpResponse(resp, httpResp.getContent());
 	}
 
-	protected Issuer getIssuer() {
-		URI opUri;
-		if (params.getBool(FORCE_HONEST_TOKEN_ISS)) {
-			opUri = opivCfg.getHonestOPUri();
-		} else {
-			opUri = supplyHonestOrEvil(opivCfg::getHonestOPUri, opivCfg::getEvilOPUri);
-		}
-		URI issuerUri = UriBuilder.fromUri(opUri)
-				.path(testId)
-				.build();
-		return new Issuer(issuerUri);
+
+	protected Issuer getHonestIssuer() {
+		return new Issuer(UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).build());
 	}
 
-	protected Subject getSubject() {
+	protected Issuer getEvilIssuer() {
+		return new Issuer(UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).build());
+	}
+
+	protected Issuer getMetadataIssuer() {
+		Issuer issuer;
+		issuer = supplyHonestOrEvil(this::getHonestIssuer, this::getEvilIssuer);
+		return issuer;
+	}
+
+	protected Issuer getTokenIssuer() {
+		Issuer issuer;
+		if (params.getBool(FORCE_HONEST_TOKEN_ISS)) {
+			issuer = getHonestIssuer();
+		} else {
+			issuer = supplyHonestOrEvil(this::getHonestIssuer, this::getEvilIssuer);
+		}
+		return issuer;
+	}
+
+	protected Subject getHonestSubject() {
+		return new Subject("honest-op-test-subject");
+	}
+
+	protected Subject getEvilSubject() {
+		return new Subject("evil-op-test-subject");
+	}
+
+	protected Subject getTokenSubject() {
 		Subject sub;
 		if (params.getBool(FORCE_HONEST_TOKEN_SUB)) {
-			sub = new Subject("honest-op-test-subject");
+			sub = getHonestSubject();
 		} else {
-			sub = supplyHonestOrEvil(() -> new Subject("honest-op-test-subject"),
-					() -> new Subject("evil-op-test-subject"));
+			sub = supplyHonestOrEvil(this::getHonestSubject, this::getEvilSubject);
 		}
 		return sub;
 	}
 
 	protected OIDCProviderMetadata getDefaultOPMetadata() throws ParseException {
-		Issuer issuer = getIssuer();
+		Issuer issuer = getMetadataIssuer();
 		List<SubjectType> subjectTypes = Arrays.asList(SubjectType.PUBLIC);
 		URI jwksUri = UriBuilder.fromUri(baseUri).path(JWKS_PATH).build();
 		OIDCProviderMetadata md = new OIDCProviderMetadata(issuer, subjectTypes, jwksUri);
@@ -215,7 +234,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 	protected UserInfo getUserInfo() {
-		UserInfo ui = new UserInfo(getSubject());
+		UserInfo ui = new UserInfo(getTokenSubject());
 
 		return ui;
 	}
@@ -226,7 +245,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 
 		JWTClaimsSet.Builder cb = new JWTClaimsSet.Builder(ui.toJWTClaimsSet());
 
-		cb.issuer(baseUri.toString());
+		cb.issuer(getTokenIssuer().getValue());
 		cb.audience(clientId.getValue());
 		cb.issueTime(new Date());
 		cb.expirationTime(Date.from(Instant.now().plus(Duration.ofMinutes(15))));
