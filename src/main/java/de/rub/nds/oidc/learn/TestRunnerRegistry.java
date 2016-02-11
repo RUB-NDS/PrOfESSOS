@@ -118,7 +118,7 @@ public class TestRunnerRegistry {
 		TestRPConfigType testCfg = new TestRPConfigType();
 		testCfg.setHonestWebfingerResourceId(hosts.getHonestOPScheme() + "://" + hosts.getHonestOPHost() + "/" + testId);
 		testCfg.setEvilWebfingerResourceId(hosts.getEvilOPScheme() + "://" + hosts.getEvilOPHost() + "/" + testId);
-		testCfg.setUserNeedle("honest-op-test-subject");
+		testCfg.setUserNeedle("honest-user-name");
 
 		return testCfg;
 	}
