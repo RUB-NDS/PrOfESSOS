@@ -32,18 +32,19 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 		driver.get(startUrl);
 
 		// execute JS to start authentication
-		String submitScript = rpConfig.getSeleniumScript();
-		submitScript = te.eval(createRPContext(), submitScript);
-		//waitForPageLoad(() -> driver.executeScript(js));
-		driver.executeScript(submitScript);
-		// capture state where the text is entered
-		logger.log("Webfinger identity entered into the login form.");
+		String submitScriptRaw = rpConfig.getSeleniumScript();
+		String submitScript = te.eval(createRPContext(), submitScriptRaw);
 
-		// make sure the document is not in ready state anymore before waiting for the document ready state again
-		waitMillis(100);
-		waitForDocumentReady();
+		// wait until a new html element appears, indicating a page load
+		waitForPageLoad(() -> {
+			driver.executeScript(submitScript);
+			// capture state where the text is entered
+			logger.log("Webfinger identity entered into the login form.");
+			return null;
+		});
+		logger.log("HTML element found in Browser.");
 		// wait a bit more in case we have an angular app or some other JS heavy application
-		waitMillis(400);
+		waitMillis(1000);
 
 		// take a screenshot again to show the finished site
 		logger.log("Finished login procedure, please check if it succeeded and correct the success URL and the user needle accordingly.");
@@ -55,16 +56,28 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 			return TestStepResult.FAIL;
 		}
 
-		// TODO: see if we need to go to another URL
-		if (rpConfig.getProfileUrl() != null) {
-			waitMillis(100);
-			waitForDocumentReady();
+		// see if we need to go to another URL
+		String profileUrl = rpConfig.getProfileUrl();
+		if (profileUrl != null && ! profileUrl.isEmpty()) {
+			logger.log("Loading profile URL page.");
+			waitForPageLoad(() -> {
+				driver.get(rpConfig.getProfileUrl());
+				return null;
+			});
 			// wait a bit more in case we have an angular app or some other JS heavy application
-			waitMillis(400);
+			waitMillis(1000);
+			logger.log("Loaded profile URL page.");
 		}
 
-		boolean needleFound = ! driver.findElements(By.partialLinkText(rpConfig.getUserNeedle())).isEmpty();
-		return needleFound ? TestStepResult.PASS : TestStepResult.FAIL;
+		String needle = rpConfig.getUserNeedle();
+		if (needle != null && ! needle.isEmpty()) {
+			boolean needleFound = ! driver.findElements(By.partialLinkText(needle)).isEmpty();
+			logger.log("User needle search result: needle-found=" + needleFound);
+			return needleFound ? TestStepResult.FAIL : TestStepResult.PASS;
+		} else {
+			logger.log("Search for user needle not possible, none specified.");
+			return TestStepResult.UNDETERMINED;
+		}
 	}
 
 }

@@ -65,6 +65,9 @@ var OPIV = (function(module) {
 		$("#honest-op-id-display").html(document.createTextNode(testRPConfig.HonestWebfingerResourceId));
 		$("#evil-op-id-display").html(document.createTextNode(testRPConfig.EvilWebfingerResourceId));
 
+		// update config
+		writeRPConfigGUI(testRPConfig);
+
 		loadTestReport();
 	}
 
@@ -318,17 +321,22 @@ var OPIV = (function(module) {
 
 	function writeRPConfig(newTestRPConfig) {
 		testRPConfig.UrlClientTarget = newTestRPConfig.UrlClientTarget;
-		$("input[name='url-client-target']").val(testRPConfig.UrlClientTarget);
 		testRPConfig.InputFieldName = newTestRPConfig.InputFieldName;
-		$("input[name='input-field-name']").val(testRPConfig.InputFieldName);
 		testRPConfig.SeleniumScript = newTestRPConfig.SeleniumScript;
-		$("textarea[name='selenium-script']").val(testRPConfig.SeleniumScript);
 		testRPConfig.FinalValidUrl = newTestRPConfig.FinalValidUrl;
-		$("input[name='url-client-target-success']").val(testRPConfig.FinalValidUrl);
 		testRPConfig.UserNeedle = newTestRPConfig.UserNeedle;
-		$("input[name='user-needle']").val(testRPConfig.UserNeedle);
 		testRPConfig.ProfileUrl = newTestRPConfig.ProfileUrl;
-		$("input[name='user-profile-url']").val(testRPConfig.ProfileUrl);
+
+		writeRPConfigGUI(newTestRPConfig);
+	}
+
+	function writeRPConfigGUI(newTestRPConfig) {
+		$("input[name='url-client-target']").val(newTestRPConfig.UrlClientTarget);
+		$("input[name='input-field-name']").val(newTestRPConfig.InputFieldName);
+		$("textarea[name='selenium-script']").val(newTestRPConfig.SeleniumScript);
+		$("input[name='url-client-target-success']").val(newTestRPConfig.FinalValidUrl);
+		$("input[name='user-needle']").val(newTestRPConfig.UserNeedle);
+		$("input[name='user-profile-url']").val(newTestRPConfig.ProfileUrl);
 	}
 
 	function processLearnResponse(learnResult) {

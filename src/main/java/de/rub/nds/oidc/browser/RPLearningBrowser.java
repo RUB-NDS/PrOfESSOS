@@ -112,7 +112,29 @@ public class RPLearningBrowser extends BrowserSimulator {
 		// save the location of the finished state
 		rpConfig.setFinalValidUrl(driver.getCurrentUrl());
 
-		return TestStepResult.PASS;
+		// see if we need to go to another URL
+		String profileUrl = rpConfig.getProfileUrl();
+		if (profileUrl != null && ! profileUrl.isEmpty()) {
+			logger.log("Loading profile URL page.");
+			waitForPageLoad(() -> {
+				driver.get(profileUrl);
+				return null;
+			});
+			// wait a bit more in case we have an angular app or some other JS heavy application
+			waitMillis(400);
+			logger.log("Loaded profile URL page.");
+			logScreenshot();
+		}
+
+		String needle = rpConfig.getUserNeedle();
+		if (needle != null && ! needle.isEmpty()) {
+			boolean needleFound = ! driver.findElements(By.partialLinkText(needle)).isEmpty();
+			logger.log("User needle search result: needle-found=" + needleFound);
+			return needleFound ? TestStepResult.PASS : TestStepResult.FAIL;
+		} else {
+			logger.log("Search for user needle not possible, none specified.");
+			return TestStepResult.UNDETERMINED;
+		}
 	}
 
 	private String containsIgnoreCase(String node, String reference) {
