@@ -128,7 +128,11 @@ public class RPLearningBrowser extends BrowserSimulator {
 
 		String needle = rpConfig.getUserNeedle();
 		if (needle != null && ! needle.isEmpty()) {
-			boolean needleFound = withSearchTimeout(() -> ! driver.findElements(By.partialLinkText(needle)).isEmpty());
+			needle = needle.replace("\"", "\\\""); // escape quotation marks
+			String xpath = String.format("//*[contains(., \"%s\")]", needle);
+			// search string
+			boolean needleFound = withSearchTimeout(() -> ! driver.findElements(By.xpath(xpath)).isEmpty());
+
 			logger.log("User needle search result: needle-found=" + needleFound);
 			return needleFound ? TestStepResult.PASS : TestStepResult.FAIL;
 		} else {

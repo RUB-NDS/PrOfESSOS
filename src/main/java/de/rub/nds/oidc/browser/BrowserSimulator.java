@@ -27,7 +27,6 @@ import de.rub.nds.oidc.utils.InstanceParameters;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import org.apache.velocity.context.Context;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
@@ -48,7 +47,7 @@ public abstract class BrowserSimulator {
 	protected final RemoteWebDriver driver;
 
 	protected long NORMAL_WAIT_TIMEOUT = 15;
-	protected long SEARCH_WAIT_TIMEOUT = 3;
+	protected long SEARCH_WAIT_TIMEOUT = 1;
 
 	protected TestRPConfigType rpConfig;
 	protected TestOPConfigType opConfig;
