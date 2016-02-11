@@ -18,13 +18,14 @@
 	<TestStep Name="ID Spoofing 1">
 		<Description><![CDATA[
 			<h1>ID Spoofing Attack</h1>
-			In this test we use the Attacker OP and create an ID Token containing the identity (sub) of the victim, which is controlled by another OP: Honest OP.
+			In this test we use the Attacker OP and create an ID Token containing the identity (sub) of the victim,
+			which is controlled by another OP: Honest OP.
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.  The attack needs additional configuration parameters:
 
 			<h2>Execution.</h2>
-			The OPIV issues invalid ID token containing victim's identity in the "sub".
+			The OPIV issues an invalid ID token containing the victim's identity in the "sub".
 
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the code or token is accepted by the Client.
@@ -41,7 +42,7 @@
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.IDSpoofingOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 
 			<!-- gets the "sub" configured in the Honest OP" -->
 			<Parameter Key="force_honest_idtoken_iss">false</Parameter>
@@ -55,13 +56,14 @@
 	<TestStep Name="ID Spoofing 2">
 		<Description><![CDATA[
 			<h1>ID Spoofing Attack</h1>
-			In this test we use the Attacker OP and create an ID Token containing the identity (iss+sub) of the victim, which is controlled by another OP: Honest OP.
+			In this test we use the Attacker OP and create an ID Token containing the identity (iss+sub) of the victim,
+			which is controlled by another OP: Honest OP.
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.  The attack needs additional configuration parameters:
 
 			<h2>Execution.</h2>
-			The OPIV issues invalid ID token containing victim's identity in the "sub" and the Honest OP as "iss".
+			The OPIV issues an invalid ID token containing the victim's identity in the "sub" and the Honest OP as "iss".
 
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the code or token is accepted by the Client.
@@ -78,7 +80,7 @@
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.IDSpoofingOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 
 			<!-- gets the "iss" and "sub" configured in the Honest OP" -->
 			<Parameter Key="force_honest_idtoken_iss">true</Parameter>
@@ -92,7 +94,8 @@
 	<TestStep Name="ID Spoofing 3">
 		<Description><![CDATA[
 			<h1>ID Spoofing Attack</h1>
-			In this test we use the Attacker OP and create an ID Token containing the identity (name+username+email) of the victim, which is controlled by another OP: Honest OP.
+			In this test we use the Attacker OP and create an ID Token containing the identity (name+username+email) of
+			the victim, which is controlled by another OP: Honest OP.
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.  The attack needs additional configuration parameters:
@@ -115,7 +118,7 @@
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.IDSpoofingOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 			<!-- gets the "name", "username" and "email" configured in the Honest OP" -->
 			<Parameter Key="force_honest_idtoken_iss">false</Parameter>
 			<Parameter Key="force_honest_idtoken_sub">false</Parameter>
