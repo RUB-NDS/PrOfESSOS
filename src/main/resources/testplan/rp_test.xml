@@ -18,7 +18,7 @@
 	<TestStep Name="ID Spoofing 1">
 		<Description><![CDATA[
 			<h1>ID Spoofing Attack</h1>
-			In this test we use the Attacker OP and create an ID Token containing the identity of the victim, which is controlled by another OP– Honest OP.
+			In this test we use the Attacker OP and create an ID Token containing the identity (sub) of the victim, which is controlled by another OP: Honest OP.
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.  The attack needs additional configuration parameters:
@@ -41,7 +41,7 @@
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.IDSpoofingOP</ImplementationClass>
 
 			<!-- gets the "sub" configured in the Honest OP" -->
 			<Parameter Key="force_honest_idtoken_iss">false</Parameter>
@@ -55,7 +55,7 @@
 	<TestStep Name="ID Spoofing 2">
 		<Description><![CDATA[
 			<h1>ID Spoofing Attack</h1>
-			In this test we use the Attacker OP and create an ID Token containing the identity of the victim, which is controlled by another OP– Honest OP.
+			In this test we use the Attacker OP and create an ID Token containing the identity (iss+sub) of the victim, which is controlled by another OP: Honest OP.
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.  The attack needs additional configuration parameters:
@@ -92,7 +92,7 @@
 	<TestStep Name="ID Spoofing 3">
 		<Description><![CDATA[
 			<h1>ID Spoofing Attack</h1>
-			In this test we use the Attacker OP and create an ID Token containing the identity of the victim, which is controlled by another OP– Honest OP.
+			In this test we use the Attacker OP and create an ID Token containing the identity (name+username+email) of the victim, which is controlled by another OP: Honest OP.
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.  The attack needs additional configuration parameters:
@@ -128,7 +128,7 @@
 	<TestStep Name="Issuer Confusion">
 		<Description><![CDATA[
 			<h1>Issuer Confusion</h1>
-			In this test we use the Attacker OP to return maliciously crafted Discovery document and afterwards to create an ID Token containing the identity of the victim, which is controlled by another OP – Honest OP.
+			In this test we use the Attacker OP to return maliciously crafted Discovery document (containing the issuer of the honest OP) and afterwards to create an ID Token containing the identity (iss+sub) of the victim, which is controlled by another OP: Honest OP.
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow. The attack needs additional configuration parameters: subject and issuer
@@ -165,7 +165,7 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token containing valid signature signed with untrusted key.
+			The OPIV issues an ID token containing valid signature signed with an untrusted key.
 			The key is referenced by the "kid" parameter.
 
 			<h2>Result Evaluation.</h2>
@@ -184,8 +184,6 @@
 		</OPConfig-1>
 		<OPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
-
-
 			<Parameter Key="force_idtoken_header_kid_untrusted_key">true</Parameter>
 		</OPConfig-2>
 	</TestStep>
@@ -341,7 +339,7 @@
 			<Parameter Key="dynamic_client_registration_support_needed">true</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowserSimulator</BrowserSimulatorClass>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -607,7 +605,7 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowserSimulator</BrowserSimulatorClass>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -654,7 +652,7 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token containing invalid signature and "none" alogirthm.
+			The OPIV issues an ID token containing invalid signature and "none" algorithm.
 
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the token is accepted by the Client.
@@ -675,6 +673,36 @@
 
 			<Parameter Key="force_idtoken_header_alg_none">true</Parameter>
 			<Parameter Key="force_idtoken_signature_invalidValue">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Signature Manipulation 3">
+		<Description><![CDATA[
+			<h1>Signature Manipulation</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			The OPIV issues an ID token containing no signature and "none" algorithm.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<SeleniumScript>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+		</SeleniumScript>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.SignatureManipulationOP</ImplementationClass>
+
+			<Parameter Key="force_idtoken_header_alg_none">true</Parameter>
 		</OPConfig-2>
 	</TestStep>
 
@@ -745,9 +773,10 @@
 		<Description><![CDATA[
 			<h1>CSRF Protection via the “state” parameter</h1>
 			The OPIV tests the Validation of the "state" parameter on the Client.
+			The OPIV does not return the "state" parameter.
 
 			<h2>Prerequisites.</h2>
-			The OPIV does not return the "state" parameter.
+			The target Client supports the implicit or the code flow.
 
 			<h2>Execution.</h2>
 			The OPIV returns "state" parameter issued within another browser session.
@@ -782,7 +811,7 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token,which does not contain an "audience" parameter.
+			The OPIV issues an ID token, which does not contain an "audience" parameter.
 
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the token is accepted by the Client.
@@ -813,7 +842,7 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token,which contains invalid "aud" parameter.
+			The OPIV issues an ID token, which contains invalid "aud" parameter.
 
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the token is accepted by the Client.
@@ -845,7 +874,7 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token,which contains invalid "aud" parameter.
+			The OPIV issues an ID token, which contains invalid "aud" parameter.
 
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the token is accepted by the Client.
