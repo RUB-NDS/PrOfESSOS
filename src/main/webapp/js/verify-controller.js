@@ -89,20 +89,25 @@ var OPIV = (function(module) {
 		container.className = ("step-container " + testResult.Result);
 
 		// name and result image
-		var head = document.createElement("div");
-		container.appendChild(head);
-		head.className = "step-head";
-		head.innerHTML = "<b>" + testDef.Name + "</b>: ";
-		head.appendChild(createResultImage(testResult.Result));
+		var stepHead = document.createElement("div");
+		container.appendChild(stepHead);
+		stepHead.className = "step-head";
+		var heading = document.createElement("h2");
+		stepHead.appendChild(heading);
+		heading.innerHTML = testDef.Name;
+		heading.appendChild(createResultImage(testResult.Result));
+
 		// create test button
 		var testForm = document.createElement("form");
 		testForm.action = "javascript:;";
 		testForm.onsubmit = function() { OPIV.testRPStep(testDef.Name, container); };
-		var button = document.createElement("input");
+		var button = document.createElement("button");
+		button.className = "btn btn-default";
 		button.type = "submit";
 		button.value = "Run Test";
+		button.innerHTML = "Run Test";
 		testForm.appendChild(button);
-		head.appendChild(testForm);
+		stepHead.appendChild(testForm);
 
 		// description
 		var descContainer = document.createElement("div");
