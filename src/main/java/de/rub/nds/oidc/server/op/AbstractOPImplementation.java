@@ -71,6 +71,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.UriBuilder;
 
@@ -175,6 +176,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return issuer;
 	}
 
+
 	protected Subject getHonestSubject() {
 		return new Subject("honest-op-test-subject");
 	}
@@ -192,6 +194,68 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		}
 		return sub;
 	}
+
+
+	protected String getHonestName() {
+		return "Honest User";
+	}
+
+	protected String getEvilName() {
+		return "Evil User";
+	}
+
+	protected String getTokenName() {
+		String name;
+		if (params.getBool(FORCE_HONEST_TOKEN_NAME)) {
+			name = getHonestName();
+		} else {
+			name = supplyHonestOrEvil(this::getHonestName, this::getEvilName);
+		}
+		return name;
+	}
+
+
+	protected String getHonestUsername() {
+		return "honest-user-name";
+	}
+
+	protected String getEvilUsername() {
+		return "evil-user-name";
+	}
+
+	protected String getTokenUsername() {
+		String name;
+		if (params.getBool(FORCE_HONEST_TOKEN_USERNAME)) {
+			name = getHonestUsername();
+		} else {
+			name = supplyHonestOrEvil(this::getHonestUsername, this::getEvilUsername);
+		}
+		return name;
+	}
+
+
+	protected InternetAddress getHonestEmail() {
+		InternetAddress mail = new InternetAddress();
+		mail.setAddress("user@honest.com");
+		return mail;
+	}
+
+	protected InternetAddress getEvilEmail() {
+		InternetAddress mail = new InternetAddress();
+		mail.setAddress("user@evil.com");
+		return mail;
+	}
+
+	protected InternetAddress getTokenEmail() {
+		InternetAddress mail;
+		if (params.getBool(FORCE_HONEST_TOKEN_EMAIL)) {
+			mail = getHonestEmail();
+		} else {
+			mail = supplyHonestOrEvil(this::getHonestEmail, this::getEvilEmail);
+		}
+		return mail;
+	}
+
 
 	protected OIDCProviderMetadata getDefaultOPMetadata() throws ParseException {
 		Issuer issuer = getMetadataIssuer();
@@ -235,6 +299,9 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 
 	protected UserInfo getUserInfo() {
 		UserInfo ui = new UserInfo(getTokenSubject());
+		ui.setName(getTokenName());
+		ui.setPreferredUsername(getTokenUsername());
+		ui.setEmail(getTokenEmail());
 
 		return ui;
 	}
