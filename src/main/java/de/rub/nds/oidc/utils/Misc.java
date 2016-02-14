@@ -14,24 +14,32 @@
  * limitations under the License.
  ***************************************************************************/
 
-package de.rub.nds.oidc.server.op;
+package de.rub.nds.oidc.utils;
+
+import de.rub.nds.oidc.test_model.TestStepResult;
+import javax.annotation.Nullable;
 
 /**
  *
  * @author Tobias Wich
  */
-public class OPContextConstants {
+public class Misc {
 
-	private static final String PFX = "op.";
-
-	public static final String REGISTERED_CLIENT_INFO_HONEST = PFX + "registered-client-info-honest";
-	public static final String REGISTERED_CLIENT_INFO_EVIL = PFX + "registered-client-info-evil";
-
-	public static final String AUTH_REQ_NONCE = PFX + "auth-reg-nonce";
-
-	public static final String TOKEN_INFORMATIONLEAK_FUTURE = PFX + "token-information-leak-future";
-	public static final String USERINFO_INFORMATIONLEAK_FUTURE = PFX + "userinfo-information-leak-future";
-	public static final String HONEST_CODE = PFX + "honest-code";
-	public static final String HONEST_ACCESSTOKEN = PFX + "honest-code";
+	@Nullable
+	public static TestStepResult getWorst(@Nullable TestStepResult r1, @Nullable TestStepResult r2) {
+		if (r1 == null || r2 == null) {
+			if (r1 == null) {
+				return r2;
+			} else {
+				return r1;
+			}
+		} else {
+			if (r1.compareTo(r2) < 0) {
+				return r2;
+			} else {
+				return r1;
+			}
+		}
+	}
 
 }

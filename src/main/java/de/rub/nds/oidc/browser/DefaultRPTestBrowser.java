@@ -17,6 +17,7 @@
 package de.rub.nds.oidc.browser;
 
 import de.rub.nds.oidc.test_model.TestStepResult;
+import javax.annotation.Nullable;
 import org.openqa.selenium.By;
 
 /**
@@ -49,6 +50,13 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 		// take a screenshot again to show the finished site
 		logger.log("Finished login procedure, please check if it succeeded and correct the success URL and the user needle accordingly.");
 		logScreenshot();
+
+		// run condition check code
+		TestStepResult checkResult = checkConditionAfterLogin();
+		if (checkResult != null) {
+			logger.log("Result returned from check condition funtion: " + checkResult.name());
+			return checkResult;
+		}
 
 		// save the location of the finished state
 		boolean urlReached = rpConfig.getFinalValidUrl().equals(driver.getCurrentUrl());
@@ -84,6 +92,11 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 			logger.log("Search for user needle not possible, none specified.");
 			return TestStepResult.UNDETERMINED;
 		}
+	}
+
+	@Nullable
+	protected TestStepResult checkConditionAfterLogin() {
+		return null;
 	}
 
 }

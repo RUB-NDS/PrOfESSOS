@@ -99,10 +99,10 @@ limitations under the License.
 
 	<simpleType name="TestStepResult">
 		<restriction base="string">
-			<enumeration value="NOT_RUN" />
 			<enumeration value="PASS" />
-			<enumeration value="FAIL" />
+			<enumeration value="NOT_RUN" />
 			<enumeration value="UNDETERMINED" />
+			<enumeration value="FAIL" />
 		</restriction>
 	</simpleType>
 
