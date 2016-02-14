@@ -162,7 +162,11 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 
 	protected Issuer getMetadataIssuer() {
 		Issuer issuer;
-		issuer = supplyHonestOrEvil(this::getHonestIssuer, this::getEvilIssuer);
+		if (params.getBool(FORCE_HONEST_DISCOVERY_ISS)) {
+			issuer = getHonestIssuer();
+		} else {
+			issuer = supplyHonestOrEvil(this::getHonestIssuer, this::getEvilIssuer);
+		}
 		return issuer;
 	}
 

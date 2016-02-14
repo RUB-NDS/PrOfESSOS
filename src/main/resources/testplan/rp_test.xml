@@ -154,9 +154,9 @@
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.IssuerConfusionOP</ImplementationClass>
-			<Parameter Key="force_honest_discovery_issuer">true</Parameter>
-			<Parameter Key="force_honest_idtoken_issuer">true</Parameter>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+			<Parameter Key="force_honest_discovery_iss">true</Parameter>
+			<Parameter Key="force_honest_idtoken_iss">true</Parameter>
 			<Parameter Key="force_honest_idtoken_sub">true</Parameter>
 		</OPConfig-2>
 	</TestStep>

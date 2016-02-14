@@ -22,6 +22,8 @@ package de.rub.nds.oidc.server.op;
  */
 public class OPParameterConstants {
 
+	public static final String FORCE_HONEST_DISCOVERY_ISS  = "force_honest_discovery_iss";
+
 	public static final String FORCE_HONEST_TOKEN_ISS      = "force_honest_idtoken_iss";
 	public static final String FORCE_HONEST_TOKEN_SUB      = "force_honest_idtoken_sub";
 	public static final String FORCE_HONEST_TOKEN_NAME     = "force_honest_idtoken_name";
