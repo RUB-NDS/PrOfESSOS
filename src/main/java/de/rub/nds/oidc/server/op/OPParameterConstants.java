@@ -22,7 +22,11 @@ package de.rub.nds.oidc.server.op;
  */
 public class OPParameterConstants {
 
-	public static final String FORCE_HONEST_DISCOVERY_ISS  = "force_honest_discovery_iss";
+	public static final String FORCE_HONEST_DISCOVERY_ISS         = "force_honest_discovery_iss";
+	public static final String FORCE_HONEST_DISCOVERY_REG_EP      = "force_honest_discovery_registrationEP";
+	public static final String FORCE_HONEST_DISCOVERY_AUTH_EP     = "force_honest_discovery_authorizationEP";
+	public static final String FORCE_HONEST_DISCOVERY_TOKEN_EP    = "force_honest_discovery_tokenEP";
+	public static final String FORCE_HONEST_DISCOVERY_USERINFO_EP = "force_honest_discovery_userinfoEP";
 
 	public static final String FORCE_HONEST_TOKEN_ISS      = "force_honest_idtoken_iss";
 	public static final String FORCE_HONEST_TOKEN_SUB      = "force_honest_idtoken_sub";

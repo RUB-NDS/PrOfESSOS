@@ -238,6 +238,83 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
+	protected URI getHonestRegistrationEndpoint() {
+		return UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).path(REGISTER_CLIENT_PATH).build();
+	}
+
+	protected URI getEvilRegistrationEndpoint() {
+		return UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).path(REGISTER_CLIENT_PATH).build();
+	}
+
+	protected URI getMetadataRegistrationEndpoint() {
+		URI uri;
+		if (params.getBool(FORCE_HONEST_DISCOVERY_REG_EP)) {
+			uri = getHonestRegistrationEndpoint();
+		} else {
+			uri = supplyHonestOrEvil(this::getHonestRegistrationEndpoint, this::getEvilRegistrationEndpoint);
+		}
+		return uri;
+	}
+
+
+	protected URI getHonestAuthorizationEndpoint() {
+		return UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).path(AUTH_REQUEST_PATH).build();
+	}
+
+	protected URI getEvilAuthorizationEndpoint() {
+		return UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).path(AUTH_REQUEST_PATH).build();
+	}
+
+	protected URI getMetadataAuthorizationEndpoint() {
+		URI uri;
+		if (params.getBool(FORCE_HONEST_DISCOVERY_AUTH_EP)) {
+			uri = getHonestAuthorizationEndpoint();
+		} else {
+			uri = supplyHonestOrEvil(this::getHonestAuthorizationEndpoint, this::getEvilAuthorizationEndpoint);
+		}
+		return uri;
+	}
+
+
+	protected URI getHonestTokenEndpoint() {
+		return UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).path(TOKEN_REQUEST_PATH).build();
+	}
+
+	protected URI getEvilTokenEndpoint() {
+		return UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).path(TOKEN_REQUEST_PATH).build();
+	}
+
+	protected URI getMetadataTokenEndpoint() {
+		URI uri;
+		if (params.getBool(FORCE_HONEST_DISCOVERY_TOKEN_EP)) {
+			uri = getHonestTokenEndpoint();
+		} else {
+			uri = supplyHonestOrEvil(this::getHonestTokenEndpoint, this::getEvilTokenEndpoint);
+		}
+		return uri;
+	}
+
+
+	protected URI getHonestUserinfoEndpoint() {
+		return UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).path(USER_INFO_REQUEST_PATH).build();
+	}
+
+	protected URI getEvilUserinfoEndpoint() {
+		return UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).path(USER_INFO_REQUEST_PATH).build();
+	}
+
+	protected URI getMetadataUserinfoEndpoint() {
+		URI uri;
+		if (params.getBool(FORCE_HONEST_DISCOVERY_AUTH_EP)) {
+			uri = getHonestUserinfoEndpoint();
+		} else {
+			uri = supplyHonestOrEvil(this::getHonestUserinfoEndpoint, this::getEvilUserinfoEndpoint);
+		}
+		return uri;
+	}
+
+
+
 	protected InternetAddress getHonestEmail() {
 		InternetAddress mail = new InternetAddress();
 		mail.setAddress("user@honest.com");
@@ -269,10 +346,10 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		md.applyDefaults();
 
 		// endpoints
-		URI authzEndpt = UriBuilder.fromUri(baseUri).path(AUTH_REQUEST_PATH).build();
-		URI tokenEndpt = UriBuilder.fromUri(baseUri).path(TOKEN_REQUEST_PATH).build();
-		URI userInfoEndpt = UriBuilder.fromUri(baseUri).path(USER_INFO_REQUEST_PATH).build();
-		URI registrationEndpt = UriBuilder.fromUri(baseUri).path(REGISTER_CLIENT_PATH).build();
+		URI authzEndpt = getMetadataAuthorizationEndpoint();
+		URI tokenEndpt = getMetadataTokenEndpoint();
+		URI userInfoEndpt = getMetadataUserinfoEndpoint();
+		URI registrationEndpt = getMetadataRegistrationEndpoint();
 		md.setAuthorizationEndpointURI(authzEndpt);
 		md.setTokenEndpointURI(tokenEndpt);
 		md.setUserInfoEndpointURI(userInfoEndpt);
