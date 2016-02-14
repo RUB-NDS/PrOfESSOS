@@ -53,6 +53,7 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 		// save the location of the finished state
 		boolean urlReached = rpConfig.getFinalValidUrl().equals(driver.getCurrentUrl());
 		if (! urlReached) {
+			logger.log("Target URL not reached. Assuming login is not successful.");
 			return TestStepResult.PASS;
 		}
 
@@ -67,6 +68,7 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 			// wait a bit more in case we have an angular app or some other JS heavy application
 			waitMillis(1000);
 			logger.log("Loaded profile URL page.");
+			logScreenshot();
 		}
 
 		String needle = rpConfig.getUserNeedle();
