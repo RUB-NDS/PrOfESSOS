@@ -409,8 +409,8 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return ui;
 	}
 
-	protected JWT getIdToken(@Nonnull ClientID clientId, @Nullable Nonce nonce, @Nullable AccessTokenHash atHash,
-			@Nullable CodeHash cHash) throws GeneralSecurityException, JOSEException, ParseException {
+	protected JWTClaimsSet getIdTokenClaims(@Nonnull ClientID clientId, @Nullable Nonce nonce,
+			@Nullable AccessTokenHash atHash, @Nullable CodeHash cHash) throws ParseException {
 		UserInfo ui = getUserInfo();
 
 		JWTClaimsSet.Builder cb = new JWTClaimsSet.Builder(ui.toJWTClaimsSet());
@@ -431,6 +431,12 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		}
 
 		JWTClaimsSet claims = cb.build();
+		return claims;
+	}
+
+	protected JWT getIdToken(@Nonnull ClientID clientId, @Nullable Nonce nonce, @Nullable AccessTokenHash atHash,
+			@Nullable CodeHash cHash) throws GeneralSecurityException, JOSEException, ParseException {
+		JWTClaimsSet claims = getIdTokenClaims(clientId, nonce, atHash, cHash);
 
 		RSAKey key = getSigningJwk();
 

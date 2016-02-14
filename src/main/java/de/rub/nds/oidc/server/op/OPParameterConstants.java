@@ -40,5 +40,7 @@ public class OPParameterConstants {
 	public static final String FORCE_TOKEN_IAT_YEAR      = "force_idtoken_iat_oneyear";
 	public static final String FORCE_TOKEN_NONCE_INVALID = "force_idtoken_nonce_invalidValue";
 	public static final String FORCE_TOKEN_NONCE_EXCL    = "force_idtoken_nonce_excluded";
+	public static final String FORCE_TOKEN_SIG_INVALID   = "force_idtoken_signature_invalidValue";
+	public static final String FORCE_TOKEN_SIG_NONE      = "force_idtoken_header_alg_none";
 
 }
