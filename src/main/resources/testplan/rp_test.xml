@@ -760,7 +760,7 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.InvalidStateRPTestBrowser</BrowserSimulatorClass>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>

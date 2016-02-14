@@ -31,7 +31,11 @@ public class OPContextConstants {
 
 	public static final String TOKEN_INFORMATIONLEAK_FUTURE = PFX + "token-information-leak-future";
 	public static final String USERINFO_INFORMATIONLEAK_FUTURE = PFX + "userinfo-information-leak-future";
+
 	public static final String HONEST_CODE = PFX + "honest-code";
 	public static final String HONEST_ACCESSTOKEN = PFX + "honest-code";
+
+	public static final String BLOCK_OP_FUTURE = PFX + "block-op-future";
+	public static final String RELOAD_BROWSER_FUTURE = PFX + "reload-browser-future";
 
 }

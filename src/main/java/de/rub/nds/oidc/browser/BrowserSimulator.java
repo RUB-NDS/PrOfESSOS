@@ -44,7 +44,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  */
 public abstract class BrowserSimulator {
 
-	protected final RemoteWebDriver driver;
+	protected RemoteWebDriver driver;
 
 	protected long NORMAL_WAIT_TIMEOUT = 15;
 	protected long SEARCH_WAIT_TIMEOUT = 1;
@@ -59,6 +59,10 @@ public abstract class BrowserSimulator {
 	protected InstanceParameters params;
 
 	public BrowserSimulator() {
+		loadDriver();
+	}
+
+	protected void loadDriver() {
 		driver = new PhantomJSDriver();
 		driver.manage().window().setSize(new Dimension(1024, 768));
 		driver.manage().timeouts().implicitlyWait(NORMAL_WAIT_TIMEOUT, TimeUnit.SECONDS);

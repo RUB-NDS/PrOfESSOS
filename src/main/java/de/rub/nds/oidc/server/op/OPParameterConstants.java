@@ -43,4 +43,7 @@ public class OPParameterConstants {
 	public static final String FORCE_TOKEN_SIG_INVALID   = "force_idtoken_signature_invalidValue";
 	public static final String FORCE_TOKEN_SIG_NONE      = "force_idtoken_header_alg_none";
 
+	public static final String FORCE_STATE_INVALID_VALUE = "force_state_invalidValue";
+	public static final String FORCE_STATE_OTHER_SESSION = "force_state_fromotherSession";
+
 }

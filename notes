@@ -1,0 +1,3 @@
+* Key Confusion needs work
+* How can it be checked if a login with malicious OP is successful? iss+sub does not work here and is irrelevant
+* CSRF 3 is copied from CSRF-2, can be done in one session
