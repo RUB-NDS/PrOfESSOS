@@ -57,6 +57,19 @@ limitations under the License.
 				<h1>Client Verifier</h1>
 				<p class="lead"></p>
 			</div>
+
+			<div>
+				<h2>Legend</h2>
+				<b>Test not run: </b>
+				<img alt="NOT_RUN" src="img/NOT_RUN.png" width="20"> <br>
+				<b>Test passed: </b>
+				<img alt="PASS" src="img/PASS.png" width="20"> <br>
+				<b>Test failed: </b>
+				<img alt="FAIL" src="img/FAIL.png" width="20"> <br>
+				<b>Test outcome undetermined: </b>
+				<img alt="UNDETERMINED" src="img/UNDETERMINED.png" width="20"> <br>
+			</div>
+
 			<div class="row">
 				<div class="learn-controls col-sm-12">
 					<p>Test ID: <tt id="test-id-display">not-loaded</tt><br>
@@ -126,8 +139,20 @@ limitations under the License.
 			</div>
 
 			<div id="learn-report">
-				<b>Learning Log</b>
-				<img id="learn-status" alt="NOT_RUN" src="img/NOT_RUN.png" width="20">
+				<script>
+					function toggleLearnLog() {
+						var containerToHide = document.getElementById("learn-log");
+						if (containerToHide.style.display === "none") {
+							containerToHide.style.display = null;
+						} else {
+							containerToHide.style.display = "none";
+						}
+					}
+				</script>
+				<a onclick="toggleLearnLog();">
+					<b>Learning Log</b>
+					<img id="learn-status" alt="NOT_RUN" src="img/NOT_RUN.png" width="20">
+				</a>
 				<div id="learn-log">
 
 				</div>

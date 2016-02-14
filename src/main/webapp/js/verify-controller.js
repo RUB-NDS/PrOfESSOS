@@ -120,8 +120,12 @@ var OPIV = (function(module) {
 		descContainer.appendChild(desc);
 		container.appendChild(descContainer);
 
+		// log
 		var logContainer = document.createElement("div");
+		var hideCaption = createHideImage(logContainer, "Test Log");
 		logContainer.className = "step-log";
+		logContainer.style.display = null; // make it visible again
+		container.appendChild(hideCaption);
 		container.appendChild(logContainer);
 
 		return container;
@@ -166,7 +170,7 @@ var OPIV = (function(module) {
 		for (var i = 0; i < testLog.length; i++) {
 			var entry = testLog[i];
 			var date = new Date(entry.Date);
-			
+
 			// create entries
 			var entryContainer = document.createElement("div");
 			entryContainer.className = "log-entry-wrapper " + (i % 2 === 0 ? "even" : "odd");
@@ -356,7 +360,8 @@ var OPIV = (function(module) {
 		learnStatus.attr("src", "img/" + stepResult.Result + ".png");
 
 		// write log
-		writeLog(document.getElementById("learn-log"), stepResult.LogEntry);
+		var learnLog = document.getElementById("learn-log");
+		writeLog(learnLog, stepResult.LogEntry);
 	}
 
 	function processTestResponse(stepContainer, learnResult) {
