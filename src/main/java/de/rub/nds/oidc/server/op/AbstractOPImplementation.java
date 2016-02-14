@@ -409,6 +409,16 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return ui;
 	}
 
+	protected String getTokenAudience(ClientID clientId) {
+		if (params.getBool(FORCE_TOKEN_AUD_EXCL)) {
+			return null;
+		} else if (params.getBool(FORCE_TOKEN_AUD_INVALID)) {
+			return new ClientID().getValue();
+		} else {
+			return clientId.getValue();
+		}
+	}
+
 	protected JWTClaimsSet getIdTokenClaims(@Nonnull ClientID clientId, @Nullable Nonce nonce,
 			@Nullable AccessTokenHash atHash, @Nullable CodeHash cHash) throws ParseException {
 		UserInfo ui = getUserInfo();
@@ -416,7 +426,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		JWTClaimsSet.Builder cb = new JWTClaimsSet.Builder(ui.toJWTClaimsSet());
 
 		cb.issuer(getTokenIssuer().getValue());
-		cb.audience(clientId.getValue());
+		cb.audience(getTokenAudience(clientId));
 		cb.issueTime(getTokenIssuedAt());
 		cb.expirationTime(getTokenExpiration());
 
