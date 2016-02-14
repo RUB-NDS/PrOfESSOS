@@ -34,4 +34,11 @@ public class OPParameterConstants {
 	public static final String FORCE_HONEST_TOKEN_USERNAME = "force_honest_idtoken_username";
 	public static final String FORCE_HONEST_TOKEN_EMAIL    = "force_honest_idtoken_email";
 
+	public static final String FORCE_TOKEN_EXP_DAY       = "force_idtoken_exp_oneday";
+	public static final String FORCE_TOKEN_EXP_YEAR      = "force_idtoken_exp_oneyear";
+	public static final String FORCE_TOKEN_IAT_DAY       = "force_idtoken_iat_oneday";
+	public static final String FORCE_TOKEN_IAT_YEAR      = "force_idtoken_iat_oneyear";
+	public static final String FORCE_TOKEN_NONCE_INVALID = "force_idtoken_nonce_invalidValue";
+	public static final String FORCE_TOKEN_NONCE_EXCL    = "force_idtoken_nonce_excluded";
+
 }

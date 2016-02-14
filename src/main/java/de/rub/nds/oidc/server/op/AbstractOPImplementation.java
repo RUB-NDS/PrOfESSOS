@@ -63,6 +63,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.Period;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -338,6 +339,27 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
+	protected Date getTokenIssuedAt() {
+		Date date;
+		if (params.getBool(FORCE_TOKEN_IAT_DAY)) {
+			date = Date.from(Instant.now().minus(Duration.ofDays(1)));
+		} else if (params.getBool(FORCE_TOKEN_IAT_YEAR)) {
+			date = Date.from(Instant.now().minus(Period.ofYears(1)));
+		}
+		return new Date();
+	}
+
+	protected Date getTokenExpiration() {
+		Date date = Date.from(Instant.now().plus(Duration.ofMinutes(15)));
+		if (params.getBool(FORCE_TOKEN_IAT_DAY)) {
+			date = Date.from(date.toInstant().minus(Duration.ofDays(1)));
+		} else if (params.getBool(FORCE_TOKEN_IAT_YEAR)) {
+			date = Date.from(date.toInstant().minus(Period.ofYears(1)));
+		}
+		return date;
+	}
+
+
 	protected OIDCProviderMetadata getDefaultOPMetadata() throws ParseException {
 		Issuer issuer = getMetadataIssuer();
 		List<SubjectType> subjectTypes = Arrays.asList(SubjectType.PUBLIC);
@@ -395,8 +417,8 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 
 		cb.issuer(getTokenIssuer().getValue());
 		cb.audience(clientId.getValue());
-		cb.issueTime(new Date());
-		cb.expirationTime(Date.from(Instant.now().plus(Duration.ofMinutes(15))));
+		cb.issueTime(getTokenIssuedAt());
+		cb.expirationTime(getTokenExpiration());
 
 		if (nonce != null) {
 			cb.claim("nonce", nonce.getValue());
