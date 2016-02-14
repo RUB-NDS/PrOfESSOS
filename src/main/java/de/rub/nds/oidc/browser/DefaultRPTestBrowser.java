@@ -53,7 +53,7 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 		// save the location of the finished state
 		boolean urlReached = rpConfig.getFinalValidUrl().equals(driver.getCurrentUrl());
 		if (! urlReached) {
-			return TestStepResult.FAIL;
+			return TestStepResult.PASS;
 		}
 
 		// see if we need to go to another URL
