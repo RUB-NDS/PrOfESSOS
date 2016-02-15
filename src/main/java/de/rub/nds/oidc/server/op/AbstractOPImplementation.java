@@ -340,21 +340,25 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 
 
 	protected Date getTokenIssuedAt() {
-		Date date;
+		Date date = new Date();
 		if (params.getBool(FORCE_TOKEN_IAT_DAY)) {
-			date = Date.from(Instant.now().minus(Duration.ofDays(1)));
+			logger.log("Setting iat to 1 day.");
+			date = Date.from(date.toInstant().plus(Duration.ofDays(1)));
 		} else if (params.getBool(FORCE_TOKEN_IAT_YEAR)) {
-			date = Date.from(Instant.now().minus(Period.ofYears(1)));
+			logger.log("Setting iat to 365 days.");
+			date = Date.from(date.toInstant().plus(Period.ofDays(365)));
 		}
-		return new Date();
+		return date;
 	}
 
 	protected Date getTokenExpiration() {
 		Date date = Date.from(Instant.now().plus(Duration.ofMinutes(15)));
-		if (params.getBool(FORCE_TOKEN_IAT_DAY)) {
+		if (params.getBool(FORCE_TOKEN_EXP_DAY)) {
+			logger.log("Setting exp to -1 day + 15min.");
 			date = Date.from(date.toInstant().minus(Duration.ofDays(1)));
-		} else if (params.getBool(FORCE_TOKEN_IAT_YEAR)) {
-			date = Date.from(date.toInstant().minus(Period.ofYears(1)));
+		} else if (params.getBool(FORCE_TOKEN_EXP_YEAR)) {
+			logger.log("Setting exp to -365 days + 15min.");
+			date = Date.from(date.toInstant().minus(Period.ofDays(365)));
 		}
 		return date;
 	}

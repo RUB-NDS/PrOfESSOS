@@ -362,7 +362,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="MaliciousEntpointAttack">
+	<TestStep Name="Malicious Entpoint Attack">
 		<Description><![CDATA[
 			<h1>Malicious Endpoint Attacks</h1>
 			In this test we use the Attacker OP to return maliciously crafted Discovery document and afterwards to
@@ -413,7 +413,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ReplayAttack_1">
+	<TestStep Name="Replay Attack 1">
 		<Description><![CDATA[
 			<h1>Replay Attack</h1>
 
@@ -443,7 +443,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ReplayAttack_2">
+	<TestStep Name="Replay Attack 2">
 		<Description><![CDATA[
 			<h1>Replay Attack</h1>
 
@@ -473,7 +473,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ReplayAttack_3">
+	<TestStep Name="Replay Attack 3">
 		<Description><![CDATA[
 			<h1>Replay Attack</h1>
 
@@ -503,7 +503,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ReplayAttack_4">
+	<TestStep Name="Replay Attack 4">
 		<Description><![CDATA[
 			<h1>Replay Attack</h1>
 
@@ -533,7 +533,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ReplayAttack_5">
+	<TestStep Name="Replay Attack 5">
 		<Description><![CDATA[
 			<h1>Replay Attack</h1>
 
@@ -563,7 +563,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ReplayAttack_6">
+	<TestStep Name="Replay Attack 6">
 		<Description><![CDATA[
 			<h1>Replay Attack</h1>
 
@@ -721,7 +721,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="CSRF">
+	<TestStep Name="CSRF 1">
 		<Description><![CDATA[
 			<h1>CSRF Protection via the “state” parameter</h1>
 			The OPIV tests the Validation of the "state" parameter on the Client.
