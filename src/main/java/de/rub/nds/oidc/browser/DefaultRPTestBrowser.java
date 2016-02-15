@@ -61,6 +61,12 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 
 		// save the location of the finished state
 		boolean urlReached = rpConfig.getFinalValidUrl().equals(driver.getCurrentUrl());
+		boolean forceSuccessUrlFails = params.getBool(OPParameterConstants.FORCE_SUCCESS_URL_FAILS);
+		if (forceSuccessUrlFails && urlReached) {
+			logger.log("Target URL reached. Assuming login is successful.");
+			logger.log("Successful login fails the test");
+			return TestStepResult.FAIL;
+		}
 		if (! urlReached) {
 			logger.log("Target URL not reached. Assuming login is not successful.");
 			return TestStepResult.PASS;

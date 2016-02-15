@@ -5,7 +5,6 @@
 	<LearningStep Name="LearningStep">
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.RPLearningBrowser</BrowserSimulatorClass>
-			<Parameter Key="browser.input.op_url">HONEST</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -37,6 +36,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">false</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -75,6 +75,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">false</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -113,6 +114,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">false</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -149,6 +151,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">false</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -343,6 +346,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowserSimulator</BrowserSimulatorClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -429,6 +433,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -458,6 +463,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -487,6 +493,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -516,6 +523,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -545,6 +553,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -574,6 +583,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -638,6 +648,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -667,6 +678,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -698,6 +710,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -729,6 +742,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -761,6 +775,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.InvalidStateRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -782,9 +797,8 @@
 			The target Client supports the implicit or the code flow.
 
 			<h2>Execution.</h2>
-			The OPIV returns "state" parameter issued within another browser session.
-			Step 1: Starts the browser, initiates the authentication with the MaliciousOP and gets the received state parameter
-			Step 2: OP uses the received "state" parameter in a new browser session
+			The OPIV returns no "state" parameter.
+
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the code or token is accepted by the Client.
 		]]>
@@ -795,6 +809,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -802,7 +817,7 @@
 		<OPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.op.InvalidStateOP</ImplementationClass>
 
-			<Parameter Key="force_force_state_excluded">true</Parameter>
+			<Parameter Key="force_state_excluded">true</Parameter>
 		</OPConfig-2>
 	</TestStep>
 
@@ -826,6 +841,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -857,6 +873,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -889,6 +906,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>

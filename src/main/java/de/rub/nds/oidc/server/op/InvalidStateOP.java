@@ -35,6 +35,8 @@ public class InvalidStateOP extends DefaultOP {
 	protected State getState(AuthenticationRequest authReq) {
 		if (params.getBool(OPParameterConstants.FORCE_STATE_INVALID_VALUE)) {
 			return new State();
+		} else if (params.getBool(OPParameterConstants.FORCE_STATE_EXCL)) {
+			return null;
 		} else if (params.getBool(OPParameterConstants.FORCE_STATE_OTHER_SESSION)) {
 			if (firstState == null) {
 				firstState = authReq.getState();
