@@ -47,6 +47,13 @@
 			<groupId>com.nimbusds</groupId>
 			<artifactId>oauth2-oidc-sdk</artifactId>
 			<version>5.1.1</version>
+			<exclusions>
+				<!-- this is part of the application server already -->
+				<exclusion>
+					<groupId>javax.mail</groupId>
+					<artifactId>mail</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- use jbrowserdriver when it is more mature -->
