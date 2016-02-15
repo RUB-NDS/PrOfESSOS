@@ -22,6 +22,12 @@ package de.rub.nds.oidc.server.op;
  */
 public class OPParameterConstants {
 
+	public static final String BROWSER_INPUT_OP_URL = "browser.input.op_url";
+	public static final String BROWSER_INPUT_HONEST_OP_URL = "browser.input.honest_op_url";
+	public static final String BROWSER_INPUT_EVIL_OP_URL = "browser.input.evil_op_url";
+
+	public static final String USE_EVIL_NEEDLE = "use_evil_needle";
+
 	public static final String FORCE_HONEST_DISCOVERY_ISS         = "force_honest_discovery_iss";
 	public static final String FORCE_HONEST_DISCOVERY_REG_EP      = "force_honest_discovery_registrationEP";
 	public static final String FORCE_HONEST_DISCOVERY_AUTH_EP     = "force_honest_discovery_authorizationEP";

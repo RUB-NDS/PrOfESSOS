@@ -16,6 +16,7 @@
 
 package de.rub.nds.oidc.browser;
 
+import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.test_model.TestStepResult;
 import javax.annotation.Nullable;
 import org.openqa.selenium.By;
@@ -79,7 +80,12 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 			logScreenshot();
 		}
 
-		String needle = rpConfig.getUserNeedle();
+		String needle;
+		if (params.getBool(OPParameterConstants.USE_EVIL_NEEDLE)) {
+			needle = rpConfig.getEvilUserNeedle();
+		} else {
+			needle = rpConfig.getHonestUserNeedle();
+		}
 		if (needle != null && ! needle.isEmpty()) {
 			needle = needle.replace("\"", "\\\""); // escape quotation marks
 			String xpath = String.format("//*[contains(., \"%s\")]", needle);

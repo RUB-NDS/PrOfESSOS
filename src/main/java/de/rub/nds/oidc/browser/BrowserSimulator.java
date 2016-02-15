@@ -62,7 +62,7 @@ public abstract class BrowserSimulator {
 		loadDriver();
 	}
 
-	protected void loadDriver() {
+	protected final void loadDriver() {
 		driver = new PhantomJSDriver();
 		driver.manage().window().setSize(new Dimension(1024, 768));
 		driver.manage().timeouts().implicitlyWait(NORMAL_WAIT_TIMEOUT, TimeUnit.SECONDS);

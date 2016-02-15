@@ -16,6 +16,8 @@
 
 package de.rub.nds.oidc.browser;
 
+import de.rub.nds.oidc.server.op.OPParameterConstants;
+import de.rub.nds.oidc.server.op.OPType;
 import de.rub.nds.oidc.test_model.TestStepResult;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -35,13 +37,39 @@ public class RPLearningBrowser extends BrowserSimulator {
 
 	@Override
 	public final TestStepResult run() {
+		// first make it work with honest OP
+		TestStepResult resultHonest = runHonest();
+		if (resultHonest == TestStepResult.FAIL || resultHonest == TestStepResult.UNDETERMINED) {
+			return resultHonest;
+		}
+		// run with evil OP with fresh browser, when honest OP passed
+		loadDriver();
+		TestStepResult resultEvil = runEvil();
+		return resultEvil;
+	}
+
+	private TestStepResult runHonest() {
+		String inputOpUrl = (String) stepCtx.get(OPParameterConstants.BROWSER_INPUT_HONEST_OP_URL);
+		stepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, inputOpUrl);
+		return runGeneric(OPType.HONEST);
+	}
+
+	private TestStepResult runEvil() {
+		String inputOpUrl = (String) stepCtx.get(OPParameterConstants.BROWSER_INPUT_EVIL_OP_URL);
+		stepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, inputOpUrl);
+		return runGeneric(OPType.EVIL);
+	}
+
+	private TestStepResult runGeneric(OPType type) {
+		logger.log("Running learning phase for " + type.name().toLowerCase() + " OP.");
+
 		String startUrl = rpConfig.getUrlClientTarget();
 		logger.log(String.format("Opening browser with URL '%s'.", startUrl));
 		driver.get(startUrl);
 
 		// if we have a script skip the form detection
 		if (rpConfig.getSeleniumScript() == null || rpConfig.getSeleniumScript().isEmpty()) {
-			// see if someone specified a input name
+			// see if someone specified an input name
 			String givenInputName = rpConfig.getInputFieldName();
 			if (givenInputName != null && ! givenInputName.isEmpty()) {
 				String script = evalSubmitFormTemplate(givenInputName);
@@ -126,7 +154,7 @@ public class RPLearningBrowser extends BrowserSimulator {
 			logScreenshot();
 		}
 
-		String needle = rpConfig.getUserNeedle();
+		String needle = type == OPType.HONEST ? rpConfig.getHonestUserNeedle() : rpConfig.getEvilUserNeedle();
 		if (needle != null && ! needle.isEmpty()) {
 			needle = needle.replace("\"", "\\\""); // escape quotation marks
 			String xpath = String.format("//*[contains(., \"%s\")]", needle);

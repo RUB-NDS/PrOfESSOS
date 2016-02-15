@@ -324,7 +324,8 @@ var OPIV = (function(module) {
 		 testRPConfig.InputFieldName = $("input[name='input-field-name']").val();
 		 testRPConfig.SeleniumScript = $("textarea[name='selenium-script']").val();
 		 testRPConfig.FinalValidUrl = $("input[name='url-client-target-success']").val();
-		 testRPConfig.UserNeedle = $("input[name='user-needle']").val();
+		 testRPConfig.HonestUserNeedle = $("input[name='honest-user-needle']").val();
+		 testRPConfig.EvilUserNeedle = $("input[name='evil-user-needle']").val();
 		 testRPConfig.ProfileUrl = $("input[name='user-profile-url']").val();
 	}
 
@@ -333,7 +334,8 @@ var OPIV = (function(module) {
 		testRPConfig.InputFieldName = newTestRPConfig.InputFieldName;
 		testRPConfig.SeleniumScript = newTestRPConfig.SeleniumScript;
 		testRPConfig.FinalValidUrl = newTestRPConfig.FinalValidUrl;
-		testRPConfig.UserNeedle = newTestRPConfig.UserNeedle;
+		testRPConfig.HonestUserNeedle = newTestRPConfig.HonestUserNeedle;
+		testRPConfig.EvilUserNeedle = newTestRPConfig.EvilUserNeedle;
 		testRPConfig.ProfileUrl = newTestRPConfig.ProfileUrl;
 
 		writeRPConfigGUI(newTestRPConfig);
@@ -344,7 +346,8 @@ var OPIV = (function(module) {
 		$("input[name='input-field-name']").val(newTestRPConfig.InputFieldName);
 		$("textarea[name='selenium-script']").val(newTestRPConfig.SeleniumScript);
 		$("input[name='url-client-target-success']").val(newTestRPConfig.FinalValidUrl);
-		$("input[name='user-needle']").val(newTestRPConfig.UserNeedle);
+		$("input[name='honest-user-needle']").val(newTestRPConfig.HonestUserNeedle);
+		$("input[name='evil-user-needle']").val(newTestRPConfig.EvilUserNeedle);
 		$("input[name='user-profile-url']").val(newTestRPConfig.ProfileUrl);
 	}
 

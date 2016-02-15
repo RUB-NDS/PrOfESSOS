@@ -21,6 +21,7 @@ import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.ServerInstance;
 import de.rub.nds.oidc.server.TestInstanceRegistry;
 import de.rub.nds.oidc.server.op.OPInstance;
+import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.server.op.OPType;
 import de.rub.nds.oidc.test_model.LearnResultType;
 import de.rub.nds.oidc.test_model.TestObjectType;
@@ -119,18 +120,28 @@ public class TestRunner {
 			Optional.ofNullable(stepDef.getTestParameters()).ifPresent(tp -> {
 				tp.getParameter().forEach(p -> testStepCtx.put(p.getKey(), p.getValue()));
 			});
-			// resolve OP URL
-			String startOpType = stepDef.getSeleniumScript().getParameter().stream()
-					.filter(e -> e.getKey().equals("browser.input.op_url"))
-					.map(e -> e.getValue())
-					.findFirst().orElse("EVIL");
-			if (startOpType.equals("HONEST")) {
-				testStepCtx.put("browser.input.op_url", getTestObj().getTestRPConfig().getHonestWebfingerResourceId());
-			} else if (startOpType.equals("EVIL")) {
-				testStepCtx.put("browser.input.op_url", getTestObj().getTestRPConfig().getEvilWebfingerResourceId());
-			} else {
-				logger.log("Invalid Browser parameter in test specification.");
-				return errorResponse;
+
+			// RP Test specific config
+			if (getTestObj().getTestRPConfig() != null) {
+				// resolve OP URL
+				String startOpType = stepDef.getSeleniumScript().getParameter().stream()
+						.filter(e -> e.getKey().equals(OPParameterConstants.BROWSER_INPUT_OP_URL))
+						.map(e -> e.getValue())
+						.findFirst().orElse("EVIL");
+				String honestWebfinger = getTestObj().getTestRPConfig().getHonestWebfingerResourceId();
+				String evilWebfinger = getTestObj().getTestRPConfig().getEvilWebfingerResourceId();
+				// save both in context under their own name
+				testStepCtx.put(OPParameterConstants.BROWSER_INPUT_HONEST_OP_URL, honestWebfinger);
+				testStepCtx.put(OPParameterConstants.BROWSER_INPUT_EVIL_OP_URL, evilWebfinger);
+				// now save standard value
+				if (startOpType.equals("HONEST")) {
+					testStepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, honestWebfinger);
+				} else if (startOpType.equals("EVIL")) {
+					testStepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, evilWebfinger);
+				} else {
+					logger.log("Invalid Browser parameter in test specification.");
+					return errorResponse;
+				}
 			}
 
 			OPInstance op1Inst = new OPInstance(stepDef.getOPConfig1(), logger, testSuiteCtx, testStepCtx, OPType.HONEST);
@@ -171,7 +182,8 @@ public class TestRunner {
 		local.setUrlClientTarget(rpConfig.getUrlClientTarget());
 		local.setInputFieldName(rpConfig.getInputFieldName());
 		local.setSeleniumScript(rpConfig.getSeleniumScript());
-		local.setUserNeedle(rpConfig.getUserNeedle());
+		local.setHonestUserNeedle(rpConfig.getHonestUserNeedle());
+		local.setEvilUserNeedle(rpConfig.getEvilUserNeedle());
 		local.setProfileUrl(rpConfig.getProfileUrl());
 	}
 
