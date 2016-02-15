@@ -61,7 +61,7 @@ public class InvalidStateRPTestBrowser extends DefaultRPTestBrowser {
 			}
 
 			// reload browser so we have a clean start
-			loadDriver();
+			loadDriver(true);
 
 			// call normal processing code
 			return super.run();

@@ -43,7 +43,7 @@ public class RPLearningBrowser extends BrowserSimulator {
 			return resultHonest;
 		}
 		// run with evil OP with fresh browser, when honest OP passed
-		loadDriver();
+		loadDriver(true);
 		TestStepResult resultEvil = runEvil();
 		return resultEvil;
 	}

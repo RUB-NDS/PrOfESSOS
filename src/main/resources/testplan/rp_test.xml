@@ -345,16 +345,15 @@
 			<Parameter Key="dynamic_client_registration_support_needed">true</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowser</BrowserSimulatorClass>
 			<Parameter Key="force_success_url_fails">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<Parameter Key="registration_clientid">de.rub.nds.oidc.server.op.DefaultOP.IDToken.audience</Parameter>
-
 			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="registration_clientid">de.rub.nds.oidc.server.op.DefaultOP.IDToken.audience</Parameter>
 
 			<Parameter Key="force_idtoken_header_alg_hmac">true</Parameter>
 			<Parameter Key="force_honest_idtoken_iss">true</Parameter>
@@ -618,7 +617,7 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowser</BrowserSimulatorClass>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
