@@ -334,7 +334,7 @@
 				Step 1: starts authentication with Malicious OP
 				Step 2: pause before sending the Authentication Response (code or idtoken/access token) to the SP
 				Step 3: start authentication with Honest OP within the same HTTP session as Step 1 (i.e., use the same Cookies)
-				Step 4: abort Step 3 after the Malicious IdP has been contacted by the Browser from Step 3.
+				Step 4: abort Step 3 after the Honest IdP has been contacted by the Browser from Step 3.
 				Step 5: continue with Step 2 (break the pause) and sends the Authentication Response (code or idtoken/access token)
 
 			<h2>Result Evaluation.</h2>
@@ -604,9 +604,9 @@
 			<h2>Execution.</h2>
 
 			The Session Overwriting test consists of five steps and requires the participation of the Attacker OP and the Honest OP.
-				Step 1: starts authentication with Malicious OP
+				Step 1: starts authentication with Honest OP
 				Step 2: pause before sending the Authentication Response (code or idtoken/access token) to the SP
-				Step 3: start authentication with Honest OP within the same HTTP session as Step 1 (i.e., use the same Cookies)
+				Step 3: start authentication with Malicious OP within the same HTTP session as Step 1 (i.e., use the same Cookies)
 				Step 4: abort Step 3 after the Malicious IdP has been contacted by the Browser from Step 3.
 				Step 5: continue with Step 2 (break the pause) and sends the Authentication Response (code or idtoken/access token)
 
