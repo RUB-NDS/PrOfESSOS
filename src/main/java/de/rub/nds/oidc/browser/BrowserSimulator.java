@@ -44,7 +44,10 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  */
 public abstract class BrowserSimulator {
 
-	protected final RemoteWebDriver driver;
+	protected RemoteWebDriver driver;
+
+	protected long NORMAL_WAIT_TIMEOUT = 15;
+	protected long SEARCH_WAIT_TIMEOUT = 1;
 
 	protected TestRPConfigType rpConfig;
 	protected TestOPConfigType opConfig;
@@ -56,9 +59,16 @@ public abstract class BrowserSimulator {
 	protected InstanceParameters params;
 
 	public BrowserSimulator() {
+		loadDriver(false);
+	}
+
+	protected final void loadDriver(boolean quit) {
+		if (quit) {
+			quit();
+		}
 		driver = new PhantomJSDriver();
 		driver.manage().window().setSize(new Dimension(1024, 768));
-		driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
+		driver.manage().timeouts().implicitlyWait(NORMAL_WAIT_TIMEOUT, TimeUnit.SECONDS);
 	}
 
 	public void setRpConfig(TestRPConfigType rpConfig) {
@@ -135,6 +145,15 @@ public abstract class BrowserSimulator {
 	protected void logScreenshot() {
 		byte[] screenshot = driver.getScreenshotAs(OutputType.BYTES);
 		logger.log(screenshot, "image/png");
+	}
+
+	protected <T> T withSearchTimeout(Func<T> fun) {
+		try {
+			driver.manage().timeouts().implicitlyWait(SEARCH_WAIT_TIMEOUT, TimeUnit.SECONDS);
+			return fun.call();
+		} finally {
+			driver.manage().timeouts().implicitlyWait(NORMAL_WAIT_TIMEOUT, TimeUnit.SECONDS);
+		}
 	}
 
 }

@@ -69,6 +69,7 @@ import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Date;
+import javax.annotation.Nullable;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
@@ -158,7 +159,7 @@ public class DefaultOP extends AbstractOPImplementation {
 
 		OIDCClientInformation info = supplyHonestOrEvil(
 				() -> (OIDCClientInformation) suiteCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST),
-				() -> (OIDCClientInformation) suiteCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL));
+				() -> (OIDCClientInformation) stepCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL));
 
 		// check if the client is already registered
 		try {
@@ -177,7 +178,7 @@ public class DefaultOP extends AbstractOPImplementation {
 				if (type == OPType.HONEST) {
 					suiteCtx.put(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST, info);
 				} else {
-					suiteCtx.put(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL, info);
+					stepCtx.put(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL, info);
 				}
 
 				// answer the response
@@ -210,6 +211,10 @@ public class DefaultOP extends AbstractOPImplementation {
 		}
 	}
 
+	protected State getState(AuthenticationRequest authReq) {
+		return authReq.getState();
+	}
+
 	@Override
 	public void authRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		logger.log("Authentication requested.");
@@ -220,7 +225,7 @@ public class DefaultOP extends AbstractOPImplementation {
 			AuthenticationRequest authReq = AuthenticationRequest.parse(reqMsg);
 
 			URI redirectUri = authReq.getRedirectionURI();
-			State state = authReq.getState();
+			State state = getState(authReq);
 			Nonce nonce = authReq.getNonce();
 			ResponseType responseType = authReq.getResponseType();
 
@@ -230,6 +235,10 @@ public class DefaultOP extends AbstractOPImplementation {
 				if (responseType.contains("code")) {
 					code = new AuthorizationCode();
 					cHash = CodeHash.compute(code, JWSAlgorithm.RS256);
+					// save code if honest op
+					if (type == OPType.HONEST) {
+						stepCtx.put(OPContextConstants.HONEST_CODE, code);
+					}
 				}
 
 				AccessToken at = null;
@@ -237,6 +246,10 @@ public class DefaultOP extends AbstractOPImplementation {
 				if (responseType.contains("token")) {
 					at = new BearerAccessToken();
 					atHash = AccessTokenHash.compute(at, JWSAlgorithm.RS256);
+					// save token if honest op
+					if (type == OPType.HONEST) {
+						stepCtx.put(OPContextConstants.HONEST_ACCESSTOKEN, at);
+					}
 				}
 
 				JWT idToken = null;
@@ -280,25 +293,10 @@ public class DefaultOP extends AbstractOPImplementation {
 			TokenRequest tokenReq = TokenRequest.parse(httpReq);
 			logger.logHttpRequest(req, httpReq.getQuery());
 
-			ClientAuthentication auth = tokenReq.getClientAuthentication();
-			ClientID clientId = auth != null ? auth.getClientID() : tokenReq.getClientID();
-			AuthorizationGrant grant = tokenReq.getAuthorizationGrant();
-			CodeHash cHash = null;
-			if (grant != null && grant.getType() == GrantType.AUTHORIZATION_CODE) {
-				AuthorizationCodeGrant codeGrant = (AuthorizationCodeGrant) grant;
-				cHash = CodeHash.compute(codeGrant.getAuthorizationCode(), JWSAlgorithm.RS256);
+			OIDCTokenResponse tokenRes = tokenRequestInt(tokenReq, resp);
+			if (tokenRes != null) {
+				sendResponse("Token", tokenRes, resp);
 			}
-
-			AccessToken at = new BearerAccessToken();
-			AccessTokenHash atHash = AccessTokenHash.compute(at, JWSAlgorithm.RS256);
-
-			Nonce nonce = (Nonce) stepCtx.get(OPContextConstants.AUTH_REQ_NONCE);
-
-			JWT idToken = getIdToken(clientId, nonce, atHash, cHash);
-
-			OIDCTokens tokens = new OIDCTokens(idToken, at, null);
-			OIDCTokenResponse tokenRes = new OIDCTokenResponse(tokens);
-			sendResponse("Token", tokenRes, resp);
 		} catch (GeneralSecurityException | JOSEException ex) {
 			ErrorObject error = OAuth2Error.SERVER_ERROR;
 			TokenErrorResponse errorResp = new TokenErrorResponse(error);
@@ -310,6 +308,36 @@ public class DefaultOP extends AbstractOPImplementation {
 		}
 	}
 
+	@Nullable
+	protected OIDCTokenResponse tokenRequestInt(TokenRequest tokenReq, HttpServletResponse resp)
+			throws GeneralSecurityException, JOSEException, ParseException {
+		ClientAuthentication auth = tokenReq.getClientAuthentication();
+		ClientID clientId = auth != null ? auth.getClientID() : tokenReq.getClientID();
+		AuthorizationGrant grant = tokenReq.getAuthorizationGrant();
+		CodeHash cHash = null;
+		if (grant != null && grant.getType() == GrantType.AUTHORIZATION_CODE) {
+			AuthorizationCodeGrant codeGrant = (AuthorizationCodeGrant) grant;
+			cHash = CodeHash.compute(codeGrant.getAuthorizationCode(), JWSAlgorithm.RS256);
+		}
+
+		AccessToken at = new BearerAccessToken();
+		AccessTokenHash atHash = AccessTokenHash.compute(at, JWSAlgorithm.RS256);
+		// save access token if honest op
+		if (type == OPType.HONEST) {
+			stepCtx.put(OPContextConstants.HONEST_ACCESSTOKEN, at);
+		}
+
+		Nonce nonce = (Nonce) stepCtx.get(OPContextConstants.AUTH_REQ_NONCE);
+
+		JWT idToken = getIdToken(clientId, nonce, atHash, cHash);
+
+		OIDCTokens tokens = new OIDCTokens(idToken, at, null);
+		OIDCTokenResponse tokenRes = new OIDCTokenResponse(tokens);
+
+		return tokenRes;
+	}
+
+
 	@Override
 	public void userInfoRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		try {
@@ -319,18 +347,10 @@ public class DefaultOP extends AbstractOPImplementation {
 			UserInfoRequest userReq = UserInfoRequest.parse(httpReq);
 			logger.logHttpRequest(req, httpReq.getQuery());
 			
-			AccessToken at = userReq.getAccessToken();
-			if (at == null) {
-				UserInfoErrorResponse errorResp = new UserInfoErrorResponse(BearerTokenError.MISSING_TOKEN);
-				sendErrorResponse("User Info", errorResp, resp);
-				return;
+			UserInfoSuccessResponse uiResp = userInfoRequestInt(userReq, resp);
+			if (uiResp != null) {
+				sendResponse("User Info", uiResp, resp);
 			}
-			//AccessTokenHash atHash = AccessTokenHash.compute(at, JWSAlgorithm.RS256);
-
-			UserInfo ui = getUserInfo();
-
-			UserInfoSuccessResponse uiResp = new UserInfoSuccessResponse(ui);
-			sendResponse("User Info", uiResp, resp);
 		} catch (ParseException ex) {
 			logger.log("Error parsing User Info Request.", ex);
 			ErrorObject error = ex.getErrorObject();
@@ -340,5 +360,21 @@ public class DefaultOP extends AbstractOPImplementation {
 		}
 	}
 
+	@Nullable
+	protected UserInfoSuccessResponse userInfoRequestInt(UserInfoRequest userReq, HttpServletResponse resp)
+			throws IOException {
+		AccessToken at = userReq.getAccessToken();
+		if (at == null) {
+			UserInfoErrorResponse errorResp = new UserInfoErrorResponse(BearerTokenError.MISSING_TOKEN);
+			sendErrorResponse("User Info", errorResp, resp);
+			return null;
+		}
+		//AccessTokenHash atHash = AccessTokenHash.compute(at, JWSAlgorithm.RS256);
+
+		UserInfo ui = getUserInfo();
+
+		UserInfoSuccessResponse uiResp = new UserInfoSuccessResponse(ui);
+		return uiResp;
+	}
 
 }

@@ -5,7 +5,6 @@
 	<LearningStep Name="LearningStep">
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.RPLearningBrowser</BrowserSimulatorClass>
-			<Parameter Key="browser.input.op_url">HONEST</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -18,13 +17,14 @@
 	<TestStep Name="ID Spoofing 1">
 		<Description><![CDATA[
 			<h1>ID Spoofing Attack</h1>
-			In this test we use the Attacker OP and create an ID Token containing the identity (sub) of the victim, which is controlled by another OP: Honest OP.
+			In this test we use the Attacker OP and create an ID Token containing the identity (sub) of the victim,
+			which is controlled by another OP: Honest OP.
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.  The attack needs additional configuration parameters:
 
 			<h2>Execution.</h2>
-			The OPIV issues invalid ID token containing victim's identity in the "sub".
+			The OPIV issues an invalid ID token containing the victim's identity in the "sub".
 
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the code or token is accepted by the Client.
@@ -36,12 +36,13 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">false</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.IDSpoofingOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 
 			<!-- gets the "sub" configured in the Honest OP" -->
 			<Parameter Key="force_honest_idtoken_iss">false</Parameter>
@@ -55,13 +56,14 @@
 	<TestStep Name="ID Spoofing 2">
 		<Description><![CDATA[
 			<h1>ID Spoofing Attack</h1>
-			In this test we use the Attacker OP and create an ID Token containing the identity (iss+sub) of the victim, which is controlled by another OP: Honest OP.
+			In this test we use the Attacker OP and create an ID Token containing the identity (iss+sub) of the victim,
+			which is controlled by another OP: Honest OP.
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.  The attack needs additional configuration parameters:
 
 			<h2>Execution.</h2>
-			The OPIV issues invalid ID token containing victim's identity in the "sub" and the Honest OP as "iss".
+			The OPIV issues an invalid ID token containing the victim's identity in the "sub" and the Honest OP as "iss".
 
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the code or token is accepted by the Client.
@@ -72,13 +74,14 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">false</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.IDSpoofingOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 
 			<!-- gets the "iss" and "sub" configured in the Honest OP" -->
 			<Parameter Key="force_honest_idtoken_iss">true</Parameter>
@@ -92,7 +95,8 @@
 	<TestStep Name="ID Spoofing 3">
 		<Description><![CDATA[
 			<h1>ID Spoofing Attack</h1>
-			In this test we use the Attacker OP and create an ID Token containing the identity (name+username+email) of the victim, which is controlled by another OP: Honest OP.
+			In this test we use the Attacker OP and create an ID Token containing the identity (name+username+email) of
+			the victim, which is controlled by another OP: Honest OP.
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.  The attack needs additional configuration parameters:
@@ -109,13 +113,14 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">false</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.IDSpoofingOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 			<!-- gets the "name", "username" and "email" configured in the Honest OP" -->
 			<Parameter Key="force_honest_idtoken_iss">false</Parameter>
 			<Parameter Key="force_honest_idtoken_sub">false</Parameter>
@@ -145,15 +150,16 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">false</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.IssuerConfusionOP</ImplementationClass>
-			<Parameter Key="force_honest_discovery_issuer">true</Parameter>
-			<Parameter Key="force_honest_idtoken_issuer">true</Parameter>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+			<Parameter Key="force_honest_discovery_iss">true</Parameter>
+			<Parameter Key="force_honest_idtoken_iss">true</Parameter>
 			<Parameter Key="force_honest_idtoken_sub">true</Parameter>
 		</OPConfig-2>
 	</TestStep>
@@ -177,7 +183,7 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -207,7 +213,7 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -238,7 +244,7 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -269,7 +275,7 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -300,7 +306,7 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -340,15 +346,15 @@
 			<Parameter Key="dynamic_client_registration_support_needed">true</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowser</BrowserSimulatorClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<Parameter Key="registration_clientid">de.rub.nds.oidc.server.op.DefaultOP.IDToken.audience</Parameter>
-
 			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="registration_clientid">de.rub.nds.oidc.server.op.DefaultOP.IDToken.audience</Parameter>
 
 			<Parameter Key="force_idtoken_header_alg_hmac">true</Parameter>
 			<Parameter Key="force_honest_idtoken_iss">true</Parameter>
@@ -357,10 +363,11 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="MaliciousEntpointAttack">
+	<TestStep Name="Malicious Entpoint Attack">
 		<Description><![CDATA[
 			<h1>Malicious Endpoint Attacks</h1>
-			In this test we use the Attacker OP to return maliciously crafted Discovery document and afterwards to create an ID Token containing the identity of the victim, which is controlled by another OP – Honest OP.
+			In this test we use the Attacker OP to return maliciously crafted Discovery document and afterwards to
+			create an ID Token containing the identity of the victim, which is controlled by another OP – Honest OP.
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
@@ -382,9 +389,8 @@
 			<h2>Result Evaluation.</h2>
 			The goal of this test is to verify whether the End-User authentication can
 			be broken. The attack is successful if the Attacker OP receives any secret information, for example,
-			client_id, client_secret,code or access token, generated by the Honest OP.
+			client_id, client_secret, code or access token, generated by the Honest OP.
 			Injection and DoS attacks are considered out of scope for the tests provided by OPIV.
-
 		]]>
 		</Description>
 		<TestParameters>
@@ -392,7 +398,7 @@
 			<Parameter Key="dynamic_client_registration_support_needed">true</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.InformationleakRPBrowser</BrowserSimulatorClass>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -408,7 +414,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ReplayAttack_1">
+	<TestStep Name="Replay Attack 1">
 		<Description><![CDATA[
 			<h1>Replay Attack</h1>
 
@@ -426,7 +432,8 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -437,7 +444,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ReplayAttack_2">
+	<TestStep Name="Replay Attack 2">
 		<Description><![CDATA[
 			<h1>Replay Attack</h1>
 
@@ -455,7 +462,8 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -466,7 +474,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ReplayAttack_3">
+	<TestStep Name="Replay Attack 3">
 		<Description><![CDATA[
 			<h1>Replay Attack</h1>
 
@@ -484,7 +492,8 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -495,7 +504,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ReplayAttack_4">
+	<TestStep Name="Replay Attack 4">
 		<Description><![CDATA[
 			<h1>Replay Attack</h1>
 
@@ -513,7 +522,8 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -524,7 +534,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ReplayAttack_5">
+	<TestStep Name="Replay Attack 5">
 		<Description><![CDATA[
 			<h1>Replay Attack</h1>
 
@@ -542,7 +552,8 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -553,7 +564,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ReplayAttack_6">
+	<TestStep Name="Replay Attack 6">
 		<Description><![CDATA[
 			<h1>Replay Attack</h1>
 
@@ -571,7 +582,8 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -607,7 +619,7 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowser</BrowserSimulatorClass>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -636,7 +648,8 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -665,7 +678,8 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -696,7 +710,8 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -708,7 +723,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="CSRF">
+	<TestStep Name="CSRF 1">
 		<Description><![CDATA[
 			<h1>CSRF Protection via the “state” parameter</h1>
 			The OPIV tests the Validation of the "state" parameter on the Client.
@@ -727,7 +742,8 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -759,7 +775,8 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.InvalidStateRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -781,9 +798,8 @@
 			The target Client supports the implicit or the code flow.
 
 			<h2>Execution.</h2>
-			The OPIV returns "state" parameter issued within another browser session.
-			Step 1: Starts the browser, initiates the authentication with the MaliciousOP and gets the received state parameter
-			Step 2: OP uses the received "state" parameter in a new browser session
+			The OPIV returns no "state" parameter.
+
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the code or token is accepted by the Client.
 		]]>
@@ -793,7 +809,8 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -801,7 +818,7 @@
 		<OPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.op.InvalidStateOP</ImplementationClass>
 
-			<Parameter Key="force_force_state_excluded">true</Parameter>
+			<Parameter Key="force_state_excluded">true</Parameter>
 		</OPConfig-2>
 	</TestStep>
 
@@ -824,13 +841,14 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.trcOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 
 			<Parameter Key="force_idtoken_aud_excluded">true</Parameter>
 		</OPConfig-2>
@@ -855,13 +873,14 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.trcOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 
 			<Parameter Key="force_idtoken_aud_invalidValue">true</Parameter>
 		</OPConfig-2>
@@ -887,15 +906,16 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultOPBrowserSimulator</BrowserSimulatorClass>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.trcOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.TRCOP</ImplementationClass>
 
-			<Parameter Key="force_honest_idtoken_aud">true</Parameter>
+			<Parameter Key="force_idtoken_honest_aud">true</Parameter>
 		</OPConfig-2>
 	</TestStep>
 

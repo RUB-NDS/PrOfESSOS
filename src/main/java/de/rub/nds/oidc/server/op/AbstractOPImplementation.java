@@ -63,6 +63,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.Period;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -71,6 +72,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.UriBuilder;
 
@@ -150,42 +152,230 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		logger.logHttpResponse(resp, httpResp.getContent());
 	}
 
-	protected Issuer getIssuer() {
-		URI opUri;
-		if (params.getBool(FORCE_HONEST_TOKEN_ISS)) {
-			opUri = opivCfg.getHonestOPUri();
-		} else {
-			opUri = supplyHonestOrEvil(opivCfg::getHonestOPUri, opivCfg::getEvilOPUri);
-		}
-		URI issuerUri = UriBuilder.fromUri(opUri)
-				.path(testId)
-				.build();
-		return new Issuer(issuerUri);
+
+	protected Issuer getHonestIssuer() {
+		return new Issuer(UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).build());
 	}
 
-	protected Subject getSubject() {
+	protected Issuer getEvilIssuer() {
+		return new Issuer(UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).build());
+	}
+
+	protected Issuer getMetadataIssuer() {
+		Issuer issuer;
+		if (params.getBool(FORCE_HONEST_DISCOVERY_ISS)) {
+			issuer = getHonestIssuer();
+		} else {
+			issuer = supplyHonestOrEvil(this::getHonestIssuer, this::getEvilIssuer);
+		}
+		return issuer;
+	}
+
+	protected Issuer getTokenIssuer() {
+		Issuer issuer;
+		if (params.getBool(FORCE_HONEST_TOKEN_ISS)) {
+			issuer = getHonestIssuer();
+		} else {
+			issuer = supplyHonestOrEvil(this::getHonestIssuer, this::getEvilIssuer);
+		}
+		return issuer;
+	}
+
+
+	protected Subject getHonestSubject() {
+		return new Subject("honest-op-test-subject");
+	}
+
+	protected Subject getEvilSubject() {
+		return new Subject("evil-op-test-subject");
+	}
+
+	protected Subject getTokenSubject() {
 		Subject sub;
 		if (params.getBool(FORCE_HONEST_TOKEN_SUB)) {
-			sub = new Subject("honest-op-test-subject");
+			sub = getHonestSubject();
 		} else {
-			sub = supplyHonestOrEvil(() -> new Subject("honest-op-test-subject"),
-					() -> new Subject("evil-op-test-subject"));
+			sub = supplyHonestOrEvil(this::getHonestSubject, this::getEvilSubject);
 		}
 		return sub;
 	}
 
+
+	protected String getHonestName() {
+		return "Honest User";
+	}
+
+	protected String getEvilName() {
+		return "Evil User";
+	}
+
+	protected String getTokenName() {
+		String name;
+		if (params.getBool(FORCE_HONEST_TOKEN_NAME)) {
+			name = getHonestName();
+		} else {
+			name = supplyHonestOrEvil(this::getHonestName, this::getEvilName);
+		}
+		return name;
+	}
+
+
+	protected String getHonestUsername() {
+		return "honest-user-name";
+	}
+
+	protected String getEvilUsername() {
+		return "evil-user-name";
+	}
+
+	protected String getTokenUsername() {
+		String name;
+		if (params.getBool(FORCE_HONEST_TOKEN_USERNAME)) {
+			name = getHonestUsername();
+		} else {
+			name = supplyHonestOrEvil(this::getHonestUsername, this::getEvilUsername);
+		}
+		return name;
+	}
+
+
+	protected URI getHonestRegistrationEndpoint() {
+		return UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).path(REGISTER_CLIENT_PATH).build();
+	}
+
+	protected URI getEvilRegistrationEndpoint() {
+		return UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).path(REGISTER_CLIENT_PATH).build();
+	}
+
+	protected URI getMetadataRegistrationEndpoint() {
+		URI uri;
+		if (params.getBool(FORCE_HONEST_DISCOVERY_REG_EP)) {
+			uri = getHonestRegistrationEndpoint();
+		} else {
+			uri = supplyHonestOrEvil(this::getHonestRegistrationEndpoint, this::getEvilRegistrationEndpoint);
+		}
+		return uri;
+	}
+
+
+	protected URI getHonestAuthorizationEndpoint() {
+		return UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).path(AUTH_REQUEST_PATH).build();
+	}
+
+	protected URI getEvilAuthorizationEndpoint() {
+		return UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).path(AUTH_REQUEST_PATH).build();
+	}
+
+	protected URI getMetadataAuthorizationEndpoint() {
+		URI uri;
+		if (params.getBool(FORCE_HONEST_DISCOVERY_AUTH_EP)) {
+			uri = getHonestAuthorizationEndpoint();
+		} else {
+			uri = supplyHonestOrEvil(this::getHonestAuthorizationEndpoint, this::getEvilAuthorizationEndpoint);
+		}
+		return uri;
+	}
+
+
+	protected URI getHonestTokenEndpoint() {
+		return UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).path(TOKEN_REQUEST_PATH).build();
+	}
+
+	protected URI getEvilTokenEndpoint() {
+		return UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).path(TOKEN_REQUEST_PATH).build();
+	}
+
+	protected URI getMetadataTokenEndpoint() {
+		URI uri;
+		if (params.getBool(FORCE_HONEST_DISCOVERY_TOKEN_EP)) {
+			uri = getHonestTokenEndpoint();
+		} else {
+			uri = supplyHonestOrEvil(this::getHonestTokenEndpoint, this::getEvilTokenEndpoint);
+		}
+		return uri;
+	}
+
+
+	protected URI getHonestUserinfoEndpoint() {
+		return UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).path(USER_INFO_REQUEST_PATH).build();
+	}
+
+	protected URI getEvilUserinfoEndpoint() {
+		return UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).path(USER_INFO_REQUEST_PATH).build();
+	}
+
+	protected URI getMetadataUserinfoEndpoint() {
+		URI uri;
+		if (params.getBool(FORCE_HONEST_DISCOVERY_AUTH_EP)) {
+			uri = getHonestUserinfoEndpoint();
+		} else {
+			uri = supplyHonestOrEvil(this::getHonestUserinfoEndpoint, this::getEvilUserinfoEndpoint);
+		}
+		return uri;
+	}
+
+
+
+	protected InternetAddress getHonestEmail() {
+		InternetAddress mail = new InternetAddress();
+		mail.setAddress("user@honest.com");
+		return mail;
+	}
+
+	protected InternetAddress getEvilEmail() {
+		InternetAddress mail = new InternetAddress();
+		mail.setAddress("user@evil.com");
+		return mail;
+	}
+
+	protected InternetAddress getTokenEmail() {
+		InternetAddress mail;
+		if (params.getBool(FORCE_HONEST_TOKEN_EMAIL)) {
+			mail = getHonestEmail();
+		} else {
+			mail = supplyHonestOrEvil(this::getHonestEmail, this::getEvilEmail);
+		}
+		return mail;
+	}
+
+
+	protected Date getTokenIssuedAt() {
+		Date date = new Date();
+		if (params.getBool(FORCE_TOKEN_IAT_DAY)) {
+			logger.log("Setting iat to 1 day.");
+			date = Date.from(date.toInstant().plus(Duration.ofDays(1)));
+		} else if (params.getBool(FORCE_TOKEN_IAT_YEAR)) {
+			logger.log("Setting iat to 365 days.");
+			date = Date.from(date.toInstant().plus(Period.ofDays(365)));
+		}
+		return date;
+	}
+
+	protected Date getTokenExpiration() {
+		Date date = Date.from(Instant.now().plus(Duration.ofMinutes(15)));
+		if (params.getBool(FORCE_TOKEN_EXP_DAY)) {
+			logger.log("Setting exp to -1 day + 15min.");
+			date = Date.from(date.toInstant().minus(Duration.ofDays(1)));
+		} else if (params.getBool(FORCE_TOKEN_EXP_YEAR)) {
+			logger.log("Setting exp to -365 days + 15min.");
+			date = Date.from(date.toInstant().minus(Period.ofDays(365)));
+		}
+		return date;
+	}
+
+
 	protected OIDCProviderMetadata getDefaultOPMetadata() throws ParseException {
-		Issuer issuer = getIssuer();
+		Issuer issuer = getMetadataIssuer();
 		List<SubjectType> subjectTypes = Arrays.asList(SubjectType.PUBLIC);
 		URI jwksUri = UriBuilder.fromUri(baseUri).path(JWKS_PATH).build();
 		OIDCProviderMetadata md = new OIDCProviderMetadata(issuer, subjectTypes, jwksUri);
 		md.applyDefaults();
 
 		// endpoints
-		URI authzEndpt = UriBuilder.fromUri(baseUri).path(AUTH_REQUEST_PATH).build();
-		URI tokenEndpt = UriBuilder.fromUri(baseUri).path(TOKEN_REQUEST_PATH).build();
-		URI userInfoEndpt = UriBuilder.fromUri(baseUri).path(USER_INFO_REQUEST_PATH).build();
-		URI registrationEndpt = UriBuilder.fromUri(baseUri).path(REGISTER_CLIENT_PATH).build();
+		URI authzEndpt = getMetadataAuthorizationEndpoint();
+		URI tokenEndpt = getMetadataTokenEndpoint();
+		URI userInfoEndpt = getMetadataUserinfoEndpoint();
+		URI registrationEndpt = getMetadataRegistrationEndpoint();
 		md.setAuthorizationEndpointURI(authzEndpt);
 		md.setTokenEndpointURI(tokenEndpt);
 		md.setUserInfoEndpointURI(userInfoEndpt);
@@ -215,21 +405,34 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 	protected UserInfo getUserInfo() {
-		UserInfo ui = new UserInfo(getSubject());
+		UserInfo ui = new UserInfo(getTokenSubject());
+		ui.setName(getTokenName());
+		ui.setPreferredUsername(getTokenUsername());
+		ui.setEmail(getTokenEmail());
 
 		return ui;
 	}
 
-	protected JWT getIdToken(@Nonnull ClientID clientId, @Nullable Nonce nonce, @Nullable AccessTokenHash atHash,
-			@Nullable CodeHash cHash) throws GeneralSecurityException, JOSEException, ParseException {
+	protected String getTokenAudience(ClientID clientId) {
+		if (params.getBool(FORCE_TOKEN_AUD_EXCL)) {
+			return null;
+		} else if (params.getBool(FORCE_TOKEN_AUD_INVALID)) {
+			return new ClientID().getValue();
+		} else {
+			return clientId.getValue();
+		}
+	}
+
+	protected JWTClaimsSet getIdTokenClaims(@Nonnull ClientID clientId, @Nullable Nonce nonce,
+			@Nullable AccessTokenHash atHash, @Nullable CodeHash cHash) throws ParseException {
 		UserInfo ui = getUserInfo();
 
 		JWTClaimsSet.Builder cb = new JWTClaimsSet.Builder(ui.toJWTClaimsSet());
 
-		cb.issuer(baseUri.toString());
-		cb.audience(clientId.getValue());
-		cb.issueTime(new Date());
-		cb.expirationTime(Date.from(Instant.now().plus(Duration.ofMinutes(15))));
+		cb.issuer(getTokenIssuer().getValue());
+		cb.audience(getTokenAudience(clientId));
+		cb.issueTime(getTokenIssuedAt());
+		cb.expirationTime(getTokenExpiration());
 
 		if (nonce != null) {
 			cb.claim("nonce", nonce.getValue());
@@ -242,6 +445,12 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		}
 
 		JWTClaimsSet claims = cb.build();
+		return claims;
+	}
+
+	protected JWT getIdToken(@Nonnull ClientID clientId, @Nullable Nonce nonce, @Nullable AccessTokenHash atHash,
+			@Nullable CodeHash cHash) throws GeneralSecurityException, JOSEException, ParseException {
+		JWTClaimsSet claims = getIdTokenClaims(clientId, nonce, atHash, cHash);
 
 		RSAKey key = getSigningJwk();
 

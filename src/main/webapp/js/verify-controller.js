@@ -89,20 +89,25 @@ var OPIV = (function(module) {
 		container.className = ("step-container " + testResult.Result);
 
 		// name and result image
-		var head = document.createElement("div");
-		container.appendChild(head);
-		head.className = "step-head";
-		head.innerHTML = "<b>" + testDef.Name + "</b>: ";
-		head.appendChild(createResultImage(testResult.Result));
+		var stepHead = document.createElement("div");
+		container.appendChild(stepHead);
+		stepHead.className = "step-head";
+		var heading = document.createElement("h2");
+		stepHead.appendChild(heading);
+		heading.innerHTML = testDef.Name;
+		heading.appendChild(createResultImage(testResult.Result));
+
 		// create test button
 		var testForm = document.createElement("form");
 		testForm.action = "javascript:;";
 		testForm.onsubmit = function() { OPIV.testRPStep(testDef.Name, container); };
-		var button = document.createElement("input");
+		var button = document.createElement("button");
+		button.className = "btn btn-default";
 		button.type = "submit";
 		button.value = "Run Test";
+		button.innerHTML = "Run Test";
 		testForm.appendChild(button);
-		head.appendChild(testForm);
+		stepHead.appendChild(testForm);
 
 		// description
 		var descContainer = document.createElement("div");
@@ -115,8 +120,12 @@ var OPIV = (function(module) {
 		descContainer.appendChild(desc);
 		container.appendChild(descContainer);
 
+		// log
 		var logContainer = document.createElement("div");
+		var hideCaption = createHideImage(logContainer, "Test Log");
 		logContainer.className = "step-log";
+		logContainer.style.display = null; // make it visible again
+		container.appendChild(hideCaption);
 		container.appendChild(logContainer);
 
 		return container;
@@ -161,7 +170,7 @@ var OPIV = (function(module) {
 		for (var i = 0; i < testLog.length; i++) {
 			var entry = testLog[i];
 			var date = new Date(entry.Date);
-			
+
 			// create entries
 			var entryContainer = document.createElement("div");
 			entryContainer.className = "log-entry-wrapper " + (i % 2 === 0 ? "even" : "odd");
@@ -315,7 +324,8 @@ var OPIV = (function(module) {
 		 testRPConfig.InputFieldName = $("input[name='input-field-name']").val();
 		 testRPConfig.SeleniumScript = $("textarea[name='selenium-script']").val();
 		 testRPConfig.FinalValidUrl = $("input[name='url-client-target-success']").val();
-		 testRPConfig.UserNeedle = $("input[name='user-needle']").val();
+		 testRPConfig.HonestUserNeedle = $("input[name='honest-user-needle']").val();
+		 testRPConfig.EvilUserNeedle = $("input[name='evil-user-needle']").val();
 		 testRPConfig.ProfileUrl = $("input[name='user-profile-url']").val();
 	}
 
@@ -324,7 +334,8 @@ var OPIV = (function(module) {
 		testRPConfig.InputFieldName = newTestRPConfig.InputFieldName;
 		testRPConfig.SeleniumScript = newTestRPConfig.SeleniumScript;
 		testRPConfig.FinalValidUrl = newTestRPConfig.FinalValidUrl;
-		testRPConfig.UserNeedle = newTestRPConfig.UserNeedle;
+		testRPConfig.HonestUserNeedle = newTestRPConfig.HonestUserNeedle;
+		testRPConfig.EvilUserNeedle = newTestRPConfig.EvilUserNeedle;
 		testRPConfig.ProfileUrl = newTestRPConfig.ProfileUrl;
 
 		writeRPConfigGUI(newTestRPConfig);
@@ -335,7 +346,8 @@ var OPIV = (function(module) {
 		$("input[name='input-field-name']").val(newTestRPConfig.InputFieldName);
 		$("textarea[name='selenium-script']").val(newTestRPConfig.SeleniumScript);
 		$("input[name='url-client-target-success']").val(newTestRPConfig.FinalValidUrl);
-		$("input[name='user-needle']").val(newTestRPConfig.UserNeedle);
+		$("input[name='honest-user-needle']").val(newTestRPConfig.HonestUserNeedle);
+		$("input[name='evil-user-needle']").val(newTestRPConfig.EvilUserNeedle);
 		$("input[name='user-profile-url']").val(newTestRPConfig.ProfileUrl);
 	}
 
@@ -351,7 +363,8 @@ var OPIV = (function(module) {
 		learnStatus.attr("src", "img/" + stepResult.Result + ".png");
 
 		// write log
-		writeLog(document.getElementById("learn-log"), stepResult.LogEntry);
+		var learnLog = document.getElementById("learn-log");
+		writeLog(learnLog, stepResult.LogEntry);
 	}
 
 	function processTestResponse(stepContainer, learnResult) {

@@ -44,7 +44,8 @@ limitations under the License.
 			<element name="InputFieldName" type="NCName" minOccurs="0" />
 			<element name="SeleniumScript" type="string" minOccurs="0" />
 			<element name="FinalValidUrl" type="anyURI" minOccurs="0" />
-			<element name="UserNeedle" type="string" minOccurs="0" />
+			<element name="HonestUserNeedle" type="string" minOccurs="0" />
+			<element name="EvilUserNeedle" type="string" minOccurs="0" />
 			<element name="ProfileUrl" type="anyURI" minOccurs="0" />
 			<!--<element name="FinalInvalidUrl" type="anyURI" minOccurs="0" />-->
 			<!--<element name="InvalidReturnCode" type="nonNegativeInteger" minOccurs="0" />-->
@@ -99,10 +100,10 @@ limitations under the License.
 
 	<simpleType name="TestStepResult">
 		<restriction base="string">
-			<enumeration value="NOT_RUN" />
 			<enumeration value="PASS" />
-			<enumeration value="FAIL" />
+			<enumeration value="NOT_RUN" />
 			<enumeration value="UNDETERMINED" />
+			<enumeration value="FAIL" />
 		</restriction>
 	</simpleType>
 

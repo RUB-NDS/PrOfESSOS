@@ -57,6 +57,23 @@ limitations under the License.
 				<h1>Client Verifier</h1>
 				<p class="lead"></p>
 			</div>
+
+			<div>
+				<h3>Legend</h3>
+				<dl style="" class="dl-horizontal">
+					<dt><img alt="NOT_RUN" src="img/NOT_RUN.png" width="20"></dt>
+					<dd><b>Test not run</b></dd>
+					<dt><img alt="PASS" src="img/PASS.png" width="20"></dt>
+					<dd><b>Test passed</b></dd>
+					<dt><img alt="FAIL" src="img/FAIL.png" width="20"></dt>
+					<dd><b>Test failed</b></dd>
+					<dt><img alt="UNDETERMINED" src="img/UNDETERMINED.png" width="20"></dt>
+					<dd><b>Test outcome undetermined</b></dd>
+				</dl>
+			</div>
+
+			<hr>
+
 			<div class="row">
 				<div class="learn-controls col-sm-12">
 					<p>Test ID: <tt id="test-id-display">not-loaded</tt><br>
@@ -102,10 +119,18 @@ limitations under the License.
 							</div>
 							<div class="form-group">
 								<div class="col-sm-2">
-									<label for="user-needle">User Needle:</label>
+									<label for="honest-user-needle">Honest User Needle:</label>
 								</div>
 								<div class="col-sm-10">
-									<input class="form-control" type="text" name="user-needle" size="80">
+									<input class="form-control" type="text" name="honest-user-needle" size="80">
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-2">
+									<label for="evil-user-needle">Evil User Needle:</label>
+								</div>
+								<div class="col-sm-10">
+									<input class="form-control" type="text" name="evil-user-needle" size="80">
 								</div>
 							</div>
 							<div class="form-group">
@@ -126,8 +151,20 @@ limitations under the License.
 			</div>
 
 			<div id="learn-report">
-				<b>Learning Log</b>
-				<img id="learn-status" alt="NOT_RUN" src="img/NOT_RUN.png" width="20">
+				<script>
+					function toggleLearnLog() {
+						var containerToHide = document.getElementById("learn-log");
+						if (containerToHide.style.display === "none") {
+							containerToHide.style.display = null;
+						} else {
+							containerToHide.style.display = "none";
+						}
+					}
+				</script>
+				<a onclick="toggleLearnLog();">
+					<b>Learning Log</b>
+					<img id="learn-status" alt="NOT_RUN" src="img/NOT_RUN.png" width="20">
+				</a>
 				<div id="learn-log">
 
 				</div>

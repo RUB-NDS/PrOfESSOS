@@ -1,0 +1,5 @@
+* How can it be checked if a login with malicious OP is successful? iss+sub does not work here and is irrelevant
+
+- Key Confusion 6 implementieren
+  HMAC mit client secret
+- SessionOverwriting implementieren

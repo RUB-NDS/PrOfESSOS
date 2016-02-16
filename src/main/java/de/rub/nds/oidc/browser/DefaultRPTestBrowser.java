@@ -16,7 +16,9 @@
 
 package de.rub.nds.oidc.browser;
 
+import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.test_model.TestStepResult;
+import javax.annotation.Nullable;
 import org.openqa.selenium.By;
 
 /**
@@ -50,10 +52,24 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 		logger.log("Finished login procedure, please check if it succeeded and correct the success URL and the user needle accordingly.");
 		logScreenshot();
 
+		// run condition check code
+		TestStepResult checkResult = checkConditionAfterLogin();
+		if (checkResult != null) {
+			logger.log("Result returned from check condition funtion: " + checkResult.name());
+			return checkResult;
+		}
+
 		// save the location of the finished state
 		boolean urlReached = rpConfig.getFinalValidUrl().equals(driver.getCurrentUrl());
-		if (! urlReached) {
+		boolean forceSuccessUrlFails = params.getBool(OPParameterConstants.FORCE_SUCCESS_URL_FAILS);
+		if (forceSuccessUrlFails && urlReached) {
+			logger.log("Target URL reached. Assuming login is successful.");
+			logger.log("Successful login fails the test");
 			return TestStepResult.FAIL;
+		}
+		if (! urlReached) {
+			logger.log("Target URL not reached. Assuming login is not successful.");
+			return TestStepResult.PASS;
 		}
 
 		// see if we need to go to another URL
@@ -67,17 +83,32 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 			// wait a bit more in case we have an angular app or some other JS heavy application
 			waitMillis(1000);
 			logger.log("Loaded profile URL page.");
+			logScreenshot();
 		}
 
-		String needle = rpConfig.getUserNeedle();
+		String needle;
+		if (params.getBool(OPParameterConstants.USE_EVIL_NEEDLE)) {
+			needle = rpConfig.getEvilUserNeedle();
+		} else {
+			needle = rpConfig.getHonestUserNeedle();
+		}
 		if (needle != null && ! needle.isEmpty()) {
-			boolean needleFound = ! driver.findElements(By.partialLinkText(needle)).isEmpty();
+			needle = needle.replace("\"", "\\\""); // escape quotation marks
+			String xpath = String.format("//*[contains(., \"%s\")]", needle);
+			// search string
+			boolean needleFound = withSearchTimeout(() -> ! driver.findElements(By.xpath(xpath)).isEmpty());
+
 			logger.log("User needle search result: needle-found=" + needleFound);
 			return needleFound ? TestStepResult.FAIL : TestStepResult.PASS;
 		} else {
 			logger.log("Search for user needle not possible, none specified.");
 			return TestStepResult.UNDETERMINED;
 		}
+	}
+
+	@Nullable
+	protected TestStepResult checkConditionAfterLogin() {
+		return null;
 	}
 
 }
