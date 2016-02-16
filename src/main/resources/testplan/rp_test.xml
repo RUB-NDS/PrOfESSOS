@@ -326,9 +326,10 @@
 
 			Test desciption
 				Step 1: starts authentication with Malicious OP
-				Step 2: timeout before sending the Authentication Response (code or idtoken/access token)
-				Step 3: starts authentication with Honest OP
-			Step 4: stops the timeout on the honest OP and sends the Authentication Response (code or idtoken/access token)
+				Step 2: pause before sending the Authentication Response (code or idtoken/access token) to the SP
+				Step 3: start authentication with Honest OP within the same HTTP session as Step 1 (i.e., use the same Cookies)
+				Step 4: abort Step 3 after the Malicious IdP has been contacted by the Browser from Step 3.
+				Step 5: continue with Step 2 (break the pause) and sends the Authentication Response (code or idtoken/access token)
 
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the token is accepted by the Client.
@@ -589,12 +590,13 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The Session Overwriting test consists of three steps and requires the participation of the Attacker OP and the Honest OP.
 
-			Step 1: starts authentication with Honest OP
-			Step 2: timeout before sending the Authentication Response (code or idtoken/access token)
-			Step 3: starts authentication with Malicious OP
-			Step 4: stops the timeout on the honest OP and sends the Authentication Response (code or idtoken/access token)
+			The Session Overwriting test consists of five steps and requires the participation of the Attacker OP and the Honest OP.
+				Step 1: starts authentication with Malicious OP
+				Step 2: pause before sending the Authentication Response (code or idtoken/access token) to the SP
+				Step 3: start authentication with Honest OP within the same HTTP session as Step 1 (i.e., use the same Cookies)
+				Step 4: abort Step 3 after the Malicious IdP has been contacted by the Browser from Step 3.
+				Step 5: continue with Step 2 (break the pause) and sends the Authentication Response (code or idtoken/access token)
 
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the token is accepted by the Client.
