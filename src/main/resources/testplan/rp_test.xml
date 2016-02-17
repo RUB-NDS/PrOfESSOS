@@ -163,7 +163,7 @@
 			<Parameter Key="force_honest_idtoken_sub">true</Parameter>
 		</OPConfig-2>
 	</TestStep>
-
+<!--
 	<TestStep Name="Key Confusion 1 (future work)">
 		<Description><![CDATA[
 			<h1>Key Confusion</h1>
@@ -318,7 +318,6 @@
 		</OPConfig-2>
 	</TestStep>
 
-
 	<TestStep Name="Key Confusion 6 ">
 		<Description><![CDATA[
 			<h1>Key Confusion</h1>
@@ -362,6 +361,7 @@
 
 		</OPConfig-2>
 	</TestStep>
+-->
 
 	<TestStep Name="Malicious Entpoint Attack">
 		<Description><![CDATA[
