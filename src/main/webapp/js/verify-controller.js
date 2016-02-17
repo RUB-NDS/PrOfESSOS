@@ -23,6 +23,7 @@ var OPIV = (function(module) {
 	var testObject;
 	var testRPConfig;
 	var testReport;
+	var learningComplete = false;
 
 	module.clear = function() {
 		document.location.reload();
@@ -34,7 +35,27 @@ var OPIV = (function(module) {
 		
 	};
 
+	function isInitialized() {
+		return typeof testId !== 'undefined';
+	}
+
+	module.loadDemo = function() {
+		if (isInitialized()) {
+			testRPConfig.UrlClientTarget = "http://www.honestsp.de:8080/simple-web-app/login";
+			testRPConfig.InputFieldName = null;
+			testRPConfig.SeleniumScript = null;
+			testRPConfig.FinalValidUrl = "http://www.honestsp.de:8080/simple-web-app/";
+			testRPConfig.HonestUserNeedle = "{sub=honest-op-test-subject, iss=" + testRPConfig.HonestWebfingerResourceId + "}";
+			testRPConfig.EvilUserNeedle = "{sub=evil-op-test-subject, iss=" + testRPConfig.EvilWebfingerResourceId + "}";
+			testRPConfig.ProfileUrl = "http://www.honestsp.de:8080/simple-web-app/user";
+
+			writeRPConfigGUI(testRPConfig);
+		}
+	};
+
 	module.learnRP = function() {
+		learningComplete = false;
+
 		updateRPConfig();
 		// call learning function
 		$.post({
@@ -46,14 +67,18 @@ var OPIV = (function(module) {
 	};
 
 	module.testRPStep = function(stepId, stepContainer) {
-		updateRPConfig();
-		// call test function
-		$.post({
-			url: "api/rp/" + testId + "/test/" + stepId,
-			data: JSON.stringify(testRPConfig),
-			contentType: "application/json",
-			success: function(data) { processTestResponse(stepContainer, data); }
-		});
+		if (learningComplete) {
+			updateRPConfig();
+			// call test function
+			$.post({
+				url: "api/rp/" + testId + "/test/" + stepId,
+				data: JSON.stringify(testRPConfig),
+				contentType: "application/json",
+				success: function(data) { processTestResponse(stepContainer, data); }
+			});
+		} else {
+			alert("Please make sure the learning phase was successful first.");
+		}
 	};
 
 	function initTestObject(data) {
@@ -124,7 +149,6 @@ var OPIV = (function(module) {
 		var logContainer = document.createElement("div");
 		var hideCaption = createHideImage(logContainer, "Test Log");
 		logContainer.className = "step-log";
-		logContainer.style.display = null; // make it visible again
 		container.appendChild(hideCaption);
 		container.appendChild(logContainer);
 
@@ -163,9 +187,13 @@ var OPIV = (function(module) {
 		return resultImg;
 	}
 
-	function writeLog(logContainer, testLog) {
-		// clear container first
+	function writeLog(logContainer, testLog, hideLog) {
+		// default parameters
+		hideLog = typeof hideLog !== 'undefined' ? hideLog : false;
+
+		// clear container first and set display status
 		logContainer.innerHTML = "";
+		logContainer.style.display = hideLog ? "none" : null;
 
 		for (var i = 0; i < testLog.length; i++) {
 			var entry = testLog[i];
@@ -353,6 +381,7 @@ var OPIV = (function(module) {
 
 	function processLearnResponse(learnResult) {
 		var stepResult = learnResult.TestStepResult;
+		var testPassed = stepResult.Result === "PASS";
 
 		// update config
 		writeRPConfig(learnResult.TestRPConfig);
@@ -364,11 +393,17 @@ var OPIV = (function(module) {
 
 		// write log
 		var learnLog = document.getElementById("learn-log");
-		writeLog(learnLog, stepResult.LogEntry);
+		writeLog(learnLog, stepResult.LogEntry, testPassed);
+
+		// grant access to tests if OK is returned
+		if (testPassed) {
+			learningComplete = true;
+		}
 	}
 
 	function processTestResponse(stepContainer, learnResult) {
 		var stepResult = learnResult.TestStepResult;
+		var testPassed = stepResult.Result === "PASS";
 
 		// update status
 		var statusImg = stepContainer.getElementsByClassName("status-image")[0];
@@ -377,7 +412,7 @@ var OPIV = (function(module) {
 
 		// write log
 		var logContainer = stepContainer.getElementsByClassName("step-log")[0];
-		writeLog(logContainer, stepResult.LogEntry);
+		writeLog(logContainer, stepResult.LogEntry, testPassed);
 	}
 
 	return module;

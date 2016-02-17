@@ -59,6 +59,23 @@ limitations under the License.
 			</div>
 
 			<div>
+				<h3>Introduction</h3>
+				<p>This OpenID-Connect test tool can be used to check OpenID Connect Clients for known vulnerabilities.
+				It is in a very early stage of development, where only the bare essentials are implemented. The missing
+				parts especially include UI feedback from tests and the learning phase, configuration help during the
+				learning phase, and the robustness of frontend-server interactions. These deficiencies will be addressed
+				shortly.</p>
+				<p>In the meantime we provide a configuration for a demo OpenID Connect Client. The configuration can be
+				loaded by pressing the 'Load Demo Config' button below. Afterwards the usual learning and test phase can
+				be run with the buttons below the configuration form.</p>
+				<form id="rp-demo-form" action="javascript:;" onsubmit="javascript:OPIV.loadDemo();">
+					<button class="btn btn-default" type="submit" value="Load Demo Config">Load Demo Config</button>
+				</form>
+			</div>
+
+			<hr>
+
+			<div>
 				<h3>Legend</h3>
 				<dl style="" class="dl-horizontal">
 					<dt><img alt="NOT_RUN" src="img/NOT_RUN.png" width="20"></dt>
@@ -178,7 +195,6 @@ limitations under the License.
 
 
 		<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
-		<!--<script src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>-->
 
 		<!-- Latest compiled and minified JavaScript -->
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
