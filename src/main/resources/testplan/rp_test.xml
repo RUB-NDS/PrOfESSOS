@@ -595,6 +595,7 @@
 		</OPConfig-2>
 	</TestStep>
 
+<!--
 	<TestStep Name="Session Overwriting">
 		<Description><![CDATA[
 			<h1>Session Overwriting</h1>
@@ -629,6 +630,7 @@
 
 		</OPConfig-2>
 	</TestStep>
+-->
 
 	<TestStep Name="Signature Manipulation 1">
 		<Description><![CDATA[
