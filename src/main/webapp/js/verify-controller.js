@@ -53,7 +53,65 @@ var OPIV = (function(module) {
 		}
 	};
 
-	module.learnRP = function() {
+	module.runAllTests = function() {
+		if (learningComplete) {
+			// delete results first
+			clearAllTests();
+
+			// get containers and make iterator
+			var containers = getTestContainers();
+			var i = 0;
+			var containerIt = function() {
+				if (i < containers.length) {
+					return containers[i++];
+				} else {
+					return null;
+				}
+			};
+
+			// handler to perform iteration
+			var completeHandler = function(xhr, status) {
+				var nextContainer = containerIt();
+				if (nextContainer) {
+					OPIV.testRPStep(nextContainer.TestId, nextContainer.Container, completeHandler);
+				}
+			};
+
+			// call for the first time
+			var nextContainer = containerIt();
+			if (nextContainer) {
+				OPIV.testRPStep(nextContainer.TestId, nextContainer.Container, completeHandler);
+			}
+		} else {
+			alert("Please make sure the learning phase was successful first.");
+		}
+	};
+
+	function clearAllTests() {
+		document.getElementById("test-report").innerHTML = "";
+		loadTestReport();
+	}
+
+	function getTestContainers() {
+		var result = [];
+		
+		// loop over all step definitions and find the matching container
+		var testResults = testReport.TestStepResult;
+		for (var i = 0; i < testResults.length; i++) {
+			var nextResult = testResults[i];
+			var testDef = nextResult.StepReference;
+			var testId = testDef.Name;
+			var container = document.getElementById("step-result-" + testDef.Name);
+			result.push({ TestId: testId, Container: container });
+		}
+
+		return result;
+	}
+
+	module.learnRP = function(completeHandler) {
+		// default parameters
+		completeHandler = typeof completeHandler !== 'undefined' ? completeHandler : function() {};
+
 		learningComplete = false;
 
 		updateRPConfig();
@@ -62,11 +120,16 @@ var OPIV = (function(module) {
 			url: "api/rp/" + testId + "/learn",
 			data: JSON.stringify(testRPConfig),
 			contentType: "application/json",
-			success: processLearnResponse
+			success: processLearnResponse,
+			error: learnResponseError,
+			complete: completeHandler
 		});
 	};
 
-	module.testRPStep = function(stepId, stepContainer) {
+	module.testRPStep = function(stepId, stepContainer, completeHandler) {
+		// default parameters
+		completeHandler = typeof completeHandler !== 'undefined' ? completeHandler : function() {};
+
 		if (learningComplete) {
 			updateRPConfig();
 			// call test function
@@ -74,7 +137,9 @@ var OPIV = (function(module) {
 				url: "api/rp/" + testId + "/test/" + stepId,
 				data: JSON.stringify(testRPConfig),
 				contentType: "application/json",
-				success: function(data) { processTestResponse(stepContainer, data); }
+				success: function(data) { processTestResponse(stepContainer, data); },
+				error: function(xhr, status) { learnTestError(stepId, stepContainer, xhr, status); },
+				complete: completeHandler
 			});
 		} else {
 			alert("Please make sure the learning phase was successful first.");
@@ -384,7 +449,9 @@ var OPIV = (function(module) {
 		var testPassed = stepResult.Result === "PASS";
 
 		// update config
-		writeRPConfig(learnResult.TestRPConfig);
+		if (learnResult.TestRPConfig) {
+			writeRPConfig(learnResult.TestRPConfig);
+		}
 
 		// update status
 		var learnStatus = $("#learn-status");
@@ -401,6 +468,24 @@ var OPIV = (function(module) {
 		}
 	}
 
+
+	function createHttpErrorStepResult(xhr, status) {
+		return {
+			TestStepResult: {
+				Result: "UNDETERMINED",
+				LogEntry: [
+					{ Date: new Date().toISOString(),
+					  Text: "Request failed with status '" + status + "' and code " + xhr.status + "." }
+				]
+			}
+		};
+	}
+
+	function learnResponseError(xhr, status) {
+		var result = createHttpErrorStepResult(xhr, status);
+		processLearnResponse(result);
+	}
+
 	function processTestResponse(stepContainer, learnResult) {
 		var stepResult = learnResult.TestStepResult;
 		var testPassed = stepResult.Result === "PASS";
@@ -413,6 +498,11 @@ var OPIV = (function(module) {
 		// write log
 		var logContainer = stepContainer.getElementsByClassName("step-log")[0];
 		writeLog(logContainer, stepResult.LogEntry, testPassed);
+	}
+
+	function learnTestError(stepId, stepContainer, xhr, status) {
+		var result = createHttpErrorStepResult(xhr, status);
+		processTestResponse(stepContainer, result);
 	}
 
 	return module;

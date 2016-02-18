@@ -79,7 +79,7 @@ public class TestRunner {
 
 		result.setResult(runTestFun(instReg, result, (simulator) -> {
 			return simulator.run();
-		}, TestStepResult.FAIL));
+		}, TestStepResult.UNDETERMINED));
 
 		LearnResultType learnResult = new LearnResultType();
 		learnResult.setTestRPConfig(getTestObj().getTestRPConfig());
@@ -98,7 +98,7 @@ public class TestRunner {
 
 		result.setResult(runTestFun(instReg, result, (simulator) -> {
 			return simulator.run();
-		}, TestStepResult.FAIL));
+		}, TestStepResult.UNDETERMINED));
 
 		LearnResultType learnResult = new LearnResultType();
 		learnResult.setTestRPConfig(getTestObj().getTestRPConfig());
