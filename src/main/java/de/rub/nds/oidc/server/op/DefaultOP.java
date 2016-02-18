@@ -104,6 +104,9 @@ public class DefaultOP extends AbstractOPImplementation {
 			logger.logHttpResponse(resp, sw.toString());
 		} else {
 			// return not handled
+			String msg = "Missing webfinger parameters in request.";
+			logger.log(msg);
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND, msg);
 		}
 	}
 
