@@ -204,7 +204,7 @@ var OPIV = (function(module) {
 		var desc = document.createElement("div");
 		desc.style.display = "none";
 		desc.className = "step-description";
-		desc.innerHTML = testDef.Description;
+		desc.innerHTML = getDescription(testDef);
 
 		descContainer.appendChild(createHideImage(desc, "Description"));
 		descContainer.appendChild(desc);
@@ -218,6 +218,26 @@ var OPIV = (function(module) {
 		container.appendChild(logContainer);
 
 		return container;
+	}
+
+	function getDescription(testDef) {
+		var result = "";
+
+		if (typeof testDef.Description === "string") {
+			result = testDef.Description;
+		} else if (Array.isArray(testDef.Description)) {
+			testDef.Description.forEach(function(next) {
+				if (typeof next === "string") {
+					result += next;
+				} else {
+					console.log("Skipping entry of unknown type in description array.");
+				}
+			});
+		} else {
+			console.log("Description of test '" + testDef.Name + "' does not contain an expected value.");
+		}
+
+		return result;
 	}
 
 	function createHideImage(containerToHide, hideText) {
