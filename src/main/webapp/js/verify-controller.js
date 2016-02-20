@@ -225,8 +225,8 @@ var OPIV = (function(module) {
 
 		if (typeof testDef.Description === "string") {
 			result = testDef.Description;
-		} else if (Array.isArray(testDef.Description)) {
-			testDef.Description.forEach(function(next) {
+		} else if (testDef.Description && Array.isArray(testDef.Description.value)) {
+			testDef.Description.value.forEach(function(next) {
 				if (typeof next === "string") {
 					result += next;
 				} else {
