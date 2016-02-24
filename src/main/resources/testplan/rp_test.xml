@@ -21,13 +21,17 @@
 			which is controlled by another OP: Honest OP.
 
 			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.  The attack needs additional configuration parameters:
+			The target Client supports the implicit or the code flow. 
 
 			<h2>Execution.</h2>
-			The OPIV issues an invalid ID token containing the victim's identity in the "sub".
+			PrOfESSOS issues an invalid ID token containing the victim's identity in the "sub".
 
 			<h2>Result Evaluation.</h2>
-			The attack is successful if the code or token is accepted by the Client.
+			The attack is successful if the Client accepts and ID Token AND logs the attacker into the victim's account.
+			
+			<h2>Mitigation</h2>
+			The identity of an user is represented by the combination of "iss" 
+			and "sub". Thus, both values MUST be used to authenticate the user.
 		]]>
 		</Description>
 		<TestParameters>
@@ -60,13 +64,19 @@
 			which is controlled by another OP: Honest OP.
 
 			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.  The attack needs additional configuration parameters:
+			The target Client supports the implicit or the code flow.
 
 			<h2>Execution.</h2>
-			The OPIV issues an invalid ID token containing the victim's identity in the "sub" and the Honest OP as "iss".
+			PrOfESSOS issues an invalid ID token containing the victim's identity in the "sub" and the Honest OP as "iss".
 
 			<h2>Result Evaluation.</h2>
-			The attack is successful if the code or token is accepted by the Client.
+			The attack is successful if the Client accepts and ID Token AND logs the attacker into the victim's account.
+			
+			<h2>Mitigation</h2>
+			Step 2 in Section 3.1.3.7. 
+			OpenIDConnect-Core: " The Issuer Identifier for the OpenID Provider 
+			(which is typically obtained during Discovery) MUST exactly match 
+			the value of the iss (issuer) Claim." within the ID Token.
 		]]>
 		</Description>
 		<TestParameters>
@@ -99,13 +109,20 @@
 			the victim, which is controlled by another OP: Honest OP.
 
 			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.  The attack needs additional configuration parameters:
+			The target Client supports the implicit or the code flow.
 
 			<h2>Execution.</h2>
-			The OPIV issues valid ID token containing victim's identity as subclaims.
+			PrOfESSOS issues valid ID token containing victim's identity as subclaims (name, username and email).
 
 			<h2>Result Evaluation.</h2>
-			The attack is successful if the code or token is accepted by the Client.
+			The attack is successful if the Client accepts and ID Token AND logs the attacker into the victim's account.
+			
+			<h2>Mitigation</h2>
+			The identity of an user is represented by the combination of "iss" 
+			and "sub". Thus, subclaims can be used only to retrieve 
+			further information regarding the user, but NOT for 
+			authentication. Currently, OpenID Connect does not provide 
+			any mechanisms to verify these statements.
 		]]>
 		</Description>
 		<TestParameters>
@@ -133,16 +150,22 @@
 	<TestStep Name="Issuer Confusion">
 		<Description><![CDATA[
 			<h1>Issuer Confusion</h1>
-			In this test we use the Attacker OP to return maliciously crafted Discovery document (containing the issuer of the honest OP) and afterwards to create an ID Token containing the identity (iss+sub) of the victim, which is controlled by another OP: Honest OP.
+			In this test we use the Attacker OP to return maliciously crafted Discovery document (containing the issuer of the Honest OP) and afterwards to create an ID Token containing the identity (iss+sub) of the victim, which is controlled by another OP: Honest OP.
 
 			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow. The attack needs additional configuration parameters: subject and issuer
+			The target Client supports the implicit or the code flow.
 
 			<h2>Execution.</h2>
-			The OPIV returns invalid "issuer" parameters during Discovery.
+				Step 1: PrOfESSOS returns invalid "issuer" parameter during Discovery. The "iss" is set to the value of the Honest OP.
+				Step 2: PrOfESSOS issues an invalid ID token containing the victim's identity in the "sub" and the Honest OP as "iss". 
 
 			<h2>Result Evaluation.</h2>
-			The attack is successful if the code or token is accepted by the Client.
+			The attack is successful if the Client accepts and ID Token AND logs the attacker into the victim's account.
+			
+			<h2>Mitigation</h2>
+			Step 1 in Section 3. 
+			OpenIDConnect-Discovery: "If Issuer discovery is supported (see 
+			Section 2), this value MUST be identical to the issuer value returned by WebFinger. This also MUST be identical to the iss Claim value in ID Tokens issued from this Issuer."
 		]]>
 		</Description>
 		<TestParameters>
@@ -171,11 +194,11 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token containing valid signature signed with an untrusted key.
+			PrOfESSOS issues an ID token containing valid signature signed with an untrusted key.
 			The key is referenced by the "kid" parameter.
 
 			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
+			The attack is successful if the ID token is accepted by the Client.
 		]]>
 		</Description>
 		<TestParameters>
@@ -201,7 +224,7 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token containing valid signature signed with untrusted key.
+			PrOfESSOS issues an ID token containing valid signature signed with untrusted key.
 			The key is referenced by the "x5u" parameter.
 
 			<h2>Result Evaluation.</h2>
@@ -232,7 +255,7 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token containing valid signature signed with untrusted key.
+			PrOfESSOS issues an ID token containing valid signature signed with untrusted key.
 			The key is referenced by the "x5c" parameter.
 
 			<h2>Result Evaluation.</h2>
@@ -263,7 +286,7 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token containing valid signature signed with untrusted key.
+			PrOfESSOS issues an ID token containing valid signature signed with untrusted key.
 			The key is referenced by the "jku" parameter.
 
 			<h2>Result Evaluation.</h2>
@@ -294,7 +317,7 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token containing valid signature signed with untrusted key.
+			PrOfESSOS issues an ID token containing valid signature signed with untrusted key.
 			The key is referenced by the "jwk" parameter.
 
 			<h2>Result Evaluation.</h2>
@@ -362,6 +385,46 @@
 		</OPConfig-2>
 	</TestStep>
 -->
+	<TestStep Name="IdP Confusion">
+		<Description><![CDATA[
+			<h1>IdP Confusion</h1>
+			In this test we use the Attacker OP to enforce the Client to send valid "code" issued by the Honest OP to the Attacker OP.
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the code flow.
+			The attacker OP returns the same "client_id" during the registration as the one registered at the Honest OP.
+			In other words, the Client has same client_id on both OPs.
+
+			<h2>Execution.</h2>
+				Step 1: PrOfESSOS starts an authentication on the Client with the Honest OP. PrOfESSOS caches the received "state" and "nonce" parameters sent to the Authentication Request.
+				Step 2: PrOfESSOS starts an authentication on the Client with the Malicious OP.
+				Step 3: PrOfESSOS receives the Authentication Request and responds with a HTTP 302 Redirect to the Honest OP. The redirect URL contains the same parameters received in the Authentication Request except the "nonce" parameter, which is replaced by the value from Step 1.
+				
+				In case that the Client does not use the "nonce" parameter, no parameter exchange in step 3 is needed.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the Malicious OP receives the "code" generated by the Honest OP in the Token Request. 
+			
+			<h2>Mitigation</h2>
+			The mitigation is currently discussed by the working groups.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<SeleniumScript>
+			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">false</Parameter>
+		</SeleniumScript>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+			<Parameter Key="force_honest_authreq_nonce">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
 
 	<TestStep Name="Malicious Entpoint Attack">
 		<Description><![CDATA[
@@ -384,13 +447,14 @@
 			 }
 			</pre>
 
-			<h2>What happens if no discovery is supported?</h2>
-
 			<h2>Result Evaluation.</h2>
 			The goal of this test is to verify whether the End-User authentication can
 			be broken. The attack is successful if the Attacker OP receives any secret information, for example,
 			client_id, client_secret, code or access token, generated by the Honest OP.
-			Injection and DoS attacks are considered out of scope for the tests provided by OPIV.
+			Injection and DoS attacks are considered out of scope for the tests provided by PrOfESSOS.
+			
+			<h2>Mitigation</h2>
+			The mitigation of the attack is not officially specifyed yet, but currently discussed.
 		]]>
 		</Description>
 		<TestParameters>
@@ -421,10 +485,15 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token containing expired "exp" timestamp.
+			PrOfESSOS issues an ID token containing expired "exp" timestamp.
 
 			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
+			The attack is successful if the ID token is accepted by the Client.
+			
+			<h2>Mitigation</h2>
+			The "exp" value MUST be validated, see Step 9 in Section 
+			3.1.3.7 in OpenIDConnect-Core. A satisfying value is 
+			30 minutes.
 		]]>
 		</Description>
 		<TestParameters>
@@ -451,10 +520,15 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token containing expired "exp" timestamp.
+			PrOfESSOS issues an ID token containing expired "exp" timestamp.
 
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the token is accepted by the Client.
+			
+			<h2>Mitigation</h2>
+			The "exp" value MUST be validated, see Step 9 in Section 
+			3.1.3.7 in OpenIDConnect-Core. A satisfying value is 
+			30 minutes.
 		]]>
 		</Description>
 		<TestParameters>
@@ -481,10 +555,15 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token containing invalid "iat" timestamp.
+			PrOfESSOS issues an ID token containing invalid "iat" timestamp.
 
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the token is accepted by the Client.
+			
+			<h2>Mitigation</h2>
+			The "iat" value MUST be validated, see Step 10 in Section 
+			3.1.3.7 in OpenIDConnect-Core. ID Tokens created in 
+			the future should not be accepted.
 		]]>
 		</Description>
 		<TestParameters>
@@ -511,10 +590,15 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token containing invalid "iat" timestamp.
+			PrOfESSOS issues an ID token containing invalid "iat" timestamp.
 
 			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
+			The attack is successful if the ID token is accepted by the Client.
+			
+			<h2>Mitigation</h2>
+			The "iat" value MUST be validated, see Step 10 in Section 
+			3.1.3.7 in OpenIDConnect-Core. ID Tokens created in 
+			the future should not be accepted.
 		]]>
 		</Description>
 		<TestParameters>
@@ -540,11 +624,16 @@
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
+			
 			<h2>Execution.</h2>
-			The OPIV issues an ID token containing constant “nonce” value.
+			PrOfESSOS issues an ID token containing constant “nonce” value.
 
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the token is accepted by the Client.
+			
+			<h2>Mitigation</h2>
+			The "nonce" value MUST be validated, see Step 11 in Section 
+			3.1.3.7 in OpenIDConnect-Core. ID Tokens with invalid "nonce" values must not be accepted.
 		]]>
 		</Description>
 		<TestParameters>
@@ -571,10 +660,15 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token without a “nonce” parameter.
+			PrOfESSOS issues an ID token without a “nonce” parameter.
 
 			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
+			The attack is successful if the ID token is accepted by the Client.
+			
+			<h2>Mitigation</h2>
+			The "nonce" value MUST be validated, see Step 11 in Section 
+			3.1.3.7 in OpenIDConnect-Core. ID Tokens, which does not contain a "nonce" value must not be accepted.
+			Despite the fact that the "nonce" value is optional, we advice to use it in order to mitigate CSRF attacks.
 		]]>
 		</Description>
 		<TestParameters>
@@ -612,7 +706,11 @@
 				Step 5: continue with Step 2 (break the pause) and sends the Authentication Response (code or idtoken/access token)
 
 			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
+			The attack is successful if the ID token is accepted by the Client and the attacks is logged on the victim's account.
+			
+			<h2>Mitigation</h2>
+			The proper usage of the "state" parameter hamper the attack, but not prevent it.
+			A complete mitigation of the attack is not officially specifyed yet, but currently discussed. 
 		]]>
 		</Description>
 		<TestParameters>
@@ -621,6 +719,7 @@
 		</TestParameters>
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowser</BrowserSimulatorClass>
+			<Parameter Key="use_evil_needle">false</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -639,10 +738,14 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token containing wrong signature.
+			PrOfESSOS issues an ID token containing wrong signature.
 
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the token is accepted by the Client.
+			
+			<h2>Mitigation</h2>
+			The signature MUST be validated, see Step 6 in Section 
+			3.1.3.7 in OpenIDConnect-Core.
 		]]>
 		</Description>
 		<TestParameters>
@@ -669,10 +772,14 @@
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token containing invalid signature and "none" algorithm.
+			PrOfESSOS issues an ID token containing invalid signature and "none" algorithm.
 
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the token is accepted by the Client.
+			
+			<h2>Mitigation</h2>
+			The signature MUST be validated, see Step 6 in Section 
+			3.1.3.7 in OpenIDConnect-Core. The usage of the "nonce" algorithm is allowed in "code" flow. However, in implicit flow its usage is not allowed and the ID token MUST NOT be accepted.
 		]]>
 		</Description>
 		<TestParameters>
@@ -694,49 +801,26 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Signature Manipulation 3">
-		<Description><![CDATA[
-			<h1>Signature Manipulation</h1>
-
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
-			The OPIV issues an ID token containing no signature and "none" algorithm.
-
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
-		]]>
-		</Description>
-		<TestParameters>
-			<Parameter Key="discovery_support_needed">false</Parameter>
-			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
-		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
-			<Parameter Key="use_evil_needle">true</Parameter>
-		</SeleniumScript>
-		<OPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
-		</OPConfig-1>
-		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.SignatureManipulationOP</ImplementationClass>
-
-			<Parameter Key="force_idtoken_header_alg_none">true</Parameter>
-		</OPConfig-2>
-	</TestStep>
-
 	<TestStep Name="CSRF 1">
 		<Description><![CDATA[
-			<h1>CSRF Protection via the “state” parameter</h1>
-			The OPIV tests the Validation of the "state" parameter on the Client.
+			<h1>CSRF Protection via the "state" parameter</h1>
+			PrOfESSOS tests the Validation of the "state" parameter on the Client.
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
+			
 			<h2>Execution.</h2>
-			The OPIV returns invalid "state" parameter.
+			PrOfESSOS returns invalid "state" parameter.
 
 			<h2>Result Evaluation.</h2>
-			The attack is successful if the code or token is accepted by the Client.
+			The attack is successful if the Authentication Response is accepted despite the fact the the "state" parameter is missing or invalid and the next protocol steps are executed.
+				Code flow: A token request containing the "code" is sent to the Attacker OP
+				Implicit flow: The attacker is successfully logged on his account.
+			
+			<h2>Mitigation</h2>
+			The "state" parameter MUST be validated, see Section 3.2.2.5. in OpenIDConnect-Core.
+				1) The "state" must be bound to the End-User Session (e.g. cookies)
+				2) The "state" must be bound to the sent Authentication Request.
 		]]>
 		</Description>
 		<TestParameters>
@@ -760,16 +844,26 @@
 	<TestStep Name="CSRF 2">
 		<Description><![CDATA[
 			<h1>CSRF Protection via the “state” parameter</h1>
-			The OPIV tests the Validation of the "state" parameter on the Client.
+			PrOfESSOS tests the Validation of the "state" parameter on the Client.
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
+			
 			<h2>Execution.</h2>
-			The OPIV returns "state" parameter issued within another browser session.
-			Step 1: Starts the browser, initiates the authentication with the MaliciousOP and gets the received state parameter
-			Step 2: OP uses the received "state" parameter in a new browser session
+			PrOfESSOS returns "state" parameter issued in another browser session.
+				Step 1: The browser is startet, the authentication with the MaliciousOP is initiated and the received parameter is cached. Then, the connection is dropped.
+				Step 2: A new session in the browser is started and the authentication with the MaliciousOP is initiated.
+				After receiving the Authentication Request, the Authentication Response is generated. But, now the received "state" parameter from step 1 is sent back to the Client.
+			
 			<h2>Result Evaluation.</h2>
-			The attack is successful if the code or token is accepted by the Client.
+			The attack is successful if the Authentication Response is accepted despite the fact the the "state" parameter is missing or invalid and the next protocol steps are executed.
+				Code flow: A token request containing the "code" is sent to the Attacker OP and afterwards the attacker is successfully logged on his account.
+				Implicit flow: The attacker is successfully logged on his account.
+			
+			<h2>Mitigation</h2>
+			The "state" parameter MUST be validated, see Section 3.2.2.5. in OpenIDConnect-Core.
+				1) The "state" must be bound to the End-User Session (e.g. cookies)
+				2) The "state" must be bound to the sent Authentication Request.
 		]]>
 		</Description>
 		<TestParameters>
@@ -793,17 +887,21 @@
 	<TestStep Name="CSRF 3">
 		<Description><![CDATA[
 			<h1>CSRF Protection via the “state” parameter</h1>
-			The OPIV tests the Validation of the "state" parameter on the Client.
-			The OPIV does not return the "state" parameter.
+			PrOfESSOS tests the Validation of the "state" parameter on the Client.
+			PrOfESSOS does not return the "state" parameter.
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 
-			<h2>Execution.</h2>
-			The OPIV returns no "state" parameter.
-
 			<h2>Result Evaluation.</h2>
-			The attack is successful if the code or token is accepted by the Client.
+			The attack is successful if the Authentication Response is accepted despite the fact the the "state" parameter is missing or invalid and the next protocol steps are executed.
+				Code flow: A token request containing the "code" is sent to the Attacker OP and afterwards the attacker is successfully logged on his account.
+				Implicit flow: The attacker is successfully logged on his account.
+			
+			<h2>Mitigation</h2>
+			The "state" parameter MUST be validated, see Section 3.2.2.5. in OpenIDConnect-Core.
+				1) The "state" must be bound to the End-User Session (e.g. cookies)
+				2) The "state" must be bound to the sent Authentication Request.
 		]]>
 		</Description>
 		<TestParameters>
@@ -827,15 +925,21 @@
 	<TestStep Name="TRC 1">
 		<Description><![CDATA[
 			<h1>Token Recipient Confusion Attack</h1>
-			The OPIV tests the Validation of the “audience” parameter on the Client by issuing maliciously crafted ID tokens.
+			PrOfESSOS tests the Validation of the "audience" parameter on the Client by issuing maliciously crafted ID tokens.
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
+			
 			<h2>Execution.</h2>
-			The OPIV issues an ID token, which does not contain an "audience" parameter.
+			PrOfESSOS issues an ID token, which does not contain an "audience" parameter.
 
 			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
+			The attack is successful if the token is accepted by the Client and the attacker is logged in his account.
+			
+			<h2>Mitigation</h2>
+			The "aud" value MUST be validated, see Step 3 in Section 
+			3.1.3.7 in OpenIDConnect-Core.
+			
 		]]>
 		</Description>
 		<TestParameters>
@@ -859,15 +963,19 @@
 	<TestStep Name="TRC 2">
 		<Description><![CDATA[
 			<h1>Token Recipient Confusion Attack</h1>
-			The OPIV tests the Validation of the “audience” parameter on the Client by issuing maliciously crafted ID tokens.
+			PrOfESSOS tests the Validation of the "audience" parameter on the Client by issuing maliciously crafted ID tokens.
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			The OPIV issues an ID token, which contains invalid "aud" parameter.
+			PrOfESSOS issues an ID token, which contains invalid "aud" parameter.
 
 			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
+			The attack is successful if the token is accepted by the Client and the attacker is logged in his account.
+			
+			<h2>Mitigation</h2>
+			The "aud" value MUST be validated, see Step 3 in Section 
+			3.1.3.7 in OpenIDConnect-Core.
 		]]>
 		</Description>
 		<TestParameters>
@@ -877,6 +985,7 @@
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
 			<Parameter Key="force_success_url_fails">true</Parameter>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
@@ -892,15 +1001,21 @@
 	<TestStep Name="TRC 3">
 		<Description><![CDATA[
 			<h1>Token Recipient Confusion Attack</h1>
-			The OPIV tests the Validation of the “audience” parameter on the Client by issuing maliciously crafted ID tokens.
-
+			PrOfESSOS tests the Validation of the "audience" parameter on the Client by issuing maliciously crafted ID tokens.
+			The value of the "aud" is set to the "aud" value of the Client registered at the Honest OP. 
+			
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
+			
 			<h2>Execution.</h2>
-			The OPIV issues an ID token, which contains invalid "aud" parameter.
-
+			PrOfESSOS issues an ID token, which contains "aud" initialized with the client_id of the Client registered at the Honest OP.
+			
 			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
+			The attack is successful if the token is accepted by the Client and the attacker is logged in his account.
+			
+			<h2>Mitigation</h2>
+			The "aud" value MUST be validated, see Step 3 in Section 
+			3.1.3.7 in OpenIDConnect-Core.
 		]]>
 		</Description>
 		<TestParameters>
@@ -910,6 +1025,7 @@
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
 			<Parameter Key="force_success_url_fails">true</Parameter>
+			<Parameter Key="use_evil_needle">true</Parameter>
 		</SeleniumScript>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
