@@ -40,5 +40,11 @@ public class OPContextConstants {
 
 	public static final String BLOCK_HONEST_OP_FUTURE = PFX + "block-honest-op-future";
 	public static final String BLOCK_EVIL_OP_FUTURE = PFX + "block-evil-op-future";
+	
+	// confusion
+	public static final String BLOCK_BROWSER_WAITING_FOR_HONEST = PFX + "block-browser-waiting-for-honest";
+	public static final String BLOCK_BROWSER_AND_TEST_RESULT = PFX + "block-browser-and-test-result";
+	public static final String AUTH_REQ_HONEST_NONCE = PFX + "auth-reg-honest-nonce";
+	public static final String AUTH_REQ_HONEST_STATE = PFX + "auth-reg-honest-state";
 
 }
