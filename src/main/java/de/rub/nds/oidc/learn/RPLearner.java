@@ -76,6 +76,7 @@ public class RPLearner {
 
 	@POST
 	@Path("/create-test-object")
+	@Produces(MediaType.APPLICATION_JSON)
 	public TestObjectType createTestObject() {
 		String testId = valueGenerator.generateTestId();
 		TestRunner runner = testObjs.createRPTestObject(testId);
@@ -86,6 +87,7 @@ public class RPLearner {
 	@POST
 	@Path("/{testId}/learn")
 	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces(MediaType.APPLICATION_JSON)
 	public LearnResultType learn(@PathParam("testId") String testId, TestRPConfigType rpConfig)
 			throws NoSuchTestObject, ImplementationLoadException {
 		TestRunner runner = testObjs.getTestObject(testId);
@@ -99,6 +101,7 @@ public class RPLearner {
 	@POST
 	@Path("/{testId}/test/{stepId}")
 	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces(MediaType.APPLICATION_JSON)
 	public LearnResultType test(@PathParam("testId") String testId, @PathParam("stepId") String stepId,
 			TestRPConfigType rpConfig) throws NoSuchTestObject, ImplementationLoadException {
 		TestRunner runner = testObjs.getTestObject(testId);

@@ -182,7 +182,7 @@ var OPIV = (function(module) {
 		var stepHead = document.createElement("div");
 		container.appendChild(stepHead);
 		stepHead.className = "step-head";
-		var heading = document.createElement("h2");
+		var heading = document.createElement("h3");
 		stepHead.appendChild(heading);
 		heading.innerHTML = testDef.Name;
 		heading.appendChild(createResultImage(testResult.Result));
@@ -222,17 +222,26 @@ var OPIV = (function(module) {
 
 	function getDescription(testDef) {
 		var result = "";
-
-		if (typeof testDef.Description === "string") {
-			result = testDef.Description;
-		} else if (testDef.Description && Array.isArray(testDef.Description.value)) {
-			testDef.Description.value.forEach(function(next) {
+		
+		var concat = function(textArray) {
+			var result = "";
+			textArray.forEach(function(next) {
 				if (typeof next === "string") {
 					result += next;
 				} else {
 					console.log("Skipping entry of unknown type in description array.");
 				}
 			});
+			return result;
+		};
+
+		// there seems to be countless possibilities how the description looks like according to the JAXB implementations
+		if (typeof testDef.Description === "string") {
+			result = testDef.Description;
+		} else if (testDef.Description && Array.isArray(testDef.Description.value)) {
+			result = concat(testDef.Description.value);
+		} else if (testDef.Description && Array.isArray(testDef.Description.content)) {
+			result = concat(testDef.Description.content);
 		} else {
 			console.log("Description of test '" + testDef.Name + "' does not contain an expected value.");
 		}

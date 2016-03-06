@@ -20,7 +20,7 @@ limitations under the License.
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-		<title>OPIV Client Verifier</title>
+		<title>PrOfESSOS</title>
 
 
 
@@ -40,7 +40,7 @@ limitations under the License.
 		<nav class="navbar navbar-inverse navbar-fixed-top">
 			<div class="container">
 				<div class="navbar-header">
-					<a class="navbar-brand" href="./">OPIV</a>
+					<a class="navbar-brand" href="./">PrOfESSOS</a>
 				</div>
 				<div id="navbar" class="collapse navbar-collapse">
 					<ul class="nav navbar-nav">
@@ -54,53 +54,77 @@ limitations under the License.
 		<div class="container">
 
 			<div class="page-headline">
-				<h1>Client Verifier</h1>
+				<h1>Evolution of Single Sign-On Security: Systematically Attacking and Defending OpenID Connect</h1>
 				<p class="lead"></p>
 			</div>
 
-			<div>
-				<h3>Introduction</h3>
-				<p>This OpenID-Connect test tool can be used to check OpenID Connect Clients for known vulnerabilities.
-				It is in a very early stage of development, where only the bare essentials are implemented. The missing
-				parts especially include UI feedback from tests and the learning phase, configuration help during the
-				learning phase, and the robustness of frontend-server interactions. These deficiencies will be addressed
-				shortly.</p>
-				<p>In the meantime we provide a configuration for a demo OpenID Connect Client. The configuration can be
-				loaded by pressing the 'Load Demo Config' button below. Afterwards the usual learning and test phase can
-				be run with the buttons below the configuration form.</p>
+				<h2>Abstract</h2>
+
+				<p>The IETF OpenID Connect standard is one of the most important 
+					Single Sign-On (SSO) protocols and is used by companies like Amazon, 
+					Google, Microsoft and PayPal.</p>
+				<p>In this paper we describe a new-found <i>IdP Confusion</i> vulnerability that abuses a lack in the
+					specification and belongs to a novel class of attacks called <i>Cross-Phase Attacks</i>. We present
+					that <i>all</i> OpenID Connect libraries are vulnerable to this attack. In addition, we
+					show how to adapt attacks known from other SSO protocols to OpenID 
+					Connect. 63% of the tested OpenID Connect implementations are vulnerable
+					to these attacks.</p>
+				<p>We address the existing problems regarding the SSO security with our 
+					novel tool named PrOfESSOS (Practical Offensive Evaluation of Single 
+					Sign-On Services), a <i>fully automated</i> Evaluation-as-a-Service for 
+					SSO. PrOfESSOS introduces a generic approach to improve the security of 
+					OpenID Connect implementations by systematically detecting 
+					vulnerabilities and preventing such attacks.</p>
+				<p>We cooperate with the OAuth and OpenID Connect working group to integrate PrOfESSOS as a part of the
+					implementation certification process.</p>
+				
+				<h2>How to use the USENIX Demo Site?</h2>
+				<ol>
+					<li>Click on the <i>Load USENIX Config</i> button.</li>
+					<ul>
+						<li>This fills out the URL of the tested Client (SP), the user needle, the profile URL, and
+							completes Stage 1 of PrOfESSOS.</li>
+					</ul>
+					<li>Cick on the button <i>Learn</i></li>
+					<ul>
+						<li>This starts the configuration evaluation and completes Stage 2.</li>
+					</ul>
+					<li>Cick on the button <i>Run all Tests</i> to complete Stage 3.</li>
+					<ul>
+						<li>This starts all available tests, and thus, executes the attacks.</li>
+					</ul>
+				</ol>
+
 				<form id="rp-demo-form" action="javascript:;" onsubmit="javascript:OPIV.loadDemo();">
-					<button class="btn btn-default" type="submit" value="Load Demo Config">Load Demo Config</button>
+					<button class="btn btn-default" type="submit" value="Load USENIX Config">Load USENIX Config</button>
 				</form>
-			</div>
 
 			<hr>
 
-			<div>
-				<h3>Legend</h3>
-				<dl style="" class="dl-horizontal">
-					<dt><img alt="NOT_RUN" src="img/NOT_RUN.png" width="20"></dt>
-					<dd><b>Test not run</b></dd>
-					<dt><img alt="PASS" src="img/PASS.png" width="20"></dt>
-					<dd><b>Test passed</b></dd>
-					<dt><img alt="FAIL" src="img/FAIL.png" width="20"></dt>
-					<dd><b>Test failed</b></dd>
-					<dt><img alt="UNDETERMINED" src="img/UNDETERMINED.png" width="20"></dt>
-					<dd><b>Test outcome undetermined</b></dd>
-				</dl>
-			</div>
+			<h2>Legend</h2>
+			<dl style="" class="dl-horizontal">
+				<dt><img alt="NOT_RUN" src="img/NOT_RUN.png" width="20"></dt>
+				<dd><b>Test not run</b></dd>
+				<dt><img alt="PASS" src="img/PASS.png" width="20"></dt>
+				<dd><b>Test passed</b></dd>
+				<dt><img alt="FAIL" src="img/FAIL.png" width="20"></dt>
+				<dd><b>Test failed</b></dd>
+				<dt><img alt="UNDETERMINED" src="img/UNDETERMINED.png" width="20"></dt>
+				<dd><b>Test outcome undetermined</b></dd>
+			</dl>
 
 			<hr>
 
+			<h2>Stage 1: Setup - Client Parameters</h2>
 			<div class="row">
 				<div class="learn-controls col-sm-12">
-					<p>Test ID: <tt id="test-id-display">not-loaded</tt><br>
-					Honest OP Identity: <tt id="honest-op-id-display">not-loaded</tt><br>
-					Evil OP Identity: <tt id="evil-op-id-display">not-loaded</tt></p>
-
-					
-
 					<form id="rp-learn-form" action="javascript:;" onsubmit="javascript:OPIV.learnRP();">
 						<fieldset>
+							<legend>OP Parameters</legend>
+							<p>Test ID: <tt id="test-id-display">not-loaded</tt><br>
+							Honest OP Identity: <tt id="honest-op-id-display">not-loaded</tt><br>
+							Evil OP Identity: <tt id="evil-op-id-display">not-loaded</tt></p>
+							
 							<legend>Client Parameters</legend>
 							<div class="form-group">
 								<div class="col-sm-2">
@@ -160,16 +184,17 @@ limitations under the License.
 							</div>
 							<div class="col-sm-2"></div>
 							<div class="col-sm-10">
-								<button class="btn btn-default" type="submit" value="Learn">Learn</button>
-								<button class="btn btn-default" type="submit" value="Run all Tests" form="rp-runall-form"
-										>Run all Tests</button>
+								
 							</div>
 						</fieldset>
 					</form>
-					<form id="rp-runall-form" action="javascript:;" onsubmit="javascript:OPIV.runAllTests();"></form>
 				</div>
 			</div>
 
+			
+			<h2>Stage 2: Configuration Evaluation</h2>
+			<button class="btn btn-default" type="submit" value="Learn" form="rp-learn-form">Learn</button>
+			
 			<div id="learn-report">
 				<script>
 					function toggleLearnLog() {
@@ -189,6 +214,12 @@ limitations under the License.
 
 				</div>
 			</div>
+
+			
+			<h2>Stage 3: Tests and Attacks</h2>
+			<form id="rp-runall-form" action="javascript:;" onsubmit="javascript:OPIV.runAllTests();">
+				<button class="btn btn-default" type="submit" value="Run all Tests" form="rp-runall-form">Run all Tests</button>
+			</form>
 
 			<div id="test-report">
 				<!-- The Test Report is filled by the JS logic -->
