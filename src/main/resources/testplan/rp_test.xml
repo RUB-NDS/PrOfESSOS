@@ -424,7 +424,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Malicious Entpoint Attack">
+	<TestStep Name="Malicious Endpoint Attack">
 		<Description><![CDATA[
 			<h1>Malicious Endpoint Attacks</h1>
 			In this test we use the Attacker OP to return maliciously crafted Discovery document and afterwards to
