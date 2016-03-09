@@ -108,7 +108,7 @@ limitations under the License.
 				<dt><img alt="PASS" src="img/PASS.png" width="20"></dt>
 				<dd><b>Test passed</b></dd>
 				<dt><img alt="FAIL" src="img/FAIL.png" width="20"></dt>
-				<dd><b>Test failed</b></dd>
+				<dd><b>Test failed (Attack succeeded)</b></dd>
 				<dt><img alt="UNDETERMINED" src="img/UNDETERMINED.png" width="20"></dt>
 				<dd><b>Test outcome undetermined</b></dd>
 			</dl>
@@ -147,7 +147,7 @@ limitations under the License.
 									<label for="selenium-script">Selenium Script:</label>
 								</div>
 								<div class="col-sm-10">
-									<textarea class="form-control" name="selenium-script" form="rp-learn-form" rows="10" cols="80"></textarea>
+									<textarea class="form-control" name="selenium-script" form="rp-learn-form" rows="5" cols="80"></textarea>
 								</div>
 							</div>
 							<div class="form-group">
@@ -191,10 +191,10 @@ limitations under the License.
 				</div>
 			</div>
 
-			
+
 			<h2>Stage 2: Configuration Evaluation</h2>
 			<button class="btn btn-default" type="submit" value="Learn" form="rp-learn-form">Learn</button>
-			
+
 			<div id="learn-report">
 				<script>
 					function toggleLearnLog() {
@@ -208,7 +208,7 @@ limitations under the License.
 				</script>
 				<a onclick="toggleLearnLog();">
 					<b>Learning Log</b>
-					<img id="learn-status" alt="NOT_RUN" src="img/NOT_RUN.png" width="20">
+					<img id="learn-status" alt="NOT_RUN" src="img/NOT_RUN.png">
 				</a>
 				<div id="learn-log">
 

@@ -7,6 +7,12 @@ body {
   text-align: center;
 }
 
+#learn-status {
+	margin-left: 5px;
+	width: 20px;
+	height: 20px;
+}
+
 #learn-log img {
 	border: 2px;
 	border-style: groove;
@@ -83,7 +89,18 @@ mark.err {
 	text-decoration: underline;
 }
 
-.step-head form{
+.status-image {
+	margin-left: 10px;
+	margin-right: 5px;
+	width: 25px;
+	height: 25px;
+}
+
+.status-image-description {
+	color: #b40000;
+}
+
+.step-head form {
 	margin-bottom: 10px;
 	padding-left: 5px;
 }

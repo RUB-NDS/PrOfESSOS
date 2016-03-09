@@ -138,7 +138,7 @@ var OPIV = (function(module) {
 				data: JSON.stringify(testRPConfig),
 				contentType: "application/json",
 				success: function(data) { processTestResponse(stepContainer, data); },
-				error: function(xhr, status) { learnTestError(stepId, stepContainer, xhr, status); },
+				error: function(xhr, status) { stepTestError(stepId, stepContainer, xhr, status); },
 				complete: completeHandler
 			});
 		} else {
@@ -185,7 +185,10 @@ var OPIV = (function(module) {
 		var heading = document.createElement("h3");
 		stepHead.appendChild(heading);
 		heading.innerHTML = testDef.Name;
-		heading.appendChild(createResultImage(testResult.Result));
+		var imageContainer = document.createElement("span");
+		imageContainer.className = "status-image-container";
+		heading.appendChild(imageContainer);
+		createResultImage(imageContainer, testResult.Result);
 
 		// create test button
 		var testForm = document.createElement("form");
@@ -271,14 +274,24 @@ var OPIV = (function(module) {
 		return hideImgLink;
 	}
 
-	function createResultImage(code) {
+	function createResultImage(container, code) {
+		container.innerHTML = "";
+
+		// create image element
 		var resultImg = document.createElement("img");
 		resultImg.className = "status-image";
 		resultImg.src = "img/" + code + ".png";
 		resultImg.alt = code;
-		resultImg.width = "20";
 		resultImg.textContent = code;
-		return resultImg;
+		container.appendChild(resultImg);
+
+		// create text
+		if (code === "FAIL") {
+			var textContainer = document.createElement("span");
+			textContainer.className = "status-image-description";
+			textContainer.innerHTML = "Attack Successful";
+			container.appendChild(textContainer);
+		}
 	}
 
 	function writeLog(logContainer, testLog, hideLog) {
@@ -520,16 +533,15 @@ var OPIV = (function(module) {
 		var testPassed = stepResult.Result === "PASS";
 
 		// update status
-		var statusImg = stepContainer.getElementsByClassName("status-image")[0];
-		statusImg.alt = stepResult.Result;
-		statusImg.src = "img/" + stepResult.Result + ".png";
+		var statusImgContainer = stepContainer.getElementsByClassName("status-image-container")[0];
+		createResultImage(statusImgContainer, stepResult.Result);
 
 		// write log
 		var logContainer = stepContainer.getElementsByClassName("step-log")[0];
 		writeLog(logContainer, stepResult.LogEntry, testPassed);
 	}
 
-	function learnTestError(stepId, stepContainer, xhr, status) {
+	function stepTestError(stepId, stepContainer, xhr, status) {
 		var result = createHttpErrorStepResult(xhr, status);
 		processTestResponse(stepContainer, result);
 	}
