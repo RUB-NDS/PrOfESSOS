@@ -51,6 +51,51 @@ limitations under the License.
 			</div>
 		</nav>
 
+		<!-- Progress Modal -->
+		<div class="modal fade" id="please-wait-dialog" tabindex="-1" role="dialog" data-backdrop="static">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<!--
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+						-->
+						<h4 class="modal-title" id="myModalLabel">Process running</h4>
+					</div>
+					<div class="modal-body">
+						<p>Please wait ...</p>
+						<div class="progress">
+							<div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar"
+								 aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"
+								 style="width: 100%">
+								<span class="sr-only">Unknown Completion</span>
+							</div>
+						</div>
+					</div>
+					<!-- Cancel is not implemented right now, so disable the cancel button -->
+					<!--
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" onclick="OPIV.cancelProcess();">Cancel</button>
+					</div>
+					-->
+				</div>
+			</div>
+		</div>
+
+		<!--
+		<div class="modal fade" id="please-wait-dialog" tabindex="-1" role="dialog">
+			<div class="modal-header">
+				<h1>Processing...</h1>
+			</div>
+			<div class="modal-body">
+				<div class="progress progress-striped active">
+					<div class="bar" style="width: 100%;"></div>
+				</div>
+			</div>
+		</div>
+  -->
+
 		<div class="container">
 
 			<div class="page-headline">
@@ -228,7 +273,10 @@ limitations under the License.
 		</div>
 
 
-		<script src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
+		<script src="https://code.jquery.com/jquery-2.2.1.min.js"
+				integrity="sha384-8C-3bW_ArbXinsJduAjm9O7WNnuOcO-Bok_VScRYikawtvz4ZPrpXtGfKIewM9dK"
+				crossorigin="anonymous">
+		</script>
 
 		<!-- Latest compiled and minified JavaScript -->
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"

@@ -32,7 +32,11 @@ var OPIV = (function(module) {
 	module.createRPTestPlan = function() {
 		// request new test id
 		$.post("api/rp/create-test-object", initTestObject);
-		
+	};
+
+	module.cancelProcess = function() {
+		// TODO: cancel running XHR
+		hideWaitDialog();
 	};
 
 	function isInitialized() {
@@ -74,6 +78,8 @@ var OPIV = (function(module) {
 				var nextContainer = containerIt();
 				if (nextContainer) {
 					OPIV.testRPStep(nextContainer.TestId, nextContainer.Container, completeHandler);
+				} else {
+					hideWaitDialog();
 				}
 			};
 
@@ -109,8 +115,9 @@ var OPIV = (function(module) {
 	}
 
 	module.learnRP = function(completeHandler) {
+		showWaitDialog();
 		// default parameters
-		completeHandler = typeof completeHandler !== 'undefined' ? completeHandler : function() {};
+		completeHandler = typeof completeHandler !== 'undefined' ? completeHandler : function() { hideWaitDialog(); };
 
 		learningComplete = false;
 
@@ -127,8 +134,9 @@ var OPIV = (function(module) {
 	};
 
 	module.testRPStep = function(stepId, stepContainer, completeHandler) {
+		showWaitDialog();
 		// default parameters
-		completeHandler = typeof completeHandler !== 'undefined' ? completeHandler : function() {};
+		completeHandler = typeof completeHandler !== 'undefined' ? completeHandler : function() { hideWaitDialog(); };
 
 		if (learningComplete) {
 			updateRPConfig();
@@ -544,6 +552,14 @@ var OPIV = (function(module) {
 	function stepTestError(stepId, stepContainer, xhr, status) {
 		var result = createHttpErrorStepResult(xhr, status);
 		processTestResponse(stepContainer, result);
+	}
+
+	function showWaitDialog() {
+		$("#please-wait-dialog").modal("show");
+	}
+
+	function hideWaitDialog() {
+		$("#please-wait-dialog").modal("hide");
 	}
 
 	return module;
