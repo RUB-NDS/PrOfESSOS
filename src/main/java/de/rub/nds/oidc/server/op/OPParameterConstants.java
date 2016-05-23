@@ -58,4 +58,6 @@ public class OPParameterConstants {
 	public static final String FORCE_STATE_OTHER_SESSION = "force_state_fromotherSession";
 	public static final String FORCE_STATE_EXCL          = "force_state_excluded";
 
+	public static final String INCLUDE_SIGNING_CERT      = "include_signing_certificate";
+
 }

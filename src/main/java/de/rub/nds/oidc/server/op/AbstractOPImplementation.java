@@ -454,10 +454,12 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 
 		RSAKey key = getSigningJwk();
 
-		JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
-				.type(JOSEObjectType.JWT)
-				.jwk(key.toPublicJWK())
-				.build();
+		JWSHeader.Builder headerBuilder = new JWSHeader.Builder(JWSAlgorithm.RS256)
+				.type(JOSEObjectType.JWT);
+		if (params.getBool(INCLUDE_SIGNING_CERT)) {
+			headerBuilder = headerBuilder.jwk(key.toPublicJWK());
+		}
+		JWSHeader header = headerBuilder.build();
 
 		SignedJWT signedJwt = new SignedJWT(header, claims);
 

@@ -468,7 +468,7 @@
 		<OPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.op.MaliciousEndpointOP</ImplementationClass>
 
-			<Parameter Key="force_honest_discovery_issuer">false</Parameter>
+			<Parameter Key="force_honest_discovery_iss">false</Parameter>
 			<Parameter Key="force_honest_discovery_registrationEP">true</Parameter>
 			<Parameter Key="force_honest_discovery_authorizationEP">true</Parameter>
 			<Parameter Key="force_honest_discovery_tokenEP">false</Parameter>
