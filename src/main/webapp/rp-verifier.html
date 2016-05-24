@@ -105,27 +105,25 @@ limitations under the License.
 
 				<h2>Abstract</h2>
 
-				<p>The IETF OpenID Connect standard is one of the most important 
-					Single Sign-On (SSO) protocols and is used by companies like Amazon, 
-					Google, Microsoft and PayPal.</p>
-				<p>In this paper we describe a new-found <i>IdP Confusion</i> vulnerability that abuses a lack in the
-					specification and belongs to a novel class of attacks called <i>Cross-Phase Attacks</i>. We present
-					that <i>all</i> OpenID Connect libraries are vulnerable to this attack. In addition, we
-					show how to adapt attacks known from other SSO protocols to OpenID 
-					Connect. 63% of the tested OpenID Connect implementations are vulnerable
-					to these attacks.</p>
-				<p>We address the existing problems regarding the SSO security with our 
-					novel tool named PrOfESSOS (Practical Offensive Evaluation of Single 
-					Sign-On Services), a <i>fully automated</i> Evaluation-as-a-Service for 
-					SSO. PrOfESSOS introduces a generic approach to improve the security of 
-					OpenID Connect implementations by systematically detecting 
-					vulnerabilities and preventing such attacks.</p>
-				<p>We cooperate with the OAuth and OpenID Connect working group to integrate PrOfESSOS as a part of the
-					implementation certification process.</p>
+				<p>OpenID Connect is the OAuth 2.0-based replacement for OpenID and one of the most important Single
+					Sign-On (SSO) protocols. It is used by companies like Amazon, Google, Microsoft and PayPal.</p>
+				<p>In this paper, we describe a novel Identity Provider Confusion vulnerability executed across multiple
+					protocol phases and messages that breaks the OpenID Connect specification itself. We present that
+					all OpenID Connect libraries are vulnerable to this attack. In addition, we show how to adapt
+					attacks known from other SSO protocols to OpenID Connect. 63% of the tested OpenID Connect
+					implementations are vulnerable to these attacks. We classify them into two groups: Single-Phase
+					Attacks abuse simple protocol checks. Our new found Cross-Phase Attacks require a complex attack
+					setup and manipulate multiple messages distributed across the whole protocol workflow.</p>
+				<p>We address the existing problems in a Practical Offensive Evaluation of Single Sign-On Services
+					(PrOfESSOS). PrOfESSOS is our open source implementation for fully automated Evaluation-as-a-Service
+					for SSO. PrOfESSOS introduces a generic approach to improve the security of OpenID Connect
+					implementations by systematically detecting vulnerabilities. In collaboration with the IETF OAuth
+					and OpenID Connect working group, we integrate PrOfESSOS into the OpenID Connect certification
+					process.</p>
 				
-				<h2>How to use the USENIX Demo Site?</h2>
+				<h2>How to use the CCS Demo Site?</h2>
 				<ol>
-					<li>Click on the <i>Load USENIX Config</i> button.</li>
+					<li>Click on the <i>Load CCS Config</i> button.</li>
 					<ul>
 						<li>This fills out the URL of the tested Client (SP), the user needle, the profile URL, and
 							completes Stage 1 of PrOfESSOS.</li>
@@ -141,7 +139,7 @@ limitations under the License.
 				</ol>
 
 				<form id="rp-demo-form" action="javascript:;" onsubmit="javascript:OPIV.loadDemo();">
-					<button class="btn btn-default" type="submit" value="Load USENIX Config">Load USENIX Config</button>
+					<button class="btn btn-default" type="submit" value="Load CCS Config">Load CCS Config</button>
 				</form>
 
 			<hr>
