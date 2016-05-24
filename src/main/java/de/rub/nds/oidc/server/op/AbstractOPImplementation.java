@@ -42,6 +42,7 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.Display;
 import com.nimbusds.openid.connect.sdk.Nonce;
+import com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.claims.AccessTokenHash;
 import com.nimbusds.openid.connect.sdk.claims.CodeHash;
@@ -383,9 +384,10 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 
 		// , ResponseType.parse("id_token"), ResponseType.parse("token id_token"));
 		Scope scopes = new Scope("openid");
-		List<ResponseType> responseTypes = Arrays.asList(ResponseType.parse("code"));
-		List<ResponseMode> responseModes = Arrays.asList(ResponseMode.QUERY);
-		List<GrantType> grantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
+		List<ResponseType> responseTypes = Arrays.asList(ResponseType.parse("code"), ResponseType.parse("id_token"),
+				ResponseType.parse("token id_token"));
+		List<ResponseMode> responseModes = Arrays.asList(ResponseMode.QUERY, ResponseMode.FRAGMENT);
+		List<GrantType> grantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.IMPLICIT);
 		md.setScopes(scopes);
 		md.setResponseTypes(responseTypes);
 		md.setResponseModes(responseModes);

@@ -261,7 +261,7 @@ public class DefaultOP extends AbstractOPImplementation {
 				}
 
 				AuthenticationResponse authRes = new AuthenticationSuccessResponse(redirectUri, code, idToken,
-						at, state, null, ResponseMode.QUERY);
+						at, state, null, null);
 				HTTPResponse httpRes = authRes.toHTTPResponse();
 				ServletUtils.applyHTTPResponse(httpRes, resp);
 

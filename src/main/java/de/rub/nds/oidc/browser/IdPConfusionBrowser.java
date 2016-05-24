@@ -71,6 +71,7 @@ public class IdPConfusionBrowser extends DefaultRPTestBrowser {
 			return blockAndResult.get(60, TimeUnit.SECONDS);
 		} catch (ExecutionException | TimeoutException ex) {
 			logger.log("Waiting for Honest OP  or test result gave an error.", ex);
+			logScreenshot();
 			return TestStepResult.UNDETERMINED;
 		} catch (InterruptedException ex) {
 			throw new RuntimeException("Test interrupted.", ex);

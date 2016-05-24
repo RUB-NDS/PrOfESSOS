@@ -130,7 +130,7 @@ public class RPLearningBrowser extends BrowserSimulator {
 		});
 		logger.log("HTML element found in Browser.");
 		// wait a bit more in case we have an angular app or some other JS heavy application
-		waitMillis(1000);
+		waitMillis(5000);
 
 		// take a screenshot again to show the finished site
 		logger.log("Last URL seen in Browser: " + driver.getCurrentUrl());
