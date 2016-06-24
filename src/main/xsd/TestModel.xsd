@@ -156,6 +156,13 @@ limitations under the License.
 	<element name="TestPlan" type="tm:TestPlanType" />
 	<complexType name="TestPlanType">
 		<sequence>
+			<element name="SuiteParameters" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="Parameter" type="tm:ParameterType" minOccurs="0" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
 			<element name="LearningStep" type="tm:TestStepType" />
 			<element name="TestStep" type="tm:TestStepType" maxOccurs="unbounded" />
 		</sequence>

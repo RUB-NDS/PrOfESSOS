@@ -117,6 +117,10 @@ public class TestRunner {
 			// setup the test
 			Map<String, Object> testStepCtx = Collections.synchronizedMap(new HashMap<>());
 			// add parameters to step context
+			Optional.ofNullable(testPlan.getSuiteParameters()).ifPresent(sp -> {
+				sp.getParameter().forEach(p -> testStepCtx.put(p.getKey(), p.getValue()));
+			});
+			// overwrite suite parameters
 			Optional.ofNullable(stepDef.getTestParameters()).ifPresent(tp -> {
 				tp.getParameter().forEach(p -> testStepCtx.put(p.getKey(), p.getValue()));
 			});
