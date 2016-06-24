@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>de.rub.nds.oidc</groupId>
-	<artifactId>opiv</artifactId>
+	<artifactId>professos</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 
-	<name>OpenID-Verifier</name>
+	<name>PrOfESSOS</name>
 	<url>http://maven.apache.org</url>
 
 	<licenses>
