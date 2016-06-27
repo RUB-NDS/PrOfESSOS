@@ -33,6 +33,10 @@ import de.rub.nds.oidc.test_model.TestStepResultType;
 import de.rub.nds.oidc.test_model.TestStepType;
 import de.rub.nds.oidc.utils.ImplementationLoadException;
 import de.rub.nds.oidc.utils.ImplementationLoader;
+import de.rub.nds.oidc.utils.UriUtils;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +44,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 
 /**
  *
@@ -128,6 +133,12 @@ public class TestRunner {
 				tp.getParameter().forEach(p -> testStepCtx.put(p.getKey(), p.getValue()));
 			});
 
+			// check if the test is authorized by the RP
+			if (! testGranted(logger, testStepCtx)) {
+				logger.log("Test is not authorized by Relying Party.");
+				return errorResponse;
+			}
+
 			// RP Test specific config
 			if (getTestObj().getTestRPConfig() != null) {
 				// resolve OP URL
@@ -192,6 +203,34 @@ public class TestRunner {
 		local.setHonestUserNeedle(rpConfig.getHonestUserNeedle());
 		local.setEvilUserNeedle(rpConfig.getEvilUserNeedle());
 		local.setProfileUrl(rpConfig.getProfileUrl());
+	}
+
+	private boolean testGranted(TestStepLogger logger, Map<String, Object> testStepCtx) {
+		Object grantNotNeeded = testStepCtx.get("RP_grant_not_needed");
+		if (grantNotNeeded instanceof String && Boolean.valueOf((String) grantNotNeeded)) {
+			logger.log("Permission to perform test on remote server not evaluated.");
+			return true;
+		} else {
+			try {
+				String targetUrl = testObj.getTestRPConfig().getUrlClientTarget();
+				URI wellKnown = UriBuilder.fromUri(targetUrl)
+						.replacePath(".professos")
+						.replaceQuery(null)
+						.build();
+
+				String grantToken = (String) wellKnown.toURL().getContent(new Class[] { String.class });
+				grantToken = grantToken.trim();
+
+				URI grantTokenUri = new URI(grantToken);
+				grantTokenUri = UriUtils.normalize(grantTokenUri);
+				URI referenceUri = UriUtils.normalize(hostCfg.getControllerUri());
+
+				return referenceUri.equals(grantTokenUri);
+			} catch (IOException | URISyntaxException ex) {
+				logger.log("Failed to retrieve grant token from Relying Party.", ex);
+				return false;
+			}
+		}
 	}
 
 }

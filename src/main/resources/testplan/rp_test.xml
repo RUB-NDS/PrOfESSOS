@@ -2,6 +2,10 @@
 <TestPlan xmlns="http://nds.rub.de/oidc/test-model"
 		  Name="RP-Test-Plan">
 
+	<SuiteParameters>
+		<Parameter Key="RP_grant_needed">false</Parameter>
+	</SuiteParameters>
+
 	<LearningStep Name="LearningStep">
 		<SeleniumScript>
 			<BrowserSimulatorClass>de.rub.nds.oidc.browser.RPLearningBrowser</BrowserSimulatorClass>
