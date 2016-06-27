@@ -18,6 +18,7 @@ package de.rub.nds.oidc.learn;
 
 import de.rub.nds.oidc.browser.BrowserSimulator;
 import de.rub.nds.oidc.log.TestStepLogger;
+import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.server.ServerInstance;
 import de.rub.nds.oidc.server.TestInstanceRegistry;
 import de.rub.nds.oidc.server.op.OPInstance;
@@ -47,14 +48,16 @@ import javax.ws.rs.core.Response;
 public class TestRunner {
 
 	private final String testId;
+	private final OPIVConfig hostCfg;
 	private final TestObjectType testObj;
 	private final TestPlanType testPlan;
 	private final TemplateEngine te;
 
 	private final Map<String, Object> testSuiteCtx;
 
-	public TestRunner(TestObjectType testObj, TestPlanType testPlan, TemplateEngine te) {
+	public TestRunner(OPIVConfig hostCfg, TestObjectType testObj, TestPlanType testPlan, TemplateEngine te) {
 		this.testId = testObj.getTestId();
+		this.hostCfg = hostCfg;
 		this.testObj = testObj;
 		this.testPlan = testPlan;
 		this.te = te;

@@ -70,7 +70,7 @@ public class TestRunnerRegistry {
 		TestObjectType to = createTestObject(testId, plan);
 
 		// set both in a testobject instance and save it
-		TestRunner toi = new TestRunner(to, plan, te);
+		TestRunner toi = new TestRunner(hosts, to, plan, te);
 		testObjects.put(testId, toi);
 
 		return toi;

@@ -37,6 +37,7 @@ public class OPIVConfig {
 		Properties p = new Properties();
 		p.load(hostsFile);
 
+		CONTROLLER_URI = new URI(p.getProperty("controller"));
 		HONEST_OP_URL = new URI(p.getProperty("honest-op"));
 		EVIL_OP_URL = new URI(p.getProperty("evil-op"));
 		RP_URL = new URI(p.getProperty("rp"));
@@ -46,6 +47,7 @@ public class OPIVConfig {
 		keyStore.load(keystoreFile, keystorePass.toCharArray());
 	}
 
+	private final URI CONTROLLER_URI;
 	private final URI HONEST_OP_URL;
 	private final URI EVIL_OP_URL;
 	private final URI RP_URL;
@@ -55,6 +57,10 @@ public class OPIVConfig {
 	private final String evilSigAlias = "opiv evil token signer";
 	private final String keystorePass = "pass";
 	private final KeyStore keyStore;
+
+	public URI getControllerUri() {
+		return CONTROLLER_URI;
+	}
 
 	public URI getHonestOPUri() {
 		return HONEST_OP_URL;
