@@ -159,6 +159,10 @@ limitations under the License.
 			<hr>
 
 			<h2>Stage 1: Setup - Client Parameters</h2>
+			<p>As a safeguard to prevent illegitimate usage of the PrOfESSOS service, the RP operator must install a file
+				named <i>.professos</i> at the root directory of the webserver (see <i>Login-Site URL</i> below) containing the
+				base URL of the PrOfESSOS service (<tt id="controller-uri">&lt;PrOfESSOS-URI&gt;</tt>).
+			</p>
 			<div class="row">
 				<div class="learn-controls col-sm-12">
 					<form id="rp-learn-form" action="javascript:;" onsubmit="javascript:OPIV.learnRP();">
@@ -271,7 +275,7 @@ limitations under the License.
 		</div>
 
 
-		<script src="https://code.jquery.com/jquery-2.2.1.min.js">
+		<script src="https://code.jquery.com/jquery-2.2.4.min.js">
 		</script>
 
 		<!-- Latest compiled and minified JavaScript -->
@@ -283,6 +287,10 @@ limitations under the License.
 		<!-- own scripts -->
 		<script src="js/verify-controller.js"></script>
 		<script>
+			// init dynamic elements on this page
+			document.getElementById("controller-uri").innerHTML = location.origin;
+
+			// init the test session
 			OPIV.createRPTestPlan();
 		</script>
 	</body>
