@@ -34,7 +34,6 @@ import de.rub.nds.oidc.test_model.TestStepType;
 import de.rub.nds.oidc.utils.ImplementationLoadException;
 import de.rub.nds.oidc.utils.ImplementationLoader;
 import de.rub.nds.oidc.utils.UriUtils;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -43,6 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
@@ -218,14 +218,14 @@ public class TestRunner {
 						.replaceQuery(null)
 						.build();
 
-				String grantToken = (String) wellKnown.toURL().getContent(new Class[] { String.class });
+				String grantToken = ClientBuilder.newClient().target(wellKnown).request().get(String.class);
 				grantToken = grantToken.trim();
 
 				URI grantTokenUri = UriUtils.normalize(new URI(grantToken));
 				URI referenceUri  = UriUtils.normalize(hostCfg.getControllerUri());
 
 				return referenceUri.equals(grantTokenUri);
-			} catch (IOException | URISyntaxException ex) {
+			} catch (WebApplicationException | URISyntaxException ex) {
 				logger.log("Failed to retrieve grant token from Relying Party.", ex);
 				return false;
 			}
