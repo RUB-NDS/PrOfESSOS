@@ -221,9 +221,8 @@ public class TestRunner {
 				String grantToken = (String) wellKnown.toURL().getContent(new Class[] { String.class });
 				grantToken = grantToken.trim();
 
-				URI grantTokenUri = new URI(grantToken);
-				grantTokenUri = UriUtils.normalize(grantTokenUri);
-				URI referenceUri = UriUtils.normalize(hostCfg.getControllerUri());
+				URI grantTokenUri = UriUtils.normalize(new URI(grantToken));
+				URI referenceUri  = UriUtils.normalize(hostCfg.getControllerUri());
 
 				return referenceUri.equals(grantTokenUri);
 			} catch (IOException | URISyntaxException ex) {
