@@ -109,5 +109,5 @@ http://ssoattacks.org/OIDC_MaliciousDiscoveryService/
 http://web-in-security.blogspot.de/2016/
 
 # Licence
-
+Apache 2.0 license
 
