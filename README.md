@@ -80,8 +80,8 @@ As a safeguard to prevent illegitimate usage and misuse of the PrOfESSOS service
   <td align="center">2</td>
   <td>Malicious Endpoint Attack</td>
   <td align="center">1</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
+  <td>Token Substitution</td>
+  <td>2</td>
 </tr>
 <tr>
   <td>Cross-site-request-Forgery</td>
