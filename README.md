@@ -50,21 +50,62 @@ what is going to be evaluated. The STR then executes the selected attacks by usi
 As a safeguard to prevent illegitimate usage and misuse of the PrOfESSOS service, the SP operator (a pentester oder developer) must install a file named <b>.professos</b> at the root directory of the webserver containing the base URL of the PrOfESSOS service: <b>https://openid.sso-security.de</b>. 
 
 # Supported attacks
-#####Single phase ()
-###### ID Spoofing: 3 patterns
-###### Replay Attack: 6 patterns
-###### Signature Bypass: 2 patterns
-###### Cross-site-request-Forgery: 3 patterns
-###### Token Recipient confusion: 3 patterns
+<table border="1">
+<tr>
+  <td colspan="2">Single Phase</td>
+  <td colspan="2">Cross Phase</td>
+  <td colspan="2">Planned</td>
+</tr>
+<tr>
+  <td>ID Spoofing</td>
+  <td>3</td>
+  <td>Issuer Confusion</td>
+  <td>1</td>
+  <td>Key Confusion</td>
+  <td>6</td>
+</tr>
+<tr>
+  <td>Replay Attack</td>
+  <td>6</td>
+  <td>IdP Confusion</td>
+  <td>1</td>
+  <td>Session Overwriting</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>Signature Bypass</td>
+  <td>2</td>
+  <td>Malicious Endpoint Attack</td>
+  <td>1</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td>Cross-site-request-Forgery</td>
+  <td>3</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td>Token Recipient Confusion</td>
+  <td>3</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+</tr>
+</table>
 
 ##### Cross phase
-###### Issuer Confusion
+###### 
 ###### IdP Confusion
-###### Malicious Endpoint Attack
+###### 
 
 ##### Planed
-###### Key Confusion: 6 patterns
-###### Session Overwriting
+###### : 6 patterns
+###### 
 
 # Demos
 https://openid.sso-security.de
