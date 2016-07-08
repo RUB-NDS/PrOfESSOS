@@ -50,39 +50,42 @@ what is going to be evaluated. The STR then executes the selected attacks by usi
 As a safeguard to prevent illegitimate usage and misuse of the PrOfESSOS service, the SP operator (a pentester oder developer) must install a file named <b>.professos</b> at the root directory of the webserver containing the base URL of the PrOfESSOS service: <b>https://openid.sso-security.de</b>. 
 
 # Supported attacks
-<table border="1">
+<table border="1" width="100%">
 <tr>
-  <td colspan="2">Single Phase</td>
-  <td colspan="2">Cross Phase</td>
-  <td colspan="2">Planned</td>
+  <td><b>Single Phase</b></td>
+  <td align="center"><b>Attack Pattern</b></td>
+  <td><b>Cross Phase</b></td>
+  <td align="center"><b>Attack Pattern</b></td>
+  <td><b>Planned</b></td>
+  <td align="center"><b>Attack Pattern</b></td>
 </tr>
 <tr>
   <td>ID Spoofing</td>
-  <td>3</td>
+  <td align="center">3</td>
   <td>Issuer Confusion</td>
-  <td>1</td>
+  <td align="center">1</td>
   <td>Key Confusion</td>
-  <td>6</td>
+  <td align="center">6</td>
 </tr>
 <tr>
   <td>Replay Attack</td>
-  <td>6</td>
+  <td align="center">6</td>
   <td>IdP Confusion</td>
-  <td>1</td>
+  <td align="center">1</td>
   <td>Session Overwriting</td>
-  <td>1</td>
+  <td align="center">1</td>
 </tr>
 <tr>
   <td>Signature Bypass</td>
-  <td>2</td>
+  <td align="center">2</td>
   <td>Malicious Endpoint Attack</td>
-  <td>1</td>
+  <td align="center">1</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
 </tr>
 <tr>
   <td>Cross-site-request-Forgery</td>
-  <td>3</td>
+  <td align="center">3</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
@@ -90,22 +93,13 @@ As a safeguard to prevent illegitimate usage and misuse of the PrOfESSOS service
 </tr>
 <tr>
   <td>Token Recipient Confusion</td>
-  <td>3</td>
+  <td align="center">3</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
 </tr>
 </table>
-
-##### Cross phase
-###### 
-###### IdP Confusion
-###### 
-
-##### Planed
-###### : 6 patterns
-###### 
 
 # Demos
 https://openid.sso-security.de
