@@ -53,11 +53,11 @@ As a safeguard to prevent illegitimate usage and misuse of the PrOfESSOS service
 <table border="1" width="100%">
 <tr>
   <td><b>Single Phase</b></td>
-  <td align="center"><b>Attack Pattern</b></td>
+  <td align="center"><b># Attack Patterns</b></td>
   <td><b>Cross Phase</b></td>
-  <td align="center"><b>Attack Pattern</b></td>
+  <td align="center"><b># Attack Patterns</b></td>
   <td><b>Planned</b></td>
-  <td align="center"><b>Attack Pattern</b></td>
+  <td align="center"><b># Attack Patterns</b></td>
 </tr>
 <tr>
   <td>ID Spoofing</td>
@@ -101,7 +101,7 @@ As a safeguard to prevent illegitimate usage and misuse of the PrOfESSOS service
 </tr>
 </table>
 
-# Demos
+# Demos & Links
 https://openid.sso-security.de
 
 http://ssoattacks.org/OIDC_MaliciousDiscoveryService/
