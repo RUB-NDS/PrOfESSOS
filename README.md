@@ -1,6 +1,12 @@
-<img src="http://www.syssec.rub.de/media/attachments/cache/attachments/images/2012/11/NDS_Logo_scaled_scaled.jpeg" width="10%" height="10%" />
-<img src="https://www.hackmanit.de/img/Logo_Hackmanit-not_underlined.png" width="20%" height="20%"/>
-<img src="https://www.ecsec.de/fileadmin/Ecsec-files/templates/img/ecsec-logo_100px.png" width="10%" height="10%"/>
+<table width="100%" border="0">
+  <tr>    
+  <td align="center"><img src="http://www.syssec.rub.de/media/attachments/cache/attachments/images/2012/11/NDS_Logo_scaled_scaled.jpeg" width="60%" height="60%" alt=""/></td>
+  <td align="center"><img src="https://www.hackmanit.de/img/Hackmanit_Logo.png" alt="" align="center" width="40%" height="40%"/></td>
+  <td align="center"><img src="https://www.ecsec.de/fileadmin/Ecsec-files/templates/img/ecsec-logo_100px.png" width="50%" height="50%"/></td>
+  </tr>
+</table>
+
+
 
 # PrOfESSOS
 PrOfESSOS is our open source implementation for fully automated Evaluation-as-a-Service for SSO.
