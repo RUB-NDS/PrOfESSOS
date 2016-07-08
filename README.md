@@ -30,7 +30,7 @@ processor of PrOfESSOS so that multiple, parallel, running tests do not interfer
 <h4>Honest IdP.</h4> Using only one IdP for testing implementations is quite limited. During some attacks, the attacker IdP confuses the SP by making it to believe that it communicates with the honest IdP, see IDS or Issuer Confusion attacks, which require interaction between the SP and the honest IdP. Unfortunately, the attacker IdP cannot observe this communication. Thus, it is not possible to analyze the exact behavior of the SP during the attacks and evaluate the results. To solve this limitation, PrOfESSOS introduces a second IdP (honest IdP acting honestly and not performing any attacks. Instead, it is only used to simulate the victim’s IdP and to observe the communication between the SP and any honest IdP. Similar to the attacker IdP, the honest IdP
 pushes reports to the STR, which evaluates the results.
 
-# Usage
+<hr/>
 PrOfESSOS evaluates the target SP in three stages:
 
 <h4>Stage 1: </h4> Setup. PrOfESSOS is configured with the necessary parameters so that it can later on login at the target SP automatically. First, PrOfESSOS calls URL.SP.target, fetches the HTML document, and tries to detect the login form. Then, it enters the URL of the attacker IdP to start the authentication. Finally, a screenshot is presented to the penetration tester so that he can verify if the correct login form is going to be used or further parameters have to be configured.
@@ -46,8 +46,17 @@ all redirects and thus is able to determine failed logins during attacking.
 target SP. He can choose from all attacks described in Section 5 and 6. All attacks have detailed descriptions regarding
 what is going to be evaluated. The STR then executes the selected attacks by using the previously configured SP.
 
+# Usage
+As a safeguard to prevent illegitimate usage and misuse of the PrOfESSOS service, the SP operator (a pentester oder developer) must install a file named <b>.professos</b> at the root directory of the webserver containing the base URL of the PrOfESSOS service: <b>https://openid.sso-security.de</b>. 
+
+# Supported attacks
+<b>Single phase</b>
+<b>Cross phase</b>
+
 # Demos
 https://openid.sso-security.de
+http://ssoattacks.org/OIDC_MaliciousDiscoveryService/
+http://web-in-security.blogspot.de/2016/
 
 # Licence
 
