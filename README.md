@@ -50,12 +50,27 @@ what is going to be evaluated. The STR then executes the selected attacks by usi
 As a safeguard to prevent illegitimate usage and misuse of the PrOfESSOS service, the SP operator (a pentester oder developer) must install a file named <b>.professos</b> at the root directory of the webserver containing the base URL of the PrOfESSOS service: <b>https://openid.sso-security.de</b>. 
 
 # Supported attacks
-<b>Single phase</b>
-<b>Cross phase</b>
+#####Single phase ()
+###### ID Spoofing: 3 patterns
+###### Replay Attack: 6 patterns
+###### Signature Bypass: 2 patterns
+###### Cross-site-request-Forgery: 3 patterns
+###### Token Recipient confusion: 3 patterns
+
+##### Cross phase
+###### Issuer Confusion
+###### IdP Confusion
+###### Malicious Endpoint Attack
+
+##### Planed
+###### Key Confusion: 6 patterns
+###### Session Overwriting
 
 # Demos
 https://openid.sso-security.de
+
 http://ssoattacks.org/OIDC_MaliciousDiscoveryService/
+
 http://web-in-security.blogspot.de/2016/
 
 # Licence
