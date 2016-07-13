@@ -21,6 +21,7 @@ import de.rub.nds.oidc.test_model.LearnResultType;
 import de.rub.nds.oidc.test_model.ObjectFactory;
 import de.rub.nds.oidc.test_model.TestObjectType;
 import de.rub.nds.oidc.test_model.TestRPConfigType;
+import de.rub.nds.oidc.test_model.TestResult;
 import de.rub.nds.oidc.utils.ImplementationLoadException;
 import de.rub.nds.oidc.utils.ValueGenerator;
 import javax.inject.Inject;
@@ -102,14 +103,17 @@ public class RPLearner {
 	@Path("/{testId}/test/{stepId}")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces(MediaType.APPLICATION_JSON)
-	public LearnResultType test(@PathParam("testId") String testId, @PathParam("stepId") String stepId,
-			TestRPConfigType rpConfig) throws NoSuchTestObject, ImplementationLoadException {
+	public TestResult test(@PathParam("testId") String testId, @PathParam("stepId") String stepId)
+			throws NoSuchTestObject, ImplementationLoadException {
 		TestRunner runner = testObjs.getTestObject(testId);
-		runner.updateConfig(rpConfig);
 
 		LearnResultType result = runner.runTest(stepId, testInsts);
 
-		return result;
+		TestResult wrapper = new TestResult();
+		wrapper.setResult(result.getTestStepResult().getResult());
+		wrapper.setStepReference(result.getTestStepResult().getStepReference());
+		wrapper.getLogEntry().addAll(result.getTestStepResult().getLogEntry());
+		return wrapper;
 	}
 
 	@GET

@@ -90,6 +90,16 @@ limitations under the License.
 		</sequence>
 	</complexType>
 
+	<element name="TestResult">
+		<!-- model as Element to prevent problems with glassfish and JAXRS -->
+		<complexType>
+			<complexContent>
+				<extension base="tm:TestStepResultType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
 	<complexType name="TestStepResultType">
 		<sequence>
 			<element name="StepReference" type="tm:TestStepType" />

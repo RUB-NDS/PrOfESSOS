@@ -139,11 +139,9 @@ var OPIV = (function(module) {
 		completeHandler = typeof completeHandler !== 'undefined' ? completeHandler : function() { hideWaitDialog(); };
 
 		if (learningComplete) {
-			updateRPConfig();
 			// call test function
 			$.post({
 				url: "api/rp/" + testId + "/test/" + stepId,
-				data: JSON.stringify(testRPConfig),
 				contentType: "application/json",
 				success: function(data) { processTestResponse(stepContainer, data); },
 				error: function(xhr, status) { stepTestError(stepId, stepContainer, xhr, status); },
@@ -536,8 +534,7 @@ var OPIV = (function(module) {
 		processLearnResponse(result);
 	}
 
-	function processTestResponse(stepContainer, learnResult) {
-		var stepResult = learnResult.TestStepResult;
+	function processTestResponse(stepContainer, stepResult) {
 		var testPassed = stepResult.Result === "PASS";
 
 		// update status
@@ -550,7 +547,7 @@ var OPIV = (function(module) {
 	}
 
 	function stepTestError(stepId, stepContainer, xhr, status) {
-		var result = createHttpErrorStepResult(xhr, status);
+		var result = createHttpErrorStepResult(xhr, status).TestStepResult;
 		processTestResponse(stepContainer, result);
 	}
 
