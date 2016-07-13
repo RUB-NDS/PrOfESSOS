@@ -16,6 +16,7 @@
 
 package de.rub.nds.oidc;
 
+import de.rub.nds.oidc.test_model.ObjectFactory;
 import de.rub.nds.oidc.test_model.TestPlanType;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -39,7 +40,7 @@ public class TestPlanList {
 	private final Map<String, String> plans;
 
 	public TestPlanList() throws JAXBException {
-		ctx = JAXBContext.newInstance(TestPlanType.class);
+		ctx = JAXBContext.newInstance(ObjectFactory.class);
 		this.plans = new HashMap<>();
 
 		loadPlan("/testplan/op_test.xml");
