@@ -116,6 +116,10 @@ public class TestStepLogger {
 		reqLine += " " + req.getProtocol();
 		entry.setRequestLine(reqLine);
 
+		// add special headers to indicate the protocol scheme and port
+		entry.getHeader().add(createHeader("X-Protocol-Scheme", req.getScheme()));
+		entry.getHeader().add(createHeader("X-Protocol-Port", Integer.toString(req.getServerPort())));
+
 		entry.getHeader().addAll(readHeaders(Collections.list(req.getHeaderNames()), key -> {
 			return Collections.list(req.getHeaders(key));
 		}));
@@ -153,13 +157,15 @@ public class TestStepLogger {
 		return names.stream().flatMap(key -> {
 			// process list of entries matching this key
 			return headers.apply(key).stream()
-					.map(value -> {
-						HeaderType h = new HeaderType();
-						h.setKey(key);
-						h.setValue(value);
-						return h;
-					});
+					.map(value -> createHeader(key, value));
 		}).collect(Collectors.toList());
+	}
+
+	private HeaderType createHeader(String key, String value) {
+		HeaderType h = new HeaderType();
+		h.setKey(key);
+		h.setValue(value);
+		return h;
 	}
 
 	private String formatBody(String contentType, String body) {
