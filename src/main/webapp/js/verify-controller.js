@@ -348,10 +348,10 @@ var OPIV = (function(module) {
 	function createScreenshotLogEntry(screenshot) {
 		var container = document.createElement("div");
 		container.className = "log-entry";
-		
+
 		var img = document.createElement("img");
 		img.src = "data:" + screenshot.MimeType + ";base64," + screenshot.Data;
-		
+
 		container.appendChild(img);
 		return container;
 	}
@@ -371,9 +371,10 @@ var OPIV = (function(module) {
 		
 		var method = req.RequestLine.substr(0,req.RequestLine.indexOf(" "));
 		var url = req.RequestLine.substr(req.RequestLine.indexOf(" "));
+		var host = findHeader("host", req.Header);
 		var methodDoc = document.createElement("mark");
 		methodDoc.innerHTML = method;
-		var urlDoc = document.createTextNode(url);
+		var urlDoc = document.createTextNode("[" + host + "] " + url);
 		
 		//status.appendChild(document.createTextNode(req.RequestLine));
 		status.appendChild(methodDoc);
@@ -417,6 +418,19 @@ var OPIV = (function(module) {
 
 		container.appendChild(result);
 		return container;
+	}
+
+	function findHeader(key, headers) {
+		if (headers) {
+			for (var i = 0; i < headers.length; i++) {
+				var entry = headers[i];
+				if (entry.Key === key) {
+					return entry.value;
+				}
+			}
+		}
+
+		return null;
 	}
 
 	function createHttpHeaders(headers) {
