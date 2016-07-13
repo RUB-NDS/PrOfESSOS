@@ -171,12 +171,7 @@ limitations under the License.
 
 	<complexType name="TestStepType">
 		<sequence>
-			<element name="Description" minOccurs="0">
-				<complexType mixed="true">
-					<sequence>
-						<any minOccurs="0" maxOccurs="unbounded" processContents="skip" />
-					</sequence>
-				</complexType>
+			<element name="Description" minOccurs="0" type="string">
 			</element>
 			<element name="TestParameters" minOccurs="0">
 				<complexType>
@@ -185,7 +180,7 @@ limitations under the License.
 					</sequence>
 				</complexType>
 			</element>
-			<element name="SeleniumScript" type="tm:SeleniumScriptType" />
+			<element name="BrowserSimulator" type="tm:BrowserSimulatorType" />
 			<choice>
 				<sequence>
 					<element name="OPConfig-1" type="tm:OPConfigType" />
@@ -197,11 +192,10 @@ limitations under the License.
 		<attribute name="Name" type="normalizedString" use="required" />
 	</complexType>
 
-	<complexType name="SeleniumScriptType">
-		<sequence>
-			<element name="BrowserSimulatorClass" type="normalizedString" />
-			<element name="Parameter" type="tm:ParameterType" minOccurs="0" maxOccurs="unbounded" />
-		</sequence>
+	<complexType name="BrowserSimulatorType">
+		<complexContent>
+			<extension base="tm:AbstractConfigType" />
+		</complexContent>
 	</complexType>
 
 	<complexType name="OPConfigType">

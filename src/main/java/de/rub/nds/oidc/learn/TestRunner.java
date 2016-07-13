@@ -142,7 +142,7 @@ public class TestRunner {
 			// RP Test specific config
 			if (getTestObj().getTestRPConfig() != null) {
 				// resolve OP URL
-				String startOpType = stepDef.getSeleniumScript().getParameter().stream()
+				String startOpType = stepDef.getBrowserSimulator().getParameter().stream()
 						.filter(e -> e.getKey().equals(OPParameterConstants.BROWSER_INPUT_OP_URL))
 						.map(e -> e.getValue())
 						.findFirst().orElse("EVIL");
@@ -168,13 +168,13 @@ public class TestRunner {
 			OPInstance op2Inst = new OPInstance(stepDef.getOPConfig2(), logger, testSuiteCtx, testStepCtx, OPType.EVIL);
 			instReg.addOP2(testId, new ServerInstance<>(op2Inst, logger));
 
-			String browserClass = stepDef.getSeleniumScript().getBrowserSimulatorClass();
+			String browserClass = stepDef.getBrowserSimulator().getImplementationClass();
 			simulator = ImplementationLoader.loadClassInstance(browserClass, BrowserSimulator.class);
 			simulator.setRpConfig(getTestObj().getTestRPConfig());
 			simulator.setTemplateEngine(te);
 			simulator.setLogger(logger);
 			simulator.setContext(testSuiteCtx, testStepCtx);
-			simulator.setParameters(stepDef.getSeleniumScript().getParameter());
+			simulator.setParameters(stepDef.getBrowserSimulator().getParameter());
 
 			// run actual test
 			return f.apply(simulator);
