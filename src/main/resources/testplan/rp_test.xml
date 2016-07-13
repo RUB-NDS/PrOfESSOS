@@ -7,9 +7,9 @@
 	</SuiteParameters>
 
 	<LearningStep Name="LearningStep">
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.RPLearningBrowser</BrowserSimulatorClass>
-		</SeleniumScript>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.RPLearningBrowser</ImplementationClass>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -42,10 +42,10 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 			<Parameter Key="use_evil_needle">false</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -87,10 +87,10 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 			<Parameter Key="use_evil_needle">false</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -133,10 +133,10 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 			<Parameter Key="use_evil_needle">false</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -176,10 +176,10 @@
 			<Parameter Key="discovery_support_needed">true</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 			<Parameter Key="use_evil_needle">false</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -209,9 +209,9 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
-		</SeleniumScript>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -240,9 +240,9 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
-		</SeleniumScript>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -272,9 +272,9 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
-		</SeleniumScript>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -304,9 +304,9 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
-		</SeleniumScript>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -336,9 +336,9 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
-		</SeleniumScript>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -376,10 +376,10 @@
 			<Parameter Key="discovery_support_needed">true</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">true</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowser</ImplementationClass>
 			<Parameter Key="force_success_url_fails">true</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -422,9 +422,9 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.IdPConfusionBrowser</BrowserSimulatorClass>
-		</SeleniumScript>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.IdPConfusionBrowser</ImplementationClass>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.IdPConfusionOP</ImplementationClass>
 		</OPConfig-1>
@@ -468,9 +468,9 @@
 			<Parameter Key="discovery_support_needed">true</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">true</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.InformationleakRPBrowser</BrowserSimulatorClass>
-		</SeleniumScript>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.InformationleakRPBrowser</ImplementationClass>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -507,10 +507,10 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 			<Parameter Key="use_evil_needle">true</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -542,10 +542,10 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 			<Parameter Key="use_evil_needle">true</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -577,10 +577,10 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 			<Parameter Key="use_evil_needle">true</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -612,10 +612,10 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 			<Parameter Key="use_evil_needle">true</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -647,10 +647,10 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 			<Parameter Key="use_evil_needle">true</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -682,10 +682,10 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 			<Parameter Key="use_evil_needle">true</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -724,10 +724,10 @@
 			<Parameter Key="discovery_support_needed">true</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowser</ImplementationClass>
 			<Parameter Key="use_evil_needle">false</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -759,10 +759,10 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 			<Parameter Key="use_evil_needle">true</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -793,10 +793,10 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 			<Parameter Key="use_evil_needle">true</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -834,10 +834,10 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 			<Parameter Key="use_evil_needle">true</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -877,10 +877,10 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.InvalidStateRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.InvalidStateRPTestBrowser</ImplementationClass>
 			<Parameter Key="force_success_url_fails">true</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -915,10 +915,10 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 			<Parameter Key="use_evil_needle">true</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -953,10 +953,10 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 			<Parameter Key="use_evil_needle">true</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -989,11 +989,11 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 			<Parameter Key="force_success_url_fails">true</Parameter>
 			<Parameter Key="use_evil_needle">true</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
@@ -1029,11 +1029,11 @@
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
-		<SeleniumScript>
-			<BrowserSimulatorClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</BrowserSimulatorClass>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 			<Parameter Key="force_success_url_fails">true</Parameter>
 			<Parameter Key="use_evil_needle">true</Parameter>
-		</SeleniumScript>
+		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
