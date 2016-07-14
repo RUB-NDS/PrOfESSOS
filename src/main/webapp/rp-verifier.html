@@ -99,28 +99,18 @@ limitations under the License.
 		<div class="container">
 
 			<div class="page-headline">
-				<h1>Evolution of Single Sign-On Security: Systematically Attacking and Defending OpenID Connect</h1>
+				<h1>PrOfESSOS Client Verifier</h1>
 				<p class="lead"></p>
 			</div>
 
-				<h2>Abstract</h2>
+				<h2>Prerequisite to use PrOfESSOS</h2>
+				<p>As a safeguard to prevent illegitimate usage of the PrOfESSOS service, the RP operator must install a file
+					named <i>.professos</i> at the root directory of the webserver (see <i>Login-Site URL</i> below) containing the
+					base URL of the PrOfESSOS service (<tt id="controller-uri">&lt;PrOfESSOS-URI&gt;</tt>).
+					See <a href="http://www.honestsp.de:8080/.professos" target="_blank">http://www.honestsp.de:8080/.professos</a>
+					for an example of such a file.
+				</p>
 
-				<p>OpenID Connect is the OAuth 2.0-based replacement for OpenID and one of the most important Single
-					Sign-On (SSO) protocols. It is used by companies like Amazon, Google, Microsoft and PayPal.</p>
-				<p>In this paper, we describe a novel Identity Provider Confusion vulnerability executed across multiple
-					protocol phases and messages that breaks the OpenID Connect specification itself. We present that
-					all OpenID Connect libraries are vulnerable to this attack. In addition, we show how to adapt
-					attacks known from other SSO protocols to OpenID Connect. 63% of the tested OpenID Connect
-					implementations are vulnerable to these attacks. We classify them into two groups: Single-Phase
-					Attacks abuse simple protocol checks. Our new found Cross-Phase Attacks require a complex attack
-					setup and manipulate multiple messages distributed across the whole protocol workflow.</p>
-				<p>We address the existing problems in a Practical Offensive Evaluation of Single Sign-On Services
-					(PrOfESSOS). PrOfESSOS is our open source implementation for fully automated Evaluation-as-a-Service
-					for SSO. PrOfESSOS introduces a generic approach to improve the security of OpenID Connect
-					implementations by systematically detecting vulnerabilities. In collaboration with the IETF OAuth
-					and OpenID Connect working group, we integrate PrOfESSOS into the OpenID Connect certification
-					process.</p>
-				
 				<h2>How to use the Demo Site?</h2>
 				<ol>
 					<li>Click on the <i>Load Demo Config</i> button.</li>
@@ -159,10 +149,6 @@ limitations under the License.
 			<hr>
 
 			<h2>Stage 1: Setup - Client Parameters</h2>
-			<p>As a safeguard to prevent illegitimate usage of the PrOfESSOS service, the RP operator must install a file
-				named <i>.professos</i> at the root directory of the webserver (see <i>Login-Site URL</i> below) containing the
-				base URL of the PrOfESSOS service (<tt id="controller-uri">&lt;PrOfESSOS-URI&gt;</tt>).
-			</p>
 			<div class="row">
 				<div class="learn-controls col-sm-12">
 					<form id="rp-learn-form" action="javascript:;" onsubmit="javascript:OPIV.learnRP();">
