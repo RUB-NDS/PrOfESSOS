@@ -93,6 +93,7 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 			needle = rpConfig.getHonestUserNeedle();
 		}
 		if (needle != null && ! needle.isEmpty()) {
+			needle = te.eval(createRPContext(), needle);
 			needle = needle.replace("\"", "\\\""); // escape quotation marks
 			String xpath = String.format("//*[contains(., \"%s\")]", needle);
 			// search string
