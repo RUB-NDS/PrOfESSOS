@@ -46,7 +46,7 @@
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>oauth2-oidc-sdk</artifactId>
-			<version>5.11</version>
+			<version>5.20</version>
 			<exclusions>
 				<!-- this is part of the application server already -->
 				<exclusion>
@@ -108,13 +108,13 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.21</version>
+			<version>1.7.22</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
-			<version>6.9.10</version>
+			<version>6.10</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
