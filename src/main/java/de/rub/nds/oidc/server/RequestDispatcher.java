@@ -20,6 +20,8 @@ import de.rub.nds.oidc.server.op.OPImplementation;
 import de.rub.nds.oidc.server.op.OPInstance;
 import de.rub.nds.oidc.server.rp.RPInstance;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -27,6 +29,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.UriBuilder;
 
 /**
  *
@@ -55,6 +58,12 @@ public class RequestDispatcher extends HttpServlet {
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String serverName = req.getScheme() + "://" + req.getHeader("Host");
 		RequestPath path = new RequestPath(req);
+
+		if (path.getFullResource().startsWith(OPImplementation.WEBFINGER_PATH)) {
+			handleWebfinger(req, resp);
+			return;
+		}
+
 		String testId = path.getTestId(); // may not be the
 
 		try {
@@ -141,6 +150,28 @@ public class RequestDispatcher extends HttpServlet {
 	private void serverError(String resource, HttpServletResponse res) throws IOException {
 		String msg = "Resource '" + resource + "' produced an error.";
 		res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, msg);
+	}
+
+	private void handleWebfinger(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		String rel = req.getParameter("rel");
+		if ("http://openid.net/specs/connect/1.0/issuer".equals(rel)) {
+			String res = req.getParameter("resource");
+			try {
+				URI resUri = new URI(res);
+				URI redirect = UriBuilder.fromUri(resUri)
+						.path(".well-known").path("webfinger")
+						.replaceQuery(null)
+						.queryParam("rel", rel)
+						.queryParam("resource", res)
+						.build();
+				resp.sendRedirect(redirect.toString());
+			} catch (NullPointerException | URISyntaxException ex) {
+				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid r3esource parameter specified.");
+			}
+		} else {
+			String msg = String.format("rel=%s is not handled by this server.", rel);
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND, msg);
+		}
 	}
 
 }
