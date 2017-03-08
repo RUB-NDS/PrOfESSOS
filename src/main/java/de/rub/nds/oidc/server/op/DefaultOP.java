@@ -264,7 +264,7 @@ public class DefaultOP extends AbstractOPImplementation {
 				}
 
 				HTTPResponse httpRes = null;
-				if (responseMode.equals(ResponseMode.FORM_POST)) {
+				if (responseMode != null && responseMode.equals(ResponseMode.FORM_POST)) {
 					AuthenticationSuccessResponse authRes = new AuthenticationSuccessResponse(redirectUri, code, idToken,
 							at, state, null, ResponseMode.FORM_POST);
 
