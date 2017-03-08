@@ -218,6 +218,10 @@ public class DefaultOP extends AbstractOPImplementation {
 		return authReq.getState();
 	}
 
+	protected Nonce getNonce(AuthenticationRequest authReq) {
+		return authReq.getNonce();
+	}
+
 	@Override
 	public void authRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		logger.log("Authentication requested.");
@@ -229,7 +233,7 @@ public class DefaultOP extends AbstractOPImplementation {
 
 			URI redirectUri = authReq.getRedirectionURI();
 			State state = getState(authReq);
-			Nonce nonce = authReq.getNonce();
+			Nonce nonce = getNonce(authReq);
 			ResponseType responseType = authReq.getResponseType();
 
 			try {

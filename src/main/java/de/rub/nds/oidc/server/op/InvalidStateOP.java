@@ -18,6 +18,7 @@ package de.rub.nds.oidc.server.op;
 
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
+import com.nimbusds.openid.connect.sdk.Nonce;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +31,7 @@ import java.util.concurrent.TimeoutException;
 public class InvalidStateOP extends DefaultOP {
 
 	private State firstState;
+	private Nonce firstNonce;
 
 	@Override
 	protected State getState(AuthenticationRequest authReq) {
@@ -39,6 +41,10 @@ public class InvalidStateOP extends DefaultOP {
 			return null;
 		} else if (params.getBool(OPParameterConstants.FORCE_STATE_OTHER_SESSION)) {
 			if (firstState == null) {
+				// also save nonce if getState() is called before getNonce(), because execution will be blocked
+				if (firstNonce == null) {
+					firstNonce = authReq.getNonce();
+				}
 				firstState = authReq.getState();
 				// notify browser that the state is safed
 				((CompletableFuture) stepCtx.get(OPContextConstants.RELOAD_BROWSER_FUTURE)).complete(null);
@@ -58,4 +64,15 @@ public class InvalidStateOP extends DefaultOP {
 		}
 	}
 
+	@Override
+	protected Nonce getNonce(AuthenticationRequest authReq) {
+		if (params.getBool(OPParameterConstants.FORCE_STATE_OTHER_SESSION)) {
+			if (firstNonce == null) {
+				firstNonce = authReq.getNonce();
+			}
+			return firstNonce;
+		} else {
+			return authReq.getNonce();
+		}
+	}
 }
