@@ -69,12 +69,14 @@ import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 import javax.annotation.Nullable;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.minidev.json.JSONObject;
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  *
@@ -231,6 +233,7 @@ public class DefaultOP extends AbstractOPImplementation {
 			State state = getState(authReq);
 			Nonce nonce = authReq.getNonce();
 			ResponseType responseType = authReq.getResponseType();
+			ResponseMode responseMode = authReq.getResponseMode();
 
 			try {
 				AuthorizationCode code = null;
@@ -260,9 +263,35 @@ public class DefaultOP extends AbstractOPImplementation {
 					idToken = getIdToken(authReq.getClientID(), authReq.getNonce(), atHash, cHash);
 				}
 
-				AuthenticationResponse authRes = new AuthenticationSuccessResponse(redirectUri, code, idToken,
-						at, state, null, null);
-				HTTPResponse httpRes = authRes.toHTTPResponse();
+				HTTPResponse httpRes = null;
+				if (responseMode != null && responseMode.equals(ResponseMode.FORM_POST)) {
+					AuthenticationSuccessResponse authRes = new AuthenticationSuccessResponse(redirectUri, code, idToken,
+							at, state, null, ResponseMode.FORM_POST);
+
+					StringBuilder sb = new StringBuilder();
+					sb.append("<!DOCTYPE html>");
+					sb.append("<html>");
+					sb.append("<head><title>PrOfESSOS form post</title></head>");
+					sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
+					sb.append("<form method=\"post\" action=\"" + authRes.getRedirectionURI().toString() + "\">");
+					for (Map.Entry<String, String> entry : authRes.toParameters().entrySet()) {
+						String entryValue = StringEscapeUtils.escapeHtml(entry.getValue());
+						sb.append("<input type=\"hidden\" name=\"" + entry.getKey() + "\" value=\"" + entryValue + "\"/>");
+					}
+					sb.append("</form>");
+					sb.append("</body>");
+					sb.append("</html>");
+
+					httpRes = new HTTPResponse(HTTPResponse.SC_OK);
+					httpRes.setContentType("text/html; charset=UTF-8");
+					httpRes.setHeader("Cache-Control", "no-cache, no-store");
+					httpRes.setHeader("Pragma", "no-cache");
+					httpRes.setContent(sb.toString());
+				} else {
+					AuthenticationResponse authRes = new AuthenticationSuccessResponse(redirectUri, code, idToken,
+							at, state, null, null);
+					httpRes = authRes.toHTTPResponse();
+				}
 				ServletUtils.applyHTTPResponse(httpRes, resp);
 
 				// save nonce for the token request

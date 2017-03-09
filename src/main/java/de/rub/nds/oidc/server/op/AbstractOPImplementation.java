@@ -386,7 +386,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		Scope scopes = new Scope("openid");
 		List<ResponseType> responseTypes = Arrays.asList(ResponseType.parse("code"), ResponseType.parse("id_token"),
 				ResponseType.parse("token id_token"));
-		List<ResponseMode> responseModes = Arrays.asList(ResponseMode.QUERY, ResponseMode.FRAGMENT);
+		List<ResponseMode> responseModes = Arrays.asList(ResponseMode.QUERY, ResponseMode.FRAGMENT, ResponseMode.FORM_POST);
 		List<GrantType> grantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.IMPLICIT);
 		md.setScopes(scopes);
 		md.setResponseTypes(responseTypes);
