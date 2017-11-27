@@ -32,10 +32,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.browserlaunchers.Sleeper;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
+import org.openqa.selenium.support.ui.Duration;
+import org.openqa.selenium.support.ui.Sleeper;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
@@ -114,7 +115,7 @@ public abstract class BrowserSimulator {
 		teCtx.put("params", params.getMap());
 	}
 
-	public abstract TestStepResult run();
+	public abstract TestStepResult run() throws InterruptedException;
 
 	public void quit() {
 		driver.quit();
@@ -138,8 +139,8 @@ public abstract class BrowserSimulator {
 		wait.until((WebDriver d) -> driver.executeScript("return document.readyState").equals("complete"));
 	}
 
-	protected void waitMillis(long timeout) {
-		Sleeper.sleepTight(timeout);
+	protected void waitMillis(long timeout) throws InterruptedException {
+		Sleeper.SYSTEM_SLEEPER.sleep(new Duration(timeout, TimeUnit.MILLISECONDS));
 	}
 
 	protected void logScreenshot() {

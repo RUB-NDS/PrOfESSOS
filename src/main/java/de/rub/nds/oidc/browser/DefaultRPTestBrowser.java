@@ -28,7 +28,7 @@ import org.openqa.selenium.By;
 public class DefaultRPTestBrowser extends BrowserSimulator {
 
 	@Override
-	public TestStepResult run() {
+	public TestStepResult run() throws InterruptedException {
 		String startUrl = rpConfig.getUrlClientTarget();
 		logger.log(String.format("Opening browser with URL '%s'.", startUrl));
 		driver.get(startUrl);

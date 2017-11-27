@@ -32,7 +32,7 @@ import java.util.concurrent.TimeoutException;
 public class InformationleakRPBrowser extends DefaultRPTestBrowser {
 
 	@Override
-	public TestStepResult run() {
+	public TestStepResult run() throws InterruptedException {
 		stepCtx.put(OPContextConstants.TOKEN_INFORMATIONLEAK_FUTURE, new CompletableFuture<>());
 		stepCtx.put(OPContextConstants.USERINFO_INFORMATIONLEAK_FUTURE, new CompletableFuture<>());
 

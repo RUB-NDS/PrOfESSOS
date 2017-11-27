@@ -30,7 +30,7 @@ import java.util.concurrent.TimeoutException;
 public class InvalidStateRPTestBrowser extends DefaultRPTestBrowser {
 
 	@Override
-	public TestStepResult run() {
+	public TestStepResult run() throws InterruptedException {
 		CompletableFuture<Void> blocker = new CompletableFuture<>();
 		CompletableFuture<Void> reloader = new CompletableFuture<>();
 		stepCtx.put(OPContextConstants.BLOCK_OP_FUTURE, blocker);

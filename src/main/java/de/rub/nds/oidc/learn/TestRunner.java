@@ -40,7 +40,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.ClientBuilder;
@@ -116,7 +115,7 @@ public class TestRunner {
 		return learnResult;
 	}
 
-	private <T> T runTestFun(TestInstanceRegistry instReg, TestStepResultType result, Function<BrowserSimulator, T> f,
+	private <T> T runTestFun(TestInstanceRegistry instReg, TestStepResultType result, TestFunction<T> f,
 			T errorResponse)
 			throws ImplementationLoadException {
 		BrowserSimulator simulator = null;

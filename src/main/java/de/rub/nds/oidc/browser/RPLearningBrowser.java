@@ -36,7 +36,7 @@ import org.openqa.selenium.WebElement;
 public class RPLearningBrowser extends BrowserSimulator {
 
 	@Override
-	public final TestStepResult run() {
+	public final TestStepResult run() throws InterruptedException {
 		// first make it work with honest OP
 		TestStepResult resultHonest = runHonest();
 		if (resultHonest == TestStepResult.FAIL || resultHonest == TestStepResult.UNDETERMINED) {
@@ -48,19 +48,19 @@ public class RPLearningBrowser extends BrowserSimulator {
 		return resultEvil;
 	}
 
-	private TestStepResult runHonest() {
+	private TestStepResult runHonest() throws InterruptedException {
 		String inputOpUrl = (String) stepCtx.get(OPParameterConstants.BROWSER_INPUT_HONEST_OP_URL);
 		stepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, inputOpUrl);
 		return runGeneric(OPType.HONEST);
 	}
 
-	private TestStepResult runEvil() {
+	private TestStepResult runEvil() throws InterruptedException {
 		String inputOpUrl = (String) stepCtx.get(OPParameterConstants.BROWSER_INPUT_EVIL_OP_URL);
 		stepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, inputOpUrl);
 		return runGeneric(OPType.EVIL);
 	}
 
-	private TestStepResult runGeneric(OPType type) {
+	private TestStepResult runGeneric(OPType type) throws InterruptedException {
 		logger.log("Running learning phase for " + type.name().toLowerCase() + " OP.");
 
 		String startUrl = rpConfig.getUrlClientTarget();
