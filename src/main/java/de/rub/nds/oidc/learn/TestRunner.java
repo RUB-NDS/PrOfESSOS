@@ -218,6 +218,7 @@ public class TestRunner {
 						.replaceQuery(null)
 						.build();
 
+				logger.log("Obtaining permission to perform test from url '" + wellKnown + "'.");
 				String grantToken = ClientBuilder.newClient().target(wellKnown).request().get(String.class);
 				grantToken = grantToken.trim();
 
