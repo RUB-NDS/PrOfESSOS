@@ -41,8 +41,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
@@ -219,14 +221,24 @@ public class TestRunner {
 						.build();
 
 				logger.log("Obtaining permission to perform test from url '" + wellKnown + "'.");
-				String grantToken = ClientBuilder.newClient().target(wellKnown).request().get(String.class);
-				grantToken = grantToken.trim();
+				Response grantTokenResp = ClientBuilder.newClient().target(wellKnown).request().accept(MediaType.WILDCARD).get();
+				if (grantTokenResp.getStatus() == 200 && grantTokenResp.getLength() > 0) {
+					String grantToken = grantTokenResp.readEntity(String.class);
+					if (grantToken == null) {
+						// try reading as byte[]. Can happen with Resteasy when no ContentType is set by the server
+						grantToken = new String(grantTokenResp.readEntity(byte[].class));
+					}
+					grantToken = grantToken.trim();
 
-				URI grantTokenUri = UriUtils.normalize(new URI(grantToken));
-				URI referenceUri  = UriUtils.normalize(hostCfg.getControllerUri());
+					URI grantTokenUri = UriUtils.normalize(new URI(grantToken));
+					URI referenceUri  = UriUtils.normalize(hostCfg.getControllerUri());
 
-				return referenceUri.equals(grantTokenUri);
-			} catch (WebApplicationException | URISyntaxException ex) {
+					return referenceUri.equals(grantTokenUri);
+				} else {
+					logger.log("No valid response received.");
+					return false;
+				}
+			} catch (ProcessingException | WebApplicationException | URISyntaxException ex) {
 				logger.log("Failed to retrieve grant token from Relying Party.", ex);
 				return false;
 			}
