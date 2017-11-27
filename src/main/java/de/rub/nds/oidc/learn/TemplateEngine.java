@@ -22,11 +22,13 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import javax.enterprise.context.ApplicationScoped;
+import org.apache.velocity.app.Velocity;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  *
