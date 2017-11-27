@@ -25,6 +25,8 @@ import javax.enterprise.context.ApplicationScoped;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -37,6 +39,8 @@ public class TemplateEngine {
 
 	public TemplateEngine() {
 		this.engine = new VelocityEngine();
+		Logger logger = LoggerFactory.getLogger(TemplateEngine.class.getPackage() + ".TemplateEngine");
+		this.engine.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, new Slf4jLogger(logger));
 		this.engine.init();
 	}
 
