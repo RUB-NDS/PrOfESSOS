@@ -18,16 +18,19 @@ package de.rub.nds.oidc.browser;
 
 import de.rub.nds.oidc.learn.TemplateEngine;
 import de.rub.nds.oidc.log.TestStepLogger;
+import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.test_model.ParameterType;
 import de.rub.nds.oidc.test_model.TestOPConfigType;
 import de.rub.nds.oidc.test_model.TestRPConfigType;
 import de.rub.nds.oidc.test_model.TestStepResult;
 import de.rub.nds.oidc.utils.Func;
 import de.rub.nds.oidc.utils.InstanceParameters;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.velocity.context.Context;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
@@ -97,22 +100,33 @@ public abstract class BrowserSimulator {
 		this.params = new InstanceParameters(params);
 	}
 
-	protected Context createRPContext() {
-		Context teCtx = te.createContext(rpConfig);
-		enrichContext(teCtx);
-		return teCtx;
+	protected HashMap<String,Object> createRPContext() {
+		HashMap<String,Object> ctx = createTemplateContext();
+		ctx.put("rp", rpConfig);
+
+		return ctx;
 	}
 
-	protected Context createOPContext() {
-		Context teCtx = te.createContext(opConfig);
-		enrichContext(teCtx);
-		return teCtx;
+	protected HashMap<String,Object> createOPContext() {
+		HashMap<String,Object> ctx = createTemplateContext();
+		ctx.put("op", opConfig);
+
+		return ctx;
 	}
 
-	private void enrichContext(Context teCtx) {
+	private HashMap<String, Object> createTemplateContext() {
+
+		HashMap<String,Object> teCtx = new HashMap<>();
+
+		// required for default submitScript template
+		teCtx.put("browser-input-op_url", (String) stepCtx.get(OPParameterConstants.BROWSER_INPUT_OP_URL));
+
+		// optional
 		teCtx.put("suite", suiteCtx);
 		teCtx.put("step", stepCtx);
 		teCtx.put("params", params.getMap());
+
+		return teCtx;
 	}
 
 	public abstract TestStepResult run() throws InterruptedException;

@@ -95,7 +95,7 @@ public class DefaultOP extends AbstractOPImplementation {
 					.add("subject", resource)
 					.add("links", Json.createArrayBuilder().add(Json.createObjectBuilder()
 					.add("rel", "http://openid.net/specs/connect/1.0/issuer")
-					.add("href", path.getServerHostAndTestId().toString())))
+					.add("href", path.getDispatchUriAndTestId().toString())))
 					.build();
 			StringWriter sw = new StringWriter();
 			Json.createWriter(sw).writeObject(result);

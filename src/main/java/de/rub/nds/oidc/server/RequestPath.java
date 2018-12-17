@@ -102,4 +102,11 @@ public class RequestPath {
 				.build();
 	}
 
+	public URI getDispatchUriAndTestId() {
+		return UriBuilder.fromUri(originalRequestUri)
+				.replacePath("/dispatch/" + getTestId())
+				.replaceQuery(null)
+				.build();
+	}
+
 }

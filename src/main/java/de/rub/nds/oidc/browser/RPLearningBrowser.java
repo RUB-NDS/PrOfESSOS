@@ -19,16 +19,14 @@ package de.rub.nds.oidc.browser;
 import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.server.op.OPType;
 import de.rub.nds.oidc.test_model.TestStepResult;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.apache.velocity.context.Context;
+import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.stringtemplate.v4.ST;
 
-
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 /**
  *
  * @author Tobias Wich
@@ -179,16 +177,19 @@ public class RPLearningBrowser extends BrowserSimulator {
 	private String evalSubmitFormTemplate(String inputName) {
 		logger.log("Found input field with name '" + inputName + "'.");
 
-		// eval template
-		Reader r = new InputStreamReader(getClass().getResourceAsStream("/submit-form.vlt"), StandardCharsets.UTF_8);
-		Context ctx = createRPContext();
-		ctx.put("input-field", inputName);
-		String result = te.eval(ctx, r);
+		try {
+			String templateString = IOUtils.toString(getClass().getResourceAsStream("/submit-form.st"), "UTF-8");
+			ST st = new ST(templateString, '§','§');
+			st.add("input-field", inputName);
+			String result = st.render();
+			logger.log("Created Selenium script based on found input field '" + inputName + "'.");
+			logger.log(result);
 
-		logger.log("Created Selenium script based on found input field '" + inputName + "'.");
-		logger.log(result);
-
-		return result;
+			return result;
+		} catch (IOException e) {
+			logger.log("Could not read resource file 'submit-form.st'");
+			throw new RuntimeException( new InterruptedException(e.getMessage()));
+		}
 	}
 
 }

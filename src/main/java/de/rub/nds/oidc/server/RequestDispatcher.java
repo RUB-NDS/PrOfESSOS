@@ -97,7 +97,8 @@ public class RequestDispatcher extends HttpServlet {
 			throw new ServerInstanceMissingException(msg);
 		} else {
 			OPImplementation impl = inst.getInst().getImpl();
-			impl.setBaseUri(path.getServerHostAndTestId());
+//			impl.setBaseUri(path.getServerHostAndTestId());
+			impl.setBaseUri(path.getDispatchUriAndTestId());
 			impl.setOPIVConfig(opivCfg);
 
 			try {

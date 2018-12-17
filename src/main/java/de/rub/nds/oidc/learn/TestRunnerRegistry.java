@@ -116,8 +116,8 @@ public class TestRunnerRegistry {
 
 	private TestRPConfigType createTestRPConfig(String testId) {
 		TestRPConfigType testCfg = new TestRPConfigType();
-		testCfg.setHonestWebfingerResourceId(hosts.getHonestOPScheme() + "://" + hosts.getHonestOPHost() + "/" + testId);
-		testCfg.setEvilWebfingerResourceId(hosts.getEvilOPScheme() + "://" + hosts.getEvilOPHost() + "/" + testId);
+		testCfg.setHonestWebfingerResourceId(hosts.getHonestOPUri() + testId);
+		testCfg.setEvilWebfingerResourceId(hosts.getEvilOPUri() + testId);
 
 		return testCfg;
 	}

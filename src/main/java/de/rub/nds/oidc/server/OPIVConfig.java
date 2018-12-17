@@ -24,6 +24,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.Properties;
 import javax.enterprise.context.ApplicationScoped;
+import javax.ws.rs.core.UriBuilder;
 
 /**
  *
@@ -63,7 +64,7 @@ public class OPIVConfig {
 	}
 
 	public URI getHonestOPUri() {
-		return HONEST_OP_URL;
+		return UriBuilder.fromUri(HONEST_OP_URL).path("/dispatch/").build();
 	}
 
 	public String getHonestOPScheme() {
@@ -77,7 +78,7 @@ public class OPIVConfig {
 	}
 
 	public URI getEvilOPUri() {
-		return EVIL_OP_URL;
+		return UriBuilder.fromUri(EVIL_OP_URL).path("/dispatch/").build();
 	}
 
 	public String getEvilOPScheme() {

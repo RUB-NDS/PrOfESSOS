@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  professos:
+    build: .
+    ports:
+      - "8080:8080"
+      - "9990:9990"
+    networks:
+      default:
+        aliases:
+          - openid.sso-security.de
+          - idp.oidc.honest-sso.de
+          - idp.oidc.attack-sso.de
+  relying_party:
+    build:
+      context: ./docker/
+      dockerfile: simple-web-app/Dockerfile
+    ports:
+      - "8180:8080"
+    networks:
+      default:
+        aliases:
+          - honestsp.de
+          - www.honestsp.de
