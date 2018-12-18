@@ -25,6 +25,8 @@ import de.rub.nds.oidc.test_model.TestRPConfigType;
 import de.rub.nds.oidc.test_model.TestStepResult;
 import de.rub.nds.oidc.utils.Func;
 import de.rub.nds.oidc.utils.InstanceParameters;
+import java.io.IOException;
+import java.io.InputStream;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +37,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.phantomjs.PhantomJSDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.JavascriptExecutor;
+import java.util.Properties;
+
+//import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.support.ui.Duration;
@@ -70,8 +77,40 @@ public abstract class BrowserSimulator {
 		if (quit) {
 			quit();
 		}
-		driver = new PhantomJSDriver();
-		driver.manage().window().setSize(new Dimension(1024, 768));
+
+               ChromeOptions chromeOptions = new ChromeOptions();
+
+               // load chromedriver config
+               try {
+                       InputStream chromeConfig = BrowserSimulator.class.getResourceAsStream("/chromedriver.properties");
+                       Properties p = new Properties();
+                       p.load(chromeConfig);
+
+                       System.setProperty("webdriver.chrome.driver", p.getProperty("chromedriver_path"));
+                       if (p.containsKey("chromedriver_logfile")) {
+                               System.setProperty("webdriver.chrome.logfile", p.getProperty("chromedriver_logfile"));
+                               System.setProperty("webdriver.chrome.verboseLogging", "true");
+                       }
+                       if (p.containsKey("chrome_browser_path")) {
+                               // do not search for chrome in OS $PATH
+                               chromeOptions.setBinary(p.getProperty("chrome_browser_path"));
+                       }
+               } catch (IOException e) {
+                       // try default installation path
+                       System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver");
+               }
+
+               chromeOptions.addArguments("headless", "no-sandbox", "disable-gpu", "window-size=1024x768",
+					   "disable-local-storage");
+               // disable certificate validation to prevent chrome from getting stuck on cert errors
+               // requires chrome >= 65 to work (ignored otherwise)
+               chromeOptions.setCapability("acceptInsecureCerts", true);
+
+               driver = new ChromeDriver(chromeOptions);
+
+
+		//driver = new PhantomJSDriver();
+		//driver.manage().window().setSize(new Dimension(1024, 768));
 		driver.manage().timeouts().implicitlyWait(NORMAL_WAIT_TIMEOUT, TimeUnit.SECONDS);
 	}
 
