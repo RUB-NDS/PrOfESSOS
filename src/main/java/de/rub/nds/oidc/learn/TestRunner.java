@@ -217,7 +217,7 @@ public class TestRunner {
 
 
 	private boolean testGranted(TestStepLogger logger, Map<String, Object> testStepCtx) {
-		Object grantNotNeeded = testStepCtx.get("RP_grant_not_needed");
+		Object grantNotNeeded = testStepCtx.get("grant_not_needed");
 		if (grantNotNeeded instanceof String && Boolean.valueOf((String) grantNotNeeded)) {
 			logger.log("Permission to perform test on remote server not evaluated.");
 			return true;

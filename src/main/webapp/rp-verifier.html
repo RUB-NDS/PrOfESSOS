@@ -165,7 +165,7 @@ limitations under the License.
 							<legend>Client Parameters</legend>
 							<div class="form-group">
 								<div class="col-sm-2">
-									<label for="url-client-target">Login-Site URL:</label>
+									<label class="control-label" for="url-client-target">Login-Site URL:</label>
 								</div>
 								<div class="col-sm-10">
 									<input class="form-control" type="url" name="url-client-target" id="url-client-target"  form="rp-learn-form" required size="80">
@@ -173,7 +173,7 @@ limitations under the License.
 							</div>
 							<div class="form-group">
 								<div class="col-sm-2">
-									<label for="input-field-name">Input-Field Name:</label>
+									<label class="control-label" for="input-field-name">Input-Field Name:</label>
 								</div>
 								<div class="col-sm-10">
 									<input class="form-control" type="text" name="input-field-name" id="input-field-name" form="rp-learn-form" size="80">
@@ -181,7 +181,7 @@ limitations under the License.
 							</div>
 							<div class="form-group">
 								<div class="col-sm-2">
-									<label for="selenium-script">Selenium Script:</label>
+									<label class="control-label" for="selenium-script">Selenium Script:</label>
 								</div>
 								<div class="col-sm-10">
 									<textarea class="form-control" name="selenium-script" id="selenium-script" form="rp-learn-form" rows="5" cols="80"></textarea>
@@ -189,7 +189,7 @@ limitations under the License.
 							</div>
 							<div class="form-group">
 								<div class="col-sm-2">
-									<label for="url-client-target-success">Success URL:</label>
+									<label class="control-label" for="url-client-target-success">Success URL:</label>
 								</div>
 								<div class="col-sm-10">
 									<input class="form-control" type="url" name="url-client-target-success" id="url-client-target-success" size="80">
@@ -197,7 +197,7 @@ limitations under the License.
 							</div>
 							<div class="form-group">
 								<div class="col-sm-2">
-									<label for="honest-user-needle">Honest User Needle:</label>
+									<label class="control-label" for="honest-user-needle">Honest User Needle:</label>
 								</div>
 								<div class="col-sm-10">
 									<input class="form-control" type="text" name="honest-user-needle" id="honest-user-needle" size="80">
@@ -205,7 +205,7 @@ limitations under the License.
 							</div>
 							<div class="form-group">
 								<div class="col-sm-2">
-									<label for="evil-user-needle">Evil User Needle:</label>
+									<label class="control-label" for="evil-user-needle">Evil User Needle:</label>
 								</div>
 								<div class="col-sm-10">
 									<input class="form-control" type="text" name="evil-user-needle" id="evil-user-needle" size="80">
@@ -213,7 +213,7 @@ limitations under the License.
 							</div>
 							<div class="form-group">
 								<div class="col-sm-2">
-									<label for="user-profile-url">User Profile URL:</label>
+									<label class="control-label" for="user-profile-url">User Profile URL:</label>
 								</div>
 								<div class="col-sm-10">
 									<input class="form-control" type="text" name="user-profile-url" id="user-profile-url" size="80">
@@ -277,7 +277,7 @@ limitations under the License.
 			document.getElementById("controller-uri").innerHTML = location.origin;
 
 			// init the test session
-			OPIV.createRPTestPlan();
+			OPIV.createTestPlan("RP-TestPlan");
 		</script>
 	</body>
 </html>

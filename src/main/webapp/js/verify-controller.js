@@ -22,6 +22,7 @@ var OPIV = (function(module) {
 	var testId;
 	var testObject;
 	var testConfig;
+	var testConfigType;
 	var testReport;
 	var learningComplete = false;
 
@@ -32,9 +33,13 @@ var OPIV = (function(module) {
 		document.location.reload();
 	};
 
-	module.createRPTestPlan = function() {
+	module.createTestPlan = function(testPlanType) {
 		// request new test id
-		$.post("api/rp/create-test-object", initTestObject);
+		if (testPlanType === "RP-TestPlan") {
+			$.post("api/rp/create-test-object", initTestObject);
+		} else if ((testPlanType === "OP-TestPlan")) {
+			$.post("api/op/create-test-object", initTestObject);
+		}
 	};
 
 	module.cancelProcess = function() {
@@ -60,8 +65,16 @@ var OPIV = (function(module) {
 				writeRPConfigGUI(testConfig);
 			}
 			if (testConfig["Type"] === OP_CONFIG_TYPE) {
-				// TODO
-		    }
+				testConfig.UrlOPTarget = "http://honestidp.de:8080/openid-connect-server-webapp";
+				// registration not needed for demo when using discovery
+				testConfig.UrlOPRegistration = "http://honestidp.de:8080/openid-connect-server-webapp/register";
+                testConfig.User1Name = "user1";
+                testConfig.User1Pass = "user1pass";
+                testConfig.User2Name = "user2";
+                testConfig.User2Pass = "user2pass";
+
+                writeOPConfigGUI(testConfig);
+            }
 		}
 	};
 
@@ -125,23 +138,33 @@ var OPIV = (function(module) {
 	}
 
 	module.learnRP = function(completeHandler) {
-		showWaitDialog();
-		// default parameters
-		completeHandler = typeof completeHandler !== 'undefined' ? completeHandler : function() { hideWaitDialog(); };
-
-		learningComplete = false;
-
 		updateRPConfig();
-		// call learning function
-		$.post({
-			url: "api/rp/" + testId + "/learn",
-			data: JSON.stringify(testConfig),
-			contentType: "application/json",
-			success: processLearnResponse,
-			error: learnResponseError,
-			complete: completeHandler
-		});
+		let url = "api/rp/" + testId + "/learn";
+		learn(completeHandler, url);
 	};
+
+    module.learnOP = function(completeHandler) {
+        updateOPConfig();
+        let url = "api/op/" + testId + "/learn";
+        learn(completeHandler, url);
+    };
+
+    function learn(completeHandler, url) {
+        showWaitDialog();
+        // default parameters
+        completeHandler = typeof completeHandler !== 'undefined' ? completeHandler : function() { hideWaitDialog(); };
+        learningComplete = false;
+
+        // call learning function
+        $.post({
+            url: url,
+            data: JSON.stringify(testConfig),
+            contentType: "application/json",
+            success: processLearnResponse,
+            error: learnResponseError,
+            complete: completeHandler
+        });
+    };
 
 	module.testStep = function(stepId, stepContainer, completeHandler) {
 		showWaitDialog();
@@ -170,21 +193,24 @@ var OPIV = (function(module) {
 		testId = testObject.TestId;
 		testConfig = testObject.TestConfig;
 		testReport = testObject.TestReport;
+		testConfigType = testConfig.Type;
 
-		if (testConfig["Type"] === RP_CONFIG_TYPE) {
+        $("#test-id-display").html(document.createTextNode(testId));
+
+        if (testConfigType === RP_CONFIG_TYPE) {
 			// configuration for rp-verifier
-            $("#test-id-display").html(document.createTextNode(testId));
             $("#honest-op-id-display").html(document.createTextNode(testConfig.HonestWebfingerResourceId));
             $("#evil-op-id-display").html(document.createTextNode(testConfig.EvilWebfingerResourceId));
             // update config
             writeRPConfigGUI(testConfig);
         }
-        if (testConfig["Type"] === OP_CONFIG_TYPE) {
+        if (testConfigType === OP_CONFIG_TYPE) {
         	// configuration for op-verifier
-        	// TODO
+			$("#honest-rp-id-display").html(document.createTextNode(testConfig.HonestRpResourceId));
+			$("#evil-rp-id-display").html(document.createTextNode(testConfig.EvilRpResourceId));
 
 			// update config
-            //writeOPConfigGUI(testConfig);
+            writeOPConfigGUI(testConfig);
         }
 
 
@@ -531,14 +557,70 @@ var OPIV = (function(module) {
 		$("input[name='user-profile-url']").val(newTestRPConfig.ProfileUrl);
 	}
 
+	function updateOPConfig() {
+        testConfig.UrlOPTarget = $("#url-op-target").val();
+        testConfig.UrlOPRegistration = $("#url-op-registration").val();
+        testConfig.AccessToken1 = $("#registration-access-token-1").val();
+        testConfig.AccessToken2 = $("#registration-access-token-2").val();
+        testConfig.User2Name = $("#user-2-name").val();
+        testConfig.User2Pass = $("#user-2-pass").val();
+        testConfig.User1Name = $("#user-1-name").val();
+        testConfig.User1Pass = $("#user-1-pass").val();
+        testConfig.LoginScript =   $("#selenium-login-script").val();
+        testConfig.ConsentScript = $("#selenium-consent-script").val();
+        testConfig.Client1Config = $("#client-1-config").val();
+        testConfig.Client2Config = $("#client-2-config").val();
+	}
+
+	function writeOPConfig(newTestOPConfig) {
+		testConfig.UrlOPTarget = newTestOPConfig.UrlOPTarget;
+		testConfig.UrlOPRegistration = newTestOPConfig.UrlOPRegistration;
+		testConfig.AccessToken1 = newTestOPConfig.AccessToken1;
+		testConfig.AccessToken2 = newTestOPConfig.AccessToken2;
+		testConfig.User2Name = newTestOPConfig.User2Name;
+        testConfig.User2Pass = newTestOPConfig.User2Pass;
+        testConfig.User1Name = newTestOPConfig.User1Name;
+        testConfig.User1Pass = newTestOPConfig.User1Pass;
+		testConfig.LoginScript = newTestOPConfig.LoginScript;
+		testConfig.ConsentScript = newTestOPConfig.ConsentScript;
+		testConfig.Client1Config = newTestOPConfig.Client1Config;
+		testConfig.Client2Config = newTestOPConfig.Client2Config;
+
+		writeOPConfigGUI(newTestOPConfig);
+	}
+
+	function writeOPConfigGUI(newTestOPConfig) {
+        $("#url-op-target").val(newTestOPConfig.UrlOPTarget);
+        $("#url-op-registration").val(newTestOPConfig.UrlOPRegistration);
+        $("#registration-access-token-1").val(newTestOPConfig.AccessToken1);
+        $("#registration-access-token-2").val(newTestOPConfig.AccessToken2);
+
+        $("#user-1-name").val(newTestOPConfig.User1Name);
+        $("#user-1-password").val(newTestOPConfig.User1Pass);
+        $("#user-2-name").val(newTestOPConfig.User2Name);
+        $("#user-2-password").val(newTestOPConfig.User2Pass);
+
+        $("#selenium-login-script").val(newTestOPConfig.LoginScript);
+        $("#selenium-consent-script").val(newTestOPConfig.ConsentScript);
+        $("#client-1-config").val(newTestOPConfig.Client1Config);
+        $("#client-2-config").val(newTestOPConfig.Client2Config);
+    }
+
 	function processLearnResponse(learnResult) {
 		var stepResult = learnResult.TestStepResult;
 		var testPassed = stepResult.Result === "PASS";
 
+		//TODO RP specific
 		// update config
-		if (learnResult.TestRPConfig) {
-			writeRPConfig(learnResult.TestRPConfig);
+		if (learnResult.TestConfig) {
+			if (testConfigType === RP_CONFIG_TYPE) {
+                writeRPConfig(learnResult.TestConfig);
+            }
+            if (testConfigType === OP_CONFIG_TYPE) {
+            	writeOPConfig(learnResult.TestConfig);
+			}
 		}
+
 
 		// update status
 		var learnStatus = $("#learn-status");

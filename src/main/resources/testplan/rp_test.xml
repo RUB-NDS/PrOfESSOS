@@ -3,7 +3,7 @@
 		  Name="RP-Test-Plan">
 
 	<SuiteParameters>
-		<Parameter Key="RP_grant_not_needed">false</Parameter>
+		<Parameter Key="grant_not_needed">false</Parameter>
 	</SuiteParameters>
 
 	<LearningStep Name="LearningStep">

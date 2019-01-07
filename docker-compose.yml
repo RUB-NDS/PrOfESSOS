@@ -23,3 +23,15 @@ services:
         aliases:
           - honestsp.de
           - www.honestsp.de
+  identity_provider:
+    image: mitreid-server-webapp:latest
+    ports:
+      - "8280:8080"
+  # reminder: when switching from image to build, uncomment the build argument below
+  #                args:
+  #                        ISSUER: "honestidp.de:8080"
+    networks:
+      default:
+        aliases:
+          - honestidp.de
+          - www.honestidp.de

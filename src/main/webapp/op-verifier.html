@@ -26,7 +26,7 @@ limitations under the License.
 	<link rel="stylesheet" href="webjars/bootstrap/3.3.7-1/css/bootstrap.min.css">
 
 	<!-- Optional theme -->
-	<link rel="stylesheet" href="webjars/bootstrap/3.3.7-1/css/bootstrap-theme.min.css"">
+	<link rel="stylesheet" href="webjars/bootstrap/3.3.7-1/css/bootstrap-theme.min.css">
 
 	<link rel="stylesheet" href="css/opiv.css">
 </head>
@@ -38,7 +38,7 @@ limitations under the License.
 		</div>
 		<div id="navbar" class="collapse navbar-collapse">
 			<ul class="nav navbar-nav">
-				<li class="active"><a href="#" onclick="OPIV.clear();">Client Verifier</a></li>
+				<li class="active"><a href="#" onclick="OPIV.clear();">IdentityProvider Verifier</a></li>
 				<!--<li><a href="op-verifier.html">OP Verifier</a></li>-->
 			</ul>
 		</div><!--/.nav-collapse -->
@@ -93,13 +93,13 @@ limitations under the License.
 <div class="container">
 
 	<div class="page-headline">
-		<h1>PrOfESSOS Client Verifier</h1>
+		<h1>PrOfESSOS IdP Verifier</h1>
 		<p class="lead"></p>
 	</div>
 
 	<h2>About PrOfESSOS</h2>
 	<p>PrOfESSOS (Practical Offensive Evaluation of Single Sign-On Services) is an open source tool for
-		fully automated Evaluation-as-a-Service of OpenID Connect clients. The tool has been developed
+		fully automated Evaluation-as-a-Service of OpenID Connect clients and Identity Providers. The tool has been developed
 		for the research paper <em>SoK: Single Sign-On Security – An Evaluation of OpenID Connect</em>,
 		<a href="http://www.ieee-security.org/TC/EuroSP2017/">EuroS&P 2017</a>.
 	</p>
@@ -108,9 +108,9 @@ limitations under the License.
 	</p>
 
 	<h2>Prerequisite to use PrOfESSOS</h2>
-	<p>As a safeguard to prevent illegitimate usage of the PrOfESSOS service, the RP operator must install a file
+	<p>As a safeguard to prevent illegitimate usage of the PrOfESSOS service, the OP operator must install a file
 		named <i>.professos</i> at the root directory of the webserver (see <i>Login-Site URL</i> below) containing the
-		base URL of the PrOfESSOS service (<tt id="controller-uri">&lt;PrOfESSOS-URI&gt;</tt>).
+		base URL of the PrOfESSOS service (<code id="controller-uri">&lt;PrOfESSOS-URI&gt;</code>).
 		See <a href="http://www.honestsp.de:8080/.professos" target="_blank">http://www.honestsp.de:8080/.professos</a>
 		for an example of such a file.
 	</p>
@@ -119,7 +119,7 @@ limitations under the License.
 	<ol>
 		<li>Click on the <i>Load Demo Config</i> button.</li>
 		<ul>
-			<li>This fills out the URL of the tested Client (SP), the user needle, the profile URL, and
+			<li>This fills out the URL of the tested Identity Provider (IdP/OP) and
 				completes Stage 1 of PrOfESSOS.</li>
 		</ul>
 		<li>Cick on the button <i>Learn</i></li>
@@ -157,18 +157,48 @@ limitations under the License.
 		<div class="learn-controls col-sm-12">
 			<form id="op-learn-form" action="javascript:;" onsubmit="javascript:OPIV.learnOP();">
 				<fieldset>
-					<legend>RP Parameters</legend>
-					<p>Test ID: <tt id="test-id-display">not-loaded</tt><br>
-						Honest RP Identity: <tt id="honest-rp-id-display">not-loaded</tt><br>
-						Evil RP Identity: <tt id="evil-rp-id-display">not-loaded</tt></p>
+					<legend>Client Parameters</legend>
+					<p>Test ID: <code id="test-id-display">not-loaded</code><br>
+						Honest RP Identity: <code id="honest-rp-id-display">not-loaded</code><br>
+						Evil RP Identity: <code id="evil-rp-id-display">not-loaded</code></p>
 
-					<legend>OP Parameters</legend>
+					<legend>Target OP Parameters</legend>
 					<div class="form-group">
-						<div class="col-sm-2">
-							<label for="url-op-target">OP Discovery URL:</label>
-						</div>
+						<label class="control-label col-sm-2" for="url-op-target">Issuer (OP) URL:</label>
 						<div class="col-sm-10">
 							<input class="form-control" type="url" name="url-op-target" id="url-op-target" form="op-learn-form" required size="80">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2" for="url-op-registration">Registration URL:</label>
+						<div class="col-sm-10">
+							<input class="form-control" type="url" name="url-op-registration" id="url-op-registration" form="op-learn-form" required size="80">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2" for="registration-access-token-1">Reg. AccessToken 1:</label>
+						<div class="col-sm-10">
+							<input class="form-control" type="text" id="registration-access-token-1" name="registration-access-token-1" form="op-learn-form" size="80">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2" for="registration-access-token-2">Reg. AccessToken 2:</label>
+						<div class="col-sm-10">
+							<input class="form-control" type="text" id="registration-access-token-2" name="registration-access-token-2" form="op-learn-form" size="80">
+						</div>
+					</div>
+					<legend>Manual Client Config</legend>
+					<!--TODO add Tooltipps: Config in JSON, e.g. as received in a registration response-->
+					<div class="form-group">
+						<label class="control-label col-sm-2" for="client-1-config">Client-1 Config</label>
+						<div class="col-sm-10">
+							<textarea class="form-control" type="text" id="client-1-config" name="client-1-config" form="op-learn-form" rows="5" cols="80"></textarea>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2" for="client-2-config">Client-2 Config</label>
+						<div class="col-sm-10">
+							<textarea class="form-control" type="text" id="client-2-config" name="client-2-config" form="op-learn-form" rows="5" cols="80"></textarea>
 						</div>
 					</div>
 					<!--<div class="form-group">-->
@@ -179,12 +209,42 @@ limitations under the License.
 							<!--<input class="form-control" type="text" name="input-field-name" form="op-learn-form" size="80">-->
 						<!--</div>-->
 					<!--</div>-->
+					<legend>Login/Consent Scripts</legend>
 					<div class="form-group">
-						<div class="col-sm-2">
-							<label for="selenium-login-script">Selenium Login-Script:</label>
-						</div>
+						<label class="control-label col-sm-2" for="selenium-login-script">Login-Script:</label>
 						<div class="col-sm-10">
 							<textarea class="form-control" name="selenium-login-script" id="selenium-login-script" form="op-learn-form" rows="5" cols="80"></textarea>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2" for="selenium-consent-script">Consent-Script:</label>
+						<div class="col-sm-10">
+							<textarea class="form-control" name="selenium-consent-script" id="selenium-consent-script" form="op-learn-form" rows="5" cols="80"></textarea>
+						</div>
+					</div>
+					<legend>EndUser/ResourceOwner Credentials</legend>
+					<div class="form-group">
+						<label class="control-label col-sm-2" for="user-1-name">Username 1:</label>
+						<div class="col-sm-10">
+							<input class="form-control" type="text" name="user-1-name" id="user-1-name" form="op-learn-form" required size="80">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2" for="user-1-password">User 1 Password:</label>
+						<div class="col-sm-10">
+							<input class="form-control" type="text" name="user-1-password" id="user-1-password" form="op-learn-form" required size="80">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2" for="user-2-name">Username 2:</label>
+						<div class="col-sm-10">
+							<input class="form-control" type="text" name="user-2-name" id="user-2-name" form="op-learn-form" required size="80">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2" for="user-2-password">User 2 Password:</label>
+						<div class="col-sm-10">
+							<input class="form-control" type="text" name="user-2-password" id="user-2-password" form="op-learn-form" required size="80">
 						</div>
 					</div>
 					<!--<div class="form-group">-->
@@ -277,7 +337,7 @@ limitations under the License.
     document.getElementById("controller-uri").innerHTML = location.origin;
 
     // init the test session
-    OPIV.createOPTestPlan();
+    OPIV.createTestPlan("OP-TestPlan");
 </script>
 </body>
 </html>

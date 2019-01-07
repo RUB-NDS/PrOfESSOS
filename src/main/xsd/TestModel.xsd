@@ -67,11 +67,18 @@ limitations under the License.
 		<complexContent>
 			<extension base="tm:TestConfigType">
 				<sequence>
-					<element name="OPUrl" type="anyURI" />
-					<element name="UserCredentials" type="tm:UserCredentialsType" />
-					<element name="CodeRequestUrl" type="anyURI" />
-					<element name="TokenRequestUrl" type="anyURI" />
-					<element name="ClientCredentials" type="tm:ClientCredentialsType" />
+					<element name="UrlOPTarget" type="anyURI" minOccurs="0" />
+					<element name="UrlOPRegistration" type="anyURI" minOccurs="0" />
+					<element name="AccessToken1" type="string" minOccurs="0" />
+					<element name="AccessToken2" type="string" minOccurs="0" />
+					<element name="User1Name" type="string" />
+					<element name="User2Name" type="string" />
+					<element name="User1Pass" type="string" />
+					<element name="User2Pass" type="string" />
+					<element name="LoginScript" type="string" minOccurs="0" />
+					<element name="ConsentScript" type="string" minOccurs="0" />
+					<element name="Client1Config" type="string" minOccurs="0" />
+					<element name="Client2Config" type="string" minOccurs="0" />
 					<element name="LoginFormHelp" type="string" minOccurs="0" />
 				</sequence>
 			</extension>
@@ -211,7 +218,10 @@ limitations under the License.
 					<element name="OPConfig-1" type="tm:OPConfigType" />
 					<element name="OPConfig-2" type="tm:OPConfigType" />
 				</sequence>
-				<element name="RPConfig" type="tm:RPConfigType" />
+				<sequence>
+					<element name="RPConfig-1" type="tm:RPConfigType" />
+					<element name="RPConfig-2" type="tm:RPConfigType" />
+				</sequence>
 			</choice>
 		</sequence>
 		<attribute name="Name" type="normalizedString" use="required" />

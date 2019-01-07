@@ -51,7 +51,7 @@ ENV LAUNCH_JBOSS_IN_BACKGROUND true
 COPY ./target/professos-1.0.0-SNAPSHOT.war /opt/jboss/wildfly/standalone/deployments/professos.war
 
 # disable for debugging as root
-USER jboss
+#USER jboss
 
 # Expose the ports we're interested in
 EXPOSE 8080
