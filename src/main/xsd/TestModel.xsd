@@ -26,41 +26,56 @@ limitations under the License.
 	<element name="TestObject" type="tm:TestObjectType" />
 	<complexType name="TestObjectType">
 		<sequence>
-			<choice>
-				<element name="TestRPConfig" type="tm:TestRPConfigType" />
-				<element name="TestOPConfig" type="tm:TestOPConfigType" />
-			</choice>
+			<!--<choice>-->
+				<!--<element name="TestRPConfig" type="tm:TestRPConfigType" />-->
+				<!--<element name="TestOPConfig" type="tm:TestOPConfigType" />-->
+			<!--</choice>-->
+			<element name="TestConfig" type="tm:TestConfigType" />
 			<element name="TestReport" type="tm:TestReportType" minOccurs="0" />
 		</sequence>
 		<attribute name="TestId" type="NCName" use="required" />
 		<attribute name="TestPlanReference" type="normalizedString" use="required" />
 	</complexType>
 
+<complexType name="TestConfigType" abstract="true">
+	<attribute name="Type" type="string" />
+</complexType>
+
 	<complexType name="TestRPConfigType">
-		<sequence>
-			<element name="HonestWebfingerResourceId" type="normalizedString" />
-			<element name="EvilWebfingerResourceId" type="normalizedString" />
-			<element name="UrlClientTarget" type="anyURI" minOccurs="0" />
-			<element name="InputFieldName" type="NCName" minOccurs="0" />
-			<element name="SeleniumScript" type="string" minOccurs="0" />
-			<element name="FinalValidUrl" type="anyURI" minOccurs="0" />
-			<element name="HonestUserNeedle" type="string" minOccurs="0" />
-			<element name="EvilUserNeedle" type="string" minOccurs="0" />
-			<element name="ProfileUrl" type="anyURI" minOccurs="0" />
-			<!--<element name="FinalInvalidUrl" type="anyURI" minOccurs="0" />-->
-			<!--<element name="InvalidReturnCode" type="nonNegativeInteger" minOccurs="0" />-->
-		</sequence>
+		<complexContent>
+			<extension base="tm:TestConfigType">
+				<sequence>
+					<element name="HonestWebfingerResourceId" type="normalizedString" />
+					<element name="EvilWebfingerResourceId" type="normalizedString" />
+					<element name="UrlClientTarget" type="anyURI" minOccurs="0" />
+					<element name="InputFieldName" type="NCName" minOccurs="0" />
+					<element name="SeleniumScript" type="string" minOccurs="0" />
+					<element name="FinalValidUrl" type="anyURI" minOccurs="0" />
+					<element name="HonestUserNeedle" type="string" minOccurs="0" />
+					<element name="EvilUserNeedle" type="string" minOccurs="0" />
+					<element name="ProfileUrl" type="anyURI" minOccurs="0" />
+					<!--<element name="FinalInvalidUrl" type="anyURI" minOccurs="0" />-->
+					<!--<element name="InvalidReturnCode" type="nonNegativeInteger" minOccurs="0" />-->
+				</sequence>
+			</extension>
+		</complexContent>
+
+
 	</complexType>
 
 	<complexType name="TestOPConfigType">
-		<sequence>
-			<element name="OPUrl" type="anyURI" />
-			<element name="UserCredentials" type="tm:UserCredentialsType" />
-			<element name="CodeRequestUrl" type="anyURI" />
-			<element name="TokenRequestUrl" type="anyURI" />
-			<element name="ClientCredentials" type="tm:ClientCredentialsType" />
-			<element name="LoginFormHelp" type="string" minOccurs="0" />
-		</sequence>
+		<complexContent>
+			<extension base="tm:TestConfigType">
+				<sequence>
+					<element name="OPUrl" type="anyURI" />
+					<element name="UserCredentials" type="tm:UserCredentialsType" />
+					<element name="CodeRequestUrl" type="anyURI" />
+					<element name="TokenRequestUrl" type="anyURI" />
+					<element name="ClientCredentials" type="tm:ClientCredentialsType" />
+					<element name="LoginFormHelp" type="string" minOccurs="0" />
+				</sequence>
+			</extension>
+		</complexContent>
 	</complexType>
 
 	<complexType name="UserCredentialsType">
@@ -241,10 +256,11 @@ limitations under the License.
 	<element name="LearnResult" type="tm:LearnResultType" />
 	<complexType name="LearnResultType">
 		<sequence>
-			<choice>
-				<element name="TestRPConfig" type="tm:TestRPConfigType" />
-				<element name="TestOPConfig" type="tm:TestOPConfigType" />
-			</choice>
+			<!--<choice>-->
+				<!--<element name="TestRPConfig" type="tm:TestRPConfigType" />-->
+				<!--<element name="TestOPConfig" type="tm:TestOPConfigType" />-->
+			<!--</choice>-->
+			<element name="TestConfig" type="tm:TestConfigType" />
 			<element name="TestStepResult" type="tm:TestStepResultType" />
 		</sequence>
 	</complexType>

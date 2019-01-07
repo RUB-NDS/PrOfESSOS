@@ -24,13 +24,7 @@ import de.rub.nds.oidc.server.TestInstanceRegistry;
 import de.rub.nds.oidc.server.op.OPInstance;
 import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.server.op.OPType;
-import de.rub.nds.oidc.test_model.LearnResultType;
-import de.rub.nds.oidc.test_model.TestObjectType;
-import de.rub.nds.oidc.test_model.TestPlanType;
-import de.rub.nds.oidc.test_model.TestRPConfigType;
-import de.rub.nds.oidc.test_model.TestStepResult;
-import de.rub.nds.oidc.test_model.TestStepResultType;
-import de.rub.nds.oidc.test_model.TestStepType;
+import de.rub.nds.oidc.test_model.*;
 import de.rub.nds.oidc.utils.ImplementationLoadException;
 import de.rub.nds.oidc.utils.ImplementationLoader;
 import de.rub.nds.oidc.utils.UriUtils;
@@ -91,7 +85,14 @@ public class TestRunner {
 		}, TestStepResult.UNDETERMINED));
 
 		LearnResultType learnResult = new LearnResultType();
-		learnResult.setTestRPConfig(getTestObj().getTestRPConfig());
+//		//todo rp specific
+//		if (getTestObj().getTestConfig().getType().equals(TestRPConfigType.class.getName())) {
+//			learnResult.setTestRPConfig((TestRPConfigType) getTestObj().getTestConfig());
+//		} else if (getTestObj().getTestConfig().getType().equals(TestOPConfigType.class.getName())) {
+//			learnResult.setTestOPConfig((TestOPConfigType) getTestObj().getTestConfig());
+//		}
+		learnResult.setTestConfig(getTestObj().getTestConfig());
+
 		learnResult.setTestStepResult(result);
 		return learnResult;
 	}
@@ -110,7 +111,7 @@ public class TestRunner {
 		}, TestStepResult.UNDETERMINED));
 
 		LearnResultType learnResult = new LearnResultType();
-		learnResult.setTestRPConfig(getTestObj().getTestRPConfig());
+		learnResult.setTestConfig(getTestObj().getTestConfig());
 		learnResult.setTestStepResult(result);
 		return learnResult;
 	}
@@ -141,14 +142,16 @@ public class TestRunner {
 			}
 
 			// RP Test specific config
-			if (getTestObj().getTestRPConfig() != null) {
+			if (getTestObj().getTestConfig().getType() != null
+					&& getTestObj().getTestConfig().getType().equals(TestRPConfigType.class.getName())) {
+				TestRPConfigType testConfig = (TestRPConfigType) getTestObj().getTestConfig();
 				// resolve OP URL
 				String startOpType = stepDef.getBrowserSimulator().getParameter().stream()
 						.filter(e -> e.getKey().equals(OPParameterConstants.BROWSER_INPUT_OP_URL))
 						.map(e -> e.getValue())
 						.findFirst().orElse("EVIL");
-				String honestWebfinger = getTestObj().getTestRPConfig().getHonestWebfingerResourceId();
-				String evilWebfinger = getTestObj().getTestRPConfig().getEvilWebfingerResourceId();
+				String honestWebfinger = testConfig.getHonestWebfingerResourceId();
+				String evilWebfinger = testConfig.getEvilWebfingerResourceId();
 				// save both in context under their own name
 				testStepCtx.put(OPParameterConstants.BROWSER_INPUT_HONEST_OP_URL, honestWebfinger);
 				testStepCtx.put(OPParameterConstants.BROWSER_INPUT_EVIL_OP_URL, evilWebfinger);
@@ -171,7 +174,8 @@ public class TestRunner {
 
 			String browserClass = stepDef.getBrowserSimulator().getImplementationClass();
 			simulator = ImplementationLoader.loadClassInstance(browserClass, BrowserSimulator.class);
-			simulator.setRpConfig(getTestObj().getTestRPConfig());
+			//todo RP specific
+			simulator.setRpConfig((TestRPConfigType) getTestObj().getTestConfig());
 			simulator.setTemplateEngine(te);
 			simulator.setLogger(logger);
 			simulator.setContext(testSuiteCtx, testStepCtx);
@@ -193,8 +197,9 @@ public class TestRunner {
 		}
 	}
 
-	public void updateConfig(TestRPConfigType rpConfig) {
-		TestRPConfigType local = getTestObj().getTestRPConfig();
+
+	public void updateRPConfig(TestRPConfigType rpConfig) {
+		TestRPConfigType local = (TestRPConfigType) getTestObj().getTestConfig();
 
 		local.setHonestWebfingerResourceId(rpConfig.getHonestWebfingerResourceId());
 		local.setEvilWebfingerResourceId(rpConfig.getEvilWebfingerResourceId());
@@ -206,6 +211,11 @@ public class TestRunner {
 		local.setProfileUrl(rpConfig.getProfileUrl());
 	}
 
+	public void updateOPConfig(TestOPConfigType opConfig) {
+		//todo
+	}
+
+
 	private boolean testGranted(TestStepLogger logger, Map<String, Object> testStepCtx) {
 		Object grantNotNeeded = testStepCtx.get("RP_grant_not_needed");
 		if (grantNotNeeded instanceof String && Boolean.valueOf((String) grantNotNeeded)) {
@@ -213,7 +223,9 @@ public class TestRunner {
 			return true;
 		} else {
 			try {
-				String targetUrl = testObj.getTestRPConfig().getUrlClientTarget();
+				// TODO RP specific
+				TestRPConfigType testConfig = (TestRPConfigType) testObj.getTestConfig();
+				String targetUrl = testConfig.getUrlClientTarget();
 				URI wellKnown = UriBuilder.fromUri(targetUrl)
 						.replacePath(".professos")
 						.replaceQuery(null)

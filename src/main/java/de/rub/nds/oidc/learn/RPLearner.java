@@ -17,20 +17,11 @@
 package de.rub.nds.oidc.learn;
 
 import de.rub.nds.oidc.server.TestInstanceRegistry;
-import de.rub.nds.oidc.test_model.LearnResultType;
-import de.rub.nds.oidc.test_model.ObjectFactory;
-import de.rub.nds.oidc.test_model.TestObjectType;
-import de.rub.nds.oidc.test_model.TestRPConfigType;
-import de.rub.nds.oidc.test_model.TestResult;
+import de.rub.nds.oidc.test_model.*;
 import de.rub.nds.oidc.utils.ImplementationLoadException;
 import de.rub.nds.oidc.utils.ValueGenerator;
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBElement;
 
@@ -38,7 +29,8 @@ import javax.xml.bind.JAXBElement;
  *
  * @author Tobias Wich
  */
-@Path("/rp")
+//@Path("/{role: rp|op}")
+@Path("/")
 public class RPLearner {
 
 	private ValueGenerator valueGenerator;
@@ -62,13 +54,13 @@ public class RPLearner {
 
 
 	@GET
-	@Path("/{testId}/export")
+	@Path("/{role: rp|op}/{testId}/export")
 	@Produces({MediaType.APPLICATION_XML})
 	public JAXBElement<TestObjectType> exportXml(@PathParam("testId") String testId) throws NoSuchTestObject {
 		return new ObjectFactory().createTestObject(exportJson(testId));
 	}
 	@GET
-	@Path("/{testId}/export")
+	@Path("/{role: rp|op}/{testId}/export")
 	@Produces({MediaType.APPLICATION_JSON})
 	public TestObjectType exportJson(@PathParam("testId") String testId) throws NoSuchTestObject {
 		TestRunner obj = testObjs.getTestObject(testId);
@@ -76,31 +68,65 @@ public class RPLearner {
 	}
 
 	@POST
-	@Path("/create-test-object")
+	@Path("/{role: rp|op}/create-test-object")
 	@Produces(MediaType.APPLICATION_JSON)
-	public TestObjectType createTestObject() {
+	public TestObjectType createTestObject(@PathParam("role") String role) {
 		String testId = valueGenerator.generateTestId();
-		TestRunner runner = testObjs.createRPTestObject(testId);
+		TestRunner runner;
+		if (role.equals("rp"))
+			runner = testObjs.createRPTestObject(testId);
+		else
+			runner = testObjs.createOPTestObject(testId);
 
 		return runner.getTestObj();
 	}
 
 	@POST
-	@Path("/{testId}/learn")
-	@Consumes({MediaType.APPLICATION_JSON})
+	@Path("/rp/{testId}/learn")
+	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public LearnResultType learn(@PathParam("testId") String testId, TestRPConfigType rpConfig)
+	public LearnResultType learn(@PathParam("testId") String testId, TestRPConfigType config)
 			throws NoSuchTestObject, ImplementationLoadException {
 		TestRunner runner = testObjs.getTestObject(testId);
-		runner.updateConfig(rpConfig);
 
+//		LearnResultType result = null;
+//        ObjectMapper mapper = new ObjectMapper();
+//        mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);  // to match bean properties
+//        // parse jsonBody to required config type
+//		try {
+//			if (role.equals("rp")) {
+//				TestRPConfigType config = mapper.readValue(jsonBody, TestRPConfigType.class);
+//				runner.updateRPConfig(config);
+//			} else if (role.equals("op")) {
+//				TestOPConfigType config = mapper.readValue(jsonBody, TestOPConfigType.class);
+//				runner.updateOPConfig(config);
+//			}
+//		} catch (JsonParseException | JsonMappingException e) {
+//			// TODO: error handling
+//			System.out.println(e);
+//			e.printStackTrace();
+//		} catch (IOException e) {}
+
+		runner.updateRPConfig(config);
 		LearnResultType result = runner.runLearningTest(testInsts);
-
 		return result;
 	}
 
 	@POST
-	@Path("/{testId}/test/{stepId}")
+	@Path("/op/{testId}/learn")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public LearnResultType learn(@PathParam("testId") String testId, TestOPConfigType config)
+			throws NoSuchTestObject, ImplementationLoadException {
+		TestRunner runner = testObjs.getTestObject(testId);
+
+		runner.updateOPConfig(config);
+		LearnResultType result = runner.runLearningTest(testInsts);
+		return result;
+	}
+
+	@POST
+	@Path("/{role: rp|op}/{testId}/test/{stepId}")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces(MediaType.APPLICATION_JSON)
 	public TestResult test(@PathParam("testId") String testId, @PathParam("stepId") String stepId)
@@ -117,19 +143,35 @@ public class RPLearner {
 	}
 
 	@GET
-	@Path("/{testId}/config")
+	@Path("/{role: rp|op}/{testId}/config")
 	@Produces(MediaType.APPLICATION_JSON)
-	public TestRPConfigType getConfig(@PathParam("testId") String testId) throws NoSuchTestObject {
+	public TestConfigType getConfig(@PathParam("role") String role, @PathParam("testId") String testId) throws NoSuchTestObject {
 		TestRunner obj = testObjs.getTestObject(testId);
-		return obj.getTestObj().getTestRPConfig();
+		if (role.equals("rp"))
+			obj.getTestObj().getTestConfig().setType(TestRPConfigType.class.getName());
+		else
+			obj.getTestObj().getTestConfig().setType(TestOPConfigType.class.getName());
+
+			return obj.getTestObj().getTestConfig();
 	}
 
 	@POST
-	@Path("/{testId}/config")
+	@Path("/rp/{testId}/config")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void setConfig(@PathParam("testId") String testId, TestRPConfigType config) throws NoSuchTestObject {
+		config.setType(TestRPConfigType.class.getName());
 		TestRunner obj = testObjs.getTestObject(testId);
-		obj.getTestObj().setTestRPConfig(config);
+		obj.getTestObj().setTestConfig(config);
+	}
+
+
+	@POST
+	@Path("/op/{testId}/config")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void setConfig(@PathParam("testId") String testId, TestOPConfigType config) throws NoSuchTestObject {
+		TestRunner obj = testObjs.getTestObject(testId);
+		config.setType(TestOPConfigType.class.getName());
+		obj.getTestObj().setTestConfig(config);
 	}
 
 }

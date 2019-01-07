@@ -18,13 +18,8 @@ package de.rub.nds.oidc.learn;
 
 import de.rub.nds.oidc.TestPlanList;
 import de.rub.nds.oidc.server.OPIVConfig;
-import de.rub.nds.oidc.test_model.TestObjectType;
-import de.rub.nds.oidc.test_model.TestPlanType;
-import de.rub.nds.oidc.test_model.TestRPConfigType;
-import de.rub.nds.oidc.test_model.TestReportType;
-import de.rub.nds.oidc.test_model.TestStepResult;
-import de.rub.nds.oidc.test_model.TestStepResultType;
-import de.rub.nds.oidc.test_model.TestStepType;
+import de.rub.nds.oidc.test_model.*;
+
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
@@ -76,11 +71,31 @@ public class TestRunnerRegistry {
 		return toi;
 	}
 
+	public TestRunner createOPTestObject(String testId) {
+		// load plan
+		TestPlanType plan = planList.getOPTestPlan();
+		// create test object
+		TestObjectType to = createTestObject(testId, plan);
+
+		// set both in a testobject instance and save it
+		TestRunner toi = new TestRunner(hosts, to, plan, te);
+		testObjects.put(testId, toi);
+
+		return toi;
+	}
+
 	private TestObjectType createTestObject(String testId, TestPlanType plan) {
 		// create empty test object
 		TestObjectType to = new TestObjectType();
 		to.setTestId(testId);
-		to.setTestRPConfig(createTestRPConfig(testId));
+
+		if (plan.getName().equals("RP-Test-Plan")) {
+			to.setTestConfig(createTestRPConfig(testId));
+		} else if (plan.getName().equals("OP-Test-Plan")) {
+			to.setTestConfig(createTestOPConfig(testId));
+		}
+
+
 
 		// load plan
 		to.setTestPlanReference(plan.getName());
@@ -118,8 +133,18 @@ public class TestRunnerRegistry {
 		TestRPConfigType testCfg = new TestRPConfigType();
 		testCfg.setHonestWebfingerResourceId(hosts.getHonestOPUri() + testId);
 		testCfg.setEvilWebfingerResourceId(hosts.getEvilOPUri() + testId);
-
+        testCfg.setType(TestRPConfigType.class.getName());
 		return testCfg;
 	}
 
+	private TestOPConfigType createTestOPConfig(String testId) {
+		TestOPConfigType testCfg = new TestOPConfigType();
+        testCfg.setType(TestOPConfigType.class.getName());
+
+//		testCfg.setHonestWebfingerResourceId(hosts.getHonestOPUri() + testId);
+//		testCfg.setEvilWebfingerResourceId(hosts.getEvilOPUri() + testId);
+
+		// TODO
+		return testCfg;
+	}
 }

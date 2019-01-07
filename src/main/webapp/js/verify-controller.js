@@ -21,9 +21,12 @@ var OPIV = (function(module) {
 
 	var testId;
 	var testObject;
-	var testRPConfig;
+	var testConfig;
 	var testReport;
 	var learningComplete = false;
+
+	const RP_CONFIG_TYPE = "de.rub.nds.oidc.test_model.TestRPConfigType";
+	const OP_CONFIG_TYPE = "de.rub.nds.oidc.test_model.TestOPConfigType";
 
 	module.clear = function() {
 		document.location.reload();
@@ -44,16 +47,21 @@ var OPIV = (function(module) {
 	}
 
 	module.loadDemo = function() {
-		if (isInitialized()) {
-			testRPConfig.UrlClientTarget = "http://www.honestsp.de:8080/simple-web-app/login";
-			testRPConfig.InputFieldName = null;
-			testRPConfig.SeleniumScript = null;
-			testRPConfig.FinalValidUrl = "http://www.honestsp.de:8080/simple-web-app/";
-			testRPConfig.HonestUserNeedle = "{sub=honest-op-test-subject, iss=" + testRPConfig.HonestWebfingerResourceId + "}";
-			testRPConfig.EvilUserNeedle = "{sub=evil-op-test-subject, iss=" + testRPConfig.EvilWebfingerResourceId + "}";
-			testRPConfig.ProfileUrl = "http://www.honestsp.de:8080/simple-web-app/user";
+        if (isInitialized()) {
+            if (testConfig["Type"] === RP_CONFIG_TYPE) {
+                testConfig.UrlClientTarget = "http://www.honestsp.de:8080/simple-web-app/login";
+				testConfig.InputFieldName = null;
+				testConfig.SeleniumScript = null;
+				testConfig.FinalValidUrl = "http://www.honestsp.de:8080/simple-web-app/";
+				testConfig.HonestUserNeedle = "{sub=honest-op-test-subject, iss=" + testConfig.HonestWebfingerResourceId + "}";
+				testConfig.EvilUserNeedle = "{sub=evil-op-test-subject, iss=" + testConfig.EvilWebfingerResourceId + "}";
+				testConfig.ProfileUrl = "http://www.honestsp.de:8080/simple-web-app/user";
 
-			writeRPConfigGUI(testRPConfig);
+				writeRPConfigGUI(testConfig);
+			}
+			if (testConfig["Type"] === OP_CONFIG_TYPE) {
+				// TODO
+		    }
 		}
 	};
 
@@ -77,7 +85,8 @@ var OPIV = (function(module) {
 			var completeHandler = function(xhr, status) {
 				var nextContainer = containerIt();
 				if (nextContainer) {
-					OPIV.testRPStep(nextContainer.TestId, nextContainer.Container, completeHandler);
+					// TODO: RP verifier specific behavior
+					OPIV.testStep(nextContainer.TestId, nextContainer.Container, completeHandler);
 				} else {
 					hideWaitDialog();
 				}
@@ -86,7 +95,8 @@ var OPIV = (function(module) {
 			// call for the first time
 			var nextContainer = containerIt();
 			if (nextContainer) {
-				OPIV.testRPStep(nextContainer.TestId, nextContainer.Container, completeHandler);
+                // TODO: RP verifier specific behavior
+				OPIV.testStep(nextContainer.TestId, nextContainer.Container, completeHandler);
 			}
 		} else {
 			alert("Please make sure the learning phase was successful first.");
@@ -125,7 +135,7 @@ var OPIV = (function(module) {
 		// call learning function
 		$.post({
 			url: "api/rp/" + testId + "/learn",
-			data: JSON.stringify(testRPConfig),
+			data: JSON.stringify(testConfig),
 			contentType: "application/json",
 			success: processLearnResponse,
 			error: learnResponseError,
@@ -133,15 +143,18 @@ var OPIV = (function(module) {
 		});
 	};
 
-	module.testRPStep = function(stepId, stepContainer, completeHandler) {
+	module.testStep = function(stepId, stepContainer, completeHandler) {
 		showWaitDialog();
 		// default parameters
 		completeHandler = typeof completeHandler !== 'undefined' ? completeHandler : function() { hideWaitDialog(); };
 
 		if (learningComplete) {
+			// TODO: refactor apiPath condition
+            let apiPath = testConfig["Type"] === RP_CONFIG_TYPE ? "api/rp/" : "api/op/";
+
 			// call test function
 			$.post({
-				url: "api/rp/" + testId + "/test/" + stepId,
+				url: apiPath + testId + "/test/" + stepId,
 				contentType: "application/json",
 				success: function(data) { processTestResponse(stepContainer, data); },
 				error: function(xhr, status) { stepTestError(stepId, stepContainer, xhr, status); },
@@ -155,14 +168,25 @@ var OPIV = (function(module) {
 	function initTestObject(data) {
 		testObject = data;
 		testId = testObject.TestId;
-		testRPConfig = testObject.TestRPConfig;
+		testConfig = testObject.TestConfig;
 		testReport = testObject.TestReport;
-		$("#test-id-display").html(document.createTextNode(testId));
-		$("#honest-op-id-display").html(document.createTextNode(testRPConfig.HonestWebfingerResourceId));
-		$("#evil-op-id-display").html(document.createTextNode(testRPConfig.EvilWebfingerResourceId));
 
-		// update config
-		writeRPConfigGUI(testRPConfig);
+		if (testConfig["Type"] === RP_CONFIG_TYPE) {
+			// configuration for rp-verifier
+            $("#test-id-display").html(document.createTextNode(testId));
+            $("#honest-op-id-display").html(document.createTextNode(testConfig.HonestWebfingerResourceId));
+            $("#evil-op-id-display").html(document.createTextNode(testConfig.EvilWebfingerResourceId));
+            // update config
+            writeRPConfigGUI(testConfig);
+        }
+        if (testConfig["Type"] === OP_CONFIG_TYPE) {
+        	// configuration for op-verifier
+        	// TODO
+
+			// update config
+            //writeOPConfigGUI(testConfig);
+        }
+
 
 		loadTestReport();
 	}
@@ -199,7 +223,8 @@ var OPIV = (function(module) {
 		// create test button
 		var testForm = document.createElement("form");
 		testForm.action = "javascript:;";
-		testForm.onsubmit = function() { OPIV.testRPStep(testDef.Name, container); };
+		// TODO: RP verifier specific ???
+		testForm.onsubmit = function() { OPIV.testStep(testDef.Name, container); };
 		var button = document.createElement("button");
 		button.className = "btn btn-default";
 		button.type = "submit";
@@ -475,23 +500,23 @@ var OPIV = (function(module) {
 	}
 
 	function updateRPConfig() {
-		 testRPConfig.UrlClientTarget = $("input[name='url-client-target']").val();
-		 testRPConfig.InputFieldName = $("input[name='input-field-name']").val();
-		 testRPConfig.SeleniumScript = $("textarea[name='selenium-script']").val();
-		 testRPConfig.FinalValidUrl = $("input[name='url-client-target-success']").val();
-		 testRPConfig.HonestUserNeedle = $("input[name='honest-user-needle']").val();
-		 testRPConfig.EvilUserNeedle = $("input[name='evil-user-needle']").val();
-		 testRPConfig.ProfileUrl = $("input[name='user-profile-url']").val();
+		 testConfig.UrlClientTarget = $("input[name='url-client-target']").val();
+		 testConfig.InputFieldName = $("input[name='input-field-name']").val();
+		 testConfig.SeleniumScript = $("textarea[name='selenium-script']").val();
+		 testConfig.FinalValidUrl = $("input[name='url-client-target-success']").val();
+		 testConfig.HonestUserNeedle = $("input[name='honest-user-needle']").val();
+		 testConfig.EvilUserNeedle = $("input[name='evil-user-needle']").val();
+		 testConfig.ProfileUrl = $("input[name='user-profile-url']").val();
 	}
 
 	function writeRPConfig(newTestRPConfig) {
-		testRPConfig.UrlClientTarget = newTestRPConfig.UrlClientTarget;
-		testRPConfig.InputFieldName = newTestRPConfig.InputFieldName;
-		testRPConfig.SeleniumScript = newTestRPConfig.SeleniumScript;
-		testRPConfig.FinalValidUrl = newTestRPConfig.FinalValidUrl;
-		testRPConfig.HonestUserNeedle = newTestRPConfig.HonestUserNeedle;
-		testRPConfig.EvilUserNeedle = newTestRPConfig.EvilUserNeedle;
-		testRPConfig.ProfileUrl = newTestRPConfig.ProfileUrl;
+		testConfig.UrlClientTarget = newTestRPConfig.UrlClientTarget;
+		testConfig.InputFieldName = newTestRPConfig.InputFieldName;
+		testConfig.SeleniumScript = newTestRPConfig.SeleniumScript;
+		testConfig.FinalValidUrl = newTestRPConfig.FinalValidUrl;
+		testConfig.HonestUserNeedle = newTestRPConfig.HonestUserNeedle;
+		testConfig.EvilUserNeedle = newTestRPConfig.EvilUserNeedle;
+		testConfig.ProfileUrl = newTestRPConfig.ProfileUrl;
 
 		writeRPConfigGUI(newTestRPConfig);
 	}
