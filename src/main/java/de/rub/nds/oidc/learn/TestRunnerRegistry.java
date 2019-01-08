@@ -95,8 +95,6 @@ public class TestRunnerRegistry {
 			to.setTestConfig(createTestOPConfig(testId));
 		}
 
-
-
 		// load plan
 		to.setTestPlanReference(plan.getName());
 
@@ -131,9 +129,9 @@ public class TestRunnerRegistry {
 
 	private TestRPConfigType createTestRPConfig(String testId) {
 		TestRPConfigType testCfg = new TestRPConfigType();
+		testCfg.setType(TestRPConfigType.class.getName());
 		testCfg.setHonestWebfingerResourceId(hosts.getHonestOPUri() + testId);
 		testCfg.setEvilWebfingerResourceId(hosts.getEvilOPUri() + testId);
-        testCfg.setType(TestRPConfigType.class.getName());
 		return testCfg;
 	}
 

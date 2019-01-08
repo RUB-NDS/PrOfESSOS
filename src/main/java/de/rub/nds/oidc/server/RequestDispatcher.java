@@ -71,8 +71,10 @@ public class RequestDispatcher extends HttpServlet {
 				handleOP(path, () -> registry.getOP1Supplier().apply(testId), req, resp);
 			} else if ((opivCfg.getEvilOPScheme() + "://" + opivCfg.getEvilOPHost()).equals(serverName)) {
 				handleOP(path, () -> registry.getOP2Supplier().apply(testId), req, resp);
-			} else if ((opivCfg.getRPScheme() + "://" + opivCfg.getRPHost()).equals(serverName)) {
-				handleRP(path, () -> registry.getRPSupplier().apply(testId), req, resp);
+			} else if ((opivCfg.getHonestRPScheme() + "://" + opivCfg.getHonestRPHost()).equals(serverName)) {
+				handleRP(path, () -> registry.getRP1Supplier().apply(testId), req, resp);
+			} else if ((opivCfg.getEvilRPScheme() + "://" + opivCfg.getEvilRPHost()).equals(serverName)) {
+				handleRP(path, () -> registry.getRP2Supplier().apply(testId), req, resp);
 			} else {
 				String msg = "Servername (" + serverName + ") is not handled by the dispatcher.";
 				throw new UnknownEndpointException(msg);

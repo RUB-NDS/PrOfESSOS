@@ -156,6 +156,7 @@ limitations under the License.
 	<div class="row">
 		<div class="learn-controls col-sm-12">
 			<form id="op-learn-form" action="javascript:;" onsubmit="javascript:OPIV.learnOP();">
+				<!--TODO: add client side form validation before submit: ClientConfigs > RegistrationURI > DiscoURI -->
 				<fieldset>
 					<legend>Client Parameters</legend>
 					<p>Test ID: <code id="test-id-display">not-loaded</code><br>
@@ -166,13 +167,13 @@ limitations under the License.
 					<div class="form-group">
 						<label class="control-label col-sm-2" for="url-op-target">Issuer (OP) URL:</label>
 						<div class="col-sm-10">
-							<input class="form-control" type="url" name="url-op-target" id="url-op-target" form="op-learn-form" required size="80">
+							<input class="form-control" type="url" name="url-op-target" id="url-op-target" form="op-learn-form" size="80">
 						</div>
 					</div>
 					<div class="form-group">
 						<label class="control-label col-sm-2" for="url-op-registration">Registration URL:</label>
 						<div class="col-sm-10">
-							<input class="form-control" type="url" name="url-op-registration" id="url-op-registration" form="op-learn-form" required size="80">
+							<input class="form-control" type="url" name="url-op-registration" id="url-op-registration" form="op-learn-form" size="80">
 						</div>
 					</div>
 					<div class="form-group">
@@ -210,6 +211,7 @@ limitations under the License.
 						<!--</div>-->
 					<!--</div>-->
 					<legend>Login/Consent Scripts</legend>
+					<!--TODO add field for Username-Formfieldname and Password-Formfieldname ??? -->
 					<div class="form-group">
 						<label class="control-label col-sm-2" for="selenium-login-script">Login-Script:</label>
 						<div class="col-sm-10">

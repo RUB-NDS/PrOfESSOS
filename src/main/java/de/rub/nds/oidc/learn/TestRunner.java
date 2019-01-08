@@ -85,12 +85,6 @@ public class TestRunner {
 		}, TestStepResult.UNDETERMINED));
 
 		LearnResultType learnResult = new LearnResultType();
-//		//todo rp specific
-//		if (getTestObj().getTestConfig().getType().equals(TestRPConfigType.class.getName())) {
-//			learnResult.setTestRPConfig((TestRPConfigType) getTestObj().getTestConfig());
-//		} else if (getTestObj().getTestConfig().getType().equals(TestOPConfigType.class.getName())) {
-//			learnResult.setTestOPConfig((TestOPConfigType) getTestObj().getTestConfig());
-//		}
 		learnResult.setTestConfig(getTestObj().getTestConfig());
 
 		learnResult.setTestStepResult(result);
@@ -141,9 +135,11 @@ public class TestRunner {
 				return errorResponse;
 			}
 
-			// RP Test specific config
-			if (getTestObj().getTestConfig().getType() != null
-					&& getTestObj().getTestConfig().getType().equals(TestRPConfigType.class.getName())) {
+			String testConfigType = getTestObj().getTestConfig().getType();
+
+			// RP-Verifier specific config
+			if (isRPTest()) {
+
 				TestRPConfigType testConfig = (TestRPConfigType) getTestObj().getTestConfig();
 				// resolve OP URL
 				String startOpType = stepDef.getBrowserSimulator().getParameter().stream()
@@ -164,18 +160,22 @@ public class TestRunner {
 					logger.log("Invalid Browser parameter in test specification.");
 					return errorResponse;
 				}
+
+				OPInstance op1Inst = new OPInstance(stepDef.getOPConfig1(), logger, testSuiteCtx, testStepCtx, OPType.HONEST);
+				instReg.addOP1(testId, new ServerInstance<>(op1Inst, logger));
+
+				OPInstance op2Inst = new OPInstance(stepDef.getOPConfig2(), logger, testSuiteCtx, testStepCtx, OPType.EVIL);
+				instReg.addOP2(testId, new ServerInstance<>(op2Inst, logger));
 			}
 
-			OPInstance op1Inst = new OPInstance(stepDef.getOPConfig1(), logger, testSuiteCtx, testStepCtx, OPType.HONEST);
-			instReg.addOP1(testId, new ServerInstance<>(op1Inst, logger));
-
-			OPInstance op2Inst = new OPInstance(stepDef.getOPConfig2(), logger, testSuiteCtx, testStepCtx, OPType.EVIL);
-			instReg.addOP2(testId, new ServerInstance<>(op2Inst, logger));
+			// OP-Verifier specific config
+			if (isOPTest()) {
+				// TODO
+			}
 
 			String browserClass = stepDef.getBrowserSimulator().getImplementationClass();
 			simulator = ImplementationLoader.loadClassInstance(browserClass, BrowserSimulator.class);
-			//todo RP specific
-			simulator.setRpConfig((TestRPConfigType) getTestObj().getTestConfig());
+			simulator.setConfig(getTestObj().getTestConfig());
 			simulator.setTemplateEngine(te);
 			simulator.setLogger(logger);
 			simulator.setContext(testSuiteCtx, testStepCtx);
@@ -188,8 +188,13 @@ public class TestRunner {
 			return errorResponse;
 		} finally {
 			// clean up test
-			instReg.removeOP1(testId);
-			instReg.removeOP2(testId);
+			if (isRPTest()) {
+				instReg.removeOP1(testId);
+				instReg.removeOP2(testId);
+			} else if (isOPTest()) {
+				instReg.removeRP1(testId);
+				instReg.removeRP2(testId);
+			}
 
 			if (simulator != null) {
 				simulator.quit();
@@ -223,16 +228,27 @@ public class TestRunner {
 			return true;
 		} else {
 			try {
-				// TODO RP specific
-				TestRPConfigType testConfig = (TestRPConfigType) testObj.getTestConfig();
-				String targetUrl = testConfig.getUrlClientTarget();
+				String targetUrl;
+
+				if (isRPTest()) {
+					TestRPConfigType testConfig = (TestRPConfigType) testObj.getTestConfig();
+					targetUrl = testConfig.getUrlClientTarget();
+				} else if (isOPTest()) {
+					TestOPConfigType testConfig = (TestOPConfigType) testObj.getTestConfig();
+					targetUrl = testConfig.getUrlOPTarget();
+				} else {
+					logger.log("Unknown TestConfigType, test aborted.");
+					return false;
+				}
+
 				URI wellKnown = UriBuilder.fromUri(targetUrl)
-						.replacePath(".professos")
-						.replaceQuery(null)
-						.build();
+							.replacePath(".professos")
+							.replaceQuery(null)
+							.build();
 
 				logger.log("Obtaining permission to perform test from url '" + wellKnown + "'.");
-				Response grantTokenResp = ClientBuilder.newClient().target(wellKnown).request().accept(MediaType.WILDCARD).get();
+				Response grantTokenResp = ClientBuilder.newClient().target(wellKnown)
+						.request().accept(MediaType.WILDCARD).get();
 				if (grantTokenResp.getStatus() == 200 && grantTokenResp.getLength() > 0) {
 					String grantToken = grantTokenResp.readEntity(String.class);
 					if (grantToken == null) {
@@ -255,5 +271,14 @@ public class TestRunner {
 			}
 		}
 	}
+
+	public boolean isRPTest() {
+		return testObj.getTestConfig().getType().equals(TestRPConfigType.class.getName());
+	}
+
+	public boolean isOPTest() {
+		return testObj.getTestConfig().getType().equals(TestOPConfigType.class.getName());
+	}
+
 
 }

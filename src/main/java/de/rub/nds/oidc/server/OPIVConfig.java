@@ -32,6 +32,17 @@ import javax.ws.rs.core.UriBuilder;
  */
 @ApplicationScoped
 public class OPIVConfig {
+	private final URI CONTROLLER_URI;
+	private final URI HONEST_OP_URL;
+	private final URI EVIL_OP_URL;
+	private final URI HONEST_RP_URL;
+	private final URI EVIL_RP_URL;
+
+	// TODO: read from config
+	private final String honestSigAlias = "opiv honest token signer";
+	private final String evilSigAlias = "opiv evil token signer";
+	private final String keystorePass = "pass";
+	private final KeyStore keyStore;
 
 	public OPIVConfig() throws IOException, URISyntaxException, GeneralSecurityException {
 		InputStream hostsFile = OPIVConfig.class.getResourceAsStream("/servernames.properties");
@@ -41,24 +52,14 @@ public class OPIVConfig {
 		CONTROLLER_URI = new URI(p.getProperty("controller"));
 		HONEST_OP_URL = new URI(p.getProperty("honest-op"));
 		EVIL_OP_URL = new URI(p.getProperty("evil-op"));
-		RP_URL = new URI(p.getProperty("rp"));
+		HONEST_RP_URL = new URI(p.getProperty("honest-rp"));
+		EVIL_RP_URL = new URI(p.getProperty("evil-rp"));
 
 		InputStream keystoreFile = OPIVConfig.class.getResourceAsStream("/keystore.jks");
 		keyStore = KeyStore.getInstance("JKS");
 		keyStore.load(keystoreFile, keystorePass.toCharArray());
 	}
 
-	private final URI CONTROLLER_URI;
-	private final URI HONEST_OP_URL;
-	private final URI EVIL_OP_URL;
-	private final URI RP_URL;
-
-	// TODO: read from config
-	private final String honestSigAlias = "opiv honest token signer";
-	private final String evilSigAlias = "opiv evil token signer";
-	private final String untrustedAlias = "opiv untrusted token signer";
-	private final String keystorePass = "pass";
-	private final KeyStore keyStore;
 
 	public URI getControllerUri() {
 		return CONTROLLER_URI;
@@ -92,16 +93,31 @@ public class OPIVConfig {
 		return host + (port == -1 ? "" : ":" + port);
 	}
 
-	public String getRPScheme() {
-		return RP_URL.getScheme();
+	public URI getHonestRPUri() {
+		return UriBuilder.fromUri(HONEST_RP_URL).path("/dispatch/").build();
+	}
+	public String getHonestRPScheme() {
+		return HONEST_RP_URL.getScheme();
 	}
 
-	public String getRPHost() {
-		String host = RP_URL.getHost();
-		int port = RP_URL.getPort();
+	public String getHonestRPHost() {
+		String host = HONEST_RP_URL.getHost();
+		int port = HONEST_RP_URL.getPort();
 		return host + (port == -1 ? "" : ":" + port);
 	}
 
+	public URI getEvilRPUri() {
+		return UriBuilder.fromUri(EVIL_RP_URL).path("/dispatch/").build();
+	}
+	public String getEvilRPScheme() {
+		return EVIL_RP_URL.getScheme();
+	}
+
+	public String getEvilRPHost() {
+		String host = EVIL_RP_URL.getHost();
+		int port = EVIL_OP_URL.getPort();
+		return host + (port == -1 ? "" : ":" + port);
+	}
 
 	public KeyStore.PrivateKeyEntry getHonestOPSigningEntry() {	return getSigningEntry(honestSigAlias);	}
 

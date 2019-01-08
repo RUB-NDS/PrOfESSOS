@@ -19,10 +19,7 @@ package de.rub.nds.oidc.browser;
 import de.rub.nds.oidc.learn.TemplateEngine;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.op.OPParameterConstants;
-import de.rub.nds.oidc.test_model.ParameterType;
-import de.rub.nds.oidc.test_model.TestOPConfigType;
-import de.rub.nds.oidc.test_model.TestRPConfigType;
-import de.rub.nds.oidc.test_model.TestStepResult;
+import de.rub.nds.oidc.test_model.*;
 import de.rub.nds.oidc.utils.Func;
 import de.rub.nds.oidc.utils.InstanceParameters;
 import java.io.IOException;
@@ -112,6 +109,14 @@ public abstract class BrowserSimulator {
 		//driver = new PhantomJSDriver();
 		//driver.manage().window().setSize(new Dimension(1024, 768));
 		driver.manage().timeouts().implicitlyWait(NORMAL_WAIT_TIMEOUT, TimeUnit.SECONDS);
+	}
+
+	public void setConfig(TestConfigType config) {
+		if (config.getType().equals(TestRPConfigType.class.getName())) {
+			setRpConfig((TestRPConfigType) config);
+		} else if (config.getType().equals(TestOPConfigType.class.getName())) {
+			setOpConfig((TestOPConfigType) config);
+		}
 	}
 
 	public void setRpConfig(TestRPConfigType rpConfig) {
