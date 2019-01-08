@@ -9,7 +9,6 @@ ENV HOME /opt/mitreidc
 ARG BRANCH=1.3.x
 ARG ISSUER=localhost:8080
 
-## Prerequisites: Add user, BouncyCastle
 RUN apt-get update && apt-get upgrade -y && apt-get install -y git wget sudo && apt-get clean && \
 	mkdir -p $HOME
 
@@ -46,7 +45,7 @@ ENV HOME /opt/mitreidc
 COPY --from=builder $HOME/openid-connect-server-webapp/target/openid-connect-server-webapp.war /opt/jboss/wildfly/standalone/deployments/openid-connect-server-webapp.war
 
 # update config in .war, so we dont need to recompile when changing configs
-COPY ./config .
+COPY ./mitreid-connect-server-webapp/config .
 RUN jar uf /opt/jboss/wildfly/standalone/deployments/openid-connect-server-webapp.war WEB-INF/server-config.xml
 RUN jar uf /opt/jboss/wildfly/standalone/deployments/openid-connect-server-webapp.war WEB-INF/classes/db/hsql/users.sql
 RUN jar uf /opt/jboss/wildfly/standalone/deployments/openid-connect-server-webapp.war WEB-INF/classes/db/hsql/clients.sql
@@ -55,7 +54,7 @@ RUN jar uf /opt/jboss/wildfly/standalone/deployments/openid-connect-server-webap
 COPY ./wildfly/static-professos.txt /opt/jboss/wildfly/static/static-professos.txt
 ## use a config that serves the static safeguard file
 COPY ./wildfly/standalone.xml /opt/jboss/wildfly/standalone/configuration/standalone.xml
-# USER root
+USER root
 RUN chown jboss:jboss -R /opt/jboss/wildfly/static/static-professos.txt && \
     chown jboss:jboss -R /opt/jboss/wildfly/standalone/configuration/standalone.xml
 
@@ -73,8 +72,14 @@ EXPOSE 8080
 
 # Set the default command to run on boot
 # This will boot WildFly in the standalone mode and bind to all interfaces
-CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0", "--debug"]
+#CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0", "--debug"]
+CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
 
-# build with: "sudo docker build --build-arg ISSUER=honestidp.de:8080 -t mitreid-server-webapp:latest ."
+# build with: "sudo docker build -t mitreid-server-webapp:latest ."
 # run with: "sudo docker run -ti -p 8080:8080 mitreid-server-webapp:latest"
-# configuration can be found at www.honestidp.de:8080/openid-connect-server-webapp/.well-known/openid-configuration
+#
+# To set the Issuer ID to 'honestidp:8080', build with:
+# "sudo docker build --build-arg ISSUER=honestidp.de:8080 -t mitreid-server-webapp:latest ."
+# Configuration can then still be found at localhost:8080/openid-connect-server-webapp/.well-known/openid-configuration
+# even though the IdP uses honestidp.de:8080 as issuer URI, so relative links will be broken.
+# You may want to add honestidp.de to /etc/hosts as a WA

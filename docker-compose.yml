@@ -28,12 +28,9 @@ services:
           - honestsp.de
           - www.honestsp.de
   identity_provider:
-#    image: mitreid-server-webapp:latest
     build:
       context: ./docker/
       dockerfile: mitreid-connect-server-webapp/Dockerfile
-    # REMINDER: when switching from image to build, also
-    # set the ISSUER build arg as shown below
       args:
         ISSUER: "honestidp.de:8080"
     ports:
@@ -43,3 +40,8 @@ services:
         aliases:
           - honestidp.de
           - www.honestidp.de
+      # configuration of IdP is then available at
+      # http://localhost:8280/openid-connect-server-webapp/.well-known/openid-configuration (from host)
+      # or at
+      # http://honestidp.de:8080/openid-connect-server-webapp/.well-known/openid-configuration (from docker default net)
+
