@@ -31,7 +31,7 @@ import javax.xml.bind.JAXBElement;
  */
 //@Path("/{role: rp|op}")
 @Path("/")
-public class RPLearner {
+public class Learner {
 
 	private ValueGenerator valueGenerator;
 	private TestRunnerRegistry testObjs;
@@ -88,24 +88,6 @@ public class RPLearner {
 	public LearnResultType learn(@PathParam("testId") String testId, TestRPConfigType config)
 			throws NoSuchTestObject, ImplementationLoadException {
 		TestRunner runner = testObjs.getTestObject(testId);
-
-//		LearnResultType result = null;
-//        ObjectMapper mapper = new ObjectMapper();
-//        mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);  // to match bean properties
-//        // parse jsonBody to required config type
-//		try {
-//			if (role.equals("rp")) {
-//				TestRPConfigType config = mapper.readValue(jsonBody, TestRPConfigType.class);
-//				runner.updateRPConfig(config);
-//			} else if (role.equals("op")) {
-//				TestOPConfigType config = mapper.readValue(jsonBody, TestOPConfigType.class);
-//				runner.updateOPConfig(config);
-//			}
-//		} catch (JsonParseException | JsonMappingException e) {
-//			// TODO: error handling
-//			System.out.println(e);
-//			e.printStackTrace();
-//		} catch (IOException e) {}
 
 		runner.updateRPConfig(config);
 		LearnResultType result = runner.runLearningTest(testInsts);

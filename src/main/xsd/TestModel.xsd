@@ -79,7 +79,7 @@ limitations under the License.
 					<element name="ConsentScript" type="string" minOccurs="0" />
 					<element name="Client1Config" type="string" minOccurs="0" />
 					<element name="Client2Config" type="string" minOccurs="0" />
-					<element name="LoginFormHelp" type="string" minOccurs="0" />
+					<!--<element name="LoginFormHelp" type="string" minOccurs="0" />-->
 				</sequence>
 			</extension>
 		</complexContent>

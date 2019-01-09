@@ -28,6 +28,7 @@ import de.rub.nds.oidc.test_model.*;
 import de.rub.nds.oidc.utils.ImplementationLoadException;
 import de.rub.nds.oidc.utils.ImplementationLoader;
 import de.rub.nds.oidc.utils.UriUtils;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -135,11 +136,8 @@ public class TestRunner {
 				return errorResponse;
 			}
 
-			String testConfigType = getTestObj().getTestConfig().getType();
-
 			// RP-Verifier specific config
 			if (isRPTest()) {
-
 				TestRPConfigType testConfig = (TestRPConfigType) getTestObj().getTestConfig();
 				// resolve OP URL
 				String startOpType = stepDef.getBrowserSimulator().getParameter().stream()
@@ -171,6 +169,9 @@ public class TestRunner {
 			// OP-Verifier specific config
 			if (isOPTest()) {
 				// TODO
+				TestOPConfigType testConfig = (TestOPConfigType) getTestObj().getTestConfig();
+
+
 			}
 
 			String browserClass = stepDef.getBrowserSimulator().getImplementationClass();
@@ -216,8 +217,21 @@ public class TestRunner {
 		local.setProfileUrl(rpConfig.getProfileUrl());
 	}
 
-	public void updateOPConfig(TestOPConfigType opConfig) {
-		//todo
+	public void updateOPConfig(TestOPConfigType config) {
+		TestOPConfigType local = (TestOPConfigType) getTestObj().getTestConfig();
+
+		local.setAccessToken1(config.getAccessToken1());
+		local.setAccessToken2(config.getAccessToken2());
+		local.setClient1Config(config.getClient1Config());
+		local.setClient2Config(config.getClient2Config());
+		local.setConsentScript(config.getConsentScript());
+		local.setLoginScript(config.getLoginScript());
+		local.setUrlOPRegistration(config.getUrlOPRegistration());
+		local.setUrlOPTarget(config.getUrlOPTarget());
+		local.setUser1Name(config.getUser1Name());
+		local.setUser2Name(config.getUser2Name());
+		local.setUser1Pass(config.getUser1Pass());
+		local.setUser2Pass(config.getUser2Pass());
 	}
 
 
