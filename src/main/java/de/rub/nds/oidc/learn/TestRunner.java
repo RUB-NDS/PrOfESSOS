@@ -24,6 +24,10 @@ import de.rub.nds.oidc.server.TestInstanceRegistry;
 import de.rub.nds.oidc.server.op.OPInstance;
 import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.server.op.OPType;
+import de.rub.nds.oidc.server.rp.RPContextConstants;
+import de.rub.nds.oidc.server.rp.RPInstance;
+import de.rub.nds.oidc.server.rp.RPParameterConstants;
+import de.rub.nds.oidc.server.rp.RPType;
 import de.rub.nds.oidc.test_model.*;
 import de.rub.nds.oidc.utils.ImplementationLoadException;
 import de.rub.nds.oidc.utils.ImplementationLoader;
@@ -140,16 +144,19 @@ public class TestRunner {
 			if (isRPTest()) {
 				TestRPConfigType testConfig = (TestRPConfigType) getTestObj().getTestConfig();
 				// resolve OP URL
-				String startOpType = stepDef.getBrowserSimulator().getParameter().stream()
-						.filter(e -> e.getKey().equals(OPParameterConstants.BROWSER_INPUT_OP_URL))
-						.map(e -> e.getValue())
-						.findFirst().orElse("EVIL");
 				String honestWebfinger = testConfig.getHonestWebfingerResourceId();
 				String evilWebfinger = testConfig.getEvilWebfingerResourceId();
 				// save both in context under their own name
 				testStepCtx.put(OPParameterConstants.BROWSER_INPUT_HONEST_OP_URL, honestWebfinger);
 				testStepCtx.put(OPParameterConstants.BROWSER_INPUT_EVIL_OP_URL, evilWebfinger);
+
 				// now save standard value
+				String startOpType = stepDef.getBrowserSimulator().getParameter().stream()
+						.filter(e -> e.getKey().equals(OPParameterConstants.BROWSER_INPUT_OP_URL))
+						.map(e -> e.getValue())
+						.findFirst().orElse("EVIL");
+				// TODO: ^^wat? browserSimulater never has a param w key BROWSER_INPUT_OP_URL
+
 				if (startOpType.equals("HONEST")) {
 					testStepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, honestWebfinger);
 				} else if (startOpType.equals("EVIL")) {
@@ -158,6 +165,7 @@ public class TestRunner {
 					logger.log("Invalid Browser parameter in test specification.");
 					return errorResponse;
 				}
+				// TODO: atm, this is always EVIL and overridden in browser implementations, do we need it at all?
 
 				OPInstance op1Inst = new OPInstance(stepDef.getOPConfig1(), logger, testSuiteCtx, testStepCtx, OPType.HONEST);
 				instReg.addOP1(testId, new ServerInstance<>(op1Inst, logger));
@@ -169,9 +177,23 @@ public class TestRunner {
 			// OP-Verifier specific config
 			if (isOPTest()) {
 				// TODO
-				TestOPConfigType testConfig = (TestOPConfigType) getTestObj().getTestConfig();
+				TestOPConfigType remoteOPConfig = (TestOPConfigType) getTestObj().getTestConfig();
 
+				testStepCtx.put(RPParameterConstants.OP_DISCOVERY_URI, remoteOPConfig.getUrlOPTarget());
+				RPInstance rp1Inst = new RPInstance(stepDef.getRPConfig1(), logger, testSuiteCtx, testStepCtx, remoteOPConfig, RPType.HONEST, hostCfg);
+				instReg.addRP1(testId, new ServerInstance<>(rp1Inst, logger));
+				RPInstance rp2Inst = new RPInstance(stepDef.getRPConfig1(), logger, testSuiteCtx, testStepCtx, remoteOPConfig, RPType.EVIL, hostCfg);
+				instReg.addRP2(testId, new ServerInstance<>(rp2Inst, logger));
 
+				if (stepDef.getName().equals("LearningStep")) {
+					// register clients at tested OP
+					TestStepResult res1 = rp1Inst.getImpl().registerClientIfNeeded();
+					TestStepResult res2 = rp2Inst.getImpl().registerClientIfNeeded();
+//					if (! res1.equals(res2) && res1.equals(TestStepResult.PASS)) {
+//						// this is covered using suiteCtx.get(RPContextConstants.CLIENT_REGISTRATION_FAILED)
+						// in OPLearningBrowser
+//					}
+				}
 			}
 
 			String browserClass = stepDef.getBrowserSimulator().getImplementationClass();
@@ -218,20 +240,20 @@ public class TestRunner {
 	}
 
 	public void updateOPConfig(TestOPConfigType config) {
-		TestOPConfigType local = (TestOPConfigType) getTestObj().getTestConfig();
+		TestOPConfigType testConfig = (TestOPConfigType) getTestObj().getTestConfig();
 
-		local.setAccessToken1(config.getAccessToken1());
-		local.setAccessToken2(config.getAccessToken2());
-		local.setClient1Config(config.getClient1Config());
-		local.setClient2Config(config.getClient2Config());
-		local.setConsentScript(config.getConsentScript());
-		local.setLoginScript(config.getLoginScript());
-		local.setUrlOPRegistration(config.getUrlOPRegistration());
-		local.setUrlOPTarget(config.getUrlOPTarget());
-		local.setUser1Name(config.getUser1Name());
-		local.setUser2Name(config.getUser2Name());
-		local.setUser1Pass(config.getUser1Pass());
-		local.setUser2Pass(config.getUser2Pass());
+		testConfig.setAccessToken1(config.getAccessToken1());
+		testConfig.setAccessToken2(config.getAccessToken2());
+		testConfig.setClient1Config(config.getClient1Config());
+		testConfig.setClient2Config(config.getClient2Config());
+		testConfig.setConsentScript(config.getConsentScript());
+		testConfig.setLoginScript(config.getLoginScript());
+		testConfig.setUrlOPRegistration(config.getUrlOPRegistration());
+		testConfig.setUrlOPTarget(config.getUrlOPTarget());
+		testConfig.setUser1Name(config.getUser1Name());
+		testConfig.setUser2Name(config.getUser2Name());
+		testConfig.setUser1Pass(config.getUser1Pass());
+		testConfig.setUser2Pass(config.getUser2Pass());
 	}
 
 

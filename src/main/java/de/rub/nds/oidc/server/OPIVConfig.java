@@ -96,6 +96,7 @@ public class OPIVConfig {
 	public URI getHonestRPUri() {
 		return UriBuilder.fromUri(HONEST_RP_URL).path("/dispatch/").build();
 	}
+
 	public String getHonestRPScheme() {
 		return HONEST_RP_URL.getScheme();
 	}

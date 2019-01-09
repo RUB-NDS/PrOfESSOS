@@ -54,9 +54,11 @@ public class TestInstanceRegistry {
 	}
 
 	public void addRP1(String testId, ServerInstance<RPInstance> inst) {
+		inst.getInst().getImpl().setTestId(testId);
 		rp1s.put(testId, inst);
 	}
 	public void addRP2(String testId, ServerInstance<RPInstance> inst) {
+		inst.getInst().getImpl().setTestId(testId);
 		rp2s.put(testId, inst);
 	}
 
@@ -113,7 +115,7 @@ public class TestInstanceRegistry {
 	public ServerInstance<RPInstance> getRP1(String testId) throws ServerInstanceMissingException {
 		ServerInstance<RPInstance> result = getRP1Supplier().apply(testId);
 		if (result == null) {
-			throw createException("RP", testId);
+			throw createException("RP-1", testId);
 		} else {
 			return result;
 		}
@@ -122,7 +124,7 @@ public class TestInstanceRegistry {
 	public ServerInstance<RPInstance> getRP2(String testId) throws ServerInstanceMissingException {
 		ServerInstance<RPInstance> result = getRP2Supplier().apply(testId);
 		if (result == null) {
-			throw createException("RP", testId);
+			throw createException("RP-2", testId);
 		} else {
 			return result;
 		}

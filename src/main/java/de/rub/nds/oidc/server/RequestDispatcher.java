@@ -18,6 +18,7 @@ package de.rub.nds.oidc.server;
 
 import de.rub.nds.oidc.server.op.OPImplementation;
 import de.rub.nds.oidc.server.op.OPInstance;
+import de.rub.nds.oidc.server.rp.RPImplementation;
 import de.rub.nds.oidc.server.rp.RPInstance;
 import java.io.IOException;
 import java.net.URI;
@@ -133,7 +134,7 @@ public class RequestDispatcher extends HttpServlet {
 
 	private void handleRP(RequestPath path, Supplier<ServerInstance<RPInstance>> instSupplier, HttpServletRequest req,
 			HttpServletResponse resp)
-			throws ServerInstanceMissingException {
+			throws ServerInstanceMissingException, IOException {
 		// let the dispatcher handle everything else
 		String testId = path.getTestId();
 		String resource = path.getStrippedResource();
@@ -143,7 +144,18 @@ public class RequestDispatcher extends HttpServlet {
 			String msg = String.format("RP instance for id %s is missing in the registry.", testId);
 			throw new ServerInstanceMissingException(msg);
 		} else {
+			RPImplementation impl = inst.getInst().getImpl();
+			impl.setBaseUri(path.getDispatchUriAndTestId());
+			impl.setOPIVConfig(opivCfg);
 
+			try {
+				if (resource.startsWith(RPImplementation.REDIRECT_PATH)) {
+					impl.callback(path, req, resp);
+				}
+			} catch (Exception ex) {
+				inst.getLogger().log("Failed to process request.", ex);
+				serverError(resource, resp);
+			}
 		}
 	}
 

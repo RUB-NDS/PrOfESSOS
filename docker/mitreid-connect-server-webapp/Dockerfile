@@ -46,6 +46,7 @@ COPY --from=builder $HOME/openid-connect-server-webapp/target/openid-connect-ser
 
 # update config in .war, so we dont need to recompile when changing configs
 COPY ./mitreid-connect-server-webapp/config .
+# TODO this ovverrides the ISSUER that was set as build arg
 RUN jar uf /opt/jboss/wildfly/standalone/deployments/openid-connect-server-webapp.war WEB-INF/server-config.xml
 RUN jar uf /opt/jboss/wildfly/standalone/deployments/openid-connect-server-webapp.war WEB-INF/classes/db/hsql/users.sql
 RUN jar uf /opt/jboss/wildfly/standalone/deployments/openid-connect-server-webapp.war WEB-INF/classes/db/hsql/clients.sql

@@ -16,10 +16,56 @@
 
 package de.rub.nds.oidc.server.rp;
 
+import com.nimbusds.oauth2.sdk.ParseException;
+import de.rub.nds.oidc.log.TestStepLogger;
+import de.rub.nds.oidc.server.OPIVConfig;
+import de.rub.nds.oidc.server.RequestPath;
+import de.rub.nds.oidc.test_model.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+
 /**
  *
  * @author Tobias Wich
  */
 public interface RPImplementation {
+
+	String REDIRECT_PATH = "/callback";
+	String JWKS_PATH = "/jwks";
+	//TODO: request_uri, sector_identifier_uri, ???
+//    String SECTOR_ID_PATH = "/sectoridentifier.json";
+
+
+	void setRPConfig(RPConfigType cfg);
+
+	void setOPIVConfig(OPIVConfig cfg);
+
+	void setLogger(TestStepLogger logger);
+
+	void setTestId(String testId);
+
+	void setBaseUri(URI baseUri);
+
+	void setRPType(RPType type);
+
+	void setContext(Map<String, Object> suiteCtx, Map<String, Object> stepCtx);
+
+	void setParameters(List<ParameterType> params);
+
+	void setTestOPConfig(TestOPConfigType cfg);
+
+	TestStepResult registerClientIfNeeded() throws IOException, ParseException;
+
+	// serve redirect_uri
+	void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+
+	// TODO: add endpoints for request_uri, sector_identifier_uri, ???
+//	void requestUri(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+//	void sectorIdentifierUri(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
 
 }

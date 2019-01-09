@@ -16,6 +16,7 @@
 
 package de.rub.nds.oidc.log;
 
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import de.rub.nds.oidc.test_model.HeaderType;
 import de.rub.nds.oidc.test_model.HttpRequestEntryType;
 import de.rub.nds.oidc.test_model.HttpResponseEntryType;

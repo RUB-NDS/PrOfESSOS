@@ -11,10 +11,10 @@
 			<ImplementationClass>de.rub.nds.oidc.browser.OPLearningBrowser</ImplementationClass>
 		</BrowserSimulator>
 		<RPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultRP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
 		</RPConfig-1>
 		<RPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
 		</RPConfig-2>
 	</LearningStep>
 
@@ -31,7 +31,7 @@
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultRP</ImplementationClass>
 			<Parameter Key="bar">baz</Parameter>
 		</RPConfig-1>
-		<RPConfig-2>F
+		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultRP</ImplementationClass>
 			<Parameter Key="bar">baz</Parameter>
 		</RPConfig-2>
