@@ -85,6 +85,8 @@ public class TestRunner {
 		result.setStepReference(learningStep);
 		result.setResult(TestStepResult.NOT_RUN);
 
+		Class testCoordinator = BrowserSimulator.class;
+
 		result.setResult(runTestFun(instReg, result, (simulator) -> {
 			return simulator.run();
 		}, TestStepResult.UNDETERMINED));
@@ -179,12 +181,16 @@ public class TestRunner {
 				// TODO
 				TestOPConfigType remoteOPConfig = (TestOPConfigType) getTestObj().getTestConfig();
 
-				testStepCtx.put(RPParameterConstants.OP_DISCOVERY_URI, remoteOPConfig.getUrlOPTarget());
+				testStepCtx.put(RPContextConstants.TARGET_OP_URL, remoteOPConfig.getUrlOPTarget());
 				RPInstance rp1Inst = new RPInstance(stepDef.getRPConfig1(), logger, testSuiteCtx, testStepCtx, remoteOPConfig, RPType.HONEST, hostCfg);
 				instReg.addRP1(testId, new ServerInstance<>(rp1Inst, logger));
 				RPInstance rp2Inst = new RPInstance(stepDef.getRPConfig1(), logger, testSuiteCtx, testStepCtx, remoteOPConfig, RPType.EVIL, hostCfg);
 				instReg.addRP2(testId, new ServerInstance<>(rp2Inst, logger));
 
+				TestStepResult disocveryResult = rp1Inst.getImpl().discoverOPIfNeeded();
+				if (disocveryResult != TestStepResult.PASS) {
+					return disocveryResult;
+				}
 				if (stepDef.getName().equals("LearningStep")) {
 					// register clients at tested OP
 					TestStepResult res1 = rp1Inst.getImpl().registerClientIfNeeded();

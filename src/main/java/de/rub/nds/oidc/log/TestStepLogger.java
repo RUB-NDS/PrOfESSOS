@@ -16,6 +16,7 @@
 
 package de.rub.nds.oidc.log;
 
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import de.rub.nds.oidc.test_model.HeaderType;
 import de.rub.nds.oidc.test_model.HttpRequestEntryType;
@@ -27,13 +28,7 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -130,12 +125,35 @@ public class TestStepLogger {
 		logHttpRequest(entry);
 	}
 
+	public void logHttpRequest(@Nonnull HTTPRequest req, @Nullable String body ){
+				HttpRequestEntryType entry = new HttpRequestEntryType();
+
+		String reqLine = req.getMethod() + " " + req.getURL().getPath();
+		// nimbus SDK HttpRequest getQuery() returns the body for POST or the QueryString for GET, see:
+		// https://static.javadoc.io/com.nimbusds/oauth2-oidc-sdk/5.8/com/nimbusds/oauth2/sdk/http/HTTPRequest.html#getQuery--
+		if (req.getQuery() != null) {
+			if (req.getMethod() != HTTPRequest.Method.POST) {
+				reqLine += "?" + req.getQuery();
+			} else {
+				entry.setBody(formatBody(req.getContentType().toString(), req.getQuery()));
+			}
+		}
+		entry.setRequestLine(reqLine);
+
+		// add special headers to indicate the protocol scheme and port
+		entry.getHeader().add(createHeader("X-Protocol-Scheme", req.getURL().getProtocol()));
+		entry.getHeader().add(createHeader("X-Protocol-Port", Integer.toString(req.getURL().getPort())));
+
+		entry.getHeader().addAll(readHeaders(req.getHeaders()));
+
+		logHttpRequest(entry);
+	}
+
 	public void logHttpRequest(@Nonnull HttpRequestEntryType req) {
 		LogEntryType e = createLogEntry();
 		e.setHttpRequest(req);
 		log(e);
 	}
-
 
 	public void logHttpResponse(@Nonnull HttpServletResponse res, @Nullable String body) {
 		HttpResponseEntryType entry = new HttpResponseEntryType();
@@ -143,6 +161,17 @@ public class TestStepLogger {
 		entry.setStatus(BigInteger.valueOf(res.getStatus()));
 		entry.getHeader().addAll(readHeaders(res.getHeaderNames(), res::getHeaders));
 		entry.setBody(formatBody(res.getContentType(), body));
+
+		logHttpResponse(entry);
+	}
+
+	// nimbus SDK uses different response type
+	public void logHttpResponse(@Nonnull HTTPResponse res, @Nullable String body) {
+		HttpResponseEntryType entry = new HttpResponseEntryType();
+
+		entry.setStatus(BigInteger.valueOf(res.getStatusCode()));
+		entry.getHeader().addAll(readHeaders(res.getHeaders()));
+		entry.setBody(formatBody(res.getContentType().toString(), body));
 
 		logHttpResponse(entry);
 	}
@@ -160,6 +189,15 @@ public class TestStepLogger {
 			return headers.apply(key).stream()
 					.map(value -> createHeader(key, value));
 		}).collect(Collectors.toList());
+	}
+
+	// nimbus SDK uses different types
+	private List<HeaderType> readHeaders(Map<String,String> headers) {
+		List<HeaderType> result = new ArrayList<>();
+		for (String key : headers.keySet()) {
+			result.add(createHeader(key, headers.get(key)));
+		}
+		return result;
 	}
 
 	private HeaderType createHeader(String key, String value) {

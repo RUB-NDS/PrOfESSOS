@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -59,10 +60,13 @@ public interface RPImplementation {
 
 	void setTestOPConfig(TestOPConfigType cfg);
 
+	TestStepResult run();
+
+	TestStepResult discoverOPIfNeeded();
 	TestStepResult registerClientIfNeeded() throws IOException, ParseException;
 
 	// serve redirect_uri
-	void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+	void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException;
 
 	// TODO: add endpoints for request_uri, sector_identifier_uri, ???
 //	void requestUri(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;

@@ -1,4 +1,7 @@
-var opUrl = document.querySelector("input[name='§input-field§']");
-opUrl.value = "\§browser-input-op_url\§";
+var username = document.getElementById("j_username");
+username.value = "\§current_user_username\§";
+
+var password = document.getElementById("j_password");
+password.value = "\§current_user_password\§";
 // add short delay for taking screenshot
-setTimeout(function() {opUrl.form.submit();}, 500);
+setTimeout(function() {document.forms[0].submit();}, 500);

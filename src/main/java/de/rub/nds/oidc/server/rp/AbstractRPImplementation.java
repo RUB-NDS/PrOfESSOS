@@ -11,7 +11,6 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import com.nimbusds.oauth2.sdk.util.URLUtils;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderConfigurationRequest;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.*;
@@ -20,14 +19,11 @@ import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.test_model.*;
 import de.rub.nds.oidc.utils.InstanceParameters;
 import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import okhttp3.*;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -114,8 +110,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 	public TestStepResult registerClientIfNeeded() throws IOException, ParseException {
 //		1. If the user set a valid ClientConfig in form, use it
-//		2. Otherwise, check if a registration endpoint was provided and, if so, register at OP
-//		3. Otherwise, check the OP target URL and attempt discovery
+//		2. Otherwise, run dynamic registration (reg Endpoint from discovery)
 		TestStepResult result;
 
 		boolean isValidConfig = evalConfig();
@@ -135,7 +130,6 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 			return result;
 		}
 
-		// attempt registration - triggers discovery if needed
 		result = registerClient(type);
 		if (result != TestStepResult.PASS) {
 			suiteCtx.put(RPContextConstants.CLIENT_REGISTRATION_FAILED, true);
@@ -156,70 +150,40 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		clientMetadata.setGrantTypes(Collections.singleton(GrantType.AUTHORIZATION_CODE));
 		clientMetadata.setRedirectionURI(getRedirectUri());
 		clientMetadata.setName(getClientName());
-		logger.log("Client Metadata set");
+//		logger.log("Client Metadata set");
 
-		BearerAccessToken bat = null;
+		BearerAccessToken bearerAccessToken = null;
 		String at = getRegistrationAccessToken();
 		if (!Strings.isNullOrEmpty(at)) {
-			bat = BearerAccessToken.parse("Bearer " + at);
+			bearerAccessToken = BearerAccessToken.parse("Bearer " + at);
 		}
 
 		OIDCClientRegistrationRequest regRequest = new OIDCClientRegistrationRequest(
 				getRegistrationEndpoint(),  // triggers discovery if necessary
 				clientMetadata,
 //				getRegistrationAccessToken()
-				bat
+				bearerAccessToken
 		);
-		logger.log("Reg request prepared");
-
-//		// TODO
-//		// avoid creating several instances, should be singleon
-//		OkHttpClient client = new OkHttpClient();
-//
-//
-//		Request.Builder rb = new Request.Builder()
-//				.url(getRegistrationEndpoint().toURL())
-//				.addHeader("Content-Type", "application/json")
-//				.addHeader("Accept", "application/json");
-//
-//				if (!Strings.isNullOrEmpty(at)) {
-//					rb.addHeader("Authorization", at);
-//				}
-//
-//				Request request = rb.method("POST", RequestBody.create(MediaType.parse("application/json; charset=utf-8"), clientMetadata.toString()))
-//			 	.build();
-//
-//		Response response = client.newCall(request).execute();
-//
-//		if (! response.isSuccessful()) {
-//			logger.log("Client Registration failed");
-//			logger.log(response.toString());
-//			return  TestStepResult.FAIL;
-//		}
-//
-//		JSONObject jsonBody = JSONObjectUtils.parseJSONObject(response.body().string());
-//		OIDCClientInformation clientInfo = OIDCClientInformation.parse(jsonBody);
-//		logger.log("ClientInfo parsed from registration response");
-//		logger.log(response.body().string());
-
 
 		HTTPResponse response = regRequest.toHTTPRequest().send();
+		logger.log("Reg request prepared");
+		logger.logHttpRequest(regRequest.toHTTPRequest(), regRequest.toHTTPRequest().getQueryAsJSONObject().toString());
 
 		ClientRegistrationResponse regResponse = OIDCClientRegistrationResponseParser.parse(response);
 
 		if (! regResponse.indicatesSuccess()) {
 			ClientRegistrationErrorResponse errorResponse = (ClientRegistrationErrorResponse)regResponse;
 			logger.log("Dynamic Client Registration failed");
-			logger.log(response.getContent()); // TODO: how can we log a nimbus sdk http response?
+			logger.logHttpResponse(response, response.getContent());
 			return TestStepResult.FAIL;
 		}
 
 		OIDCClientInformationResponse successResponse = (OIDCClientInformationResponse) regResponse;
 		OIDCClientInformation clientInfo = successResponse.getOIDCClientInformation();
 
-//
 		setClientInfo(clientInfo);
-		logger.log(clientInfo.getOIDCMetadata().toJSONObject(true).toJSONString());
+		logger.log("Successfully registered client");
+		logger.logHttpResponse(response, response.getContent());
 
 		suiteCtx.put(RPContextConstants.CLIENT_REGISTRATION_FAILED, false);
         return TestStepResult.PASS;
@@ -240,13 +204,18 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 			setClientInfo(clientInfo);
 			return true;
 		} catch (com.nimbusds.oauth2.sdk.ParseException  e ) {
-			logger.log("Failed to parse client metadata", e);
+			logger.log("Failed to parse provided client metadata", e);
 			return false;
 		}
 	}
 
 	private void setClientInfo(OIDCClientInformation info) {
 		this.clientInfo = info;
+		if (type.equals(RPType.HONEST)) {
+			suiteCtx.put(RPContextConstants.HONEST_CLIENT_CLIENTINFO, clientInfo);
+		} else {
+			suiteCtx.put(RPContextConstants.EVIL_CLIENT_CLIENTINFO, clientInfo);
+		}
 	}
 
 	protected URI getClientUri() {
@@ -281,7 +250,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		return registrationToken;
 	}
 
-
+// TODO change logic: first discover if needed, then register if needed.
 	private URI getRegistrationEndpoint() throws IOException, IllegalArgumentException, ParseException {
 		URI uri;
 		if (Strings.isNullOrEmpty(testOPConfig.getUrlOPRegistration())) {
@@ -301,18 +270,34 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		return uri;
 	}
 
+	public TestStepResult discoverOpIfNeeded() throws IOException, ParseException {
+		if (opMetaData == null) {
+			return discoverRemoteOP();
+		}
+		logger.log("OP Configuration already retrieved, discovery not required");
+		return TestStepResult.PASS;
+	}
 
-	private void discoverRemoteOP() throws IOException, ParseException {
-		logger.log("Start OP discovery");
+	private TestStepResult discoverRemoteOP() throws IOException, ParseException {
+		logger.log("Running OP discovery");
 		Issuer issuer = new Issuer(testOPConfig.getUrlOPTarget());
 		OIDCProviderConfigurationRequest request = new OIDCProviderConfigurationRequest(issuer);
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		HTTPResponse httpResponse = httpRequest.send();
+		// TODO check status code, exit if negative
+		if (!httpResponse.indicatesSuccess()) {
+			logger.log("OP Discovery failed");
+			logger.logHttpResponse(httpResponse, httpResponse.getContent());
+			return TestStepResult.FAIL;
+		}
+		logger.log("OP Configuration received");
+		logger.logHttpResponse(httpResponse, httpResponse.getContent());
 
 		OIDCProviderMetadata opMetadata = OIDCProviderMetadata.parse(httpResponse.getContentAsJSONObject());
 		this.opMetaData = opMetadata;
-		stepCtx.put(RPParameterConstants.DISCOVERED_OP_METADATA, opMetadata);
+		suiteCtx.put(RPContextConstants.DISCOVERED_OP_CONFIGURATION, opMetadata);
+		return TestStepResult.PASS;
 	}
 
 	protected final <T> T supplyHonestOrEvil(Supplier<T> honestSupplier, Supplier<T> evilSupplier) {

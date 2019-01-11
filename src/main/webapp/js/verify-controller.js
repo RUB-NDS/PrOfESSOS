@@ -425,8 +425,13 @@ var OPIV = (function(module) {
 		var host = findHeader("host", req.Header);
 		var methodDoc = document.createElement("mark");
 		methodDoc.innerHTML = method;
-		var urlDoc = document.createTextNode("[" + host + "] " + url);
-		
+		if (host) {
+			// TODO: why do all requests miss the Host header???
+			var urlDoc = document.createTextNode("[" + host + "] " + url);
+        } else {
+			var urlDoc = document.createTextNode(" " + url);
+        }
+
 		//status.appendChild(document.createTextNode(req.RequestLine));
 		status.appendChild(methodDoc);
 		status.appendChild(urlDoc);
