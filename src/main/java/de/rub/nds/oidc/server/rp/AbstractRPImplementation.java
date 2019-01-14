@@ -1,39 +1,50 @@
 package de.rub.nds.oidc.server.rp;
 
 import com.google.common.base.Strings;
-import com.nimbusds.oauth2.sdk.GrantType;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.ResponseType;
-import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.*;
+import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.client.ClientInformation;
-import com.nimbusds.oauth2.sdk.client.ClientRegistrationErrorResponse;
 import com.nimbusds.oauth2.sdk.client.ClientRegistrationResponse;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.http.ServletUtils;
 import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-import com.nimbusds.openid.connect.sdk.Nonce;
-import com.nimbusds.openid.connect.sdk.OIDCScopeValue;
+import com.nimbusds.openid.connect.sdk.*;
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderConfigurationRequest;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.*;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
-import de.rub.nds.oidc.server.op.OPParameterConstants;
-import de.rub.nds.oidc.test_model.*;
+import de.rub.nds.oidc.server.RequestPath;
+import de.rub.nds.oidc.test_model.ParameterType;
+import de.rub.nds.oidc.test_model.RPConfigType;
+import de.rub.nds.oidc.test_model.TestOPConfigType;
+import de.rub.nds.oidc.test_model.TestStepResult;
 import de.rub.nds.oidc.utils.InstanceParameters;
 import net.minidev.json.JSONObject;
 
+import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
-import static de.rub.nds.oidc.server.rp.RPParameterConstants.*;
+import static de.rub.nds.oidc.server.rp.RPParameterConstants.FORCE_HONEST_CLIENT_URI;
 
 public abstract class AbstractRPImplementation implements RPImplementation {
 
@@ -120,7 +131,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 		// dont run setup steps for RP2 unless neccessary
 		if (RPType.HONEST.equals(type)
-				|| ! Boolean.valueOf((String) stepCtx.get(RPContextConstants.IS_SINGLE_RP_TEST))
+				|| ! Boolean.valueOf((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST))
 				|| params.getBool(RPParameterConstants.FORCE_REGISTER_CLIENT)) {
 			success &= evalConfig();
 			success &= registerClientIfNeeded();
@@ -142,19 +153,26 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		// response type
 		// response mode (whats that?)
 //
-//		ClaimsRequest claims = new ClaimsRequest();
+		ClaimsRequest claims = new ClaimsRequest();
 //		claims.addIDTokenClaim("group");
+		claims.addIDTokenClaim("profile");
+		claims.addIDTokenClaim("name");
+		claims.addIDTokenClaim("email");
+		claims.addUserInfoClaim("email");
+//		claims.addIDTokenClaim("given_name");
+//		claims.addIDTokenClaim("middle_name");
 		AuthenticationRequest authnReq = new AuthenticationRequest.Builder(
-				new ResponseType("code","token","id_token"), // TODO: check that these are covered by registered grant types
-//				new ResponseType("code"),
-				new Scope(OIDCScopeValue.OPENID, OIDCScopeValue.PROFILE),
-				clientInfo.getID(),
-				getRedirectUri())
-				// .state(new State())
-				.nonce(new Nonce())
-				// .claims(claims)
-				.endpointURI(opMetaData.getAuthorizationEndpointURI())
-				.build();
+//			new ResponseType("code","token","id_token"), // TODO: check that these are covered by registered grant types
+			new ResponseType("code", "id_token"), // TODO: check that these are covered by registered grant types
+//			new ResponseType("code"),
+			new Scope(OIDCScopeValue.OPENID, OIDCScopeValue.PROFILE, OIDCScopeValue.EMAIL),
+			clientInfo.getID(),
+			getRedirectUri())
+			// .state(new State())
+			.nonce(new Nonce())
+			.claims(claims)
+			.endpointURI(opMetaData.getAuthorizationEndpointURI())
+			.build();
 
 		// store in stepCtx, so BrowserSimulator can fetch it
 		String currentRP = type == RPType.HONEST ? RPContextConstants.RP1_PREPARED_AUTHNREQ
@@ -193,8 +211,8 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 			// GrantType.parse()
 		} else {
 			// MitreID demo server does not allow simultanous registration of implicit and authorization_grant
-//			grantTypes.add(GrantType.AUTHORIZATION_CODE);
-			grantTypes.add(GrantType.IMPLICIT);
+			grantTypes.add(GrantType.AUTHORIZATION_CODE);
+//			grantTypes.add(GrantType.IMPLICIT);
 			clientMetadata.setGrantTypes(grantTypes);
 //			logger.log("grant type implicit requested");
 		}
@@ -393,14 +411,133 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		return true;
 	}
 
-//
-//	public void cleanupAfterTestStep() {
-//		if(params.getBool(RPParameterConstants.FORCE_REGISTER_CLIENT) && oldClientInfo != null) {
-//			clientInfo = oldClientInfo;
-//			oldClientInfo = null;
-//		}
-//		// TODO: possibly more to cleanup?
-//	}
+
+	@Nullable
+	protected AuthenticationSuccessResponse processCallback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException {
+		// TODO: this will not parse form_post responses
+		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(req);
+		logger.log("Callback received");
+		logger.logHttpRequest(req, httpRequest.getQuery());
+
+		CompletableFuture waitForBrowser = (CompletableFuture) stepCtx.get(RPContextConstants.BLOCK_RP_FOR_BROWSER_FUTURE);
+
+		// send arbitrary default response to the waiting browser
+		sendCallbackResponse(resp);
+		// wait for browser confirmation to extract redirect_uri
+		try {
+			waitForBrowser.get(5, TimeUnit.SECONDS);
+		} catch (TimeoutException | ExecutionException |InterruptedException e) {
+			logger.log("Timeout waiting for browser redirect URL",e);
+			stepCtx.put(RPContextConstants.RP_INDICATED_STEP_RESULT, TestStepResult.UNDETERMINED);
+		}
+		// retrieve actual redirect URI from browser - may include tokens and or error messages in implicit flows
+		String lastUrl = (String) stepCtx.get(RPContextConstants.LAST_BROWSER_URL);
+		logger.log("Redirect URL as seen in Browser");
+		logger.log(lastUrl);
+		URI callbackUri;
+		callbackUri = new URI(lastUrl);
+
+		String user = (String) stepCtx.get(RPContextConstants.CURRENT_USER_USERNAME);
+		String pass = (String) stepCtx.get(RPContextConstants.CURRENT_USER_USERNAME);
+
+		// parse the URL from Browser to include potential URI Fragments (implicit/hybrid flows)
+		AuthenticationResponse authnResp = AuthenticationResponseParser.parse(callbackUri);
+		if (authnResp instanceof AuthenticationErrorResponse) {
+			String opAuthEndp = opMetaData.getAuthorizationEndpointURI().toString();
+			logger.log(String.format("Authentication at %s as %s with password %s failed:", opAuthEndp, user, pass));
+			logger.logHttpRequest(req, req.getQueryString());
+			// store auth failed hint in context for browser retrieval
+			stepCtx.put(RPContextConstants.RP_INDICATED_STEP_RESULT, TestStepResult.FAIL);
+			return null;
+		}
+
+		return authnResp.toSuccessResponse();
+	}
+
+
+	@Nullable
+	protected OIDCTokenResponse fetchToken(AuthenticationSuccessResponse successResponse) throws IOException, ParseException{
+		AuthorizationCode code = successResponse.getAuthorizationCode();
+		if (code == null) {
+			logger.log("No authorization code received in code flow.");
+			stepCtx.put(RPContextConstants.RP_INDICATED_STEP_RESULT, TestStepResult.FAIL);
+			return null;
+		}
+
+		AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, getRedirectUri());
+
+		TokenRequest request = new TokenRequest(
+				opMetaData.getTokenEndpointURI(),
+				new ClientSecretBasic(clientInfo.getID(), clientInfo.getSecret()),
+				codeGrant);
+		logger.log("Token request prepared.");
+		logger.logHttpRequest(request.toHTTPRequest(), null);
+
+		TokenResponse response = OIDCTokenResponseParser.parse(request.toHTTPRequest().send());
+
+		if (!response.indicatesSuccess()) {
+			TokenErrorResponse errorResponse = response.toErrorResponse();
+			logger.log("Code redemption failed");
+			logger.logHttpResponse(errorResponse.toHTTPResponse(), errorResponse.toHTTPResponse().getContent());
+			stepCtx.put(RPContextConstants.RP_INDICATED_STEP_RESULT, TestStepResult.FAIL);
+			return null;
+		}
+
+		OIDCTokenResponse tokenSuccessResponse = (OIDCTokenResponse) response.toSuccessResponse();
+		logger.log("Code redeemed for Token:");
+		logger.logHttpResponse(response.toHTTPResponse(), response.toHTTPResponse().getContent());
+
+//		JWT idToken = tokenSuccessResponse.getOIDCTokens().getIDToken();
+//		AccessToken accessToken = tokenSuccessResponse.getOIDCTokens().getAccessToken();
+//		RefreshToken refreshToken = tokenSuccessResponse.getOIDCTokens().getRefreshToken();
+		return tokenSuccessResponse;
+	}
+
+	@Nullable
+	protected UserInfo requestUserInfo(AccessToken at) throws IOException, ParseException {
+		BearerAccessToken bat = (BearerAccessToken) at;
+
+		HTTPResponse httpResponse = new UserInfoRequest(opMetaData.getUserInfoEndpointURI(), bat)
+				.toHTTPRequest()
+				.send();
+		logger.log("UserInfo requested");
+		logger.logHttpResponse(httpResponse, httpResponse.getContent());
+
+		UserInfoResponse userInfoResponse = UserInfoResponse.parse(httpResponse);
+		if (! userInfoResponse.indicatesSuccess()) {
+			return null;
+		}
+
+		UserInfo userInfo = userInfoResponse.toSuccessResponse().getUserInfo();
+		return userInfo;
+	}
+
+	protected void sendCallbackResponse(HttpServletResponse resp) throws IOException, ParseException {
+
+		// send some response to dangling browser
+		HTTPResponse httpRes = null;
+		StringBuilder sb = new StringBuilder();
+		sb.append("<!DOCTYPE html>");
+		sb.append("<html>");
+		sb.append("<head><title>PrOfESSOS Callback</title></head>");
+		sb.append("<body>");
+		sb.append("<h2>PrOfESSOS OP Verifier</h2>");
+		sb.append("<strong>Callback confirmation</strong>");
+		sb.append("<div><p>Received callback at <code>");
+		sb.append(getRedirectUri().toString());
+		sb.append("</code></p></div>");
+		sb.append("</body>");
+		sb.append("</html>");
+
+		httpRes = new HTTPResponse(HTTPResponse.SC_OK);
+		httpRes.setContentType("text/html; charset=UTF-8");
+		httpRes.setHeader("Cache-Control", "no-cache, no-store");
+		httpRes.setHeader("Pragma", "no-cache");
+		httpRes.setContent(sb.toString());
+
+		ServletUtils.applyHTTPResponse(httpRes, resp);
+		resp.flushBuffer();
+	}
 
 	protected final <T> T supplyHonestOrEvil(Supplier<T> honestSupplier, Supplier<T> evilSupplier) {
 		if (type == RPType.HONEST) {

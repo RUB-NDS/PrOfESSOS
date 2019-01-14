@@ -4,7 +4,6 @@ public class RPContextConstants {
 
     private static final String PFX = "rp.";
 
-	public static final String IS_SINGLE_RP_TEST = "is_single_rp_test";
 
 	public static final String STEP_SETUP_FINISHED = PFX + "test-setup-result";
 	public static final String RP_INDICATED_STEP_RESULT = PFX + "rp-indicated-test-result";
@@ -37,5 +36,8 @@ public class RPContextConstants {
 	public static final String BLOCK_BROWSER_AND_TEST_RESULT = PFX + "block-browser-for-rp-testresult-future";
 
 	public static final String LAST_BROWSER_URL = PFX + "last-url-seeen-in-browser";
+
+	// code reuse
+	public static final String USED_AUTH_CODE = PFX + "used-authuorizaton-code";
 
 }
