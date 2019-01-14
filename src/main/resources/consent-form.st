@@ -1,3 +1,3 @@
-
+var authBtn = document.confirmationForm.authorize
 // add short delay for taking screenshot
-setTimeout(function() {document.forms[0].submit();}, 500);
+setTimeout(function() {authBtn.click();}, 500);

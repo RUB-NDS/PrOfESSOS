@@ -19,6 +19,7 @@ package de.rub.nds.oidc.browser;
 import de.rub.nds.oidc.learn.TemplateEngine;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.op.OPParameterConstants;
+import de.rub.nds.oidc.server.rp.RPContextConstants;
 import de.rub.nds.oidc.test_model.*;
 import de.rub.nds.oidc.utils.Func;
 import de.rub.nds.oidc.utils.InstanceParameters;
@@ -213,6 +214,13 @@ public abstract class BrowserSimulator {
 		} finally {
 			driver.manage().timeouts().implicitlyWait(NORMAL_WAIT_TIMEOUT, TimeUnit.SECONDS);
 		}
+	}
+
+	protected TestStepResult getCombinedStepResult(TestStepResult result) {
+		TestStepResult rpResult = (TestStepResult) stepCtx.get(RPContextConstants.RP_INDICATED_STEP_RESULT);
+		// return max(rpResult, result), where PASS < NOT_RUN < UNDETERMINED < FAIL
+		result = rpResult.compareTo(result) >= 0 ? rpResult : result;
+		return result;
 	}
 
 }

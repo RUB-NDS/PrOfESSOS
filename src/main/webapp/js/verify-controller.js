@@ -67,7 +67,7 @@ var OPIV = (function(module) {
 			if (testConfig["Type"] === OP_CONFIG_TYPE) {
 				testConfig.UrlOPTarget = "http://honestidp.de:8080/openid-connect-server-webapp";
 				// registration not needed for demo when using discovery
-				testConfig.UrlOPRegistration = "http://honestidp.de:8080/openid-connect-server-webapp/register";
+				// testConfig.OPMetadata = "http://honestidp.de:8080/openid-connect-server-webapp/register";
                 testConfig.User1Name = "user1";
                 testConfig.User1Pass = "user1pass";
                 testConfig.User2Name = "user2";
@@ -390,6 +390,7 @@ var OPIV = (function(module) {
 		// TODO: check XSS attack vector
 		var textContainer = document.createElement("div");
 		textContainer.className = "log-entry";
+		textContainer.style.overflow = "auto";
 		//var textNode = document.createTextNode(text.replace(/\n/, "<br>"));
 		//textContainer.appendChild(textNode);
 		textContainer.innerHTML = text.replace(/\n/g, "<br>");
@@ -564,13 +565,13 @@ var OPIV = (function(module) {
 
 	function updateOPConfig() {
         testConfig.UrlOPTarget = $("#url-op-target").val();
-        testConfig.UrlOPRegistration = $("#url-op-registration").val();
+        testConfig.OPMetadata = $("#op-metadata-json").val();
         testConfig.AccessToken1 = $("#registration-access-token-1").val();
         testConfig.AccessToken2 = $("#registration-access-token-2").val();
         testConfig.User2Name = $("#user-2-name").val();
-        testConfig.User2Pass = $("#user-2-pass").val();
+        testConfig.User2Pass = $("#user-2-password").val();
         testConfig.User1Name = $("#user-1-name").val();
-        testConfig.User1Pass = $("#user-1-pass").val();
+        testConfig.User1Pass = $("#user-1-password").val();
         testConfig.LoginScript =   $("#selenium-login-script").val();
         testConfig.ConsentScript = $("#selenium-consent-script").val();
         testConfig.Client1Config = $("#client-1-config").val();
@@ -579,7 +580,7 @@ var OPIV = (function(module) {
 
 	function writeOPConfig(newTestOPConfig) {
 		testConfig.UrlOPTarget = newTestOPConfig.UrlOPTarget;
-		testConfig.UrlOPRegistration = newTestOPConfig.UrlOPRegistration;
+		testConfig.OPMetadata = newTestOPConfig.OPMetadata;
 		testConfig.AccessToken1 = newTestOPConfig.AccessToken1;
 		testConfig.AccessToken2 = newTestOPConfig.AccessToken2;
 		testConfig.User2Name = newTestOPConfig.User2Name;
@@ -596,7 +597,7 @@ var OPIV = (function(module) {
 
 	function writeOPConfigGUI(newTestOPConfig) {
         $("#url-op-target").val(newTestOPConfig.UrlOPTarget);
-        $("#url-op-registration").val(newTestOPConfig.UrlOPRegistration);
+        $("#op-metadata-json").val(newTestOPConfig.OPMetadata);
         $("#registration-access-token-1").val(newTestOPConfig.AccessToken1);
         $("#registration-access-token-2").val(newTestOPConfig.AccessToken2);
 

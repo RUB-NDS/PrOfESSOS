@@ -60,10 +60,13 @@ public interface RPImplementation {
 
 	void setTestOPConfig(TestOPConfigType cfg);
 
-	TestStepResult run();
+	void runTestStepSetup() throws ParseException, IOException ;
 
-	TestStepResult discoverOPIfNeeded();
-	TestStepResult registerClientIfNeeded() throws IOException, ParseException;
+//	void prepareAuthnReq();
+//
+//	void discoverOPIfNeeded();
+//
+//	void registerClientIfNeeded() throws IOException, ParseException;
 
 	// serve redirect_uri
 	void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException;

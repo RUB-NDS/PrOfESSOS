@@ -16,6 +16,7 @@
 
 package de.rub.nds.oidc.learn;
 
+import com.nimbusds.oauth2.sdk.ParseException;
 import de.rub.nds.oidc.browser.BrowserSimulator;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
@@ -33,6 +34,7 @@ import de.rub.nds.oidc.utils.ImplementationLoadException;
 import de.rub.nds.oidc.utils.ImplementationLoader;
 import de.rub.nds.oidc.utils.UriUtils;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -144,62 +146,15 @@ public class TestRunner {
 
 			// RP-Verifier specific config
 			if (isRPTest()) {
-				TestRPConfigType testConfig = (TestRPConfigType) getTestObj().getTestConfig();
-				// resolve OP URL
-				String honestWebfinger = testConfig.getHonestWebfingerResourceId();
-				String evilWebfinger = testConfig.getEvilWebfingerResourceId();
-				// save both in context under their own name
-				testStepCtx.put(OPParameterConstants.BROWSER_INPUT_HONEST_OP_URL, honestWebfinger);
-				testStepCtx.put(OPParameterConstants.BROWSER_INPUT_EVIL_OP_URL, evilWebfinger);
-
-				// now save standard value
-				String startOpType = stepDef.getBrowserSimulator().getParameter().stream()
-						.filter(e -> e.getKey().equals(OPParameterConstants.BROWSER_INPUT_OP_URL))
-						.map(e -> e.getValue())
-						.findFirst().orElse("EVIL");
-				// TODO: ^^wat? browserSimulater never has a param w key BROWSER_INPUT_OP_URL
-
-				if (startOpType.equals("HONEST")) {
-					testStepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, honestWebfinger);
-				} else if (startOpType.equals("EVIL")) {
-					testStepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, evilWebfinger);
-				} else {
-					logger.log("Invalid Browser parameter in test specification.");
+				boolean success = prepareRPTestStep(instReg, testStepCtx, stepDef, logger);
+				if (!success) {
 					return errorResponse;
 				}
-				// TODO: atm, this is always EVIL and overridden in browser implementations, do we need it at all?
-
-				OPInstance op1Inst = new OPInstance(stepDef.getOPConfig1(), logger, testSuiteCtx, testStepCtx, OPType.HONEST);
-				instReg.addOP1(testId, new ServerInstance<>(op1Inst, logger));
-
-				OPInstance op2Inst = new OPInstance(stepDef.getOPConfig2(), logger, testSuiteCtx, testStepCtx, OPType.EVIL);
-				instReg.addOP2(testId, new ServerInstance<>(op2Inst, logger));
 			}
 
 			// OP-Verifier specific config
 			if (isOPTest()) {
-				// TODO
-				TestOPConfigType remoteOPConfig = (TestOPConfigType) getTestObj().getTestConfig();
-
-				testStepCtx.put(RPContextConstants.TARGET_OP_URL, remoteOPConfig.getUrlOPTarget());
-				RPInstance rp1Inst = new RPInstance(stepDef.getRPConfig1(), logger, testSuiteCtx, testStepCtx, remoteOPConfig, RPType.HONEST, hostCfg);
-				instReg.addRP1(testId, new ServerInstance<>(rp1Inst, logger));
-				RPInstance rp2Inst = new RPInstance(stepDef.getRPConfig1(), logger, testSuiteCtx, testStepCtx, remoteOPConfig, RPType.EVIL, hostCfg);
-				instReg.addRP2(testId, new ServerInstance<>(rp2Inst, logger));
-
-				TestStepResult disocveryResult = rp1Inst.getImpl().discoverOPIfNeeded();
-				if (disocveryResult != TestStepResult.PASS) {
-					return disocveryResult;
-				}
-				if (stepDef.getName().equals("LearningStep")) {
-					// register clients at tested OP
-					TestStepResult res1 = rp1Inst.getImpl().registerClientIfNeeded();
-					TestStepResult res2 = rp2Inst.getImpl().registerClientIfNeeded();
-//					if (! res1.equals(res2) && res1.equals(TestStepResult.PASS)) {
-//						// this is covered using suiteCtx.get(RPContextConstants.CLIENT_REGISTRATION_FAILED)
-						// in OPLearningBrowser
-//					}
-				}
+				prepareOPTestStep(instReg, testStepCtx, stepDef, logger);
 			}
 
 			String browserClass = stepDef.getBrowserSimulator().getImplementationClass();
@@ -254,7 +209,7 @@ public class TestRunner {
 		testConfig.setClient2Config(config.getClient2Config());
 		testConfig.setConsentScript(config.getConsentScript());
 		testConfig.setLoginScript(config.getLoginScript());
-		testConfig.setUrlOPRegistration(config.getUrlOPRegistration());
+		testConfig.setOPMetadata(config.getOPMetadata());
 		testConfig.setUrlOPTarget(config.getUrlOPTarget());
 		testConfig.setUser1Name(config.getUser1Name());
 		testConfig.setUser2Name(config.getUser2Name());
@@ -323,4 +278,65 @@ public class TestRunner {
 	}
 
 
+	private boolean prepareRPTestStep(TestInstanceRegistry instReg, Map<String, Object> testStepCtx, TestStepType stepDef, TestStepLogger logger ) throws ImplementationLoadException {
+		TestRPConfigType testConfig = (TestRPConfigType) getTestObj().getTestConfig();
+		// resolve OP URL
+		String honestWebfinger = testConfig.getHonestWebfingerResourceId();
+		String evilWebfinger = testConfig.getEvilWebfingerResourceId();
+		// save both in context under their own name
+		testStepCtx.put(OPParameterConstants.BROWSER_INPUT_HONEST_OP_URL, honestWebfinger);
+		testStepCtx.put(OPParameterConstants.BROWSER_INPUT_EVIL_OP_URL, evilWebfinger);
+
+		// now save standard value
+		String startOpType = stepDef.getBrowserSimulator().getParameter().stream()
+				.filter(e -> e.getKey().equals(OPParameterConstants.BROWSER_INPUT_OP_URL))
+				.map(e -> e.getValue())
+				.findFirst().orElse("EVIL");
+		// TODO: browserSimulater param BROWSER_INPUT_OP_URL is never set in rp-testplan
+
+		if (startOpType.equals("HONEST")) {
+			testStepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, honestWebfinger);
+		} else if (startOpType.equals("EVIL")) {
+			testStepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, evilWebfinger);
+		} else {
+			logger.log("Invalid Browser parameter in test specification.");
+			return false;
+		}
+		// TODO: atm, this is always EVIL and overridden in browser implementations, do we need it at all?
+
+		OPInstance op1Inst = new OPInstance(stepDef.getOPConfig1(), logger, testSuiteCtx, testStepCtx, OPType.HONEST);
+		instReg.addOP1(testId, new ServerInstance<>(op1Inst, logger));
+
+		OPInstance op2Inst = new OPInstance(stepDef.getOPConfig2(), logger, testSuiteCtx, testStepCtx, OPType.EVIL);
+		instReg.addOP2(testId, new ServerInstance<>(op2Inst, logger));
+		return true;
+	}
+
+	private void prepareOPTestStep(TestInstanceRegistry instReg, Map<String, Object> testStepCtx, TestStepType stepDef,
+								   TestStepLogger logger ) throws ImplementationLoadException, IOException, ParseException {
+		// TODO
+		TestOPConfigType remoteOPConfig = (TestOPConfigType) getTestObj().getTestConfig();
+
+		testStepCtx.put(RPContextConstants.TARGET_OP_URL, remoteOPConfig.getUrlOPTarget());
+		RPInstance rp1Inst = new RPInstance(stepDef.getRPConfig1(), logger, testSuiteCtx, testStepCtx, remoteOPConfig, RPType.HONEST, hostCfg);
+		instReg.addRP1(testId, new ServerInstance<>(rp1Inst, logger));
+
+		RPInstance rp2Inst = new RPInstance(stepDef.getRPConfig2(), logger, testSuiteCtx, testStepCtx, remoteOPConfig, RPType.EVIL, hostCfg);
+		instReg.addRP2(testId, new ServerInstance<>(rp2Inst, logger));
+
+//				rp1Inst.getImpl().discoverOPIfNeeded();
+//
+//				if (stepDef.getName().equals("LearningStep")) {
+//					// register clients at tested OP
+//					rp1Inst.getImpl().registerClientIfNeeded();
+//					rp2Inst.getImpl().registerClientIfNeeded();
+//				}
+//
+//				rp1Inst.getImpl().prepareAuthnReq();
+//				rp2Inst.getImpl().prepareAuthnReq();
+
+		rp1Inst.getImpl().runTestStepSetup();
+		rp2Inst.getImpl().runTestStepSetup();
+
+	}
 }

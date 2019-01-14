@@ -21,7 +21,7 @@
 	<TestStep Name="None">
 		<Description>Not Implemented</Description>
 		<TestParameters>
-			<Parameter Key="foo">bar</Parameter>
+			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.DefaultOPTestBrowser</ImplementationClass>

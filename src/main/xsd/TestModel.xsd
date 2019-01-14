@@ -68,7 +68,7 @@ limitations under the License.
 			<extension base="tm:TestConfigType">
 				<sequence>
 					<element name="UrlOPTarget" type="anyURI" minOccurs="0" />
-					<element name="UrlOPRegistration" type="anyURI" minOccurs="0" />
+					<element name="OPMetadata" type="string" minOccurs="0" />
 					<element name="AccessToken1" type="string" minOccurs="0" />
 					<element name="AccessToken2" type="string" minOccurs="0" />
 					<element name="User1Name" type="string" />
