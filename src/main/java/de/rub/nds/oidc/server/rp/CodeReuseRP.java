@@ -23,13 +23,13 @@ import java.util.concurrent.CompletableFuture;
 public class CodeReuseRP extends AbstractRPImplementation {
 
 	private boolean isFirstCallback = true;
-	private AuthorizationCode oldAuthcode = null;
 
     @Override
     public void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException {
 
     	// can we put the browserBlocker into a field/property in AbstractRPImpl?
 		CompletableFuture<TestStepResult> browserBlocker = (CompletableFuture<TestStepResult>) stepCtx.get(RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT);
+		AuthorizationCode oldAuthcode = (AuthorizationCode) stepCtx.get(RPContextConstants.STORED_AUTH_CODE); // TODO beware of typecast exception
 
 		AuthenticationSuccessResponse successResponse = processCallback(path, req, resp);
 		if (successResponse == null) {
@@ -42,9 +42,9 @@ public class CodeReuseRP extends AbstractRPImplementation {
 
 		if (oldAuthcode == null) {
 			// store auth code for later retrieval
-			oldAuthcode = successResponse.getAuthorizationCode();
+			stepCtx.put(RPContextConstants.STORED_AUTH_CODE, successResponse.getAuthorizationCode());
 
-			if (!params.getBool(RPParameterConstants.FORCE_UNUSED_HONEST_AUTH_CODE)) {
+			if (!params.getBool(RPParameterConstants.FORCE_NO_REDEEM_AUTH_CODE)) {
 				// redeem token
 				tokenResponse = fetchToken(successResponse);
 				if (tokenResponse == null) {

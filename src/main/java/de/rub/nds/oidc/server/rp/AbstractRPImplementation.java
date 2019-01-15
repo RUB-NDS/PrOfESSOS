@@ -126,13 +126,13 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	public void runTestStepSetup() throws ParseException, IOException {
 		boolean success = true;
 
-		success &= discoverOpIfNeeded();
 		success &= areStepRequirementsMet();
 
 		// dont run setup steps for RP2 unless neccessary
 		if (RPType.HONEST.equals(type)
 				|| ! Boolean.valueOf((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST))
 				|| params.getBool(RPParameterConstants.FORCE_REGISTER_CLIENT)) {
+			success &= discoverOpIfNeeded();
 			success &= evalConfig();
 			success &= registerClientIfNeeded();
 			prepareAuthnReq();
@@ -263,8 +263,8 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		// attempt to parse user provided ClientConfig JSON strings
 		String config = type.equals(RPType.HONEST) ? testOPConfig.getClient1Config() : testOPConfig.getClient2Config();
 		if (Strings.isNullOrEmpty(config)) {
-			logger.log("Client Config not provided, attempt dynamic registration");
-			// not an error
+//			logger.log("Client Config not provided");
+			// not an error, as long as dynamic registration works
 			return true;
 		}
 		try {
@@ -372,7 +372,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 				opMetaData = (OIDCProviderMetadata) suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION);
 			}
 		}
-		logger.log("OP Configuration already retrieved, discovery not required");
+//		logger.log("OP Configuration already retrieved, discovery not required");
 		return true;
 	}
 
@@ -404,9 +404,10 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 		if (params.getBool(RPParameterConstants.FORCE_REGISTER_CLIENT)) {
 			if(Strings.isNullOrEmpty(opMetaData.getRegistrationEndpointURI().toString())) {
-				logger.log("TestStep requires dynamic registration but no registration endpoint was configured");
+				logger.log("TestStep requires dynamic registration but no registration endpoint was found");
 				return false;
 			}
+			// TODO:
 		}
 		return true;
 	}

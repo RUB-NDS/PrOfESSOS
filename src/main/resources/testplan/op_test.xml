@@ -19,24 +19,67 @@
 	</LearningStep>
 
 	<TestStep Name="Authorization Code Reuse 1">
-		<Description>PrOfESSOS attempts to redeem an authorization code that has been already been used by another user of the same client</Description>
+		<Description>PrOfESSOS attempts to redeem an authorization code that has already been used by another user of the same client</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.OPCodeReuseBrowser</ImplementationClass>
-			<Parameter Key="register_grant_types">authorization_code</Parameter>
 		</BrowserSimulator>
 
-		<RPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
-			<Parameter Key="force_auth-code_reuse_user">true</Parameter>
-		</RPConfig-1>
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+            <Parameter Key="register_grant_types">authorization_code</Parameter>
+            <Parameter Key="force_auth-code_reuse_user">true</Parameter>
+        </RPConfig-1>
 		<RPConfig-2>
 			<!-- no used but required in config-->
 			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
 		</RPConfig-2>
 	</TestStep>
+
+	<TestStep Name="Authorization Code Reuse 2">
+		<Description>PrOfESSOS attempts to redeem an authorization code that was issued to and has already been used by a different client - Honest RP</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.OPCodeReuseBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+            <Parameter Key="register_grant_types">authorization_code</Parameter>
+            <Parameter Key="force-no-redeem-auth-code">false</Parameter>
+        </RPConfig-1>
+        <RPConfig-2>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+            <Parameter Key="register_grant_types">authorization_code</Parameter>
+            <!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+    <TestStep Name="Authorization Code Reuse 3">
+		<Description>PrOfESSOS attempts to redeem an authorization code that was issued to a different client but has not yet been used in a TokenRequest</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.OPCodeReuseBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+            <Parameter Key="register_grant_types">authorization_code</Parameter>
+            <Parameter Key="force-no-redeem-auth-code">true</Parameter>
+        </RPConfig-1>
+        <RPConfig-2>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+            <Parameter Key="register_grant_types">authorization_code</Parameter>
+            <!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
 	<!--<TestStep Name="ID Spoofing 1">-->
 		<!--<Description><![CDATA[-->
 			<!--<h1>ID Spoofing Attack</h1>-->

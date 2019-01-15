@@ -2,11 +2,11 @@ package de.rub.nds.oidc.browser.op;
 
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import de.rub.nds.oidc.server.rp.RPContextConstants;
+import de.rub.nds.oidc.server.rp.RPParameterConstants;
 import de.rub.nds.oidc.server.rp.RPType;
 import de.rub.nds.oidc.test_model.TestStepResult;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -22,15 +22,18 @@ public class OPCodeReuseBrowser extends AbstractOPBrowser {
             return TestStepResult.UNDETERMINED;
         }
 
-		HashMap<String,String> users = new HashMap<>();
-        users.put(opConfig.getUser1Name(), opConfig.getUser1Pass());
-        users.put(opConfig.getUser2Name(), opConfig.getUser2Pass());
+		ArrayList<String[]> users = new ArrayList<>();
+		users.add(new String[] {opConfig.getUser1Name(), opConfig.getUser1Pass()});
+		users.add(new String[] {opConfig.getUser2Name(), opConfig.getUser2Pass()});
 
-		for (Map.Entry<String,String> entry : users.entrySet()) {
-			userName = entry.getKey();
-			userPass = entry.getValue();
+		for (int i = 0; i<2; i++) {
+			userName = users.get(i)[0];
+			userPass = users.get(i)[1];
 
-			TestStepResult result = runUserAuth(RPType.HONEST);
+			boolean isSingleRP = Boolean.valueOf((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST));
+			RPType type = isSingleRP ? RPType.HONEST : (i == 1) ? RPType.EVIL : RPType.HONEST;
+
+			TestStepResult result = runUserAuth(type);
 			if (result != TestStepResult.PASS) {
 				logger.log(String.format("Authentication of User %s with password %s failed", userName, userPass));
 				return result;
@@ -44,7 +47,7 @@ public class OPCodeReuseBrowser extends AbstractOPBrowser {
 
     private TestStepResult runUserAuth(RPType rpType) throws InterruptedException {
 		TestStepResult result = TestStepResult.NOT_RUN;
-		logger.log("run userAuth");
+		logger.log("Starting User Authentication");
 //
 //		// store user credentials to make them accessible to RP
 //		stepCtx.put(RPContextConstants.CURRENT_USER_USERNAME, userName);

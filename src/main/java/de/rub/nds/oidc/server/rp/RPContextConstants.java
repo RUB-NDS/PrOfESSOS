@@ -37,7 +37,7 @@ public class RPContextConstants {
 
 	public static final String LAST_BROWSER_URL = PFX + "last-url-seeen-in-browser";
 
-	// code reuse
-	public static final String USED_AUTH_CODE = PFX + "used-authuorizaton-code";
+	public static final String STORED_AUTH_CODE = PFX + "stored-auth-code";
+
 
 }
