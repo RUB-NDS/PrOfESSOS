@@ -56,7 +56,7 @@ COPY ./target/professos-1.0.0-SNAPSHOT.war /opt/jboss/wildfly/standalone/deploym
 # Expose the ports we're interested in
 EXPOSE 8080
 # port 8787 for debugging WildFly 
-# EXPOSE 8787
+ EXPOSE 8787
 
 # uncomment below, if you need to acces the management interface
 # EXPOSE 9990
@@ -65,4 +65,4 @@ EXPOSE 8080
 # Set the default command to run on boot
 # This will boot WildFly in the standalone mode and bind to all interface
 # add "--debug" to enable debugger (remember to expose port 8787)
-CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
+CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0", "--debug"]
