@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  professos:
+    build: .
+    volumes:
+            # on unix, overwriting volume-mounted files is not possible because file's 
+            # inode changes. therefore, mounting a folder
+            - "./target/dev-deploy:/opt/jboss/wildfly/standalone/deployments"
+    ports:
+      - "8080:8080"
+      - "9990:9990"
+      - "8787:8787"
+    networks:
+      default:
+        aliases:
+          - openid.sso-security.de
+          # below FQDN's should match what is in
+          # src/main/resources/servernames.properties
+          - idp.oidc.honest-sso.de
+          - idp.oidc.attack-sso.de
+          - rp.oidc.honest-sso.de
+          - rp.oidc.attack-sso.de
+    # enable debugging by appending to ENTRYPOINT from Dockerfile
+    command: '--debug'
+        
+  relying_party:
+    build:
+      context: ./docker/
+      dockerfile: simple-web-app/Dockerfile
+    ports:
+      - "8180:8080"
+    networks:
+      default:
+        aliases:
+          - honestsp.de
+          - www.honestsp.de
+
+  identity_provider:
+    build:
+      context: ./docker/
+      dockerfile: mitreid-connect-server-webapp/Dockerfile
+      args:
+        ISSUER: "honestidp.de:8080"
+    ports:
+      - "8280:8080"
+    networks:
+      default:
+        aliases:
+          - honestidp.de
+          - www.honestidp.de
+      # configuration of IdP is then available at
+      # http://localhost:8280/openid-connect-server-webapp/.well-known/openid-configuration (from host)
+      # or at
+      # http://honestidp.de:8080/openid-connect-server-webapp/.well-known/openid-configuration (from docker default net)
+

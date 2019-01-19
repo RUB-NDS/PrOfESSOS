@@ -1,0 +1,26 @@
+<html>
+  <body>
+    <h2>eLearning Test-Redirector</h2>
+      <form name="startAuthForm" method="GET" action='http://honest-sp.com/oidc_sp/faces/attack.xhtml'>
+      <input type="text" name="idp_url" id="idp_url">
+      <input type="submit" value="Submit" id="submitBtn">
+    </form>
+    <script>
+//        var params = {};
+    var search = decodeURIComponent( window.location.href.slice( window.location.href.indexOf( '?' ) + 1 ) );
+    var definitions = search.split( '&' );
+
+    definitions.forEach( function( val, key ) {
+        var parts = val.split( '=', 2 );
+        var el = document.createElement("input");
+        var keytext = document.createTextNode(parts[0]);
+        var valtext = document.createTextNode(parts[1]);
+        el.type = 'hidden';
+        el.name = keytext.textContent;
+        el.value = valtext.textContent;
+        document.startAuthForm.appendChild(el);
+      } );
+    
+    </script>
+  </body>
+</html>
