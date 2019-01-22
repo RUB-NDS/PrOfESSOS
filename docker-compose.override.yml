@@ -2,11 +2,15 @@ version: '3'
 
 services:
   professos:
-    build: .
+    build:
+      context: .
+      args:
+        wildflyconfigname: "standalone_w_test.xml"
     volumes:
-            # on unix, overwriting volume-mounted files is not possible because file's 
-            # inode changes. therefore, mounting a folder
-            - "./target/dev-deploy:/opt/jboss/wildfly/standalone/deployments"
+      # on unix, overwriting volume-mounted files is not possible because file's 
+      # inode changes (thus, the bind-mount in the container will not reflect the changes).
+      # therefore, we mount a directory that contains the .war archive
+      - "./target/dev-deploy/:/opt/jboss/wildfly/standalone/deployments/"
     ports:
       - "8080:8080"
       - "9990:9990"
@@ -23,7 +27,7 @@ services:
           - rp.oidc.attack-sso.de
     # enable debugging by appending to ENTRYPOINT from Dockerfile
     command: '--debug'
-        
+
   relying_party:
     build:
       context: ./docker/
@@ -53,4 +57,3 @@ services:
       # http://localhost:8280/openid-connect-server-webapp/.well-known/openid-configuration (from host)
       # or at
       # http://honestidp.de:8080/openid-connect-server-webapp/.well-known/openid-configuration (from docker default net)
-
