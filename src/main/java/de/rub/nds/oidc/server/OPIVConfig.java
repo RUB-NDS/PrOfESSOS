@@ -56,6 +56,7 @@ public class OPIVConfig {
 	// TODO: read from config
 	private final String honestSigAlias = "opiv honest token signer";
 	private final String evilSigAlias = "opiv evil token signer";
+	private final String untrustedAlias = "opiv untrusted token signer";
 	private final String keystorePass = "pass";
 	private final KeyStore keyStore;
 
@@ -102,20 +103,16 @@ public class OPIVConfig {
 	}
 
 
-	public KeyStore.PrivateKeyEntry getHonestOPSigningEntry() {
-		try {
-			KeyStore.ProtectionParameter pp = new KeyStore.PasswordProtection(keystorePass.toCharArray());
-			KeyStore.PrivateKeyEntry entry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(honestSigAlias, pp);
-			return entry;
-		} catch (GeneralSecurityException ex) {
-			throw new IllegalArgumentException("Failed to access keystore.", ex);
-		}
-	}
+	public KeyStore.PrivateKeyEntry getHonestOPSigningEntry() {	return getSigningEntry(honestSigAlias);	}
 
-	public KeyStore.PrivateKeyEntry getEvilOPSigningEntry() {
+	public KeyStore.PrivateKeyEntry getEvilOPSigningEntry() { return getSigningEntry(evilSigAlias);	}
+
+	public KeyStore.PrivateKeyEntry getUntrustedSigningEntry() { return getSigningEntry(untrustedAlias); }
+
+	public KeyStore.PrivateKeyEntry getSigningEntry(String entryAlias) {
 		try {
 			KeyStore.ProtectionParameter pp = new KeyStore.PasswordProtection(keystorePass.toCharArray());
-			KeyStore.PrivateKeyEntry entry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(evilSigAlias, pp);
+			KeyStore.PrivateKeyEntry entry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(entryAlias, pp);
 			return entry;
 		} catch (GeneralSecurityException ex) {
 			throw new IllegalArgumentException("Failed to access keystore.", ex);

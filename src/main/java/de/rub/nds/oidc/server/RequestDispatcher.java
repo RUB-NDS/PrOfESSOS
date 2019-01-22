@@ -116,6 +116,8 @@ public class RequestDispatcher extends HttpServlet {
 					impl.tokenRequest(path, req, resp);
 				} else if (resource.startsWith(OPImplementation.USER_INFO_REQUEST_PATH)) {
 					impl.userInfoRequest(path, req, resp);
+				} else if (resource.startsWith(OPImplementation.UNTRUSTED_KEY_PATH)) {
+					impl.untrustedKeyRequest(path, req, resp);
 				} else {
 					// TODO: match resources and call impl functions
 					notFound(resource, resp);

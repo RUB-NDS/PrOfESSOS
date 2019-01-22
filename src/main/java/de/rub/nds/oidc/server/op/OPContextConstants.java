@@ -47,4 +47,7 @@ public class OPContextConstants {
 	public static final String AUTH_REQ_HONEST_NONCE = PFX + "auth-reg-honest-nonce";
 	public static final String AUTH_REQ_HONEST_STATE = PFX + "auth-reg-honest-state";
 
+	// key confusion
+	public static final String UNTRUSTED_KEY_REQUESTED = PFX + "untrusted-key-request-received";
+	public static final String MULTI_PART_TEST_FINISHED = PFX + "all-test-runs-finished";
 }

@@ -16,6 +16,7 @@
 
 package de.rub.nds.oidc.server.op;
 
+import com.google.common.base.Strings;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWK;
@@ -173,7 +174,7 @@ public class DefaultOP extends AbstractOPImplementation {
 				OIDCClientMetadata clientMd = regReq.getOIDCClientMetadata();
 
 				// create info object and safe it in context aka register the client
-				ClientID id = new ClientID();
+				ClientID id = getRegistrationClientId();
 				Secret secret = new Secret();
 				info = new OIDCClientInformation(id, new Date(), clientMd, secret);
 
@@ -392,6 +393,7 @@ public class DefaultOP extends AbstractOPImplementation {
 		}
 	}
 
+
 	@Nullable
 	protected UserInfoSuccessResponse userInfoRequestInt(UserInfoRequest userReq, HttpServletResponse resp)
 			throws IOException {
@@ -407,6 +409,16 @@ public class DefaultOP extends AbstractOPImplementation {
 
 		UserInfoSuccessResponse uiResp = new UserInfoSuccessResponse(ui);
 		return uiResp;
+	}
+
+	@Override
+	public void untrustedKeyRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+			logger.log("Unexpected untrustedKeyRequest received");
+			HTTPRequest httpReq = ServletUtils.createHTTPRequest(req);
+			logger.logHttpRequest(req, httpReq.getQuery());
+
+			resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED);
+			// resp.flushBuffer();
 	}
 
 }

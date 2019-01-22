@@ -22,9 +22,9 @@ package de.rub.nds.oidc.server.op;
  */
 public class OPParameterConstants {
 
-	public static final String BROWSER_INPUT_OP_URL        = "browser-input-op_url";
-	public static final String BROWSER_INPUT_HONEST_OP_URL = "browser-input-honest_op_url";
-	public static final String BROWSER_INPUT_EVIL_OP_URL   = "browser-input-evil_op_url";
+	public static final String BROWSER_INPUT_OP_URL        = "browser.input.op_url";
+	public static final String BROWSER_INPUT_HONEST_OP_URL = "browser.input.honest_op_url";
+	public static final String BROWSER_INPUT_EVIL_OP_URL   = "browser.input.evil_op_url";
 
 	public static final String USE_EVIL_NEEDLE = "use_evil_needle";
 
@@ -59,5 +59,20 @@ public class OPParameterConstants {
 	public static final String FORCE_STATE_EXCL          = "force_state_excluded";
 
 	public static final String INCLUDE_SIGNING_CERT      = "include_signing_certificate";
+
+	public static final String FORCE_IDTOKEN_HEADER_UNTRUSTED_KID = "force_idtoken_header_kid_untrusted_key";
+	public static final String FORCE_IDTOKEN_HEADER_UNTRUSTED_X5U = "force_idtoken_header_x5u_untrusted_key";
+	public static final String FORCE_IDTOKEN_HEADER_UNTRUSTED_X5C = "force_idtoken_header_x5c_untrusted_key";
+	public static final String FORCE_IDTOKEN_HEADER_UNTRUSTED_JKU = "force_idtoken_header_jku_untrusted_key";
+	public static final String FORCE_IDTOKEN_HEADER_UNTRUSTED_JWK = "force_idtoken_header_jwk_untrusted_key";
+
+	public static final String FORCE_REGISTER_SAME_CLIENTID = "force_register_same_client_id";
+
+
+
+
+
+
+
 
 }

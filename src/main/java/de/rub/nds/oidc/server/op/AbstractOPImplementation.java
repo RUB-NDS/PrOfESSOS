@@ -16,6 +16,7 @@
 
 package de.rub.nds.oidc.server.op;
 
+import com.google.common.base.Strings;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -48,6 +49,7 @@ import com.nimbusds.openid.connect.sdk.claims.AccessTokenHash;
 import com.nimbusds.openid.connect.sdk.claims.CodeHash;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
 import static de.rub.nds.oidc.server.op.OPParameterConstants.*;
@@ -339,6 +341,23 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return mail;
 	}
 
+	protected ClientID getRegistrationClientId() {
+		OIDCClientInformation ci;
+		if (params.getBool(OPParameterConstants.FORCE_REGISTER_SAME_CLIENTID)) {
+			if (type == OPType.EVIL) {
+				ci = (OIDCClientInformation) suiteCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST);
+			} else {
+				ci = (OIDCClientInformation) stepCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL);
+			}
+			if (ci != null && !Strings.isNullOrEmpty(ci.getID().toString())) {
+				ClientID id = ci.getID();
+				logger.log(String.format("Re-using client ID: %s", id.toString()));
+				return id;
+			}
+		}
+		logger.log("Generating random ClientID");
+		return new ClientID();
+	}
 
 	protected Date getTokenIssuedAt() {
 		Date date = new Date();
@@ -474,6 +493,10 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	protected RSAKey getSigningJwk() {
 		KeyStore.PrivateKeyEntry keyEntry = supplyHonestOrEvil(opivCfg::getHonestOPSigningEntry, opivCfg::getEvilOPSigningEntry);
 
+		return getSigningJwk(keyEntry);
+	}
+
+	protected RSAKey getSigningJwk(KeyStore.PrivateKeyEntry keyEntry) {
 		RSAPublicKey pubKey = (RSAPublicKey) keyEntry.getCertificate().getPublicKey();
 		RSAPrivateKey privKey = (RSAPrivateKey) keyEntry.getPrivateKey();
 		List<Base64> chain = Arrays.stream(keyEntry.getCertificateChain()).map(c -> {
