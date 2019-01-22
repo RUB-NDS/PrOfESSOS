@@ -184,7 +184,7 @@ public abstract class BrowserSimulator {
 		RemoteWebElement oldHtml = (RemoteWebElement) driver.findElement(By.tagName("html"));
 
 		T result = func.call();
-		WebDriverWait wait = new WebDriverWait(driver, 30);
+		WebDriverWait wait = new WebDriverWait(driver, 15);
 		wait.until((WebDriver input) -> {
 			RemoteWebElement newHtml = (RemoteWebElement) driver.findElement(By.tagName("html"));
 			return ! newHtml.getId().equals(oldHtml.getId());
@@ -194,7 +194,7 @@ public abstract class BrowserSimulator {
 	}
 
 	protected void waitForDocumentReady() {
-		WebDriverWait wait = new WebDriverWait(driver, 30);
+		WebDriverWait wait = new WebDriverWait(driver, 15);
 		wait.until((WebDriver d) -> driver.executeScript("return document.readyState").equals("complete"));
 	}
 
