@@ -62,7 +62,7 @@ public interface RPImplementation {
 
 	void runTestStepSetup() throws ParseException, IOException ;
 
-//	void prepareAuthnReq();
+	void prepareAuthnReq();
 //
 //	void discoverOPIfNeeded();
 //

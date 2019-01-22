@@ -6,42 +6,26 @@ import de.rub.nds.oidc.server.rp.RPParameterConstants;
 import de.rub.nds.oidc.server.rp.RPType;
 import de.rub.nds.oidc.test_model.TestStepResult;
 
-import java.util.*;
+import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class OPCodeReuseBrowser extends AbstractOPBrowser {
+public class OPRumBrowser extends AbstractOPBrowser {
 
     @Override
     public final TestStepResult run() throws InterruptedException {
-		logger.log("OPCodeReuseBrowser started");
+		logger.log("OPRumeBrowser started");
         if (! (boolean) stepCtx.get(RPContextConstants.STEP_SETUP_FINISHED)) {
             logger.log("Test-setup indicates configuration error");
             return TestStepResult.UNDETERMINED;
         }
 
-		ArrayList<String[]> users = new ArrayList<>();
-		users.add(new String[] {opConfig.getUser1Name(), opConfig.getUser1Pass()});
-		users.add(new String[] {opConfig.getUser2Name(), opConfig.getUser2Pass()});
+		userName = opConfig.getUser1Name();
+        userPass = opConfig.getUser1Pass();
 
-		for (int i = 0; i<2; i++) {
-			userName = users.get(i)[0];
-			userPass = users.get(i)[1];
-
-			boolean isSingleRP = Boolean.valueOf((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST));
-			RPType type = isSingleRP ? RPType.HONEST : (i == 1) ? RPType.EVIL : RPType.HONEST;
-
-			TestStepResult result = runUserAuth(type);
-			if (result != TestStepResult.PASS) {
-				logger.log(String.format("Authentication of User %s with password %s failed", userName, userPass));
-				return result;
-			}
-			// reload browser to clear sessions
-			loadDriver(true);
-		}
-    	return TestStepResult.PASS;
+    	return runUserAuth(RPType.HONEST);
     }
 
 
@@ -49,9 +33,6 @@ public class OPCodeReuseBrowser extends AbstractOPBrowser {
 		TestStepResult result = TestStepResult.NOT_RUN;
 		logger.log("Starting User Authentication");
 //
-//		// store user credentials to make them accessible to RP
-//		stepCtx.put(RPContextConstants.CURRENT_USER_USERNAME, userName);
-//		stepCtx.put(RPContextConstants.CURRENT_USER_PASSWORD, userPass);
 
 		// prepare locks and share with RP
 		CompletableFuture<?> blockRP = new CompletableFuture();
@@ -69,29 +50,39 @@ public class OPCodeReuseBrowser extends AbstractOPBrowser {
 		// prepare scripts for login and consent page
 		evalScriptTemplates();
 
-//		logger.log(String.format("Using Login script:\n %s", submitScript));
-		// wait until a new html element appears, indicating a page load
-		waitForPageLoad(() -> {
-			driver.executeScript(submitScript);
-			// capture state where the text is entered
-//			logScreenshot();
-//			logger.log("Login Credentials entered");
-			return null;
-		});
-//		logger.log("HTML element found in Browser.");
-		// wait a bit more in case we have an angular app or some other JS heavy application
-		waitMillis(2000);
-
-		// don't run consentScript if we have already been redirected back to RP
-		if (driver.getCurrentUrl().startsWith(authnReq.getRedirectionURI().toString())) {
-			logger.log("No consent page encountered in browser");
-		} else {
+		try {
 			waitForPageLoad(() -> {
-//				driver.executeScript(consentScript);
+				driver.executeScript(submitScript);
+				// capture state where the text is entered
 				logScreenshot();
-				logger.log("ConsentScript executed, client authorized");
+//				logger.log("Login Credentials entered");
 				return null;
 			});
+//			logger.log("HTML element found in Browser.");
+			// wait a bit more in case we have an angular app or some other JS heavy application
+			waitMillis(2000);
+
+
+			// don't run consentScript if we have already been redirected back to RP
+			if (driver.getCurrentUrl().startsWith(authnReq.getRedirectionURI().toString())) {
+				logger.log("No consent page encountered in browser");
+			} else {
+				waitForPageLoad(() -> {
+					driver.executeScript(consentScript);
+					logScreenshot();
+					logger.log("ConsentScript executed, client authorized");
+					return null;
+				});
+			}
+
+		} catch (Exception e) {
+			// script execution failed, likely received an error response earlier due to wrong redirect uri
+			logger.log("Script execution failed, please check manually");
+			logScreenshot();
+
+			// TODO: can we always PASS the test here? in which cases should we remain UNDETERMINED?
+			return TestStepResult.PASS;
+
 		}
 
 		String finalUrl = driver.getCurrentUrl();

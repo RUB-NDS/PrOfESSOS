@@ -64,6 +64,7 @@ public class RPLearningBrowser extends BrowserSimulator {
 		String startUrl = rpConfig.getUrlClientTarget();
 		logger.log(String.format("Opening browser with URL '%s'.", startUrl));
 		driver.get(startUrl);
+//		logScreenshot();
 
 		// if we have a script skip the form detection
 		if (rpConfig.getSeleniumScript() == null || rpConfig.getSeleniumScript().isEmpty()) {

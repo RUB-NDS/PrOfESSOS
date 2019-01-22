@@ -111,6 +111,9 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 	protected URI getRedirectUri() {
 //		return supplyHonestOrEvil(this::getHonestRedirectUri, this::getEvilRedirectUri);
+		if (params.getBool(RPParameterConstants.FORCE_HONEST_REDIRECT_URI)) {
+			return getHonestRedirectUri();
+		}
 		return type == RPType.HONEST ? getHonestRedirectUri() : getEvilRedirectUri();
 	}
 
@@ -142,6 +145,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		}
 	}
 
+	@Override
 	public void prepareAuthnReq() {
 
 		// TODO: should depend on testStepDefiniton i.e. params.get(), at least in subclasses
@@ -151,7 +155,10 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		// nonce
 		// scopes
 		// response type
-		// response mode (whats that?)
+		// response_mode (form_post)
+		// codeChallenge
+		// prompt
+		// display
 //
 		ClaimsRequest claims = new ClaimsRequest();
 //		claims.addIDTokenClaim("group");
@@ -162,9 +169,8 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 //		claims.addIDTokenClaim("given_name");
 //		claims.addIDTokenClaim("middle_name");
 		AuthenticationRequest authnReq = new AuthenticationRequest.Builder(
-//			new ResponseType("code","token","id_token"), // TODO: check that these are covered by registered grant types
-			new ResponseType("code", "id_token"), // TODO: check that these are covered by registered grant types
-//			new ResponseType("code"),
+//			new ResponseType("code", "id_token", "token"), // TODO: check that these are covered by registered grant types
+			new ResponseType("code"),
 			new Scope(OIDCScopeValue.OPENID, OIDCScopeValue.PROFILE, OIDCScopeValue.EMAIL),
 			clientInfo.getID(),
 			getRedirectUri())
@@ -180,7 +186,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		stepCtx.put(currentRP, authnReq.toURI());
 	}
 
-	public boolean registerClientIfNeeded() throws IOException, ParseException {
+	private boolean registerClientIfNeeded() throws IOException, ParseException {
 		if(params.getBool(RPParameterConstants.FORCE_REGISTER_CLIENT)){
 			// don't store new clientConfig in suiteCtx
 			return registerClient(type);
@@ -208,9 +214,10 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		Set<GrantType> grantTypes = new HashSet<>();
 		if (!Strings.isNullOrEmpty(params.get(RPParameterConstants.REGISTER_GRANT_TYPES))) {
 			// split string on space, build set of GrantTypes using
-			// GrantType.parse()
+
+//			GrantType.parse()
 		} else {
-			// MitreID demo server does not allow simultanous registration of implicit and authorization_grant
+			// MitreID demo server does not allow simultaneous registration of implicit and authorization_grant
 			grantTypes.add(GrantType.AUTHORIZATION_CODE);
 //			grantTypes.add(GrantType.IMPLICIT);
 			clientMetadata.setGrantTypes(grantTypes);
@@ -218,6 +225,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		}
 		clientMetadata.setRedirectionURI(getRedirectUri());
 		clientMetadata.setName(getClientName());
+		// TODO: register response_types ?
 //		logger.log("Client Metadata set");
 
 		BearerAccessToken bearerAccessToken = null;
@@ -465,7 +473,17 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 			return null;
 		}
 
-		AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, getRedirectUri());
+
+		AuthorizationGrant codeGrant;
+		if (params.getBool(RPParameterConstants.FORCE_HONEST_REDIRECT_URI)) {
+			codeGrant = new AuthorizationCodeGrant(code, getHonestRedirectUri());
+		} else if (params.getBool(RPParameterConstants.FORCE_EVIL_REDIRECT_URI)) {
+			codeGrant = new AuthorizationCodeGrant(code, getEvilRedirectUri());
+		} else if (params.getBool(RPParameterConstants.FORCE_EMPTY_REDIRECT_URI)) {
+			codeGrant = new AuthorizationCodeGrant(code, null);
+		} else {
+			codeGrant = new AuthorizationCodeGrant(code, getRedirectUri());
+		}
 
 		TokenRequest request = new TokenRequest(
 				opMetaData.getTokenEndpointURI(),

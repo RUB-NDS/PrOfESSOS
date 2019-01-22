@@ -40,7 +40,7 @@ curl -vv -H "Content-Type: application/json" http://localhost:8080/api/rp/VfmRgM
 
 Start from Professos project directory using
 ```
-docker-compose -f docker-compose.yml -f docker-compose.elearning.yml up
+docker-compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.elearning.yml up
 ```
 
 ## entry point for elearning redirector
@@ -53,4 +53,13 @@ http://localhost:8080/portal?idp_verifier=1&response_type=code&sp_verifier=1
 
 ```
 http://honest-sp.com/oidc_sp/faces/success/index.xhtml
+```
+
+## User EvilUserNeedle
+```
+honest-op-test-subject
+```
+
+```
+evil-op-test-subject
 ```

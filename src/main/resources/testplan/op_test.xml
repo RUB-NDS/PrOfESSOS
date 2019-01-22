@@ -33,7 +33,7 @@
             <Parameter Key="force_auth-code_reuse_user">true</Parameter>
         </RPConfig-1>
 		<RPConfig-2>
-			<!-- no used but required in config-->
+			<!-- not used but required in config-->
 			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
 		</RPConfig-2>
 	</TestStep>
@@ -79,6 +79,68 @@
             <!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
 		</RPConfig-2>
 	</TestStep>
+
+    <TestStep Name="Redirect URI Manipulation 1">
+        <Description>PrOfESSOS issues an authentication request containing the <tt>redirect_uri</tt> value of another client - Evil Client</Description>
+        <TestParameters>
+            <Parameter Key="is_single_rp_test">false</Parameter>
+        </TestParameters>
+        <BrowserSimulator>
+            <ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+        </BrowserSimulator>
+
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+            <Parameter Key="register_grant_types">authorization_code</Parameter>
+            <Parameter Key="authnreq-force-evil-redirect-uri">true</Parameter>
+        </RPConfig-1>
+        <RPConfig-2>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+            <Parameter Key="register_grant_types">authorization_code</Parameter>
+        </RPConfig-2>
+    </TestStep>
+
+    <TestStep Name="Code Hijack 1">
+        <Description>PrOfESSOS issues a token request containing no redirect_uri parameter, even though one was present in the authentication request </Description>
+        <TestParameters>
+            <Parameter Key="is_single_rp_test">true</Parameter>
+        </TestParameters>
+        <BrowserSimulator>
+            <ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+        </BrowserSimulator>
+
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+            <Parameter Key="register_grant_types">authorization_code</Parameter>
+            <Parameter Key="tokenreq-force-empty-redirect-uri">true</Parameter>
+        </RPConfig-1>
+        <RPConfig-2>
+            <!--not used in this test-->
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+            <Parameter Key="register_grant_types">authorization_code</Parameter>
+        </RPConfig-2>
+    </TestStep>
+
+    <TestStep Name="Code Hijack 2">
+        <Description>PrOfESSOS issues a token request containing the <tt>redirect_uri</tt> value that does not match the one present in the authentication request </Description>
+        <TestParameters>
+            <Parameter Key="is_single_rp_test">true</Parameter>
+        </TestParameters>
+        <BrowserSimulator>
+            <ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+        </BrowserSimulator>
+
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+            <Parameter Key="register_grant_types">authorization_code</Parameter>
+            <Parameter Key="tokenreq-force-evil-redirect-uri">true</Parameter>
+        </RPConfig-1>
+        <RPConfig-2>
+            <!--not used in this test-->
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+            <Parameter Key="register_grant_types">authorization_code</Parameter>
+        </RPConfig-2>
+    </TestStep>
 
 	<!--<TestStep Name="ID Spoofing 1">-->
 		<!--<Description><![CDATA[-->

@@ -27,7 +27,6 @@ public class CodeReuseRP extends AbstractRPImplementation {
     @Override
     public void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException {
 
-    	// can we put the browserBlocker into a field/property in AbstractRPImpl?
 		CompletableFuture<TestStepResult> browserBlocker = (CompletableFuture<TestStepResult>) stepCtx.get(RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT);
 		AuthorizationCode oldAuthcode = (AuthorizationCode) stepCtx.get(RPContextConstants.STORED_AUTH_CODE); // TODO beware of typecast exception
 

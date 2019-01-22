@@ -1,13 +1,15 @@
 package de.rub.nds.oidc.server.rp;
 
-import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.ServletUtils;
+import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.*;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.TestStepResult;
+import org.apache.http.client.utils.URIBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,91 +21,73 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class DefaultRP extends AbstractRPImplementation {
+public class RumRP extends AbstractRPImplementation {
 
 
 
-    @Override
-    public void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException {
+	@Override
+	public void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException {
 
-		// TODO: this will not parse form_post responses
-		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(req);
-		logger.log("Callback received");
-		logger.logHttpRequest(req, httpRequest.getQuery());
-
-		CompletableFuture waitForBrowser = (CompletableFuture) stepCtx.get(RPContextConstants.BLOCK_RP_FOR_BROWSER_FUTURE);
 		CompletableFuture<TestStepResult> browserBlocker = (CompletableFuture<TestStepResult>) stepCtx.get(RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT);
 
-		// send some response to the waiting browser and wait for browser confirmation
-		sendCallbackResponse(resp);
 
-		try {
-			waitForBrowser.get(5, TimeUnit.SECONDS);
-		} catch (TimeoutException| ExecutionException |InterruptedException e) {
-			logger.log("Timeout waiting for browser redirect URL",e);
-			stepCtx.put(RPContextConstants.RP_INDICATED_STEP_RESULT, TestStepResult.UNDETERMINED);
+		AuthenticationSuccessResponse successResponse = processCallback(path, req, resp);
+		if (successResponse == null) {
+			logger.log("AuthenticationResponse Error");
+			browserBlocker.complete(TestStepResult.PASS);
 		}
-		// retrieve actual redirect URI from browser - may include tokens and or error messages in implicit flows
-		String lastUrl = (String) stepCtx.get(RPContextConstants.LAST_BROWSER_URL);
-		logger.log("Redirect URL as seen in Browser");
-		logger.log(lastUrl);
-		URI callbackUri;
-		callbackUri = new URI(lastUrl);
 
-		String user = (String) stepCtx.get(RPContextConstants.CURRENT_USER_USERNAME);
-		String pass = (String) stepCtx.get(RPContextConstants.CURRENT_USER_USERNAME);
+		if (type.equals(RPType.EVIL) && params.getBool(RPParameterConstants.FORCE_AUTHNREQ_EVIL_REDIRURI)) {
+			// received auth code in evil client
+			logger.log("Authentication SuccessResponse received in Evil Client");
+			logger.logHttpRequest(req, null);
+			browserBlocker.complete(TestStepResult.FAIL);
+			return;
 
-		// parse the URL from Browser to include potential URI Fragments (implicit/hybrid flows)
-		AuthenticationResponse authnResp = AuthenticationResponseParser.parse(callbackUri);
-		if (authnResp instanceof AuthenticationErrorResponse) {
-			String opAuthEndp = opMetaData.getAuthorizationEndpointURI().toString();
-			logger.log(String.format("Authentication at %s as %s with password %s failed:", opAuthEndp, user, pass));
-			logger.logHttpRequest(req, req.getQueryString());
-			// store auth failed hint in context for browser retrieval
-			stepCtx.put(RPContextConstants.RP_INDICATED_STEP_RESULT, TestStepResult.FAIL);
+		} else {
+			logger.log("Authentication SuccessResponse received in Honest Client");
+			logger.logHttpRequest(req, null);
+//				browserBlocker.complete(TestStepResult.PASS);
+//				return;
+		}
+
+		OIDCTokenResponse tokenResponse = fetchToken(successResponse);
+		if (tokenResponse == null) {
+			// error messages have been logged already
+			browserBlocker.complete(TestStepResult.PASS);
+			return;
+		} else {
+			logger.log("Code sucessfully redeemed");
+			logger.logHttpResponse(tokenResponse.toHTTPResponse(), tokenResponse.toHTTPResponse().getContent());
+
+			// for logging
+			requestUserInfo(tokenResponse.getTokens().getAccessToken());
+
+			browserBlocker.complete(TestStepResult.FAIL);
 			return;
 		}
+	}
 
-		AuthenticationSuccessResponse successResponse = authnResp.toSuccessResponse();
 
-		UserInfo userInfo = null;
-		if (successResponse.getAccessToken() != null ) {
-			// implicit or hybrid flow
-			userInfo = requestUserInfo(successResponse.getAccessToken());
-			// TODO: any checks on received id_token?
-		} else {
-			// in code flow, fetch token/idToken
-			OIDCTokenResponse tokenResponse = fetchToken(successResponse);
-			if (tokenResponse == null) {
-				// error messages have been logged already
-				browserBlocker.complete(TestStepResult.UNDETERMINED);
-				return;
-			}
-			OIDCTokens tokens = tokenResponse.toSuccessResponse().getOIDCTokens();
-			userInfo = requestUserInfo(tokens.getAccessToken());
-		}
+	@Override
+	public void prepareAuthnReq() {
 
-		// TODO: evaluation of test result, userinfo, scope, whatever
-		// check if the received id_token matches stepCtx.get(RPContextConstants.CURRENT_USER_USERNAME, username);
-		// or maybe introduce some kind of user needle?
-		// put RP_RESULT_INDICATION into stepCtx
-		//
-		// temporary: iterate first level keys of userinfo and compare w username
-		if (userInfo != null) {
-			userInfo.toJSONObject().forEach((k,v) -> {
-				if (v.equals(user)) {
-					logger.log(String.format("UserName %s matches %s entry in received UserInfo", user, k.toString() ));
-					return;
-				}
-			});
-		}
+		URI redirURI = params.getBool(RPParameterConstants.FORCE_AUTHNREQ_EVIL_REDIRURI) ? getEvilRedirectUri() : getRedirectUri();
 
-		stepCtx.put(RPContextConstants.RP_INDICATED_STEP_RESULT, TestStepResult.PASS);
+		AuthorizationRequest authnReq = new AuthorizationRequest(
+				opMetaData.getAuthorizationEndpointURI(),
+				new ResponseType("code"),
+				null,
+				clientInfo.getID(),
+				redirURI,
+				new Scope(OIDCScopeValue.OPENID, OIDCScopeValue.PROFILE, OIDCScopeValue.EMAIL),
+				new State(32)
+		);
 
-//		logger.log("release browser lock");
-		browserBlocker.complete(TestStepResult.PASS);
-		return;
-    }
-
+		// store in stepCtx, so BrowserSimulator can fetch it
+		String currentRP = type == RPType.HONEST ? RPContextConstants.RP1_PREPARED_AUTHNREQ
+				: RPContextConstants.RP2_PREPARED_AUTHNREQ;
+		stepCtx.put(currentRP, authnReq.toURI());
+	}
 
 }
