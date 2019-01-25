@@ -152,6 +152,7 @@ public class RPLearningBrowser extends BrowserSimulator {
 			logScreenshot();
 		}
 
+		//TODO: allow searching for multiple strings on the whole page (e.g., if sub and iss are not contained in the same element)?
 		String needle = type == OPType.HONEST ? rpConfig.getHonestUserNeedle() : rpConfig.getEvilUserNeedle();
 		if (needle != null && ! needle.isEmpty()) {
 			needle = te.eval(createRPContext(), needle);
