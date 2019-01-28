@@ -343,7 +343,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 
 	protected ClientID getRegistrationClientId() {
 		OIDCClientInformation ci;
-		if (params.getBool(OPParameterConstants.FORCE_REGISTER_SAME_CLIENTID)) {
+		if (Boolean.parseBoolean((String) stepCtx.get(OPParameterConstants.FORCE_REGISTER_SAME_CLIENTID))) {
 			if (type == OPType.EVIL) {
 				ci = (OIDCClientInformation) suiteCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST);
 			} else {

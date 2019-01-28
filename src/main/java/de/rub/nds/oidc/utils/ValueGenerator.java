@@ -19,7 +19,9 @@ package de.rub.nds.oidc.utils;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
+import javax.annotation.Nullable;
 import javax.enterprise.context.ApplicationScoped;
+import javax.validation.constraints.Null;
 
 /**
  *
@@ -36,7 +38,15 @@ public class ValueGenerator {
 
 
 	public String generateTestId() {
-		byte[] data = new byte[16];
+//		byte[] data = new byte[16];
+//		rand.nextBytes(data);
+//		String testId = Base64.getUrlEncoder().withoutPadding().encodeToString(data);
+//		return testId;
+		return generateRandString(16);
+	}
+
+	public String generateRandString(int length) {
+		byte[] data = new byte[length];
 		rand.nextBytes(data);
 		String testId = Base64.getUrlEncoder().withoutPadding().encodeToString(data);
 		return testId;

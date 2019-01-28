@@ -38,6 +38,7 @@ public class RequestPath {
 	private final String resourcePath;
 	private final List<String> segments;
 	private final URI originalRequestUri;
+	private final String registrationEnforced;
 
 	public RequestPath(HttpServletRequest req) {
 		// resources look like this /<ctx>/<servlet>/<testId>/<resource>
@@ -47,12 +48,23 @@ public class RequestPath {
 		String fullPath = req.getRequestURI();
 
 		// seperate out the prefix
-		String regexp = String.format("^%s%s(/.*)$", Pattern.quote(ctxPath), Pattern.quote(servletPath));
+		// TODO: enforce-reg should be some static constant in OPIVconfig?
+		String regexp = String.format("^%s%s(/enforce-rp-reg-.{8})?(/.*)$", Pattern.quote(ctxPath), Pattern.quote(servletPath));
 		Pattern p = Pattern.compile(regexp);
 		Matcher m = p.matcher(fullPath);
 		m.matches();
-		resourcePath = m.group(1);
 
+		if (m.groupCount() == 2 ) {
+			System.out.println("group count is 2");
+			registrationEnforced = m.group(1);
+			System.out.println("group 1: " + registrationEnforced);
+			resourcePath = m.group(2);
+			System.out.println("group 2: " + resourcePath);
+		} else {
+			System.out.println("group count is NOT  2");
+			registrationEnforced = "";
+			resourcePath = m.group(1);
+		}
 		// extract path segments
 		List<String> segmentList = Arrays.stream(resourcePath.split("/"))
 				.map(String::trim)
@@ -107,6 +119,10 @@ public class RequestPath {
 				.replacePath("/dispatch/" + getTestId())
 				.replaceQuery(null)
 				.build();
+	}
+
+	public String getRegistrationEnforced() {
+		return registrationEnforced == null ? "" : registrationEnforced;
 	}
 
 }

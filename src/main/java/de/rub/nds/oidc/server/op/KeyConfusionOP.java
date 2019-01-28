@@ -51,7 +51,7 @@ public class KeyConfusionOP extends DefaultOP {
     private int requestCount = 0;
     private URI untrustedKeyUri;
     private String untrustedKeyJsonResponse;
-    private CompletableFuture<?> waitForHonest;
+//    private CompletableFuture<?> waitForHonest;
 
     @Override
     protected JWT getIdToken(@Nonnull ClientID clientId, @Nullable Nonce nonce, @Nullable AccessTokenHash atHash,
@@ -91,7 +91,9 @@ public class KeyConfusionOP extends DefaultOP {
 
     @Override
     public void authRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (! params.getBool(FORCE_REGISTER_SAME_CLIENTID) ) {
+        if (! Boolean.parseBoolean((String) stepCtx.get(FORCE_REGISTER_SAME_CLIENTID)) ) {
+//        	logger.log("not the same.client id forced");
+			// all KC tests except KC6
             super.authRequest(path, req, resp);
             return;
         }
@@ -103,20 +105,26 @@ public class KeyConfusionOP extends DefaultOP {
                 HTTPRequest reqMsg = ServletUtils.createHTTPRequest(req);
                 logger.logHttpRequest(req, reqMsg.getQuery());
 
-                // TODO the future can be an instance variable
-//                CompletableFuture<?> releaseHonest = (CompletableFuture<?>) stepCtx.get(OPContextConstants.BLOCK_OP_FUTURE);
-                waitForHonest.complete(null);
+                CompletableFuture<?> releaseEvil = (CompletableFuture<?>) stepCtx.get(OPContextConstants.BLOCK_OP_FUTURE);
+                releaseEvil.complete(null);
 
+                resp.setStatus(204);
+                resp.flushBuffer();
             } else {
                 // first authreq
-                logger.log("Authentication requested at Evil OP.");
-                HTTPRequest reqMsg = ServletUtils.createHTTPRequest(req);
-                logger.logHttpRequest(req, reqMsg.getQuery());
+				CompletableFuture<?> waitForHonest = (CompletableFuture<?>) stepCtx.get(OPContextConstants.BLOCK_OP_FUTURE);
+
+				logger.log("Authentication requested at Evil OP.");
+				HTTPRequest reqMsg = ServletUtils.createHTTPRequest(req);
+				logger.logHttpRequest(req, reqMsg.getQuery());
 //                AuthenticationRequest authReq = AuthenticationRequest.parse(reqMsg);
 
-//                CompletableFuture<?> waitForHonestReq = (CompletableFuture<?>) stepCtx.get(OPContextConstants.BLOCK_OP_FUTURE);
-				waitForHonest = new CompletableFuture<>();
-                waitForHonest.get(30, TimeUnit.SECONDS);
+				// release browser
+				CompletableFuture<?> browserBlocker = (CompletableFuture<?>) stepCtx.get(OPContextConstants.BLOCK_BROWSER_FUTURE);
+				browserBlocker.complete(null);
+
+				// wait until authreq was received in honest op
+                waitForHonest.get(25, TimeUnit.SECONDS);
 
 				// send response using default op implementation
 				logger.log("Releasing AuthResponse from Evil OP");
@@ -248,10 +256,12 @@ public class KeyConfusionOP extends DefaultOP {
 //            header = JWSHeader.parse(jsonKey.toString());
             JWSHeader.Builder hb = new JWSHeader.Builder(JWSAlgorithm.RS256).type(JOSEObjectType.JWT);
             //hb.keyID(key.toPublicJWK().toString());
-            // TODO: ^this does not add a valid json object as kid
+            // TODO: ^this does not add a valid json object as kid - rewrite JWT / extend unsafe JWT
             // instead the key is auto converted to a string -
 //            hb.customParam("kid", key.toPublicJWK());
-            hb.parsedBase64URL(Base64URL.encode("{\"alg\":\"RS256\",\"typ\":\"JWT\",\"kid\":" + key.toPublicJWK().toString() + "}")); // this seems to work, but logging the header fails apparently ??
+
+            // TODO TEST and change
+            hb.parsedBase64URL(Base64URL.encode("{\"alg\":\"RS256\",\"typ\":\"JWT\",\"kid\":" + key.toPublicJWK().toJSONString() + "}")); // this seems to work, but logging the header fails apparently ??
             header = hb.build();
 
             // this was the last test step for kid key confusion
@@ -346,19 +356,23 @@ public class KeyConfusionOP extends DefaultOP {
 //    }
 
     private SignedJWT hmacKeyConfusion(JWTClaimsSet claims) throws GeneralSecurityException {
+		logger.log("hmackkeyconfusion");
         // replace client ID (use same ID for evil and honest
         OIDCClientInformation cinfo = (OIDCClientInformation) stepCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL);
 //        ClientID cid = cinfo.getID();
         //claims. //= super.getIdTokenClaims(cid, nonce, atHash, cHash);
 
 //        JWTClaimsSet newClaims = super.getIdTokenClaims(cid, claims.getClaim("nonce"), claims.getClaim("atHash"), claims.getClaim("cHash"));
-
+		logger.log(cinfo.getOIDCMetadata().toString());
 
         JWSHeader.Builder hb = new JWSHeader.Builder(JWSAlgorithm.HS256).type(JOSEObjectType.JWT);
         JWSHeader header = hb.build();
         SignedJWT signedJwt = new SignedJWT(header, claims);
+        if (signedJwt == null) {logger.log("signedJWt is nulll");}
         try {
-            JWSSigner signer = new MACSigner(cinfo.getSecret().getValueBytes());
+        	byte [] key = cinfo.getSecret().getValueBytes();
+        	if (key == null) {logger.log("key is null...");}
+            JWSSigner signer = new MACSigner(key);
             signedJwt.sign(signer);
 //            stepCtx.put(OPContextConstants.MULTI_PART_TEST_FINISHED, true);
             return signedJwt;

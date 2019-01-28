@@ -3,9 +3,15 @@ package de.rub.nds.oidc.browser;
 import de.rub.nds.oidc.server.op.OPContextConstants;
 import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.test_model.TestStepResult;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +32,10 @@ public class SessionOverwritingOPBrowser extends DefaultRPTestBrowser {
             String startUrl = rpConfig.getUrlClientTarget();
             logger.log(String.format("Opening browser with URL '%s'.", startUrl));
             driver.get(startUrl);
+//			waitMillis(1000);  // driver.get() should already block and only release once document.readyState is complete
+
+			// store session cookies
+			Set<Cookie> cookies = driver.manage().getCookies();
 
             // execute JS to start authentication
             String honestInputOpUrl = (String) stepCtx.get(OPParameterConstants.BROWSER_INPUT_HONEST_OP_URL);
@@ -35,26 +45,29 @@ public class SessionOverwritingOPBrowser extends DefaultRPTestBrowser {
             logger.log("Start authentication for Honest OP.");
             driver.executeScript(submitScript);
 
-            // then open second browser window...
-            String windowHandle = driver.getWindowHandle();
-//            logger.log(String.format("Opening new browser window with URL '%s'.", startUrl));
-            driver.executeScript("window.open('" + startUrl + "', '_blank');");
+            // TODO: do we really need this wait?
+            waitMillis(1000);
 
-            // switch to newly openened window
-            ArrayList<String> tabs = new ArrayList(driver.getWindowHandles());
-//            logger.log(String.format("number of open tabs: %s", tabs.size()));
-            tabs.remove(windowHandle);
-            driver.switchTo().window(tabs.get(0));
+			RemoteWebDriver second = getDriverInstance();
+			// copy all cookies that were set in first browser instance
+			// 1. navigate to correct domain
+			second.get(startUrl);
+			// 2. purge cookie jar
+			second.manage().deleteAllCookies();
+			// 3. set cookies from other browser instance
+			Iterator<Cookie> it = cookies.iterator();
+			while (it.hasNext()) {
+				Cookie c = it.next();
+				logger.log("a coookie: " + c.toString());
+				second.manage().addCookie(c);
+			}
 
             // ... and request authentication with Evil OP
             String evilInputOpUrl = (String) stepCtx.get(OPParameterConstants.BROWSER_INPUT_EVIL_OP_URL);
             stepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, evilInputOpUrl);
             String submitScriptEvil = te.eval(createRPContext(), submitScriptRaw);
             logger.log("Start authentication for Evil OP.");
-            driver.executeScript(submitScriptEvil);
-
-            // switch focus back to original tab
-            driver.switchTo().window(windowHandle);
+            second.executeScript(submitScriptEvil);
 
             // wait for result of the test
             TestStepResult result = blockAndResult.get(10, TimeUnit.SECONDS);
@@ -71,6 +84,6 @@ public class SessionOverwritingOPBrowser extends DefaultRPTestBrowser {
             return TestStepResult.UNDETERMINED;
         } catch (InterruptedException ex) {
             throw new RuntimeException("Test interrupted.", ex);
-        }
+        } // TODO: close second browser in finally
     }
 }

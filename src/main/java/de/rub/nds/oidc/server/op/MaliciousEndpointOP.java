@@ -70,7 +70,7 @@ public class MaliciousEndpointOP extends DefaultOP {
 				logger.log("Detected Honest ClientID in Evil OP.");
 				result = TestStepResult.FAIL;
 			} else if (clientId != null) {
-				logger.log("Detected unknown ClientID in Evil OP.");
+				logger.log(String.format("Detected unknown ClientID %s in Evil OP.", clientId.toString()));
 				result = TestStepResult.UNDETERMINED;
 			}
 			if (refCode != null && refCode.equals(code)) {

@@ -191,7 +191,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 1 (future work)">
+	<TestStep Name="Key Confusion 1">
 		<Description><![CDATA[
 			<h1>Key Confusion</h1>
 
@@ -222,7 +222,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 2 (future work)">
+	<TestStep Name="Key Confusion 2">
 		<Description><![CDATA[
 			<h1>Key Confusion</h1>
 
@@ -254,7 +254,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 3 (future work)">
+	<TestStep Name="Key Confusion 3">
 		<Description><![CDATA[
 			<h1>Key Confusion</h1>
 
@@ -286,7 +286,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 4 (future work)">
+	<TestStep Name="Key Confusion 4">
 		<Description><![CDATA[
 			<h1>Key Confusion</h1>
 
@@ -318,7 +318,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 5 (future work)">
+	<TestStep Name="Key Confusion 5">
 		<Description><![CDATA[
 			<h1>Key Confusion</h1>
 
@@ -351,7 +351,7 @@
 	</TestStep>
 
 
-	<TestStep Name="Key Confusion 6 ">
+	<TestStep Name="Key Confusion 6">
 		<Description><![CDATA[
 			<h1>Key Confusion</h1>
 
@@ -376,6 +376,7 @@
 		<TestParameters>
 			<Parameter Key="discovery_support_needed">true</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">true</Parameter>
+            <Parameter Key="force_register_same_client_id">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.KC6OPBrowser</ImplementationClass>
@@ -386,7 +387,6 @@
 		</OPConfig-1>
 		<OPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
-			<Parameter Key="force_register_same_client_id">true</Parameter>
 
 			<Parameter Key="force_idtoken_header_alg_hmac">true</Parameter>
 			<Parameter Key="force_honest_idtoken_iss">true</Parameter>

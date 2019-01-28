@@ -22,6 +22,7 @@ import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.server.ServerInstance;
 import de.rub.nds.oidc.server.TestInstanceRegistry;
+import de.rub.nds.oidc.server.op.OPContextConstants;
 import de.rub.nds.oidc.server.op.OPInstance;
 import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.server.op.OPType;
@@ -33,14 +34,14 @@ import de.rub.nds.oidc.test_model.*;
 import de.rub.nds.oidc.utils.ImplementationLoadException;
 import de.rub.nds.oidc.utils.ImplementationLoader;
 import de.rub.nds.oidc.utils.UriUtils;
+import de.rub.nds.oidc.utils.ValueGenerator;
+import org.apache.commons.lang.RandomStringUtils;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.ClientBuilder;
@@ -59,9 +60,11 @@ public class TestRunner {
 	private final TestObjectType testObj;
 	private final TestPlanType testPlan;
 	private final TemplateEngine te;
+	private ValueGenerator valueGenerator;
 
 	private final Map<String, Object> testSuiteCtx;
 
+	@Inject
 	public TestRunner(OPIVConfig hostCfg, TestObjectType testObj, TestPlanType testPlan, TemplateEngine te) {
 		this.testId = testObj.getTestId();
 		this.hostCfg = hostCfg;
@@ -70,6 +73,11 @@ public class TestRunner {
 		this.te = te;
 
 		this.testSuiteCtx = Collections.synchronizedMap(new HashMap<>());
+	}
+
+	@Inject
+	public void setValueGenerator(ValueGenerator valueGenerator) {
+		this.valueGenerator = valueGenerator;
 	}
 
 	public TestObjectType getTestObj() {
@@ -281,8 +289,22 @@ public class TestRunner {
 	private boolean prepareRPTestStep(TestInstanceRegistry instReg, Map<String, Object> testStepCtx, TestStepType stepDef, TestStepLogger logger ) throws ImplementationLoadException {
 		TestRPConfigType testConfig = (TestRPConfigType) getTestObj().getTestConfig();
 		// resolve OP URL
-		String honestWebfinger = testConfig.getHonestWebfingerResourceId();
-		String evilWebfinger = testConfig.getEvilWebfingerResourceId();
+
+		String honestWebfinger;
+		String evilWebfinger;
+		Boolean enforceReg = Boolean.parseBoolean((String) testStepCtx.get(OPContextConstants.REGISTRATION_NEEDED));
+		if (enforceReg) {
+			logger.log("attempt to enforce new registration");
+			String prefix = "enforce-rp-reg-"; // TODO: this is also used in RequestPath, should be a constant defined somewhere
+//			String regEnforcer = prefix + valueGenerator.generateRandString(8);
+			String regEnforcer = prefix + RandomStringUtils.randomAlphanumeric(8);
+			honestWebfinger = hostCfg.getHonestOPUri().toString() + regEnforcer +"/"+ testId;
+			evilWebfinger = hostCfg.getEvilOPUri().toString() + regEnforcer +"/"+ testId;
+			logger.log("set stepcontext uris to " + evilWebfinger + " and "+honestWebfinger);
+		} else {
+			honestWebfinger = testConfig.getHonestWebfingerResourceId();
+			evilWebfinger = testConfig.getEvilWebfingerResourceId();
+		}
 		// save both in context under their own name
 		testStepCtx.put(OPParameterConstants.BROWSER_INPUT_HONEST_OP_URL, honestWebfinger);
 		testStepCtx.put(OPParameterConstants.BROWSER_INPUT_EVIL_OP_URL, evilWebfinger);

@@ -66,6 +66,7 @@ public class RequestDispatcher extends HttpServlet {
 		}
 
 		String testId = path.getTestId(); // may not be the
+		System.out.println("The Id " + testId);
 
 		try {
 			if ((opivCfg.getHonestOPScheme() + "://" + opivCfg.getHonestOPHost()).equals(serverName)) {

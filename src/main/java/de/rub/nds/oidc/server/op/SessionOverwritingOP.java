@@ -39,10 +39,7 @@ import java.util.concurrent.TimeoutException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- *
- * @author Tobias Wich
- */
+
 public class SessionOverwritingOP extends DefaultOP {
 
     @Override
@@ -53,10 +50,30 @@ public class SessionOverwritingOP extends DefaultOP {
                 HTTPRequest reqMsg = ServletUtils.createHTTPRequest(req);
                 logger.logHttpRequest(req, reqMsg.getQuery());
 
-                CompletableFuture<?> waitForEvil = (CompletableFuture<?>) stepCtx.get(OPContextConstants.BLOCK_HONEST_OP_FUTURE);
-                waitForEvil.get(30, TimeUnit.SECONDS);
 
+
+
+//                CompletableFuture.runAsync(() -> {
+//                    try {
+//                        CompletableFuture<?> waitForEvil = (CompletableFuture<?>) stepCtx.get(OPContextConstants.BLOCK_HONEST_OP_FUTURE);
+//                        waitForEvil.get(30, TimeUnit.SECONDS);
+//                    } catch (InterruptedException|ExecutionException|TimeoutException e) {}
+//                }).whenComplete((task, throwable) -> {
+//                    if(throwable != null) {
+//                       logger.log("timeout", throwable);
+//                    } else {
+//                        try {
+//                            // forward request by the actual honest implementation
+//                            logger.log("processing authreq in honest op");
+//                            super.authRequest(path, req, resp);
+//                        } catch (IOException e){logger.log("failed to respond", e);}
+//                    }
+//                });
+
+				CompletableFuture<?> waitForEvil = (CompletableFuture<?>) stepCtx.get(OPContextConstants.BLOCK_HONEST_OP_FUTURE);
+				waitForEvil.get(15, TimeUnit.SECONDS);
                 // forward request by the actual honest implementation
+                logger.log("processing authreq in honest op");
                 super.authRequest(path, req, resp);
 
             } else {
@@ -69,13 +86,18 @@ public class SessionOverwritingOP extends DefaultOP {
 //                State opState = authReq.getState();
 //                stepCtx.put(OPContextConstants.AUTH_REQ_EVIL_STATE, opState);
 //                logger.log("State from Evil OP saved, releasing AuthResponse from Honest OP ");
+
+//				resp.setStatus(204);
+//				resp.flushBuffer();
                 CompletableFuture<?> releaseHonest = (CompletableFuture<?>) stepCtx.get(OPContextConstants.BLOCK_HONEST_OP_FUTURE);
+                logger.log("releasing honest op");
                 releaseHonest.complete(null);
             }
         } catch (ParseException ex) {
             logger.log("Failed to parse Authorization Request.");
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-        } catch (InterruptedException ex) {
+        }
+        catch (InterruptedException ex) {
             logger.log("Waiting for client to discover evil OP was interrupted.", ex);
         } catch (ExecutionException |TimeoutException ex) {
             logger.log("Waiting for client to discover evil failed.", ex);

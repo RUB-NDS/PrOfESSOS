@@ -22,8 +22,9 @@ package de.rub.nds.oidc.server.op;
  */
 public class OPContextConstants {
 
-	private static final String PFX = "op.";
+	public static final String REGISTRATION_NEEDED = "dynamic_client_registration_support_needed";
 
+	private static final String PFX = "op.";
 
 	public static final String REGISTERED_CLIENT_INFO_HONEST = PFX + "registered-client-info-honest";
 	public static final String REGISTERED_CLIENT_INFO_EVIL = PFX + "registered-client-info-evil";
@@ -34,9 +35,10 @@ public class OPContextConstants {
 	public static final String USERINFO_INFORMATIONLEAK_FUTURE = PFX + "userinfo-information-leak-future";
 
 	public static final String HONEST_CODE = PFX + "honest-code";
-	public static final String HONEST_ACCESSTOKEN = PFX + "honest-code";
+	public static final String HONEST_ACCESSTOKEN = PFX + "honest-accesstoken";
 
 	public static final String BLOCK_OP_FUTURE = PFX + "block-op-future";
+	public static final String BLOCK_BROWSER_FUTURE = PFX + "block-browser-future";
 	public static final String RELOAD_BROWSER_FUTURE = PFX + "reload-browser-future";
 
 	public static final String BLOCK_HONEST_OP_FUTURE = PFX + "block-honest-op-future";

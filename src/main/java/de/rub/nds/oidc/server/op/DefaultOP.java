@@ -91,12 +91,14 @@ public class DefaultOP extends AbstractOPImplementation {
 		logger.logHttpRequest(req, null);
 		String rel = req.getParameter("rel");
 		String resource = req.getParameter("resource");
+		// TODO this should be a final constant
+		String href = resource.contains("enforce-rp-reg") ? resource : path.getDispatchUriAndTestId().toString();
 		if ("http://openid.net/specs/connect/1.0/issuer".equals(rel)) {
 			JsonObject result = Json.createObjectBuilder()
 					.add("subject", resource)
 					.add("links", Json.createArrayBuilder().add(Json.createObjectBuilder()
 					.add("rel", "http://openid.net/specs/connect/1.0/issuer")
-					.add("href", path.getDispatchUriAndTestId().toString())))
+					.add("href", href)))
 					.build();
 			StringWriter sw = new StringWriter();
 			Json.createWriter(sw).writeObject(result);
@@ -118,15 +120,17 @@ public class DefaultOP extends AbstractOPImplementation {
 		logger.log("Provider configuration requested.");
 		logger.logHttpRequest(req, null);
 		try {
-			OIDCProviderMetadata md = getDefaultOPMetadata();
-			String mdStr = md.toJSONObject().toString();
 
-			resp.setContentType("application/json");
-			resp.getWriter().write(mdStr);
+				OIDCProviderMetadata md = getDefaultOPMetadata();
+				String mdStr = md.toJSONObject().toString();
 
-			resp.flushBuffer();
-			logger.log("Returning default provider config.");
-			logger.logHttpResponse(resp, mdStr);
+				resp.setContentType("application/json");
+				resp.getWriter().write(mdStr);
+
+				resp.flushBuffer();
+				logger.log("Returning default provider config.");
+				logger.logHttpResponse(resp, mdStr);
+
 		} catch (IOException | ParseException ex) {
 			logger.log("Failed to process default provider config.", ex);
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

@@ -87,7 +87,7 @@ public class OPCodeReuseBrowser extends AbstractOPBrowser {
 			logger.log("No consent page encountered in browser");
 		} else {
 			waitForPageLoad(() -> {
-//				driver.executeScript(consentScript);
+				driver.executeScript(consentScript);
 				logScreenshot();
 				logger.log("ConsentScript executed, client authorized");
 				return null;
