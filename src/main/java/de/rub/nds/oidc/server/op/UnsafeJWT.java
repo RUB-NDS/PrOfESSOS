@@ -58,7 +58,7 @@ public class UnsafeJWT implements JWT {
 	@Override
 	public JWTClaimsSet getJWTClaimsSet() throws ParseException {
 		// code copied from SignedJWT
-		JSONObject json = JSONObjectUtils.parseJSONObject(payload.decodeToString());
+		JSONObject json = JSONObjectUtils.parse(payload.decodeToString());
 		if (json == null) {
 			throw new ParseException("Payload of JWS object is not a valid JSON object", 0);
 		}

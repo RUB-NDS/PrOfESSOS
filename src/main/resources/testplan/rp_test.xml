@@ -808,6 +808,76 @@
 		</OPConfig-2>
 	</TestStep>
 
+	<TestStep Name="Signature Manipulation 3">
+		<Description><![CDATA[
+			<h1>Signature Manipulation</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID token containing "none" algorithm and no signature.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client.
+
+			<h2>Mitigation</h2>
+			The signature MUST be validated, see Step 6 in Section
+			3.1.3.7 in OpenIDConnect-Core. The usage of the "nonce" algorithm is allowed in "code" flow. However, in implicit flow its usage is not allowed and the ID token MUST NOT be accepted.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.SignatureManipulationOP</ImplementationClass>
+
+			<Parameter Key="force_idtoken_header_alg_none">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+		<TestStep Name="Signature Manipulation 4">
+		<Description><![CDATA[
+			<h1>Signature Manipulation</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID token containing "none" algorithm in a mixed-case writing ("NoNe") and no signature. This may circumvent naive blacklisting of the "none" algorithm.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client.
+
+			<h2>Mitigation</h2>
+			The signature MUST be validated, see Step 6 in Section
+			3.1.3.7 in OpenIDConnect-Core. The usage of the "nonce" algorithm is allowed in "code" flow. However, in implicit flow its usage is not allowed and the ID token MUST NOT be accepted.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.SignatureManipulationOP</ImplementationClass>
+
+			<Parameter Key="force_idtoken_header_alg_none2">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
 	<TestStep Name="CSRF 1">
 		<Description><![CDATA[
 			<h1>CSRF Protection via the "state" parameter</h1>
