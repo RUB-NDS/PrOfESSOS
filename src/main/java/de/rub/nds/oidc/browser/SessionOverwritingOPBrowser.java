@@ -22,33 +22,36 @@ public class SessionOverwritingOPBrowser extends DefaultRPTestBrowser {
     @Override
     public TestStepResult run() {
         try {
-            // prepare futures
-            CompletableFuture<?> waitForEvil = new CompletableFuture<>();
-            stepCtx.put(OPContextConstants.BLOCK_HONEST_OP_FUTURE, waitForEvil);
+            // prepare future
             CompletableFuture<TestStepResult> blockAndResult = new CompletableFuture<>();
             stepCtx.put(OPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT, blockAndResult);
+            
+            // determine order of AuthReq from TestPlan parameters
+            String honestOpUrl = (String) stepCtx.get(OPParameterConstants.BROWSER_INPUT_HONEST_OP_URL);
+			String evilOpUrl = (String) stepCtx.get(OPParameterConstants.BROWSER_INPUT_EVIL_OP_URL);
+
+			String firstOpUrl = (String) stepCtx.get(OPParameterConstants.BROWSER_INPUT_OP_URL);
+			String secondOpUrl =  firstOpUrl.equals(honestOpUrl) ? evilOpUrl : honestOpUrl;
 
             // open clients login page
             String startUrl = rpConfig.getUrlClientTarget();
             logger.log(String.format("Opening browser with URL '%s'.", startUrl));
             driver.get(startUrl);
-//			waitMillis(1000);  // driver.get() should already block and only release once document.readyState is complete
+			waitMillis(1000);  // driver.get() should already block and only release once document.readyState is complete
 
 			// store session cookies
 			Set<Cookie> cookies = driver.manage().getCookies();
 
             // execute JS to start authentication
-            String honestInputOpUrl = (String) stepCtx.get(OPParameterConstants.BROWSER_INPUT_HONEST_OP_URL);
-            stepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, honestInputOpUrl);
+            stepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, firstOpUrl);
             String submitScriptRaw = rpConfig.getSeleniumScript();
             String submitScript = te.eval(createRPContext(), submitScriptRaw);
-            logger.log("Start authentication for Honest OP.");
+            logger.log("Browser starts authentication at first OP.");
             driver.executeScript(submitScript);
-
-            // TODO: do we really need this wait?
             waitMillis(1000);
 
 			RemoteWebDriver second = getDriverInstance();
+			
 			// copy all cookies that were set in first browser instance
 			// 1. navigate to correct domain
 			second.get(startUrl);
@@ -58,24 +61,23 @@ public class SessionOverwritingOPBrowser extends DefaultRPTestBrowser {
 			Iterator<Cookie> it = cookies.iterator();
 			while (it.hasNext()) {
 				Cookie c = it.next();
-				logger.log("a coookie: " + c.toString());
+//				logger.log("Cookie: " + c.toString());
 				second.manage().addCookie(c);
 			}
 
             // ... and request authentication with Evil OP
-            String evilInputOpUrl = (String) stepCtx.get(OPParameterConstants.BROWSER_INPUT_EVIL_OP_URL);
-            stepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, evilInputOpUrl);
+            stepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, secondOpUrl);
             String submitScriptEvil = te.eval(createRPContext(), submitScriptRaw);
-            logger.log("Start authentication for Evil OP.");
+            logger.log("Browser starts authentication at second OP.");
             second.executeScript(submitScriptEvil);
 
             // wait for result of the test
             TestStepResult result = blockAndResult.get(10, TimeUnit.SECONDS);
-            logScreenshot();
-            logger.log("Authentication result for Honest OP.");
-            return result;
+            logger.log("Authentication result:");
+			logScreenshot();
+			return result;
         } catch (TimeoutException ex) {
-            logger.log("Timeout while waiting for token request of Honest OP, assuming test passed.");
+            logger.log("Timeout while waiting for token request, assuming test passed.");
             logScreenshot();
             return TestStepResult.PASS;
         } catch (ExecutionException  ex) {

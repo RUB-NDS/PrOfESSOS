@@ -41,6 +41,7 @@ public class OPIVConfig {
 	// TODO: read from config
 	private final String honestSigAlias = "opiv honest token signer";
 	private final String evilSigAlias = "opiv evil token signer";
+	private final String untrustedAlias = "opiv untrusted token signer";
 	private final String keystorePass = "pass";
 	private final KeyStore keyStore;
 
