@@ -42,7 +42,7 @@ public class OPContextConstants {
 	public static final String BLOCK_BROWSER_FUTURE = PFX + "block-browser-future";
 	public static final String RELOAD_BROWSER_FUTURE = PFX + "reload-browser-future";
 
-	public static final String BLOCK_HONEST_OP_FUTURE = PFX + "block-honest-op-future";
+//	public static final String BLOCK_HONEST_OP_FUTURE = PFX + "block-honest-op-future";
 	public static final String BLOCK_EVIL_OP_FUTURE = PFX + "block-evil-op-future";
 	
 	// confusion
