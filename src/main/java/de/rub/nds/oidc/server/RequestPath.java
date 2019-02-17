@@ -55,13 +55,13 @@ public class RequestPath {
 		m.matches();
 
 		if (m.groupCount() == 2 ) {
-			System.out.println("group count is 2");
+//			System.out.println("group count is 2");
 			registrationEnforced = m.group(1);
-			System.out.println("group 1: " + registrationEnforced);
+//			System.out.println("group 1: " + registrationEnforced);
 			resourcePath = m.group(2);
-			System.out.println("group 2: " + resourcePath);
+//			System.out.println("group 2: " + resourcePath);
 		} else {
-			System.out.println("group count is NOT  2");
+//			System.out.println("group count is NOT  2");
 			registrationEnforced = "";
 			resourcePath = m.group(1);
 		}

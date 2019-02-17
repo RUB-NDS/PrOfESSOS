@@ -191,7 +191,389 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 1">
+	<TestStep Name="Key Confusion 1 - jwk Spoofing">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing valid signature signed with an untrusted key.
+			The key is included in the ID Token as "jwk" member and referenced by the "kid" parameter.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the ID token is accepted by the Client.
+
+			<h2>Mitigation</h2>
+			As per OpenID Connect Core 1.0, Section 2, "ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c,
+			jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in
+			advance using Discovery and Registration parameters"
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_jwk">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jwk">true</Parameter>-->
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 1.1 - JWK Spoofing (jwk: URI)">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing valid signature signed with an untrusted key.
+			The ID Token's "jwk" member is (invalidly) set to a JWKS URI that returns the signing key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the ID token is accepted by the Client.
+
+			<h2>Mitigation</h2>
+			As per OpenID Connect Core 1.0, Section 2, "ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c,
+			jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in
+			advance using Discovery and Registration parameters"
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_jku_as_jwk">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jwk">true</Parameter>-->
+			<Parameter Key="request_to_untrusted_key_uri_fails_test">true</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 2 - jku Spoofing">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing valid signature signed with an untrusted key.
+			The key is referenced by the "jku" parameter.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the ID token is accepted by the Client.
+
+			<h2>Mitigation</h2>
+			As per OpenID Connect Core 1.0, Section 2, "ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c,
+			jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in
+			advance using Discovery and Registration parameters"
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_jku">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jku">true</Parameter>-->
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 2.1 - jku returns [untrusted, trusted]">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing valid signature signed with an untrusted key.
+			The key is referenced by the "jku" parameter.
+			The resource referenced in the jku member returns a JWKS which contains the signing key as the
+			first member and the (trusted) key from OP's JWKS endpoint as the second member.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the ID token is accepted by the Client.
+
+			<h2>Mitigation</h2>
+			As per OpenID Connect Core 1.0, Section 2, "ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c,
+			jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in
+			advance using Discovery and Registration parameters"
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_jku">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<Parameter Key="jku_return_untrusted-trusted_jwks">true</Parameter>
+			<Parameter Key="idtoken_crit_jku">true</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 2.2 - jku returns [trusted, untrusted]">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing valid signature signed with an untrusted key.
+			The key is referenced by the "jku" parameter.
+			The resource referenced in the jku member returns a JWKS which contains the signing key as the
+			second member and the (trusted) key from OP's JWKS endpoint as the first member.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the ID token is accepted by the Client.
+
+			<h2>Mitigation</h2>
+			As per OpenID Connect Core 1.0, Section 2, "ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c,
+			jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in
+			advance using Discovery and Registration parameters"
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_jku">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<Parameter Key="jku_return_trusted-untrusted_jwks">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jku">true</Parameter>-->
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 2.3 - jwk contains spoofed jku">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing valid signature signed with an untrusted key.
+			The signing key is included in the jwk parameter. To lure the client into trustin the key,
+			the JWK's "jku" parameter points to an URL that responds with the signing key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the ID token is accepted by the Client or if the jku URI is contacted.
+
+			<h2>Mitigation</h2>
+			As per OpenID Connect Core 1.0, Section 2, "ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c,
+			jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in
+			advance using Discovery and Registration parameters"
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_jku_in_jwk">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<Parameter Key="idtoken_crit_jwk">true</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+			<Parameter Key="request_to_untrusted_key_uri_fails_test">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 3 - x5u Spoofing">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing valid signature signed with an untrusted key.
+			The key is referenced by the "x5u" parameter.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the ID token is accepted by the Client.
+
+			<h2>Mitigation</h2>
+			As per OpenID Connect Core 1.0, Section 2, "ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c,
+			jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in
+			advance using Discovery and Registration parameters"
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_x5u">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jwk">true</Parameter>-->
+			<Parameter Key="idtoken_crit_x5u">true</Parameter>
+			<!--<Parameter Key="idtoken_spoofed_jku">true</Parameter>-->
+			<Parameter Key="force_success_url_fails">true</Parameter>
+			<Parameter Key="request_to_untrusted_key_uri_fails_test">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 4 - x5c Spoofing">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID token containing valid signature signed with untrusted key.
+			The key is included in the ID Token as the "x5c" member.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_x5c">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+			<Parameter Key="request_to_untrusted_key_uri_fails_test">true</Parameter>
+
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 4.1 - x5c: [trusted, untrusted]">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID token containing valid signature signed with untrusted key.
+			The signing key is included in the second position of the "x5c" parameter.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_x5c">true</Parameter>
+			<Parameter Key="idtoken_x5c_trusted-untrusted">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+			<!--<Parameter Key="request_to_untrusted_key_uri_fails_test">true</Parameter>-->
+
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 4.2 - x5c: [untrusted, trusted]">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID token containing valid signature signed with untrusted key.
+			The signing key is included in the first position of the "x5c" parameter, whereas the OP's (trusted)
+			key is in the first position of the "x5c" list.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_x5c">true</Parameter>
+			<Parameter Key="idtoken_x5c_untrusted-trusted">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_x5c">true</Parameter>-->
+			<Parameter Key="force_success_url_fails">true</Parameter>
+
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 5 - kid Spoofing (kid: URI)">
 		<Description><![CDATA[
 			<h1>Key Confusion</h1>
 
@@ -199,10 +581,11 @@
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
 			PrOfESSOS issues an ID token containing valid signature signed with an untrusted key.
-			The key is referenced by the "kid" parameter.
+			The signing key is hinted at in the ID Token by the "kid" parameter. However, in this test, the value
+			of the "kid" is an (untrusted) URI that responds with the signing key.
 
 			<h2>Result Evaluation.</h2>
-			The attack is successful if the ID token is accepted by the Client.
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
 		]]>
 		</Description>
 		<TestParameters>
@@ -210,30 +593,34 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.MultiStepTestBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
-			<Parameter Key="force_idtoken_header_kid_untrusted_key">true</Parameter>
-			<Parameter Key="include_signing_certificate">true</Parameter>
+			<Parameter Key="force_spoofed_jku_as_kid">true</Parameter>
+			<Parameter Key="idtoken_crit_kid">true</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+			<Parameter Key="request_to_untrusted_key_uri_fails_test">true</Parameter>
+
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 2">
+	<TestStep Name="Key Confusion 5.1 - kid Spoofing (kid: jwk)">
 		<Description><![CDATA[
 			<h1>Key Confusion</h1>
 
 			<h2>Prerequisites.</h2>
 			The target Client supports the implicit or the code flow.
 			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token containing valid signature signed with untrusted key.
-			The key is referenced by the "x5u" parameter.
+			PrOfESSOS issues an ID token containing valid signature created with an untrusted key.
+			The signing key is hinted at in the ID Token by the "kid" parameter. However, in this test, the (invalid)
+			value of the "kid" is the JWK representation of the signing key.
 
 			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
 		]]>
 		</Description>
 		<TestParameters>
@@ -241,117 +628,21 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.MultiStepTestBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
 		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="force_spoofed_jwk_as_kid">true</Parameter>
+			<Parameter Key="idtoken_crit_kid">true</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
 
-			<Parameter Key="force_idtoken_header_x5u_untrusted_key">true</Parameter>
-			<Parameter Key="include_signing_certificate">true</Parameter>
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 3">
-		<Description><![CDATA[
-			<h1>Key Confusion</h1>
-
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token containing valid signature signed with untrusted key.
-			The key is referenced by the "x5c" parameter.
-
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
-		]]>
-		</Description>
-		<TestParameters>
-			<Parameter Key="discovery_support_needed">false</Parameter>
-			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
-		</TestParameters>
-		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.MultiStepTestBrowser</ImplementationClass>
-		</BrowserSimulator>
-		<OPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
-		</OPConfig-1>
-		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
-
-			<Parameter Key="force_idtoken_header_x5c_untrusted_key">true</Parameter>
-			<Parameter Key="include_signing_certificate">true</Parameter>
-		</OPConfig-2>
-	</TestStep>
-
-	<TestStep Name="Key Confusion 4">
-		<Description><![CDATA[
-			<h1>Key Confusion</h1>
-
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token containing valid signature signed with untrusted key.
-			The key is referenced by the "jku" parameter.
-
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
-		]]>
-		</Description>
-		<TestParameters>
-			<Parameter Key="discovery_support_needed">false</Parameter>
-			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
-		</TestParameters>
-		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.MultiStepTestBrowser</ImplementationClass>
-		</BrowserSimulator>
-		<OPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
-		</OPConfig-1>
-		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
-
-			<Parameter Key="force_idtoken_header_jku_untrusted_key">true</Parameter>
-			<Parameter Key="include_signing_certificate">true</Parameter>
-		</OPConfig-2>
-	</TestStep>
-
-	<TestStep Name="Key Confusion 5">
-		<Description><![CDATA[
-			<h1>Key Confusion</h1>
-
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token containing valid signature signed with untrusted key.
-			The key is referenced by the "jwk" parameter.
-
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
-		]]>
-		</Description>
-		<TestParameters>
-			<Parameter Key="discovery_support_needed">false</Parameter>
-			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
-		</TestParameters>
-		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.MultiStepTestBrowser</ImplementationClass>
-		</BrowserSimulator>
-		<OPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
-		</OPConfig-1>
-		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
-
-			<Parameter Key="force_idtoken_header_jwk_untrusted_key">true</Parameter>
-			<Parameter Key="include_signing_certificate">true</Parameter>
-		</OPConfig-2>
-	</TestStep>
-
-
-	<TestStep Name="Key Confusion 6">
+	<TestStep Name="Key Confusion 6 - Session Overwriting">
 		<Description><![CDATA[
 			<h1>Key Confusion</h1>
 
@@ -395,7 +686,651 @@
 		</OPConfig-2>
 	</TestStep>
 
+	<TestStep Name="Key Confusion 7.1 - MAC from PKCS1 RSA Key 1">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
 
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the PEM string of
+			the PKCS1 encoded RSA public key as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">ORIGINAL</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.2 - MAC from PKCS1 RSA Key 2">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the stripped PEM string of
+			the PKCS1 encoded RSA public key as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">ORIGINAL_NO_HEADER_FOOTER</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.3 - MAC from PKCS1 RSA Key 3">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the linefeed free PEM string of
+			the PKCS1 encoded RSA public key as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">ORIGINAL_NO_LF</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.4 - MAC from PKCS1 RSA Key 4">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a variation of the PEM string of
+			the PKCS1 encoded RSA public key as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">ORIGINAL_NO_HEADER_FOOTER_LF</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.5 - MAC from PKCS1 RSA Key 5">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a variation of the PEM string of
+			the PKCS1 encoded RSA public key as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">ORIGINAL_ADDITIONAL_LF</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.6 - MAC from PKCS1 RSA Key 6">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the Base64 encoded ASN.1 RSA
+			Public Key as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">PKCS1</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.7 - MAC from PKCS1 RSA Key 7">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the stripped Base64 encoded ASN.1 RSA
+			Public Key as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">PKCS1_NO_HEADER_FOOTER</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.8 - MAC from PKCS1 RSA Key 8">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the linefeed free
+			Base64 encoded ASN.1 RSA Public Key as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">PKCS1_NO_LF</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.9 - MAC from PKCS1 RSA Key 9">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a variation of the
+			Base64 encoded ASN.1 RSA Public Key as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">PKCS1_NO_HEADER_FOOTER_LF</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.10 - MAC from PKCS8 RSA Key 1">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the
+			PKCS8 formatted RSA public Key as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs8_pubkey">true</Parameter>
+			<Parameter Key="pkcs8_keyconfusion_payload_type">PKCS8</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.11 - MAC from PKCS8 RSA Key 2">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the
+			PKCS8 formatted RSA public Key as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs8_pubkey">true</Parameter>
+			<Parameter Key="pkcs8_keyconfusion_payload_type">PKCS8_WITH_HEADER_FOOTER</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.12 - MAC from PKCS8 RSA Key 3">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a variation of the 
+			PKCS8 formatted RSA public Key as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs8_pubkey">true</Parameter>
+			<Parameter Key="pkcs8_keyconfusion_payload_type">PKCS8_WITH_LF</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.13 - MAC from PKCS8 RSA Key 4">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a variation of the 
+			PKCS8 formatted RSA public Key as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs8_pubkey">true</Parameter>
+			<Parameter Key="pkcs8_keyconfusion_payload_type">PKCS8_WITH_HEADER_FOOTER_LF</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.14 - MAC from PKCS8 RSA Key 5">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a variation of the 
+			PKCS8 formatted RSA public Key as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs8_pubkey">true</Parameter>
+			<Parameter Key="pkcs8_keyconfusion_payload_type">PKCS8_WITH_HEADER_FOOTER_LF_ENDING_LF</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 8 - Spoofed MAC Key">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a key that is 
+			contained encoded octet string in the token's JWK member.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">true</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_secret_key_in_jwk">true</Parameter>
+			<Parameter Key="idtoken_crit_jwk">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+			<Parameter Key="op_configuration_include_jws_algorithm_hs256">true</Parameter>
+			
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 9 - MAC using public Exponent">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a the JWK representation of 
+			the public exponent of the trusted public RSA key as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pubkey_e">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jwk">true</Parameter>-->
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 10 - MAC using RSA Modulus">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a the JWK representation of 
+			the RSA modul as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pubkey_n">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jwk">true</Parameter>-->
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 11 - MAC using kty JWK field">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a the JWK field "kty" 
+			 (keyType) of the trusted public RSA key as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pubkey_kty">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jwk">true</Parameter>-->
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 12 - MAC using alg JWK field">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a the JWK field "alg" 
+			 (algorithm) of the trusted public RSA key as MAC key - "RS256".
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pubkey_alg">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jwk">true</Parameter>-->
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 13 - MAC using JWK JSONString">
+		<Description><![CDATA[
+			<h1>Key Confusion</h1>
+
+			<h2>Prerequisites.</h2>
+			The target Client supports the implicit or the code flow.
+			<h2>Execution.</h2>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a the JSON String representation
+			 of the trusted public RSA key as MAC key.
+
+			<h2>Result Evaluation.</h2>
+			The attack is successful if the token is accepted by the Client or if the untrusted URI is requested.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_jsonstring_jwk">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jwk">true</Parameter>-->
+			<!--<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>-->
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+	
+	
 	<TestStep Name="IdP Confusion">
 		<Description><![CDATA[
 			<h1>IdP Confusion</h1>

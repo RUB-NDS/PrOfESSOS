@@ -22,6 +22,7 @@ import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.util.Base64;
@@ -36,6 +37,8 @@ import com.nimbusds.oauth2.sdk.ResponseMode;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
+import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.http.ServletUtils;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -67,10 +70,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.Period;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -157,11 +157,15 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 
 
 	protected Issuer getHonestIssuer() {
-		return new Issuer(UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).build());
+		return new Issuer(UriBuilder.fromUri(opivCfg.getHonestOPUri())
+				.path((String) stepCtx.getOrDefault(OPContextConstants.REGISTRATION_ENFORCING_PATH_FRAGMENT,""))
+				.path(testId).build());
 	}
 
 	protected Issuer getEvilIssuer() {
-		return new Issuer(UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).build());
+		return new Issuer(UriBuilder.fromUri(opivCfg.getEvilOPUri())
+				.path((String) stepCtx.getOrDefault(OPContextConstants.REGISTRATION_ENFORCING_PATH_FRAGMENT,""))
+				.path(testId).build());
 	}
 
 	protected Issuer getMetadataIssuer() {
@@ -341,14 +345,26 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return mail;
 	}
 
+	protected OIDCClientInformation getHonestRegisteredClientInfo() {
+		// TODO: check stepCtx vs suiteCtx??
+		OIDCClientInformation ci = (OIDCClientInformation) stepCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST);
+		return ci;
+	}
+
+	protected OIDCClientInformation getEvilRegisteredClientInfo() {
+		OIDCClientInformation ci = (OIDCClientInformation) stepCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL);
+		return ci;
+	}
+
+	protected  OIDCClientInformation getRegisteredClientInfo() {
+		OIDCClientInformation ci = supplyHonestOrEvil(this::getHonestRegisteredClientInfo, this::getEvilRegisteredClientInfo);
+		return ci;
+	}
+
 	protected ClientID getRegistrationClientId() {
 		OIDCClientInformation ci;
 		if (Boolean.parseBoolean((String) stepCtx.get(OPParameterConstants.FORCE_REGISTER_SAME_CLIENTID))) {
-			if (type == OPType.EVIL) {
-				ci = (OIDCClientInformation) suiteCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST);
-			} else {
-				ci = (OIDCClientInformation) stepCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL);
-			}
+			ci = getRegisteredClientInfo();
 			if (ci != null && !Strings.isNullOrEmpty(ci.getID().toString())) {
 				ClientID id = ci.getID();
 				logger.log(String.format("Re-using client ID: %s", id.toString()));
@@ -425,6 +441,8 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return md;
 	}
 
+
+
 	protected UserInfo getUserInfo() {
 		UserInfo ui = new UserInfo(getTokenSubject());
 		ui.setName(getTokenName());
@@ -473,6 +491,21 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 			@Nullable CodeHash cHash) throws GeneralSecurityException, JOSEException, ParseException {
 		JWTClaimsSet claims = getIdTokenClaims(clientId, nonce, atHash, cHash);
 
+		// HMAC with client secret
+		if (params.getBool(OPParameterConstants.FORCE_IDTOKEN_SIGNING_ALG_HS256)) {
+			OIDCClientInformation ci = getRegisteredClientInfo();
+			Secret clientSecret = ci.getSecret();
+			JWSSigner signer = new MACSigner(clientSecret.getValueBytes());
+
+			JWSHeader.Builder headerBuilder = new JWSHeader.Builder(JWSAlgorithm.HS256).type(JOSEObjectType.JWT);
+			JWSHeader header = headerBuilder.build();
+
+			SignedJWT signedJwt = new SignedJWT(header, claims);
+			signedJwt.sign(signer);
+			return signedJwt;
+		}
+
+		// (Default) apply RSA Signature
 		RSAKey key = getSigningJwk();
 
 		JWSHeader.Builder headerBuilder = new JWSHeader.Builder(JWSAlgorithm.RS256)
@@ -507,11 +540,17 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 			}
 		}).collect(Collectors.toList());
 
-		RSAKey key = new RSAKey.Builder(pubKey)
-				.privateKey(privKey)
-				.x509CertChain(chain)
-				.algorithm(JWSAlgorithm.RS256)
-				.build();
+		RSAKey.Builder kb = new RSAKey.Builder(pubKey)
+			.privateKey(privKey)
+			.x509CertChain(chain)
+			.algorithm(JWSAlgorithm.RS256);
+
+		String keyID = (String) stepCtx.getOrDefault(OPContextConstants.SIGNING_JWK_KEYID, "");
+		if (!Strings.isNullOrEmpty(keyID)) {
+			kb.keyID(keyID);
+		}
+
+		RSAKey key = kb.build();
 
 		return key;
 	}

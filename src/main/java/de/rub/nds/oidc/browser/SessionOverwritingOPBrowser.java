@@ -55,12 +55,16 @@ public class SessionOverwritingOPBrowser extends DefaultRPTestBrowser {
 			// 2. purge cookie jar
 			second.manage().deleteAllCookies();
 			// 3. set cookies from other browser instance
-			Iterator<Cookie> it = cookies.iterator();
-			while (it.hasNext()) {
-				Cookie c = it.next();
-				logger.log("a coookie: " + c.toString());
+//			Iterator<Cookie> it = cookies.iterator();
+//			while (it.hasNext()) {
+//				Cookie c = it.next();
+//				logger.log("a coookie: " + c.toString());
+//				second.manage().addCookie(c);
+//			}
+			cookies.stream().forEach(c -> {
+				logger.log("Copying cookie: " + c.toString());
 				second.manage().addCookie(c);
-			}
+			});
 
             // ... and request authentication with Evil OP
             String evilInputOpUrl = (String) stepCtx.get(OPParameterConstants.BROWSER_INPUT_EVIL_OP_URL);

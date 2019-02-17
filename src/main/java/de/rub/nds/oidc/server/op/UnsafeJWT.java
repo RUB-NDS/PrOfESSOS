@@ -35,6 +35,8 @@ public class UnsafeJWT implements JWT {
 	private Base64URL payload;
 	private Base64URL signature;
 
+	public UnsafeJWT(){this(null, null, null);};
+
 	public UnsafeJWT(Base64URL header, Base64URL payload) {
 		this(header, payload, null);
 	}

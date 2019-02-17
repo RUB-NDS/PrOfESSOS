@@ -16,6 +16,7 @@
 
 package de.rub.nds.oidc.browser;
 
+import de.rub.nds.oidc.server.op.OPContextConstants;
 import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.test_model.TestStepResult;
 import javax.annotation.Nullable;
@@ -62,11 +63,18 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 		// save the location of the finished state
 		boolean urlReached = rpConfig.getFinalValidUrl().equals(driver.getCurrentUrl());
 		boolean forceSuccessUrlFails = params.getBool(OPParameterConstants.FORCE_SUCCESS_URL_FAILS);
+		boolean untrustedKeyRequestFails = params.getBool(OPParameterConstants.FORCE_UNTRUSTED_KEY_REQUEST_FAILS); // TODO: should be default for implicit flow
+		boolean untrustedKeyRequested = (boolean) stepCtx.getOrDefault(OPContextConstants.UNTRUSTED_KEY_REQUESTED, false);
 		if (forceSuccessUrlFails && urlReached) {
 			logger.log("Target URL reached. Assuming login is successful.");
 			logger.log("Successful login fails the test");
 			return TestStepResult.FAIL;
 		}
+		if (untrustedKeyRequested && untrustedKeyRequestFails) {
+			logger.log("A request was received to an endpoint referenced in the ID Token, which fails the test.");
+			return TestStepResult.FAIL;
+		}
+
 		if (! urlReached) {
 			logger.log("Target URL not reached. Assuming login is not successful.");
 			return TestStepResult.PASS;

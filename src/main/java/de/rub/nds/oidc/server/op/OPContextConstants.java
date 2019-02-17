@@ -23,6 +23,7 @@ package de.rub.nds.oidc.server.op;
 public class OPContextConstants {
 
 	public static final String REGISTRATION_NEEDED = "dynamic_client_registration_support_needed";
+	public static final String REGISTRATION_ENFORCING_PATH_FRAGMENT = "registration_enforcing_random_path";
 
 	private static final String PFX = "op.";
 
@@ -52,5 +53,6 @@ public class OPContextConstants {
 
 	// key confusion
 	public static final String UNTRUSTED_KEY_REQUESTED = PFX + "untrusted-key-request-received";
-	public static final String MULTI_PART_TEST_FINISHED = PFX + "all-test-runs-finished";
+
+	public static final String SIGNING_JWK_KEYID = PFX + "enforced_kid_for_jwks_signing_key";
 }

@@ -16,6 +16,8 @@
 
 package de.rub.nds.oidc.server.op;
 
+import javax.print.DocFlavor;
+
 /**
  *
  * @author Tobias Wich
@@ -62,15 +64,57 @@ public class OPParameterConstants {
 
 	public static final String INCLUDE_SIGNING_CERT      = "include_signing_certificate";
 
-	public static final String FORCE_IDTOKEN_HEADER_UNTRUSTED_KID = "force_idtoken_header_kid_untrusted_key";
-	public static final String FORCE_IDTOKEN_HEADER_UNTRUSTED_X5U = "force_idtoken_header_x5u_untrusted_key";
-	public static final String FORCE_IDTOKEN_HEADER_UNTRUSTED_X5C = "force_idtoken_header_x5c_untrusted_key";
-	public static final String FORCE_IDTOKEN_HEADER_UNTRUSTED_JKU = "force_idtoken_header_jku_untrusted_key";
-	public static final String FORCE_IDTOKEN_HEADER_UNTRUSTED_JWK = "force_idtoken_header_jwk_untrusted_key";
+	// this will only be effective if discovery/registration is enforced using
+	public static final String OP_MD_JWSA_HS256 = "op_configuration_include_jws_algorithm_hs256";
+	public static final String OP_MD_JWSA_RS256 = "op_configuration_include_jws_algorithm_rs256";
+	public static final String OP_MD_JWSA_NONE = "op_configuration_include_jws_algorithm_none";
 
+	// KeyConfusion
+	public static final String IDTOKEN_SPOOFED_JWK = "idtoken_spoofed_jwk";
+	public static final String IDTOKEN_SPOOFED_JKU = "idtoken_spoofed_jku";
+	public static final String IDTOKEN_SPOOFED_X5U = "idtoken_spoofed_x5u";
+	public static final String IDTOKEN_SPOOFED_X5C = "idtoken_spoofed_x5c";
+
+	public static final String JKU_TRUSTED_FIRST = "jku_return_trusted-untrusted_jwks"; // jwks returns [trusted, untrusted]
+	public static final String JKU_UNTRUSTED_FIRST = "jku_return_untrusted-trusted_jwks"; // skip if jku not requested in jku-1 test
+
+	public static final String X5C_TRUSTED_FIRST = "idtoken_x5c_trusted-untrusted";
+	public static final String X5C_UNTRUSTED_FIRST = "idtoken_x5c_untrusted-trusted";
+
+	public static final String FORCE_NEW_KID_IN_IDTOKEN_AND_JWK = "include_fresh_keyid_in_jwt_and_jwk";
+
+	// very experimental
+	public static final String IDTOKEN_SPOOFED_JKU_AS_KID = "force_spoofed_jku_as_kid";
+	public static final String IDTOKEN_SPOOFED_JWK_AS_KID = "force_spoofed_jwk_as_kid";
+	public static final String IDTOKEN_SPOOFED_JKU_AS_JWK = "idtoken_spoofed_jku_as_jwk";
+	public static final String IDTOKEN_SPOOFED_JKU_IN_JWK = "idtoken_spoofed_jku_in_jwk";
+	// */* //
+
+	public static final String IDTOKEN_SPOOFED_SECRET_KEY_= "idtoken_spoofed_secret_key_in_jwk";
+	public static final String IDTOKEN_HMAC_PUBKEY_e = "hmac_pubkey_e";
+	public static final String IDTOKEN_HMAC_PUBKKEY_n = "hmac_pubkey_n";
+	public static final String IDTOKEN_HMAC_PUBKEY_kty = "hmac_pubkey_kty";
+	public static final String IDTOKEN_HMAC_PUBKEY_alg = "hmac_pubkey_alg";
+	public static final String IDTOKEN_HMAC_PUBKEY_JWKSTRING = "hmac_jsonstring_jwk";
+
+	public static final String IDTOKEN_HMAC_PUBKEY_PKCS1 = "hmac_pkcs1_pubkey";
+	public static final String P1_KEY_CONFUSION_PAYLOAD_TYPE = "pkcs1_keyconfusion_payload_type";
+	public static final String IDTOKEN_HMAC_PUBKEY_PKCS8 = "hmac_pkcs8_pubkey";
+	public static final String P8_KEY_CONFUSION_PAYLOAD_TYPE = "pkcs8_keyconfusion_payload_type";
+
+	public static final String IDTOKEN_CRITICAL_JKU = "idtoken_crit_jku";
+	public static final String IDTOKEN_CRITICAL_X5C = "idtoken_crit_x5c";
+	public static final String IDTOKEN_CRITICAL_X5U = "idtoken_crit_x5u";
+	public static final String IDTOKEN_CRITICAL_JWK = "idtoken_crit_jwk";
+	public static final String IDTOKEN_CRITICAL_KID = "idtoken_crit_kid";
+
+	public static final String FORCE_UNTRUSTED_KEY_REQUEST_FAILS = "request_to_untrusted_key_uri_fails_test";
+
+	// KC6 with Session Overwriting
+	public static final String FORCE_IDTOKEN_SIGNING_ALG_HS256 = "force_idtoken_signing_alg_hs256";
 	public static final String FORCE_REGISTER_SAME_CLIENTID = "force_register_same_client_id";
 
-
+	// end KeyConfusion
 
 
 

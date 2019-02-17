@@ -67,11 +67,10 @@ public class KC6OPBrowser extends DefaultRPTestBrowser {
 			// 2. purge cookie jar
 			second.manage().deleteAllCookies();
 			// 3. set cookies from other browser instance
-			Iterator<Cookie> it = cookies.iterator();
-			while (it.hasNext()) {
-				Cookie c = it.next();
+			cookies.stream().forEach(c -> {
+				logger.log("Copying cookie: " + c.toString());
 				second.manage().addCookie(c);
-			}
+			});
 
 			// ... and request authentication with honest OP
 			String honestInputOpUrl = (String) stepCtx.get(OPParameterConstants.BROWSER_INPUT_HONEST_OP_URL);

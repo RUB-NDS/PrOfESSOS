@@ -298,9 +298,10 @@ public class TestRunner {
 			String prefix = "enforce-rp-reg-"; // TODO: this is also used in RequestPath, should be a constant defined somewhere
 //			String regEnforcer = prefix + valueGenerator.generateRandString(8);
 			String regEnforcer = prefix + RandomStringUtils.randomAlphanumeric(8);
-			honestWebfinger = hostCfg.getHonestOPUri().toString() + regEnforcer +"/"+ testId;
-			evilWebfinger = hostCfg.getEvilOPUri().toString() + regEnforcer +"/"+ testId;
-			logger.log("set stepcontext uris to " + evilWebfinger + " and "+honestWebfinger);
+			honestWebfinger = hostCfg.getHonestOPUri().toString() + regEnforcer + "/" + testId;
+			evilWebfinger = hostCfg.getEvilOPUri().toString() + regEnforcer + "/" + testId;
+			logger.log("Enforcing new registration, set stepcontext URIs to " + evilWebfinger + " and "+ honestWebfinger);
+			testStepCtx.put(OPContextConstants.REGISTRATION_ENFORCING_PATH_FRAGMENT, regEnforcer);
 		} else {
 			honestWebfinger = testConfig.getHonestWebfingerResourceId();
 			evilWebfinger = testConfig.getEvilWebfingerResourceId();
@@ -314,7 +315,6 @@ public class TestRunner {
 				.filter(e -> e.getKey().equals(OPParameterConstants.BROWSER_INPUT_OP_URL))
 				.map(e -> e.getValue())
 				.findFirst().orElse("EVIL");
-		// TODO: browserSimulater param BROWSER_INPUT_OP_URL is never set in rp-testplan
 
 		if (startOpType.equals("HONEST")) {
 			testStepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, honestWebfinger);
