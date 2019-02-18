@@ -14,6 +14,9 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
 /**
  * This class implements some conversion functions needed to perform
  * the key confusion attacks. The functions included in this class are
@@ -108,6 +111,19 @@ public class KeyConfusionHelper {
 		return modifiedKey;
 	}
 
+	
+	public static byte[] generateMac(String algorithm, byte[] key, byte[] message) {
+		try {
+			Mac mac = Mac.getInstance(algorithm);
+			SecretKeySpec secret_key = new SecretKeySpec(key, algorithm);
+			mac.init(secret_key);
+
+			return mac.doFinal(message);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
 	// source: https://stackoverflow.com/questions/7611383/generating-rsa-keys-in-pkcs1-format-in-java
 	public static String convertPKCS8toPKCS1PemString(PublicKey key)  {
 		byte[] pubBytes = key.getEncoded();

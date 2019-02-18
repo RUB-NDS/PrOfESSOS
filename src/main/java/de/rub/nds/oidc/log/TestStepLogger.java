@@ -156,11 +156,20 @@ public class TestStepLogger {
 	}
 
 	public void logHttpResponse(@Nonnull HttpServletResponse res, @Nullable String body) {
+		logHttpResponse(res, body, true);
+	}
+
+	public void logHttpResponse(@Nonnull HttpServletResponse res, @Nullable String body, @Nullable boolean formatBody) {
 		HttpResponseEntryType entry = new HttpResponseEntryType();
 
 		entry.setStatus(BigInteger.valueOf(res.getStatus()));
 		entry.getHeader().addAll(readHeaders(res.getHeaderNames(), res::getHeaders));
-		entry.setBody(formatBody(res.getContentType(), body));
+
+		String content = body;
+		if (formatBody) {
+			content = formatBody(res.getContentType(), body);
+		}
+		entry.setBody(content);
 
 		logHttpResponse(entry);
 	}

