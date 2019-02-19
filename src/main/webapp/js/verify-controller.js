@@ -563,17 +563,25 @@ var OPIV = (function(module) {
 	}
 
 	function writeRPConfigGUI(newTestRPConfig) {
-		if ($("#form-config-tab").hasClass("active")) {
-            $("input[name='url-client-target']").val(newTestRPConfig.UrlClientTarget);
-            $("input[name='input-field-name']").val(newTestRPConfig.InputFieldName);
-            $("textarea[name='selenium-script']").val(newTestRPConfig.SeleniumScript);
-            $("input[name='url-client-target-success']").val(newTestRPConfig.FinalValidUrl);
-            $("input[name='honest-user-needle']").val(newTestRPConfig.HonestUserNeedle);
-            $("input[name='evil-user-needle']").val(newTestRPConfig.EvilUserNeedle);
-            $("input[name='user-profile-url']").val(newTestRPConfig.ProfileUrl);
-        } else if ($("#json-config-tab").hasClass("active")) {
-			$("#json-config").val(JSON.stringify(newTestRPConfig, undefined, 2))
+		// config form
+		$("input[name='url-client-target']").val(newTestRPConfig.UrlClientTarget);
+		$("input[name='input-field-name']").val(newTestRPConfig.InputFieldName);
+		$("textarea[name='selenium-script']").val(newTestRPConfig.SeleniumScript);
+		$("input[name='url-client-target-success']").val(newTestRPConfig.FinalValidUrl);
+		$("input[name='honest-user-needle']").val(newTestRPConfig.HonestUserNeedle);
+		$("input[name='evil-user-needle']").val(newTestRPConfig.EvilUserNeedle);
+		$("input[name='user-profile-url']").val(newTestRPConfig.ProfileUrl);
+		// JSON form
+		let json = JSON.stringify(newTestRPConfig, jsonFilter, 4);
+		$("#json-config").val(json);
+	}
+
+	function jsonFilter(key, val) {
+		if (key === 'HonestWebfingerResourceId' || key === 'EvilWebfingerResourceId' || key === 'Type') {
+            // remove from json result
+			return undefined;
 		}
+		return val;
 	}
 
 	function updateOPConfig() {
@@ -629,7 +637,6 @@ var OPIV = (function(module) {
 		var stepResult = learnResult.TestStepResult;
 		var testPassed = stepResult.Result === "PASS";
 
-		//TODO RP specific
 		// update config
 		if (learnResult.TestConfig) {
 			if (testConfigType === RP_CONFIG_TYPE) {
