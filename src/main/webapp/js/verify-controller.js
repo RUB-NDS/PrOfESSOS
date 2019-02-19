@@ -206,18 +206,12 @@ var OPIV = (function(module) {
 			// configuration for rp-verifier
             $("#honest-op-id-display").html(document.createTextNode(testConfig.HonestWebfingerResourceId));
             $("#evil-op-id-display").html(document.createTextNode(testConfig.EvilWebfingerResourceId));
-            // update config
-            writeRPConfigGUI(testConfig);
         }
         if (testConfigType === OP_CONFIG_TYPE) {
         	// configuration for op-verifier
 			$("#honest-rp-id-display").html(document.createTextNode(testConfig.HonestRpResourceId));
 			$("#evil-rp-id-display").html(document.createTextNode(testConfig.EvilRpResourceId));
-
-			// update config
-            writeOPConfigGUI(testConfig);
         }
-
 
 		loadTestReport();
 	}
