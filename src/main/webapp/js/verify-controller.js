@@ -149,6 +149,11 @@ var OPIV = (function(module) {
         learn(completeHandler, url);
     };
 
+    module.submitRPLearningForm = function() {
+    	let activeForm = $("#form-config-tab").hasClass("active") ? $("#rp-learn-form") : $("#rp-learn-json-form")
+		activeForm.submit();
+	}
+    
     function learn(completeHandler, url) {
         showWaitDialog();
         // default parameters
@@ -532,13 +537,17 @@ var OPIV = (function(module) {
 	}
 
 	function updateRPConfig() {
-		 testConfig.UrlClientTarget = $("input[name='url-client-target']").val();
-		 testConfig.InputFieldName = $("input[name='input-field-name']").val();
-		 testConfig.SeleniumScript = $("textarea[name='selenium-script']").val();
-		 testConfig.FinalValidUrl = $("input[name='url-client-target-success']").val();
-		 testConfig.HonestUserNeedle = $("input[name='honest-user-needle']").val();
-		 testConfig.EvilUserNeedle = $("input[name='evil-user-needle']").val();
-		 testConfig.ProfileUrl = $("input[name='user-profile-url']").val();
+		if ($("#form-config-tab").hasClass("active")) {
+            testConfig.UrlClientTarget = $("input[name='url-client-target']").val();
+            testConfig.InputFieldName = $("input[name='input-field-name']").val();
+            testConfig.SeleniumScript = $("textarea[name='selenium-script']").val();
+            testConfig.FinalValidUrl = $("input[name='url-client-target-success']").val();
+            testConfig.HonestUserNeedle = $("input[name='honest-user-needle']").val();
+            testConfig.EvilUserNeedle = $("input[name='evil-user-needle']").val();
+            testConfig.ProfileUrl = $("input[name='user-profile-url']").val();
+        } else if ($("#json-config-tab").hasClass("active")) {
+			jQuery.extend(true, testConfig, JSON.parse($("#json-config").val()));
+		}
 	}
 
 	function writeRPConfig(newTestRPConfig) {
@@ -554,13 +563,17 @@ var OPIV = (function(module) {
 	}
 
 	function writeRPConfigGUI(newTestRPConfig) {
-		$("input[name='url-client-target']").val(newTestRPConfig.UrlClientTarget);
-		$("input[name='input-field-name']").val(newTestRPConfig.InputFieldName);
-		$("textarea[name='selenium-script']").val(newTestRPConfig.SeleniumScript);
-		$("input[name='url-client-target-success']").val(newTestRPConfig.FinalValidUrl);
-		$("input[name='honest-user-needle']").val(newTestRPConfig.HonestUserNeedle);
-		$("input[name='evil-user-needle']").val(newTestRPConfig.EvilUserNeedle);
-		$("input[name='user-profile-url']").val(newTestRPConfig.ProfileUrl);
+		if ($("#form-config-tab").hasClass("active")) {
+            $("input[name='url-client-target']").val(newTestRPConfig.UrlClientTarget);
+            $("input[name='input-field-name']").val(newTestRPConfig.InputFieldName);
+            $("textarea[name='selenium-script']").val(newTestRPConfig.SeleniumScript);
+            $("input[name='url-client-target-success']").val(newTestRPConfig.FinalValidUrl);
+            $("input[name='honest-user-needle']").val(newTestRPConfig.HonestUserNeedle);
+            $("input[name='evil-user-needle']").val(newTestRPConfig.EvilUserNeedle);
+            $("input[name='user-profile-url']").val(newTestRPConfig.ProfileUrl);
+        } else if ($("#json-config-tab").hasClass("active")) {
+			$("#json-config").val(JSON.stringify(newTestRPConfig, undefined, 2))
+		}
 	}
 
 	function updateOPConfig() {
