@@ -39,7 +39,7 @@ limitations under the License.
 				<div id="navbar" class="collapse navbar-collapse">
 					<ul class="nav navbar-nav">
 						<li class="active"><a href="#" onclick="OPIV.clear();">Client Verifier</a></li>
-						<!--<li><a href="op-verifier.html">OP Verifier</a></li>-->
+						<li><a href="op-verifier.html">OP Verifier</a></li>
 					</ul>
 				</div><!--/.nav-collapse -->
 			</div>
@@ -152,85 +152,127 @@ limitations under the License.
 
 			<hr>
 
-			<h2>Stage 1: Setup - Client Parameters</h2>
+			<legend>OP-Parameters</legend>
+			<p>Test ID: <tt id="test-id-display">not-loaded</tt><br>
+				Honest OP Identity: <tt id="honest-op-id-display">not-loaded</tt><br>
+				Evil OP Identity: <tt id="evil-op-id-display">not-loaded</tt></p>
+
+			<h2>Stage 1: Setup Client-Parameters</h2>
 			<div class="row">
 				<div class="learn-controls col-sm-12">
-					<form id="rp-learn-form" action="javascript:;" onsubmit="javascript:OPIV.learnRP();">
-						<fieldset>
-							<legend>OP Parameters</legend>
-							<p>Test ID: <tt id="test-id-display">not-loaded</tt><br>
-							Honest OP Identity: <tt id="honest-op-id-display">not-loaded</tt><br>
-							Evil OP Identity: <tt id="evil-op-id-display">not-loaded</tt></p>
+
+
+
+					<ul class="nav nav-tabs">
+						<li class="active"><a data-toggle="tab" href="#form-config-tab">HTML Form</a></li>
+						<li><a data-toggle="tab" href="#json-config-tab">JSON</a></li>
+					</ul>
+
+					<div class="tab-content">
+						<div id="form-config-tab" class="tab-pane fade in active">
+
+							<form id="rp-learn-form" action="javascript:;" onsubmit="javascript:OPIV.learnRP();">
+								<fieldset>
+
+									<!--<legend>Client Parameters</legend>-->
+									<div class="form-group">
+										<div class="col-sm-2">
+											<label class="control-label" for="url-client-target">Login-Site URL:</label>
+										</div>
+										<div class="col-sm-10">
+											<input class="form-control" type="url" name="url-client-target" id="url-client-target"  form="rp-learn-form" required size="80">
+										</div>
+									</div>
+									<div class="form-group">
+										<div class="col-sm-2">
+											<label class="control-label" for="input-field-name">Input-Field Name:</label>
+										</div>
+										<div class="col-sm-10">
+											<input class="form-control" type="text" name="input-field-name" id="input-field-name" form="rp-learn-form" size="80">
+										</div>
+									</div>
+									<div class="form-group">
+										<div class="col-sm-2">
+											<label class="control-label" for="selenium-script">Selenium Script:</label>
+										</div>
+										<div class="col-sm-10">
+											<textarea class="form-control" name="selenium-script" id="selenium-script" form="rp-learn-form" rows="5" cols="80"></textarea>
+										</div>
+									</div>
+									<div class="form-group">
+										<div class="col-sm-2">
+											<label class="control-label" for="url-client-target-success">Success URL:</label>
+										</div>
+										<div class="col-sm-10">
+											<input class="form-control" type="url" name="url-client-target-success" id="url-client-target-success" size="80">
+										</div>
+									</div>
+									<div class="form-group">
+										<div class="col-sm-2">
+											<label class="control-label" for="honest-user-needle">Honest User Needle:</label>
+										</div>
+										<div class="col-sm-10">
+											<input class="form-control" type="text" name="honest-user-needle" id="honest-user-needle" size="80">
+										</div>
+									</div>
+									<div class="form-group">
+										<div class="col-sm-2">
+											<label class="control-label" for="evil-user-needle">Evil User Needle:</label>
+										</div>
+										<div class="col-sm-10">
+											<input class="form-control" type="text" name="evil-user-needle" id="evil-user-needle" size="80">
+										</div>
+									</div>
+									<div class="form-group">
+										<div class="col-sm-2">
+											<label class="control-label" for="user-profile-url">User Profile URL:</label>
+										</div>
+										<div class="col-sm-10">
+											<input class="form-control" type="text" name="user-profile-url" id="user-profile-url" size="80">
+										</div>
+									</div>
+									<div class="col-sm-2"></div>
+									<div class="col-sm-10">
+
+									</div>
+								</fieldset>
+							</form>
 							
-							<legend>Client Parameters</legend>
-							<div class="form-group">
-								<div class="col-sm-2">
-									<label class="control-label" for="url-client-target">Login-Site URL:</label>
-								</div>
-								<div class="col-sm-10">
-									<input class="form-control" type="url" name="url-client-target" id="url-client-target"  form="rp-learn-form" required size="80">
-								</div>
-							</div>
-							<div class="form-group">
-								<div class="col-sm-2">
-									<label class="control-label" for="input-field-name">Input-Field Name:</label>
-								</div>
-								<div class="col-sm-10">
-									<input class="form-control" type="text" name="input-field-name" id="input-field-name" form="rp-learn-form" size="80">
-								</div>
-							</div>
-							<div class="form-group">
-								<div class="col-sm-2">
-									<label class="control-label" for="selenium-script">Selenium Script:</label>
-								</div>
-								<div class="col-sm-10">
-									<textarea class="form-control" name="selenium-script" id="selenium-script" form="rp-learn-form" rows="5" cols="80"></textarea>
-								</div>
-							</div>
-							<div class="form-group">
-								<div class="col-sm-2">
-									<label class="control-label" for="url-client-target-success">Success URL:</label>
-								</div>
-								<div class="col-sm-10">
-									<input class="form-control" type="url" name="url-client-target-success" id="url-client-target-success" size="80">
-								</div>
-							</div>
-							<div class="form-group">
-								<div class="col-sm-2">
-									<label class="control-label" for="honest-user-needle">Honest User Needle:</label>
-								</div>
-								<div class="col-sm-10">
-									<input class="form-control" type="text" name="honest-user-needle" id="honest-user-needle" size="80">
-								</div>
-							</div>
-							<div class="form-group">
-								<div class="col-sm-2">
-									<label class="control-label" for="evil-user-needle">Evil User Needle:</label>
-								</div>
-								<div class="col-sm-10">
-									<input class="form-control" type="text" name="evil-user-needle" id="evil-user-needle" size="80">
-								</div>
-							</div>
-							<div class="form-group">
-								<div class="col-sm-2">
-									<label class="control-label" for="user-profile-url">User Profile URL:</label>
-								</div>
-								<div class="col-sm-10">
-									<input class="form-control" type="text" name="user-profile-url" id="user-profile-url" size="80">
-								</div>
-							</div>
-							<div class="col-sm-2"></div>
-							<div class="col-sm-10">
-								
-							</div>
-						</fieldset>
-					</form>
+						</div>
+						<div id="json-config-tab" class="tab-pane fade">
+							<form id="rp-learn-json-form" action="javascript:;" onsubmit="javascript:OPIV.learnRP();">
+								<fieldset>
+
+									<!--<legend>Client Parameters JSON</legend>-->
+						
+									<div class="form-group">
+										<div class="col-sm-2">
+											<label class="control-label" for="json-config">JSON Config</label>
+										</div>
+										<div class="col-sm-10">
+											<textarea class="form-control" name="json-config" id="json-config" form="rp-learn-json-form" rows="5" cols="80"></textarea>
+										</div>
+									</div>
+									
+									<div class="col-sm-2"></div>
+									<div class="col-sm-10">
+
+									</div>
+								</fieldset>
+							</form>
+						</div>
+					</div>
+					
+					
+					
+
 				</div>
 			</div>
 
 
 			<h2>Stage 2: Configuration Evaluation</h2>
-			<button class="btn btn-default" type="submit" value="Learn" form="rp-learn-form">Learn</button>
+			<!--<button class="btn btn-default" type="submit" value="Learn" form="rp-learn-form">Learn</button>-->
+			<button class="btn btn-default" type="submit" value="Learn" onclick="javascript:OPIV.submitRPLearningForm()">Learn</button>
 
 			<div id="learn-report">
 				<script>
