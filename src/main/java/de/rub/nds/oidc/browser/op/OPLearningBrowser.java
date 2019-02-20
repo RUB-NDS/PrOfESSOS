@@ -48,7 +48,7 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 
 
     private TestStepResult runUserAuth(RPType rpType) throws InterruptedException {
-		TestStepResult result = TestStepResult.NOT_RUN;
+//		TestStepResult result = TestStepResult.NOT_RUN;
 		logger.log("run userAuth");
 
 		// store user credentials to make them accessible to RP
@@ -71,7 +71,7 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 		// prepare scripts for login and consent page
 		evalScriptTemplates();
 
-		logger.log(String.format("Using Login script:\n %s", submitScript));
+		logger.log(String.format("Using Login script:%n %s", submitScript));
 		// wait until a new html element appears, indicating a page load
 		waitForPageLoad(() -> {
 			driver.executeScript(submitScript);

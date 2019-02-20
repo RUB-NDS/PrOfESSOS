@@ -90,7 +90,7 @@ public class SessionOverwritingOP extends DefaultOP {
 //				resp.setStatus(204);
 //				resp.flushBuffer();
                 CompletableFuture<?> releaseHonest = (CompletableFuture<?>) stepCtx.get(OPContextConstants.BLOCK_HONEST_OP_FUTURE);
-                logger.log("releasing honest op");
+                logger.log("Releasing locked Honest-OP");
                 releaseHonest.complete(null);
             }
         } catch (ParseException ex) {
@@ -105,7 +105,7 @@ public class SessionOverwritingOP extends DefaultOP {
         }
     }
 
-    // TODO: this does not work for implicit flow - need to also  check for userinforeqeusts (?)
+    // TODO: this does not work for implicit flow - need to also check for userinforeqeusts (?)
     @Override
     public void tokenRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         CompletableFuture<TestStepResult> blocker = (CompletableFuture<TestStepResult>) stepCtx.get(OPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT);

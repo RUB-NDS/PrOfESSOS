@@ -203,8 +203,11 @@ public class TestStepLogger {
 	// nimbus SDK uses different types
 	private List<HeaderType> readHeaders(Map<String,String> headers) {
 		List<HeaderType> result = new ArrayList<>();
-		for (String key : headers.keySet()) {
-			result.add(createHeader(key, headers.get(key)));
+//		for (String key : headers.keySet()) {
+//			result.add(createHeader(key, headers.get(key)));
+//		}
+		for (Map.Entry<String,String> e : headers.entrySet()) {
+			result.add(createHeader(e.getKey(), e.getValue()));
 		}
 		return result;
 	}

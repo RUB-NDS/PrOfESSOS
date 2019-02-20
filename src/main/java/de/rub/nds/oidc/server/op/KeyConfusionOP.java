@@ -53,7 +53,7 @@ import static de.rub.nds.oidc.server.op.OPParameterConstants.*;
 // TODO: didscovery must announce all algorithms used for signing in any testcase (EC, RSA, HS)
 
 public class KeyConfusionOP extends DefaultOP {
-    private int requestCount = 0;
+//    private int requestCount = 0;
     private URI untrustedKeyUri;
     private String untrustedKeyResponseString;
 //    private CompletableFuture<?> waitForHonest;
@@ -502,7 +502,7 @@ public class KeyConfusionOP extends DefaultOP {
         JWSHeader.Builder hb = new JWSHeader.Builder(JWSAlgorithm.HS256).type(JOSEObjectType.JWT);
         JWSHeader header = hb.build();
         SignedJWT signedJwt = new SignedJWT(header, claims);
-        if (signedJwt == null) {logger.log("signedJWt is nulll");}
+
         try {
         	byte [] key = cinfo.getSecret().getValueBytes();
         	if (key == null) {logger.log("key is null...");}

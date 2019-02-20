@@ -78,8 +78,8 @@ public class RPLearningBrowser extends BrowserSimulator {
 			} else {
 				// try to detect form
 				String xpath = String.format("//input[%s]", containsIgnoreCase("@name", "openid"));
-				xpath += String.format("\n | //input[%s]", containsIgnoreCase("@id", "openid"));
-				xpath += String.format("\n | //form[@*[%s or %s or %s]]//input[%s or %s]",
+				xpath += String.format("%n | //input[%s]", containsIgnoreCase("@id", "openid"));
+				xpath += String.format("%n | //form[@*[%s or %s or %s]]//input[%s or %s]",
 						containsIgnoreCase(".", "openid"),
 						containsIgnoreCase(".", "open-id"),
 						containsIgnoreCase(".", "oidc"),

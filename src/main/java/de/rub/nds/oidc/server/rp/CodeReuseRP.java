@@ -22,7 +22,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class CodeReuseRP extends AbstractRPImplementation {
 
-	private boolean isFirstCallback = true;
+//	private boolean isFirstCallback = true;
 
     @Override
     public void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException {
@@ -34,6 +34,7 @@ public class CodeReuseRP extends AbstractRPImplementation {
 		if (successResponse == null) {
 			logger.log("AuthenticationResponse Error");
 			browserBlocker.complete(TestStepResult.UNDETERMINED);
+			return;
 		}
 
 		UserInfo userInfo = null;
@@ -53,7 +54,7 @@ public class CodeReuseRP extends AbstractRPImplementation {
 				}
 //				OIDCTokens tokens = tokenResponse.toSuccessResponse().getOIDCTokens();
 			}
-			isFirstCallback = false;
+//			isFirstCallback = false;
 			browserBlocker.complete(TestStepResult.PASS);
 			return;
 		} else {

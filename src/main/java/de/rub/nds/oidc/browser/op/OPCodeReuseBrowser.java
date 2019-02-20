@@ -46,7 +46,7 @@ public class OPCodeReuseBrowser extends AbstractOPBrowser {
 
 
     private TestStepResult runUserAuth(RPType rpType) throws InterruptedException {
-		TestStepResult result = TestStepResult.NOT_RUN;
+//		TestStepResult result = TestStepResult.NOT_RUN;
 		logger.log("Starting User Authentication");
 //
 //		// store user credentials to make them accessible to RP
