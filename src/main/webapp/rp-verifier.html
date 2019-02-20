@@ -204,7 +204,7 @@ limitations under the License.
 											<label class="control-label" for="url-client-target-success">Success URL:</label>
 										</div>
 										<div class="col-sm-10">
-											<input class="form-control" type="url" name="url-client-target-success" id="url-client-target-success" size="80">
+											<input class="form-control" type="url" name="url-client-target-success" id="url-client-target-success" size="80" required>
 										</div>
 									</div>
 									<div class="form-group">
@@ -212,7 +212,7 @@ limitations under the License.
 											<label class="control-label" for="honest-user-needle">Honest User Needle:</label>
 										</div>
 										<div class="col-sm-10">
-											<input class="form-control" type="text" name="honest-user-needle" id="honest-user-needle" size="80">
+											<input class="form-control" type="text" name="honest-user-needle" id="honest-user-needle" size="80" required>
 										</div>
 									</div>
 									<div class="form-group">
@@ -220,7 +220,7 @@ limitations under the License.
 											<label class="control-label" for="evil-user-needle">Evil User Needle:</label>
 										</div>
 										<div class="col-sm-10">
-											<input class="form-control" type="text" name="evil-user-needle" id="evil-user-needle" size="80">
+											<input class="form-control" type="text" name="evil-user-needle" id="evil-user-needle" size="80" required>
 										</div>
 									</div>
 									<div class="form-group">
@@ -228,7 +228,7 @@ limitations under the License.
 											<label class="control-label" for="user-profile-url">User Profile URL:</label>
 										</div>
 										<div class="col-sm-10">
-											<input class="form-control" type="text" name="user-profile-url" id="user-profile-url" size="80">
+											<input class="form-control" type="text" name="user-profile-url" id="user-profile-url" size="80" required>
 										</div>
 									</div>
 									<div class="col-sm-2"></div>
@@ -236,8 +236,8 @@ limitations under the License.
 									</div>
 								</fieldset>
 							</form>
-							
 						</div>
+
 						<div id="json-config-tab" class="tab-pane fade">
 							<form id="rp-learn-json-form" action="javascript:;" onsubmit="javascript:OPIV.learnRP();">
 								<fieldset>
@@ -248,10 +248,11 @@ limitations under the License.
 											<label class="control-label" for="json-config">JSON Config</label>
 										</div>
 										<div class="col-sm-10">
-											<textarea class="form-control" name="json-config" id="json-config" form="rp-learn-json-form" rows="10" cols="80"></textarea>
+											<textarea class="form-control" type="text" name="json-config" id="json-config" form="rp-learn-json-form" required rows="10" cols="80"></textarea>
 										</div>
+
 									</div>
-									
+
 									<div class="col-sm-2"></div>
 									<div class="col-sm-10">
 									</div>
@@ -287,7 +288,7 @@ limitations under the License.
 				</div>
 			</div>
 
-			
+
 			<h2>Stage 3: Tests and Attacks</h2>
 			<form id="rp-runall-form" action="javascript:;" onsubmit="javascript:OPIV.runAllTests();">
 				<button class="btn btn-default" type="submit" value="Run all Tests" form="rp-runall-form">Run all Tests</button>
@@ -299,7 +300,7 @@ limitations under the License.
 
 		</div>
 
-		<script src="webjars/jquery/3.3.1/jquery.min.js">
+		<script src="webjars/jquery/3.3.1-1/jquery.min.js">
 		</script>
 
                 <script src="webjars/bootstrap/3.3.7-1/js/bootstrap.min.js">
