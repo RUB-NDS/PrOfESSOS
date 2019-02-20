@@ -123,7 +123,7 @@ var OPIV = (function(module) {
 
 	function getTestContainers() {
 		var result = [];
-		
+
 		// loop over all step definitions and find the matching container
 		var testResults = testReport.TestStepResult;
 		for (var i = 0; i < testResults.length; i++) {
@@ -138,7 +138,22 @@ var OPIV = (function(module) {
 	}
 
 	module.learnRP = function(completeHandler) {
+		// min check based on form's "required" attribute
+		let activeForm = getActiveRPConfigForm();
+        if (!activeForm[0].checkValidity() ) {
+            // event.preventDefault();
+            // event.stopPropagation();
+            markFormErrors(activeForm);
+			return false;
+        }
+        removeFormErrorMark(activeForm);
+
 		updateRPConfig();
+		// if (! isMinValidRPConfig()) {
+		//     markFormErrors();
+		// 	return false;
+		// }
+
 		let url = "api/rp/" + testId + "/learn";
 		learn(completeHandler, url);
 	};
@@ -150,10 +165,31 @@ var OPIV = (function(module) {
 	};
 
 	module.submitRPLearningForm = function() {
-		let activeForm = $("#form-config-tab").hasClass("active") ? $("#rp-learn-form") : $("#rp-learn-json-form")
+		let activeForm = getActiveRPConfigForm();
 		activeForm.submit();
 	}
-	
+
+	function getActiveRPConfigForm() {
+		return $("#form-config-tab").hasClass("active") ? $("#rp-learn-form") : $("#rp-learn-json-form");
+	}
+
+	function markFormErrors(form) {
+        $(form).find("[required]").each(function(){
+            if ( !$(this).val() ) {
+                $(this).parent().addClass("has-error");
+            }
+        });
+    }
+
+    function removeFormErrorMark() {
+	    $("#rp-learn-form").find(".has-error").each(function(){
+            $(this).removeClass("has-error");
+        });
+        $("#rp-learn-json-form").find(".has-error").each(function(){
+            $(this).removeClass("has-error");
+        });
+    }
+
 	function learn(completeHandler, url) {
 		showWaitDialog();
 		// default parameters
@@ -281,7 +317,7 @@ var OPIV = (function(module) {
 
 	function getDescription(testDef) {
 		var result = "";
-		
+
 		var concat = function(textArray) {
 			var result = "";
 			textArray.forEach(function(next) {
@@ -410,7 +446,7 @@ var OPIV = (function(module) {
 	function createHttpRequestLogEntry(req) {
 		var container = document.createElement("div");
 		container.className = "log-entry";
-		
+
 		var result = document.createDocumentFragment();
 
 		var type = document.createElement("strong");
@@ -419,7 +455,7 @@ var OPIV = (function(module) {
 
 		var status = document.createElement("div");
 		status.className = "log-entry";
-		
+
 		var method = req.RequestLine.substr(0,req.RequestLine.indexOf(" "));
 		var url = req.RequestLine.substr(req.RequestLine.indexOf(" "));
 		var host = findHeader("host", req.Header);
@@ -435,7 +471,7 @@ var OPIV = (function(module) {
 		//status.appendChild(document.createTextNode(req.RequestLine));
 		status.appendChild(methodDoc);
 		status.appendChild(urlDoc);
-		
+
 		result.appendChild(status);
 
 		result.appendChild(createHttpHeaders(req.Header));
@@ -448,7 +484,7 @@ var OPIV = (function(module) {
 	function createHttpResponseLogEntry(res) {
 		var container = document.createElement("div");
 		container.className = "log-entry";
-		
+
 		var result = document.createDocumentFragment();
 
 		var type = document.createElement("strong");
@@ -457,14 +493,14 @@ var OPIV = (function(module) {
 
 		var status = document.createElement("div");
 		status.className = "log-entry";
-		
+
 		var resStatus = document.createElement("mark");
 		resStatus.innerHTML = res.Status;
-		
+
 		if (res.Status >= 400) {
 			resStatus.className = "err";
 		}
-		
+
 		//status.appendChild(document.createTextNode(res.Status));
 		status.appendChild(resStatus);
 		result.appendChild(status);
@@ -543,6 +579,14 @@ var OPIV = (function(module) {
 			jQuery.extend(true, testConfig, JSON.parse($("#json-config").val()));
 		}
 	}
+
+	// function isMinValidRPConfig() {
+	// 	let t = testConfig;
+	// 	if (t.UrlClientTarget && t.FinalValidUrl && t.HonestUserNeedle && t.EvilUserNeedle && t.ProfileUrl) {
+	// 		return true;
+	// 	}
+	// 	return false;
+	// }
 
 	function writeRPConfig(newTestRPConfig) {
 		testConfig.UrlClientTarget = newTestRPConfig.UrlClientTarget;
