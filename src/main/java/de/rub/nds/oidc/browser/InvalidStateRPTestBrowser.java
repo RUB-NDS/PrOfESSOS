@@ -40,6 +40,7 @@ public class InvalidStateRPTestBrowser extends DefaultRPTestBrowser {
 			String startUrl = rpConfig.getUrlClientTarget();
 			logger.log(String.format("Opening browser with URL '%s'.", startUrl));
 			driver.get(startUrl);
+			driver.executeScript(getFormSubmitDelayScript());
 
 			// execute JS to start authentication
 			String submitScriptRaw = rpConfig.getSeleniumScript();

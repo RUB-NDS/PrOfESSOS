@@ -43,6 +43,7 @@ public class IdPConfusionBrowser extends DefaultRPTestBrowser {
 			String startUrl = rpConfig.getUrlClientTarget();
 			logger.log(String.format("Opening browser with URL '%s'.", startUrl));
 			driver.get(startUrl);
+			driver.executeScript(getFormSubmitDelayScript());
 
 			// execute JS to start authentication
 			String honestInputOpUrl = (String) stepCtx.get(OPParameterConstants.BROWSER_INPUT_HONEST_OP_URL);
@@ -61,6 +62,7 @@ public class IdPConfusionBrowser extends DefaultRPTestBrowser {
 			// now request evil op
 			logger.log(String.format("Opening browser with URL '%s'.", startUrl));
 			driver.get(startUrl);
+			driver.executeScript(getFormSubmitDelayScript());
 
 			// execute JS to start authentication
 			submitScriptRaw = rpConfig.getSeleniumScript();

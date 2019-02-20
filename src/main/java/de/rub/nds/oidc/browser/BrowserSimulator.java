@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
@@ -67,8 +68,11 @@ public abstract class BrowserSimulator {
 	protected Map<String, Object> stepCtx;
 	protected InstanceParameters params;
 
+	private String formSubmitDelayScript;
+
 	public BrowserSimulator() {
 		loadDriver(false);
+		loadFormSubmissionDelayScript();
 	}
 
 	protected final void loadDriver(boolean quit) {
@@ -225,6 +229,19 @@ public abstract class BrowserSimulator {
 		// return max(rpResult, result), where PASS < NOT_RUN < UNDETERMINED < FAIL
 		result = rpResult.compareTo(result) >= 0 ? rpResult : result;
 		return result;
+	}
+
+	private void loadFormSubmissionDelayScript() {
+		try {
+			String script = IOUtils.toString(getClass().getResourceAsStream("/delayFormSubmission.js"), "UTF-8");
+			formSubmitDelayScript = script;
+		} catch (IOException e) {
+			//TODO
+		}
+	}
+
+	protected String getFormSubmitDelayScript() {
+		return formSubmitDelayScript;
 	}
 
 }
