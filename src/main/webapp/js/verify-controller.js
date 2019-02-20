@@ -141,18 +141,12 @@ var OPIV = (function(module) {
 		// min check based on form's "required" attribute
 		let activeForm = getActiveRPConfigForm();
         if (!activeForm[0].checkValidity() ) {
-            // event.preventDefault();
-            // event.stopPropagation();
             markFormErrors(activeForm);
 			return false;
         }
         removeFormErrorMark(activeForm);
 
 		updateRPConfig();
-		// if (! isMinValidRPConfig()) {
-		//     markFormErrors();
-		// 	return false;
-		// }
 
 		let url = "api/rp/" + testId + "/learn";
 		learn(completeHandler, url);
@@ -579,14 +573,6 @@ var OPIV = (function(module) {
 			jQuery.extend(true, testConfig, JSON.parse($("#json-config").val()));
 		}
 	}
-
-	// function isMinValidRPConfig() {
-	// 	let t = testConfig;
-	// 	if (t.UrlClientTarget && t.FinalValidUrl && t.HonestUserNeedle && t.EvilUserNeedle && t.ProfileUrl) {
-	// 		return true;
-	// 	}
-	// 	return false;
-	// }
 
 	function writeRPConfig(newTestRPConfig) {
 		testConfig.UrlClientTarget = newTestRPConfig.UrlClientTarget;
