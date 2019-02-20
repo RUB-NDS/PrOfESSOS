@@ -65,6 +65,8 @@ public class OPCodeReuseBrowser extends AbstractOPBrowser {
 		// run login script
 		logger.log(String.format("AuthnReq: opening browser with URL '%s'.", authnReq.toURI().toString()));
 		driver.get(authnReq.toURI().toString());
+		// delay form submissions for screenshots
+		driver.executeScript(getFormSubmitDelayScript());
 
 		// prepare scripts for login and consent page
 		evalScriptTemplates();
