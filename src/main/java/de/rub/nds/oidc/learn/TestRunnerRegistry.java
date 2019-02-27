@@ -138,11 +138,8 @@ public class TestRunnerRegistry {
 	private TestOPConfigType createTestOPConfig(String testId) {
 		TestOPConfigType testCfg = new TestOPConfigType();
         testCfg.setType(TestOPConfigType.class.getName());
-
-//		testCfg.setHonestWebfingerResourceId(hosts.getHonestOPUri() + testId);
-//		testCfg.setEvilWebfingerResourceId(hosts.getEvilOPUri() + testId);
-
-		// TODO
+        testCfg.setHonestRpResourceId(hosts.getHonestRPUri() + testId);
+        testCfg.setEvilRpResourceId(hosts.getEvilRPUri() + testId);
 		return testCfg;
 	}
 }
