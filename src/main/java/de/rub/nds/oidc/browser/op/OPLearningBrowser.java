@@ -69,7 +69,8 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 		driver.get(authnReq.toURI().toString());
 		// delay form submissions for screenshots
 		driver.executeScript(getFormSubmitDelayScript());
-
+		waitMillis(500);
+		
 		// prepare scripts for login and consent page
 		evalScriptTemplates();
 		logger.log(String.format("Using Login script:%n %s", submitScript));
@@ -90,6 +91,8 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 		if (driver.getCurrentUrl().startsWith(authnReq.getRedirectionURI().toString())) {
 			logger.log("No consent page encountered in browser");
 		} else {
+			driver.executeScript(getFormSubmitDelayScript());
+
 			waitForPageLoad(() -> {
 				driver.executeScript(consentScript);
 				logScreenshot();
