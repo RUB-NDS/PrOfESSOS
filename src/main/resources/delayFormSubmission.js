@@ -4,7 +4,7 @@
  * 
  */
 const delayMillis = 550;
-var forms = document.forms;
+let forms = document.forms;
 
 for (let frm of forms) {
     let orig = frm.onsubmit;
@@ -12,7 +12,7 @@ for (let frm of forms) {
         frm.onsubmit = function () {
             setTimeout(orig, delayMillis);
         };
-    } else {
+    } else if (typeof frm.submit === "function") {
         frm.onsubmit = function (e) {
             setTimeout(function () {
                 frm.submit();
@@ -21,14 +21,21 @@ for (let frm of forms) {
         };
     }
     orig = frm.submit;
-    frm.submit = function () {setTimeout(function(){orig.apply(frm);}, delayMillis);}
+    if (orig) {
+        frm.submit = function () {setTimeout(function(){orig.apply(frm);}, delayMillis);}
+    }
 }
 
-var buttons = document.querySelectorAll('input[type="submit"], button[type="submit"]');
+let buttons = document.querySelectorAll('input[type="submit"], button[type="submit"]');
 
-for (let btn in buttons) {
-    if (btn.click) {
-        let orig = btn.click;
-        btn.click = function () {setTimeout(function (){orig.apply(btn);}, delayMillis);};
-    }
+for (let btn of buttons) {
+
+    let orig = btn.onclick;
+    btn.onclick=function (e){setTimeout(function(){doClick(btn,orig)},delayMillis); e.stopPropagation();e.preventDefault();return false;};
+
+}
+
+function doClick(btn, handler) {
+    handler ? btn.onclick=handler : btn.onclick="";
+    btn.click();
 }

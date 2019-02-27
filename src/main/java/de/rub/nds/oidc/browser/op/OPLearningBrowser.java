@@ -46,8 +46,8 @@ public class OPLearningBrowser extends AbstractOPBrowser {
     	return TestStepResult.PASS;
     }
 
-
-    private TestStepResult runUserAuth(RPType rpType) throws InterruptedException {
+	@Override
+    protected TestStepResult runUserAuth(RPType rpType) throws InterruptedException {
 //		TestStepResult result = TestStepResult.NOT_RUN;
 		logger.log("run userAuth");
 
@@ -67,10 +67,12 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 		// run login script
 		logger.log(String.format("AuthnReq: opening browser with URL '%s'.", authnReq.toURI().toString()));
 		driver.get(authnReq.toURI().toString());
-
+		// delay form submissions for screenshots
+		driver.executeScript(getFormSubmitDelayScript());
+		waitMillis(500);
+		
 		// prepare scripts for login and consent page
 		evalScriptTemplates();
-
 		logger.log(String.format("Using Login script:%n %s", submitScript));
 		// wait until a new html element appears, indicating a page load
 		waitForPageLoad(() -> {
@@ -82,12 +84,14 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 		});
 		logger.log("HTML element found in Browser.");
 		// wait a bit more in case we have an angular app or some other JS heavy application
-		waitMillis(2000);
+		waitMillis(1000);
 
 		// don't run consentScript if we have already been redirected back to RP
 		if (driver.getCurrentUrl().startsWith(authnReq.getRedirectionURI().toString())) {
 			logger.log("No consent page encountered in browser");
 		} else {
+			driver.executeScript(getFormSubmitDelayScript());
+
 			waitForPageLoad(() -> {
 				driver.executeScript(consentScript);
 				logScreenshot();
