@@ -67,11 +67,13 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 		// run login script
 		logger.log(String.format("AuthnReq: opening browser with URL '%s'.", authnReq.toURI().toString()));
 		driver.get(authnReq.toURI().toString());
+		// delay form submissions for screenshots
+		driver.executeScript(getFormSubmitDelayScript());
 
 		// prepare scripts for login and consent page
 		evalScriptTemplates();
-
 		logger.log(String.format("Using Login script:%n %s", submitScript));
+
 		// wait until a new html element appears, indicating a page load
 		waitForPageLoad(() -> {
 			driver.executeScript(submitScript);

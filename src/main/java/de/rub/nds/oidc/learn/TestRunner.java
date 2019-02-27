@@ -324,7 +324,6 @@ public class TestRunner {
 			logger.log("Invalid Browser parameter in test specification.");
 			return false;
 		}
-		// TODO: atm, this is always EVIL and overridden in browser implementations, do we need it at all?
 
 		OPInstance op1Inst = new OPInstance(stepDef.getOPConfig1(), logger, testSuiteCtx, testStepCtx, OPType.HONEST);
 		instReg.addOP1(testId, new ServerInstance<>(op1Inst, logger));

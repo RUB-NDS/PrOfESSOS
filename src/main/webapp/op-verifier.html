@@ -38,8 +38,8 @@ limitations under the License.
 		</div>
 		<div id="navbar" class="collapse navbar-collapse">
 			<ul class="nav navbar-nav">
-				<li class="active"><a href="#" onclick="OPIV.clear();">IdentityProvider Verifier</a></li>
-				<!--<li><a href="op-verifier.html">OP Verifier</a></li>-->
+				<li><a href="rp-verifier.html">Client Verifier</a></li>
+				<li class="active"><a href="#" onclick="OPIV.clear();">OP Verifier</a></li>
 			</ul>
 		</div><!--/.nav-collapse -->
 	</div>
@@ -132,7 +132,7 @@ limitations under the License.
 		</ul>
 	</ol>
 
-	<form id="rp-demo-form" action="javascript:;" onsubmit="javascript:OPIV.loadDemo();">
+	<form id="op-demo-form" action="javascript:;" onsubmit="javascript:OPIV.loadDemo();">
 		<button class="btn btn-default" type="submit" value="Load Demo Config">Load Demo Config</button>
 	</form>
 
@@ -155,7 +155,7 @@ limitations under the License.
 	<h2>Stage 1: Setup - OpenID Provider Parameters</h2>
 	<div class="row">
 		<div class="learn-controls col-sm-12">
-			<form id="op-learn-form" action="javascript:;" onsubmit="javascript:OPIV.learnOP();">
+			<form class="form-horizontal" id="op-learn-form" action="javascript:;" onsubmit="javascript:OPIV.learnOP();">
 				<!--TODO: add client side form validation before submit: ClientConfigs > RegistrationURI > DiscoURI -->
 				<fieldset>
 					<legend>Client Parameters</legend>
@@ -249,38 +249,7 @@ limitations under the License.
 							<input class="form-control" type="text" name="user-2-password" id="user-2-password" form="op-learn-form" required size="80">
 						</div>
 					</div>
-					<!--<div class="form-group">-->
-						<!--<div class="col-sm-2">-->
-							<!--<label for="url-client-target-success">Success URL:</label>-->
-						<!--</div>-->
-						<!--<div class="col-sm-10">-->
-							<!--<input class="form-control" type="url" name="url-client-target-success" size="80">-->
-						<!--</div>-->
-					<!--</div>-->
-					<!--<div class="form-group">-->
-						<!--<div class="col-sm-2">-->
-							<!--<label for="honest-user-needle">Honest User Needle:</label>-->
-						<!--</div>-->
-						<!--<div class="col-sm-10">-->
-							<!--<input class="form-control" type="text" name="honest-user-needle" size="80">-->
-						<!--</div>-->
-					<!--</div>-->
-					<!--<div class="form-group">-->
-						<!--<div class="col-sm-2">-->
-							<!--<label for="evil-user-needle">Evil User Needle:</label>-->
-						<!--</div>-->
-						<!--<div class="col-sm-10">-->
-							<!--<input class="form-control" type="text" name="evil-user-needle" size="80">-->
-						<!--</div>-->
-					<!--</div>-->
-					<!--<div class="form-group">-->
-						<!--<div class="col-sm-2">-->
-							<!--<label for="user-profile-url">User Profile URL:</label>-->
-						<!--</div>-->
-						<!--<div class="col-sm-10">-->
-							<!--<input class="form-control" type="text" name="user-profile-url" size="80">-->
-						<!--</div>-->
-					<!--</div>-->
+
 					<div class="col-sm-2"></div>
 					<div class="col-sm-10">
 
@@ -326,7 +295,7 @@ limitations under the License.
 
 </div>
 
-<script src="webjars/jquery/3.3.1/jquery.min.js">
+<script src="webjars/jquery/3.3.1-1/jquery.min.js">
 </script>
 
 <script src="webjars/bootstrap/3.3.7-1/js/bootstrap.min.js">

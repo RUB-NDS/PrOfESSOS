@@ -52,9 +52,9 @@ var OPIV = (function(module) {
 	}
 
 	module.loadDemo = function() {
-        if (isInitialized()) {
-            if (testConfig["Type"] === RP_CONFIG_TYPE) {
-                testConfig.UrlClientTarget = "http://www.honestsp.de:8080/simple-web-app/login";
+		if (isInitialized()) {
+			if (testConfig["Type"] === RP_CONFIG_TYPE) {
+				testConfig.UrlClientTarget = "http://www.honestsp.de:8080/simple-web-app/login";
 				testConfig.InputFieldName = null;
 				testConfig.SeleniumScript = null;
 				testConfig.FinalValidUrl = "http://www.honestsp.de:8080/simple-web-app/";
@@ -68,13 +68,13 @@ var OPIV = (function(module) {
 				testConfig.UrlOPTarget = "http://honestidp.de:8080/openid-connect-server-webapp";
 				// registration not needed for demo when using discovery
 				// testConfig.OPMetadata = "http://honestidp.de:8080/openid-connect-server-webapp/register";
-                testConfig.User1Name = "user1";
-                testConfig.User1Pass = "user1pass";
-                testConfig.User2Name = "user2";
-                testConfig.User2Pass = "user2pass";
+				testConfig.User1Name = "user1";
+				testConfig.User1Pass = "user1pass";
+				testConfig.User2Name = "user2";
+				testConfig.User2Pass = "user2pass";
 
-                writeOPConfigGUI(testConfig);
-            }
+				writeOPConfigGUI(testConfig);
+			}
 		}
 	};
 
@@ -108,7 +108,7 @@ var OPIV = (function(module) {
 			// call for the first time
 			var nextContainer = containerIt();
 			if (nextContainer) {
-                // TODO: RP verifier specific behavior
+				// TODO: RP verifier specific behavior
 				OPIV.testStep(nextContainer.TestId, nextContainer.Container, completeHandler);
 			}
 		} else {
@@ -123,7 +123,7 @@ var OPIV = (function(module) {
 
 	function getTestContainers() {
 		var result = [];
-		
+
 		// loop over all step definitions and find the matching container
 		var testResults = testReport.TestStepResult;
 		for (var i = 0; i < testResults.length; i++) {
@@ -138,33 +138,68 @@ var OPIV = (function(module) {
 	}
 
 	module.learnRP = function(completeHandler) {
+		// min check based on form's "required" attribute
+		let activeForm = getActiveRPConfigForm();
+        if (!activeForm[0].checkValidity() ) {
+            markFormErrors(activeForm);
+			return false;
+        }
+        removeFormErrorMark(activeForm);
+
 		updateRPConfig();
+
 		let url = "api/rp/" + testId + "/learn";
 		learn(completeHandler, url);
 	};
 
-    module.learnOP = function(completeHandler) {
-        updateOPConfig();
-        let url = "api/op/" + testId + "/learn";
-        learn(completeHandler, url);
-    };
+	module.learnOP = function(completeHandler) {
+		updateOPConfig();
+		let url = "api/op/" + testId + "/learn";
+		learn(completeHandler, url);
+	};
 
-    function learn(completeHandler, url) {
-        showWaitDialog();
-        // default parameters
-        completeHandler = typeof completeHandler !== 'undefined' ? completeHandler : function() { hideWaitDialog(); };
-        learningComplete = false;
+	module.submitRPLearningForm = function() {
+		let activeForm = getActiveRPConfigForm();
+		activeForm.submit();
+	}
 
-        // call learning function
-        $.post({
-            url: url,
-            data: JSON.stringify(testConfig),
-            contentType: "application/json",
-            success: processLearnResponse,
-            error: learnResponseError,
-            complete: completeHandler
+	function getActiveRPConfigForm() {
+		return $("#form-config-tab").hasClass("active") ? $("#rp-learn-form") : $("#rp-learn-json-form");
+	}
+
+	function markFormErrors(form) {
+        $(form).find("[required]").each(function(){
+            if ( !$(this).val() ) {
+                $(this).parent().addClass("has-error");
+            }
         });
-    };
+    }
+
+    function removeFormErrorMark() {
+	    $("#rp-learn-form").find(".has-error").each(function(){
+            $(this).removeClass("has-error");
+        });
+        $("#rp-learn-json-form").find(".has-error").each(function(){
+            $(this).removeClass("has-error");
+        });
+    }
+
+	function learn(completeHandler, url) {
+		showWaitDialog();
+		// default parameters
+		completeHandler = typeof completeHandler !== 'undefined' ? completeHandler : function() { hideWaitDialog(); };
+		learningComplete = false;
+
+		// call learning function
+		$.post({
+			url: url,
+			data: JSON.stringify(testConfig),
+			contentType: "application/json",
+			success: processLearnResponse,
+			error: learnResponseError,
+			complete: completeHandler
+		});
+	};
 
 	module.testStep = function(stepId, stepContainer, completeHandler) {
 		showWaitDialog();
@@ -173,7 +208,7 @@ var OPIV = (function(module) {
 
 		if (learningComplete) {
 			// TODO: refactor apiPath condition
-            let apiPath = testConfig["Type"] === RP_CONFIG_TYPE ? "api/rp/" : "api/op/";
+			let apiPath = testConfig["Type"] === RP_CONFIG_TYPE ? "api/rp/" : "api/op/";
 
 			// call test function
 			$.post({
@@ -195,24 +230,18 @@ var OPIV = (function(module) {
 		testReport = testObject.TestReport;
 		testConfigType = testConfig.Type;
 
-        $("#test-id-display").html(document.createTextNode(testId));
+		$("#test-id-display").html(document.createTextNode(testId));
 
-        if (testConfigType === RP_CONFIG_TYPE) {
+		if (testConfigType === RP_CONFIG_TYPE) {
 			// configuration for rp-verifier
-            $("#honest-op-id-display").html(document.createTextNode(testConfig.HonestWebfingerResourceId));
-            $("#evil-op-id-display").html(document.createTextNode(testConfig.EvilWebfingerResourceId));
-            // update config
-            writeRPConfigGUI(testConfig);
-        }
-        if (testConfigType === OP_CONFIG_TYPE) {
-        	// configuration for op-verifier
+			$("#honest-op-id-display").html(document.createTextNode(testConfig.HonestWebfingerResourceId));
+			$("#evil-op-id-display").html(document.createTextNode(testConfig.EvilWebfingerResourceId));
+		}
+		if (testConfigType === OP_CONFIG_TYPE) {
+			// configuration for op-verifier
 			$("#honest-rp-id-display").html(document.createTextNode(testConfig.HonestRpResourceId));
 			$("#evil-rp-id-display").html(document.createTextNode(testConfig.EvilRpResourceId));
-
-			// update config
-            writeOPConfigGUI(testConfig);
-        }
-
+		}
 
 		loadTestReport();
 	}
@@ -282,7 +311,7 @@ var OPIV = (function(module) {
 
 	function getDescription(testDef) {
 		var result = "";
-		
+
 		var concat = function(textArray) {
 			var result = "";
 			textArray.forEach(function(next) {
@@ -411,7 +440,7 @@ var OPIV = (function(module) {
 	function createHttpRequestLogEntry(req) {
 		var container = document.createElement("div");
 		container.className = "log-entry";
-		
+
 		var result = document.createDocumentFragment();
 
 		var type = document.createElement("strong");
@@ -420,7 +449,7 @@ var OPIV = (function(module) {
 
 		var status = document.createElement("div");
 		status.className = "log-entry";
-		
+
 		var method = req.RequestLine.substr(0,req.RequestLine.indexOf(" "));
 		var url = req.RequestLine.substr(req.RequestLine.indexOf(" "));
 		var host = findHeader("host", req.Header);
@@ -429,14 +458,14 @@ var OPIV = (function(module) {
 		if (host) {
 			// TODO: why do all requests miss the Host header???
 			var urlDoc = document.createTextNode("[" + host + "] " + url);
-        } else {
+		} else {
 			var urlDoc = document.createTextNode(" " + url);
-        }
+		}
 
 		//status.appendChild(document.createTextNode(req.RequestLine));
 		status.appendChild(methodDoc);
 		status.appendChild(urlDoc);
-		
+
 		result.appendChild(status);
 
 		result.appendChild(createHttpHeaders(req.Header));
@@ -449,7 +478,7 @@ var OPIV = (function(module) {
 	function createHttpResponseLogEntry(res) {
 		var container = document.createElement("div");
 		container.className = "log-entry";
-		
+
 		var result = document.createDocumentFragment();
 
 		var type = document.createElement("strong");
@@ -458,14 +487,14 @@ var OPIV = (function(module) {
 
 		var status = document.createElement("div");
 		status.className = "log-entry";
-		
+
 		var resStatus = document.createElement("mark");
 		resStatus.innerHTML = res.Status;
-		
+
 		if (res.Status >= 400) {
 			resStatus.className = "err";
 		}
-		
+
 		//status.appendChild(document.createTextNode(res.Status));
 		status.appendChild(resStatus);
 		result.appendChild(status);
@@ -532,13 +561,17 @@ var OPIV = (function(module) {
 	}
 
 	function updateRPConfig() {
-		 testConfig.UrlClientTarget = $("input[name='url-client-target']").val();
-		 testConfig.InputFieldName = $("input[name='input-field-name']").val();
-		 testConfig.SeleniumScript = $("textarea[name='selenium-script']").val();
-		 testConfig.FinalValidUrl = $("input[name='url-client-target-success']").val();
-		 testConfig.HonestUserNeedle = $("input[name='honest-user-needle']").val();
-		 testConfig.EvilUserNeedle = $("input[name='evil-user-needle']").val();
-		 testConfig.ProfileUrl = $("input[name='user-profile-url']").val();
+		if ($("#form-config-tab").hasClass("active")) {
+			testConfig.UrlClientTarget = $("input[name='url-client-target']").val();
+			testConfig.InputFieldName = $("input[name='input-field-name']").val();
+			testConfig.SeleniumScript = $("textarea[name='selenium-script']").val();
+			testConfig.FinalValidUrl = $("input[name='url-client-target-success']").val();
+			testConfig.HonestUserNeedle = $("input[name='honest-user-needle']").val();
+			testConfig.EvilUserNeedle = $("input[name='evil-user-needle']").val();
+			testConfig.ProfileUrl = $("input[name='user-profile-url']").val();
+		} else if ($("#json-config-tab").hasClass("active")) {
+			jQuery.extend(true, testConfig, JSON.parse($("#json-config").val()));
+		}
 	}
 
 	function writeRPConfig(newTestRPConfig) {
@@ -554,6 +587,7 @@ var OPIV = (function(module) {
 	}
 
 	function writeRPConfigGUI(newTestRPConfig) {
+		// config form
 		$("input[name='url-client-target']").val(newTestRPConfig.UrlClientTarget);
 		$("input[name='input-field-name']").val(newTestRPConfig.InputFieldName);
 		$("textarea[name='selenium-script']").val(newTestRPConfig.SeleniumScript);
@@ -561,21 +595,32 @@ var OPIV = (function(module) {
 		$("input[name='honest-user-needle']").val(newTestRPConfig.HonestUserNeedle);
 		$("input[name='evil-user-needle']").val(newTestRPConfig.EvilUserNeedle);
 		$("input[name='user-profile-url']").val(newTestRPConfig.ProfileUrl);
+		// JSON form
+		let json = JSON.stringify(newTestRPConfig, jsonFilter, 4);
+		$("#json-config").val(json);
+	}
+
+	function jsonFilter(key, val) {
+		if (key === 'HonestWebfingerResourceId' || key === 'EvilWebfingerResourceId' || key === 'Type') {
+			// remove from json result
+			return undefined;
+		}
+		return val;
 	}
 
 	function updateOPConfig() {
-        testConfig.UrlOPTarget = $("#url-op-target").val();
-        testConfig.OPMetadata = $("#op-metadata-json").val();
-        testConfig.AccessToken1 = $("#registration-access-token-1").val();
-        testConfig.AccessToken2 = $("#registration-access-token-2").val();
-        testConfig.User2Name = $("#user-2-name").val();
-        testConfig.User2Pass = $("#user-2-password").val();
-        testConfig.User1Name = $("#user-1-name").val();
-        testConfig.User1Pass = $("#user-1-password").val();
-        testConfig.LoginScript =   $("#selenium-login-script").val();
-        testConfig.ConsentScript = $("#selenium-consent-script").val();
-        testConfig.Client1Config = $("#client-1-config").val();
-        testConfig.Client2Config = $("#client-2-config").val();
+		testConfig.UrlOPTarget = $("#url-op-target").val();
+		testConfig.OPMetadata = $("#op-metadata-json").val();
+		testConfig.AccessToken1 = $("#registration-access-token-1").val();
+		testConfig.AccessToken2 = $("#registration-access-token-2").val();
+		testConfig.User2Name = $("#user-2-name").val();
+		testConfig.User2Pass = $("#user-2-password").val();
+		testConfig.User1Name = $("#user-1-name").val();
+		testConfig.User1Pass = $("#user-1-password").val();
+		testConfig.LoginScript =   $("#selenium-login-script").val();
+		testConfig.ConsentScript = $("#selenium-consent-script").val();
+		testConfig.Client1Config = $("#client-1-config").val();
+		testConfig.Client2Config = $("#client-2-config").val();
 	}
 
 	function writeOPConfig(newTestOPConfig) {
@@ -584,9 +629,9 @@ var OPIV = (function(module) {
 		testConfig.AccessToken1 = newTestOPConfig.AccessToken1;
 		testConfig.AccessToken2 = newTestOPConfig.AccessToken2;
 		testConfig.User2Name = newTestOPConfig.User2Name;
-        testConfig.User2Pass = newTestOPConfig.User2Pass;
-        testConfig.User1Name = newTestOPConfig.User1Name;
-        testConfig.User1Pass = newTestOPConfig.User1Pass;
+		testConfig.User2Pass = newTestOPConfig.User2Pass;
+		testConfig.User1Name = newTestOPConfig.User1Name;
+		testConfig.User1Pass = newTestOPConfig.User1Pass;
 		testConfig.LoginScript = newTestOPConfig.LoginScript;
 		testConfig.ConsentScript = newTestOPConfig.ConsentScript;
 		testConfig.Client1Config = newTestOPConfig.Client1Config;
@@ -596,34 +641,33 @@ var OPIV = (function(module) {
 	}
 
 	function writeOPConfigGUI(newTestOPConfig) {
-        $("#url-op-target").val(newTestOPConfig.UrlOPTarget);
-        $("#op-metadata-json").val(newTestOPConfig.OPMetadata);
-        $("#registration-access-token-1").val(newTestOPConfig.AccessToken1);
-        $("#registration-access-token-2").val(newTestOPConfig.AccessToken2);
+		$("#url-op-target").val(newTestOPConfig.UrlOPTarget);
+		$("#op-metadata-json").val(newTestOPConfig.OPMetadata);
+		$("#registration-access-token-1").val(newTestOPConfig.AccessToken1);
+		$("#registration-access-token-2").val(newTestOPConfig.AccessToken2);
 
-        $("#user-1-name").val(newTestOPConfig.User1Name);
-        $("#user-1-password").val(newTestOPConfig.User1Pass);
-        $("#user-2-name").val(newTestOPConfig.User2Name);
-        $("#user-2-password").val(newTestOPConfig.User2Pass);
+		$("#user-1-name").val(newTestOPConfig.User1Name);
+		$("#user-1-password").val(newTestOPConfig.User1Pass);
+		$("#user-2-name").val(newTestOPConfig.User2Name);
+		$("#user-2-password").val(newTestOPConfig.User2Pass);
 
-        $("#selenium-login-script").val(newTestOPConfig.LoginScript);
-        $("#selenium-consent-script").val(newTestOPConfig.ConsentScript);
-        $("#client-1-config").val(newTestOPConfig.Client1Config);
-        $("#client-2-config").val(newTestOPConfig.Client2Config);
-    }
+		$("#selenium-login-script").val(newTestOPConfig.LoginScript);
+		$("#selenium-consent-script").val(newTestOPConfig.ConsentScript);
+		$("#client-1-config").val(newTestOPConfig.Client1Config);
+		$("#client-2-config").val(newTestOPConfig.Client2Config);
+	}
 
 	function processLearnResponse(learnResult) {
 		var stepResult = learnResult.TestStepResult;
 		var testPassed = stepResult.Result === "PASS";
 
-		//TODO RP specific
 		// update config
 		if (learnResult.TestConfig) {
 			if (testConfigType === RP_CONFIG_TYPE) {
-                writeRPConfig(learnResult.TestConfig);
-            }
-            if (testConfigType === OP_CONFIG_TYPE) {
-            	writeOPConfig(learnResult.TestConfig);
+				writeRPConfig(learnResult.TestConfig);
+			}
+			if (testConfigType === OP_CONFIG_TYPE) {
+				writeOPConfig(learnResult.TestConfig);
 			}
 		}
 
