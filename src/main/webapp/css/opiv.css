@@ -122,3 +122,10 @@ mark.err {
 .step-description h1 {
 	margin-top: 2px;
 }
+
+code {
+	font-family: monospace, monospace;
+	color: inherit;
+	background: inherit;
+	font-size: inherit;
+}

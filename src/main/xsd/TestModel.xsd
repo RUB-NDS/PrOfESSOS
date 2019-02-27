@@ -67,6 +67,8 @@ limitations under the License.
 		<complexContent>
 			<extension base="tm:TestConfigType">
 				<sequence>
+					<element name="HonestRpResourceId" type="normalizedString" />
+					<element name="EvilRpResourceId" type="normalizedString" />
 					<element name="UrlOPTarget" type="anyURI" minOccurs="0" />
 					<element name="OPMetadata" type="string" minOccurs="0" />
 					<element name="AccessToken1" type="string" minOccurs="0" />
