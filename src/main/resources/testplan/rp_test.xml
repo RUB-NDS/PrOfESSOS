@@ -2434,4 +2434,50 @@ TODO TBD
 		</OPConfig-2>
 	</TestStep>
 
+	<!--TODO: Same as SubClaim Spoofing 7 but encrypt the JWT Payload-->
+	<!--<TestStep Name="Sub Claim Spoofing 8">-->
+		<!--<Description><![CDATA[-->
+			<!--<h1>Sub Claim Spoofing (ID Token Header)</h1>-->
+			<!--PrOfESSOS tests the validation of the "sub" parameter on the client by returning a maliciously crafted -->
+			<!--ID Token.-->
+			<!---->
+			<!--<h2>Prerequisites.</h2>-->
+			<!--The target Client supports the implicit or the code flow.-->
+			<!---->
+			<!--<h2>Execution.</h2>-->
+			<!--PrOfESSOS issues an ID token with an JWT Header that contains claims about the victims subject and/or-->
+			<!--the HonestOP iss claim.-->
+			<!---->
+			<!--<h2>Result Evaluation.</h2>-->
+			<!--The attack is successful if the attacker is logged in the victim's account (registered with Honest OP).-->
+			<!---->
+			<!--<h2>Mitigation</h2>-->
+			<!---->
+		<!--]]>-->
+		<!--</Description>-->
+		<!--<TestParameters>-->
+			<!--<Parameter Key="discovery_support_needed">false</Parameter>-->
+			<!--<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>-->
+		<!--</TestParameters>-->
+		<!--<BrowserSimulator>-->
+			<!--<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>-->
+			<!--<Parameter Key="use_evil_needle">false</Parameter>-->
+			<!--&lt;!&ndash;<Parameter Key="force_success_url_fails">true</Parameter>&ndash;&gt;-->
+		<!--</BrowserSimulator>-->
+		<!--<OPConfig-1>-->
+			<!--<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>-->
+		<!--</OPConfig-1>-->
+		<!--<OPConfig-2>-->
+			<!--<ImplementationClass>de.rub.nds.oidc.server.op.SubClaimSpoofingOP</ImplementationClass>-->
+
+			<!--<Parameter Key="token_header_add_claims">true</Parameter>-->
+			<!--<Parameter Key="token_encrypt_payload">true</Parameter>--> <!-- TODO: not implemented -->
+			<!--<Parameter Key="force_token_header_honest_iss">true</Parameter>-->
+			<!--<Parameter Key="force_token_header_honest_sub">true</Parameter>-->
+			<!--<Parameter Key="force_token_header_honest_email">true</Parameter>-->
+			<!--&lt;!&ndash;<Parameter Key="force_honest_userinfo_iss">true</Parameter>&ndash;&gt;-->
+
+		<!--</OPConfig-2>-->
+	<!--</TestStep>-->
+	
 </TestPlan>
