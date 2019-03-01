@@ -2434,7 +2434,7 @@ TODO TBD
 		</OPConfig-2>
 	</TestStep>
 
-	<!--TODO: Same as SubClaim Spoofing 7 but encrypt the JWT Payload-->
+	<!--TODO: Same as SubClaim Spoofing 7 but actually encrypt the JWT Payload-->
 	<!--<TestStep Name="Sub Claim Spoofing 8">-->
 		<!--<Description><![CDATA[-->
 			<!--<h1>Sub Claim Spoofing (ID Token Header)</h1>-->

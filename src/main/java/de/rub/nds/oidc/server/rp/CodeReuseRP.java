@@ -1,13 +1,16 @@
 package de.rub.nds.oidc.server.rp;
 
+import com.nimbusds.oauth2.sdk.AccessTokenResponse;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.TokenResponse;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
+import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.TestStepResult;
 import org.apache.http.client.utils.URIBuilder;
@@ -20,7 +23,7 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class CodeReuseRP extends AbstractRPImplementation {
+public class CodeReuseRP extends DefaultRP {
 
 //	private boolean isFirstCallback = true;
 
@@ -30,24 +33,25 @@ public class CodeReuseRP extends AbstractRPImplementation {
 		CompletableFuture<TestStepResult> browserBlocker = (CompletableFuture<TestStepResult>) stepCtx.get(RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT);
 		AuthorizationCode oldAuthcode = (AuthorizationCode) stepCtx.get(RPContextConstants.STORED_AUTH_CODE); // TODO beware of typecast exception
 
-		AuthenticationSuccessResponse successResponse = processCallback(path, req, resp);
-		if (successResponse == null) {
+		AuthenticationResponse response = processCallback(req, resp, path);
+		if (!response.indicatesSuccess()) {
 			logger.log("AuthenticationResponse Error");
 			browserBlocker.complete(TestStepResult.UNDETERMINED);
 			return;
 		}
 
 		UserInfo userInfo = null;
-		OIDCTokenResponse tokenResponse;
+		TokenResponse tokenResponse;
 
 		if (oldAuthcode == null) {
 			// store auth code for later retrieval
-			stepCtx.put(RPContextConstants.STORED_AUTH_CODE, successResponse.getAuthorizationCode());
+			AuthorizationCode code = response.toSuccessResponse().getAuthorizationCode();
+			stepCtx.put(RPContextConstants.STORED_AUTH_CODE, code);
 
 			if (!params.getBool(RPParameterConstants.FORCE_NO_REDEEM_AUTH_CODE)) {
 				// redeem token
-				tokenResponse = fetchToken(successResponse);
-				if (tokenResponse == null) {
+				tokenResponse = redeemAuthCode(code);
+				if (!tokenResponse.indicatesSuccess()) {
 					// error messages have been logged already
 					browserBlocker.complete(TestStepResult.UNDETERMINED);
 					return;
@@ -59,14 +63,15 @@ public class CodeReuseRP extends AbstractRPImplementation {
 			return;
 		} else {
 			// replace code with oldAuthCode
-			URIBuilder ub = new URIBuilder(successResponse.toURI().toString());
+			URIBuilder ub = new URIBuilder(response.getRedirectionURI().toString());
 			ub.setParameter("code", oldAuthcode.getValue());
 			AuthenticationResponse authnResp = AuthenticationResponseParser.parse(ub.build()).toSuccessResponse();
 			// attempt to redeem hijacked authorization code
 //			logger.logHttpResponse();
-			tokenResponse = fetchToken(authnResp.toSuccessResponse());
-			if (tokenResponse != null && tokenResponse.indicatesSuccess()) {
-				String found = checkUserInfo(tokenResponse, new String[] {testOPConfig.getUser1Name(), testOPConfig.getUser2Name()});
+			tokenResponse = redeemAuthCode(oldAuthcode);
+			if (tokenResponse.indicatesSuccess()) {
+				AccessToken token = tokenResponse.toSuccessResponse().getTokens().getAccessToken();
+				String found = checkUserInfo(token, new String[] {testOPConfig.getUser1Name(), testOPConfig.getUser2Name()});
 
 				TestStepResult res = found.equals(testOPConfig.getUser1Name()) ? TestStepResult.FAIL : TestStepResult.PASS;
 				browserBlocker.complete(res);
@@ -76,15 +81,14 @@ public class CodeReuseRP extends AbstractRPImplementation {
 				logger.log("Redemption of invalid authorization code was rejected by OP");
 				browserBlocker.complete(TestStepResult.PASS);
 				return;
-
 			}
 		}
     }
 
 
     @Nullable
-    private String checkUserInfo(TokenResponse tokenResponse, String [] users) throws ParseException, IOException {
-		UserInfo userInfo = requestUserInfo(tokenResponse.toSuccessResponse().getTokens().getAccessToken());
+    private String checkUserInfo(AccessToken token, String [] users) throws ParseException, IOException {
+		UserInfo userInfo = requestUserInfo(token).toSuccessResponse().getUserInfo();
 
 		// search all root level objects if their value matches either of the usernames
 		String result = null;
@@ -92,8 +96,8 @@ public class CodeReuseRP extends AbstractRPImplementation {
 			for (String usern : users) {
 				for (Map.Entry e :userInfo.toJSONObject().entrySet() ) {
 					if (e.getValue().equals(usern)) {
-							logger.log(String.format("UserName %s matches %s entry in received UserInfo", usern, e.getKey().toString()));
-							result = usern;
+						logger.log(String.format("UserName %s matches %s entry in received UserInfo", usern, e.getKey().toString()));
+						result = usern;
 					}
 				}
 			}

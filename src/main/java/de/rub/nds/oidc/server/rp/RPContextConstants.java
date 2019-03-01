@@ -6,7 +6,7 @@ public class RPContextConstants {
 
 
 	public static final String STEP_SETUP_FINISHED = PFX + "test-setup-result";
-	public static final String RP_INDICATED_STEP_RESULT = PFX + "rp-indicated-test-result";
+//	public static final String RP_INDICATED_STEP_RESULT = PFX + "rp-indicated-test-result";
 
 	public static final String RP1_PREPARED_AUTHNREQ = PFX + "prepared-rp1-authnreq";
 	public static final String RP2_PREPARED_AUTHNREQ = PFX + "prepared-rp2-authnreq";
@@ -38,6 +38,9 @@ public class RPContextConstants {
 	public static final String LAST_BROWSER_URL = PFX + "last-url-seeen-in-browser";
 
 	public static final String STORED_AUTH_CODE = PFX + "stored-auth-code";
+	
+	public static final String MANIPULATED_REDIRECT_URI = PFX + "stored-manipulated-redirect-uri";
+	public static final String REDIRECT_URI_MANIPULATOR = PFX + "stored-uri-manipulator-string";
 
 
 }

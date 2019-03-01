@@ -224,12 +224,12 @@ public abstract class BrowserSimulator {
 		}
 	}
 
-	protected TestStepResult getCombinedStepResult(TestStepResult result) {
-		TestStepResult rpResult = (TestStepResult) stepCtx.get(RPContextConstants.RP_INDICATED_STEP_RESULT);
-		// return max(rpResult, result), where PASS < NOT_RUN < UNDETERMINED < FAIL
-		result = rpResult.compareTo(result) >= 0 ? rpResult : result;
-		return result;
-	}
+//	protected TestStepResult getCombinedStepResult(TestStepResult result) {
+//		TestStepResult rpResult = (TestStepResult) stepCtx.get(RPContextConstants.RP_INDICATED_STEP_RESULT);
+//		// return max(rpResult, result), where PASS < NOT_RUN < UNDETERMINED < FAIL
+//		result = rpResult.compareTo(result) >= 0 ? rpResult : result;
+//		return result;
+//	}
 
 	private void loadFormSubmissionDelayScript() {
 		try {

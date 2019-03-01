@@ -1,28 +1,21 @@
 package de.rub.nds.oidc.server.rp;
 
 import com.nimbusds.oauth2.sdk.*;
-import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.ServletUtils;
-import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.*;
-import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.TestStepResult;
-import org.apache.http.client.utils.URIBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
-public class RumRP extends AbstractRPImplementation {
+import static de.rub.nds.oidc.server.rp.RPParameterConstants.SUCCESSFUL_CODE_REDEMPTION_FAILS_TEST;
 
+public class RumRP extends DefaultRP {
 
 
 	@Override
@@ -30,64 +23,118 @@ public class RumRP extends AbstractRPImplementation {
 
 		CompletableFuture<TestStepResult> browserBlocker = (CompletableFuture<TestStepResult>) stepCtx.get(RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT);
 
+		AuthenticationResponse response = processCallback(req, resp, path);
 
-		AuthenticationSuccessResponse successResponse = processCallback(path, req, resp);
-		if (successResponse == null) {
-			logger.log("AuthenticationResponse Error");
+		String manipulator = (String) stepCtx.get(RPContextConstants.REDIRECT_URI_MANIPULATOR);
+
+		// callback received with error response
+		if (!response.indicatesSuccess()) {
+			if (type.equals(RPType.EVIL)) {
+				logger.log("Authentication ErrorResponse received in Evil Client");
+				logger.log("This may indicate an open redirector that could be chained to leak AuthCodes - please check manually.");
+				browserBlocker.complete(TestStepResult.UNDETERMINED);
+				return;
+			}
+			if (manipulator != null && req.getRequestURL().toString().contains(manipulator)) {
+				logger.log("Authentication ErrorResponse sent to manipulated redirect_uri.");
+				// TODO: if oidc => fail, if oauth => undetermined
+				browserBlocker.complete(TestStepResult.FAIL);
+				return;
+			}
+			
+			logger.log("AuthenticationResponse Error received in Honest Client");
+			logger.logHttpRequest(req, response.toString());
 			browserBlocker.complete(TestStepResult.PASS);
+			return;
 		}
 
-		if (type.equals(RPType.EVIL) && params.getBool(RPParameterConstants.FORCE_AUTHNREQ_EVIL_REDIRURI)) {
+		// callback received with successful authentication response incl. code/token
+		if (type.equals(RPType.EVIL)) {
 			// received auth code in evil client
 			logger.log("Authentication SuccessResponse received in Evil Client");
 			logger.logHttpRequest(req, null);
 			browserBlocker.complete(TestStepResult.FAIL);
 			return;
+		} 
+	
+		logger.log("Authentication SuccessResponse received in Honest Client");
+		logger.logHttpRequest(req, null);
 
-		} else {
-			logger.log("Authentication SuccessResponse received in Honest Client");
-			logger.logHttpRequest(req, null);
-//				browserBlocker.complete(TestStepResult.PASS);
-//				return;
-		}
 
-		OIDCTokenResponse tokenResponse = fetchToken(successResponse);
-		if (tokenResponse == null) {
-			// error messages have been logged already
-			browserBlocker.complete(TestStepResult.PASS);
-			return;
-		} else {
-			logger.log("Code sucessfully redeemed");
-			logger.logHttpResponse(tokenResponse.toHTTPResponse(), tokenResponse.toHTTPResponse().getContent());
-
-			// for logging
-			requestUserInfo(tokenResponse.getTokens().getAccessToken());
-
+		if (manipulator != null && req.getRequestURL().toString().contains(manipulator)) {
+			logger.log("Authentication Response sent to manipulated redirect_uri.");
+			logger.log("Authorization Server does not perform exact string matching on redirect_uri.");
+			// TODO: only fail for OIDC as OAUTH does not require exact matching afaik
 			browserBlocker.complete(TestStepResult.FAIL);
 			return;
 		}
-	}
 
 
-	@Override
-	public void prepareAuthnReq() {
+		// in codeHijacking tests, try to redeem the code
+		AuthenticationSuccessResponse successResponse = response.toSuccessResponse();
+		if (successResponse.impliedResponseType().impliesCodeFlow()) {
+			// attempt code redemption
+			TokenResponse tokenResponse = redeemAuthCode(successResponse.getAuthorizationCode());
+			if (!tokenResponse.indicatesSuccess()) {
+				// code redemption failed, error messages have been logged already
+				browserBlocker.complete(TestStepResult.PASS);
+				return;
+			}
 
-		URI redirURI = params.getBool(RPParameterConstants.FORCE_AUTHNREQ_EVIL_REDIRURI) ? getEvilRedirectUri() : getRedirectUri();
+			OIDCTokens tokens = ((OIDCTokenResponse) tokenResponse).getOIDCTokens();
+			logger.log("TokenRequest successful: " + tokens.toJSONObject().toJSONString());
 
-		AuthorizationRequest authnReq = new AuthorizationRequest(
-				opMetaData.getAuthorizationEndpointURI(),
-				new ResponseType("code"),
-				null,
-				clientInfo.getID(),
-				redirURI,
-				new Scope(OIDCScopeValue.OPENID, OIDCScopeValue.PROFILE, OIDCScopeValue.EMAIL),
-				new State(32)
-		);
+			if (params.getBool(SUCCESSFUL_CODE_REDEMPTION_FAILS_TEST)) {
+				logger.log("AuthorizationCode successfully redeemed, assuming test failed.");
+				browserBlocker.complete(TestStepResult.FAIL);
+				return;
+			}
+			
+			browserBlocker.complete(TestStepResult.PASS);
+		}
+		
+		
+//		else if (successResponse.impliedResponseType().impliesImplicitFlow()) {
+//			at = successResponse.getAccessToken();
+//			idToken = successResponse.getIDToken();
+//		}
 
-		// store in stepCtx, so BrowserSimulator can fetch it
-		String currentRP = type == RPType.HONEST ? RPContextConstants.RP1_PREPARED_AUTHNREQ
-				: RPContextConstants.RP2_PREPARED_AUTHNREQ;
-		stepCtx.put(currentRP, authnReq.toURI());
-	}
+
+
+			// do we need to issue a token request?
+//		OIDCTokenResponse tokenResponse = redeemAuthCode(successResponse);
+//		if (tokenResponse == null) {
+//			// error messages have been logged already
+//			browserBlocker.complete(TestStepResult.PASS);
+//			return;
+//		} else {
+//			logger.log("Code sucessfully redeemed");
+//			logger.logHttpResponse(tokenResponse.toHTTPResponse(), tokenResponse.toHTTPResponse().getContent());
+//
+//			// for logging
+//			requestUserInfo(tokenResponse.getTokens().getAccessToken());
+//
+//			browserBlocker.complete(TestStepResult.FAIL);
+//			return;
+//		}
+		}
+
+
+
+	
+//	@Override
+//	@Nullable
+//	protected URI getAuthReqRedirectUri() {
+//		URI redirURI = params.getBool(AUTHNREQ_FORCE_EVIL_REDIRURI) ? getEvilRedirectUri() : getRedirectUri();
+//		
+//		boolean subdom = params.getBool(RPParameterConstants.AUTHNREQ_ADD_SUBDOMAIN_REDIRURI);
+//		boolean path = params.getBool(RPParameterConstants.AUTHNREQ_ADD_PATHSUFFIX_REDIRURI);
+//		if (subdom || path) {
+//			return manipulateURI(redirURI, subdom, path);
+//		}
+//	
+//		return redirURI;
+//	}
+	
 
 }
