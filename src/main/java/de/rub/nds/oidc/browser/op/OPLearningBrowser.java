@@ -74,7 +74,6 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 		// prepare scripts for login and consent page
 		evalScriptTemplates();
 		logger.log(String.format("Using Login script:%n %s", submitScript));
-
 		// wait until a new html element appears, indicating a page load
 		waitForPageLoad(() -> {
 			driver.executeScript(submitScript);

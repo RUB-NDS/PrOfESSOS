@@ -1,42 +1,22 @@
-version: '3'
+version: '3.5'
 
 services:
   professos:
     build: .
     ports:
       - "8080:8080"
-#    networks:
-#      default:
-#        aliases:
-#          - openid.sso-security.de
-#          # below FQDN's should match what is in
-#          # src/main/resources/servernames.properties
-#          - idp.oidc.honest-sso.de
-#          - idp.oidc.attack-sso.de
-#          - rp.oidc.honest-sso.de
-#          - rp.oidc.attack-sso.de
-#  relying_party:
-#    build:
-#      context: ./docker/
-#      dockerfile: simple-web-app/Dockerfile
-#    ports:
-#      - "8180:8080"
-#    networks:
-#      default:
-#        aliases:
-#          - honestsp.de
-#          - www.honestsp.de
-#  identity_provider:
-#    build:
-#      context: ./docker/
-#      dockerfile: mitreid-connect-server-webapp/Dockerfile
-#      args:
-#        ISSUER: "honestidp.de:8080"
-#    ports:
-#      - "8280:8080"
-#    networks:
-#      default:
-#        aliases:
-#          - honestidp.de
-#          - www.honestidp.de
+    networks:
+      professos_default:
+        aliases:
+          - openid.sso-security.de
+          # below FQDN's should match what is in
+          # src/main/resources/servernames.properties
+          - idp.oidc.honest-sso.de
+          - idp.oidc.attack-sso.de
+          - rp.oidc.honest-sso.de
+          - rp.oidc.attack-sso.de
+
+networks:
+  professos_default:
+    name: professos-default-net
 

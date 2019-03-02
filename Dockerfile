@@ -1,6 +1,5 @@
 FROM ubuntu:xenial
 
-
 # install chromedriver, chromium
 USER root
 RUN apt-get update && apt-get install -y curl vim openjdk-8-jdk unzip chromium-browser \ 
@@ -12,7 +11,6 @@ RUN apt-get update && apt-get install -y curl vim openjdk-8-jdk unzip chromium-b
 
 ###
 # setup wildfly as per https://github.com/jboss-dockerfiles/wildfly/blob/master/Dockerfile
-
 #
 # Create a user and group used to launch processes
 # The user ID 1000 is the default for the first "regular" user on Fedora/RHEL,
@@ -27,8 +25,7 @@ WORKDIR /opt/jboss
 # Set the WILDFLY_VERSION env variable
 ENV WILDFLY_VERSION 14.0.1.Final
 ENV JBOSS_HOME /opt/jboss/wildfly
-
-#COPY docker/wildfly-$WILDFLY_VERSION.tar.gz /root/wildfly-$WILDFLY_VERSION.tar.gz
+ARG PROFESSOS_WAR="./target/professos-1.0.0-SNAPSHOT.war"
 
 RUN cd $HOME \
     && curl -O https://download.jboss.org/wildfly/$WILDFLY_VERSION/wildfly-$WILDFLY_VERSION.tar.gz \
@@ -42,24 +39,18 @@ RUN cd $HOME \
 ENV LAUNCH_JBOSS_IN_BACKGROUND true
 
 ###
-
-#ENV JAVA_OPTS='-Xms64m -Xmx512m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=org.jboss.byteman -Djava.awt.headless=true -agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8787,server=y,suspend=n'
-# ^ simply add --debug as option to standalone.sh
+# enable debugging
+# ENV JAVA_OPTS='-Xms64m -Xmx512m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=org.jboss.byteman -Djava.awt.headless=true -agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8787,server=y,suspend=n'
+# NOTE: simply add --debug as option to standalone.sh
 
 # copy the .war file into wildfly's deployment folder
-#COPY ./target/professos-1.0.0-SNAPSHOT.war /opt/jboss/wildfly/standalone/deployments/professos.war
+COPY $PROFESSOS_WAR /opt/jboss/wildfly/standalone/deployments/professos.war
 
-# add redirect page to run tests against the vulnerable test-services
-ARG wildflyconfigname
-COPY ./docker/wildfly/professos/testportal.html /opt/jboss/wildfly/static/testportal.html
-COPY ./docker/wildfly/static-professos.txt /opt/jboss/wildfly/static/static-professos.txt
-RUN chown jboss:jboss -R /opt/jboss/wildfly/static/
-# add wildfly config conditional (to serve or not to serve the redirect page) 
-COPY ./docker/wildfly/professos/"${wildflyconfigname:-standalone.xml}" /opt/jboss/wildfly/standalone/configuration/standalone.xml
-
+# add wildfly config  (to serve or not to serve the redirect page) 
+#COPY ./docker/wildfly/professos/standalone.xml /opt/jboss/wildfly/standalone/configuration/standalone.xml
 
 # disable for debugging as root
-#USER jboss
+USER jboss
 
 # Expose the ports we're interested in
 EXPOSE 8080
