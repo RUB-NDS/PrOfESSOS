@@ -29,7 +29,7 @@
 
         <RPConfig-1>
             <ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
-            <Parameter Key="register_grant_types">authorization_code</Parameter>
+            
             <Parameter Key="force_auth-code_reuse_user">true</Parameter>
         </RPConfig-1>
 		<RPConfig-2>
@@ -49,39 +49,106 @@
 
         <RPConfig-1>
             <ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
-            <Parameter Key="register_grant_types">authorization_code</Parameter>
+            
             <Parameter Key="force-no-redeem-auth-code">false</Parameter>
         </RPConfig-1>
         <RPConfig-2>
             <ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
-            <Parameter Key="register_grant_types">authorization_code</Parameter>
+            
             <!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
 		</RPConfig-2>
 	</TestStep>
 
-    <TestStep Name="Authorization Code Reuse 3">
-		<Description>PrOfESSOS attempts to redeem an authorization code that was issued to a different client but has not yet been used in a TokenRequest</Description>
-		<TestParameters>
-			<Parameter Key="is_single_rp_test">false</Parameter>
-		</TestParameters>
-		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPCodeReuseBrowser</ImplementationClass>
-		</BrowserSimulator>
 
-        <RPConfig-1>
-            <ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
-            <Parameter Key="register_grant_types">authorization_code</Parameter>
-            <Parameter Key="force-no-redeem-auth-code">true</Parameter>
-        </RPConfig-1>
-        <RPConfig-2>
-            <ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
-            <Parameter Key="register_grant_types">authorization_code</Parameter>
-            <!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
-		</RPConfig-2>
-	</TestStep>
 
     <TestStep Name="Redirect URI Manipulation 1">
-        <Description>PrOfESSOS issues an authentication request containing the <tt>redirect_uri</tt> value of another client - Evil Client</Description>
+        <Description>PrOfESSOS tests the validation of the redirect_uri parameter. To this end, an authentication request 
+            containing the redirect_uri value of another client is send to the OP</Description>
+        <TestParameters>
+            <Parameter Key="is_single_rp_test">true</Parameter>
+        </TestParameters>
+        <BrowserSimulator>
+            <ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+        </BrowserSimulator>
+
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+            
+            <Parameter Key="authnreq-force-evil-redirect-uri">true</Parameter>
+        </RPConfig-1>
+        <RPConfig-2>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+        </RPConfig-2>
+    </TestStep>
+
+    <TestStep Name="Redirect URI Manipulation 2">
+        <Description>PrOfESSOS tests the validation of the redirect_uri parameter at the OP. To this end, a random subdomain
+         is prepended to the redirect_uri contained in the authentication request.</Description>
+        <TestParameters>
+            <Parameter Key="is_single_rp_test">true</Parameter>
+        </TestParameters>
+        <BrowserSimulator>
+            <ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+        </BrowserSimulator>
+
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+            
+            <Parameter Key="authnreq-random-subdomain-in-redirect-uri">true</Parameter>
+        </RPConfig-1>
+        <RPConfig-2>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+        </RPConfig-2>
+    </TestStep>
+
+    <TestStep Name="Redirect URI Manipulation 3">
+        <Description>PrOfESSOS tests the validation of the redirect_uri parameter at the OP. To this end, a random path 
+            fragment is appended to the redirect_uri contained in the authentication request.</Description>
+        <TestParameters>
+            <Parameter Key="is_single_rp_test">true</Parameter>
+        </TestParameters>
+        <BrowserSimulator>
+            <ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+        </BrowserSimulator>
+
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+            
+            <Parameter Key="authnreq-random-path-suffix-in-redirect-uri">true</Parameter>
+        </RPConfig-1>
+        <RPConfig-2>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+        </RPConfig-2>
+    </TestStep>
+
+    <TestStep Name="Code Hijack 1">
+        <Description>PrOfESSOS issues a token request containing no redirect_uri parameter, even though one was present 
+            in the authentication request.
+        </Description>
+        <TestParameters>
+            <Parameter Key="is_single_rp_test">true</Parameter>
+        </TestParameters>
+        <BrowserSimulator>
+            <ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+        </BrowserSimulator>
+
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+            <!---->
+            <Parameter Key="tokenreq-exclude-redirect-uri">true</Parameter>
+            <Parameter Key="code-redemption-fails-test">true</Parameter>
+        </RPConfig-1>
+        <RPConfig-2>
+            <!--not used in this test-->
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+            
+        </RPConfig-2>
+    </TestStep>
+
+    <TestStep Name="Code Hijack 2">
+        <Description>PrOfESSOS issues a token request containing a redirect_uri value that is registered with another 
+            client.
+        </Description>
         <TestParameters>
             <Parameter Key="is_single_rp_test">false</Parameter>
         </TestParameters>
@@ -91,57 +158,215 @@
 
         <RPConfig-1>
             <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-            <Parameter Key="register_grant_types">authorization_code</Parameter>
-            <Parameter Key="authnreq-force-evil-redirect-uri">true</Parameter>
-        </RPConfig-1>
-        <RPConfig-2>
-            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-            <Parameter Key="register_grant_types">authorization_code</Parameter>
-        </RPConfig-2>
-    </TestStep>
-
-    <TestStep Name="Code Hijack 1">
-        <Description>PrOfESSOS issues a token request containing no redirect_uri parameter, even though one was present in the authentication request </Description>
-        <TestParameters>
-            <Parameter Key="is_single_rp_test">true</Parameter>
-        </TestParameters>
-        <BrowserSimulator>
-            <ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
-        </BrowserSimulator>
-
-        <RPConfig-1>
-            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-            <Parameter Key="register_grant_types">authorization_code</Parameter>
-            <Parameter Key="tokenreq-force-empty-redirect-uri">true</Parameter>
-        </RPConfig-1>
-        <RPConfig-2>
-            <!--not used in this test-->
-            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-            <Parameter Key="register_grant_types">authorization_code</Parameter>
-        </RPConfig-2>
-    </TestStep>
-
-    <TestStep Name="Code Hijack 2">
-        <Description>PrOfESSOS issues a token request containing the <tt>redirect_uri</tt> value that does not match the one present in the authentication request </Description>
-        <TestParameters>
-            <Parameter Key="is_single_rp_test">true</Parameter>
-        </TestParameters>
-        <BrowserSimulator>
-            <ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
-        </BrowserSimulator>
-
-        <RPConfig-1>
-            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-            <Parameter Key="register_grant_types">authorization_code</Parameter>
+            
             <Parameter Key="tokenreq-force-evil-redirect-uri">true</Parameter>
+            <Parameter Key="code-redemption-fails-test">true</Parameter>
         </RPConfig-1>
         <RPConfig-2>
             <!--not used in this test-->
             <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-            <Parameter Key="register_grant_types">authorization_code</Parameter>
+            
         </RPConfig-2>
     </TestStep>
 
+
+    <TestStep Name="Code Hijack 3">
+        <Description>PrOfESSOS issues a token request containing a redirect_uri value that does not match the
+            one presented in the authentication request and is not registered for the client to which the code
+            has been issued. A random path element is appended to the redirect_uri.
+        </Description>
+        <TestParameters>
+            <Parameter Key="is_single_rp_test">false</Parameter>
+        </TestParameters>
+        <BrowserSimulator>
+            <ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+        </BrowserSimulator>
+
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+            
+            <Parameter Key="tokenreq-random-path-suffix-in-redirect-uri">true</Parameter>
+            <Parameter Key="code-redemption-fails-test">true</Parameter>
+        </RPConfig-1>
+        <RPConfig-2>
+            <!--not used in this test-->
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+            
+        </RPConfig-2>
+    </TestStep>
+
+    <TestStep Name="Code Hijack 4">
+        <Description>PrOfESSOS issues a token request containing a redirect_uri value that does not match the
+            one presented in the authentication request and is not registered for the client to which the code
+            has been issued. A random subdomain is prepended to the redirect_uri;
+        </Description>
+        <TestParameters>
+            <Parameter Key="is_single_rp_test">false</Parameter>
+        </TestParameters>
+        <BrowserSimulator>
+            <ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+        </BrowserSimulator>
+
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+            
+            <Parameter Key="tokenreq-random-subdomain-in-redirect-uri">true</Parameter>
+            <Parameter Key="code-redemption-fails-test">true</Parameter>
+        </RPConfig-1>
+        <RPConfig-2>
+            <!--not used in this test-->
+            <ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+            
+        </RPConfig-2>
+    </TestStep>
+
+    <TestStep Name="Code Hijack 5">
+        <Description>PrOfESSOS attempts to redeem an authorization code that was issued to a different client and has 
+            not yet been used in a TokenRequest
+        </Description>
+        <TestParameters>
+            <Parameter Key="is_single_rp_test">false</Parameter>
+        </TestParameters>
+        <BrowserSimulator>
+            <ImplementationClass>de.rub.nds.oidc.browser.op.OPCodeReuseBrowser</ImplementationClass>
+        </BrowserSimulator>
+
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>            
+            <Parameter Key="force-no-redeem-auth-code">true</Parameter>
+        </RPConfig-1>
+        <RPConfig-2>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+            
+            <!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+        </RPConfig-2>
+    </TestStep>
+
+
+    <TestStep Name="Code Hijack 6">
+        <Description>PrOfESSOS attempts to redeem an authorization code using Basic Authentication with a randomly
+            generate value as ClientSecret.
+        </Description>
+        <TestParameters>
+            <Parameter Key="is_single_rp_test">true</Parameter>
+        </TestParameters>
+        <BrowserSimulator>
+            <ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+        </BrowserSimulator>
+
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
+            <Parameter Key="force_random_client_secret">true</Parameter>
+            <Parameter Key="code-redemption-fails-test">true</Parameter>
+        </RPConfig-1>
+        <RPConfig-2>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+
+            <!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+        </RPConfig-2>
+    </TestStep>
+    
+    <TestStep Name="Code Hijack 7">
+        <Description>PrOfESSOS attempts to redeem an authorization code including its client credentials as body 
+            parameters in the POST request even though only the (default) authentication method
+            "token_endpoint_auth_method": "client_secret_basic" has been registered.
+        </Description>
+        <TestParameters>
+            <Parameter Key="is_single_rp_test">true</Parameter>
+        </TestParameters>
+        <BrowserSimulator>
+            <ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+        </BrowserSimulator>
+
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
+            <Parameter Key="tokenreq-force-client-auth-post">true</Parameter>
+            <Parameter Key="code-redemption-fails-test">true</Parameter>
+        </RPConfig-1>
+        <RPConfig-2>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+
+            <!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+        </RPConfig-2>
+    </TestStep>
+
+    <TestStep Name="Code Hijack 8">
+        <Description>PrOfESSOS attempts to redeem an authorization code using "token_endpoint_auth_method": "client_secret_post"
+            as authentication method but using a random valur for the "client_secret" parameter.
+        </Description>
+        <TestParameters>
+            <Parameter Key="is_single_rp_test">true</Parameter>
+            <Parameter Key="enforce-client-registration">true</Parameter>
+        </TestParameters>
+        <BrowserSimulator>
+            <ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+        </BrowserSimulator>
+
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
+            <Parameter Key="register-clientauth-method-client_secret_post">true</Parameter>
+            <Parameter Key="tokenreq-force-client-auth-post">true</Parameter>
+            <Parameter Key="force_random_client_secret">true</Parameter>
+            <Parameter Key="code-redemption-fails-test">true</Parameter>
+        </RPConfig-1>
+        <RPConfig-2>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+
+            <!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+        </RPConfig-2>
+    </TestStep>
+    
+    <TestStep Name="Code Hijack 9">
+        <Description>PrOfESSOS attempts to redeem an authorization code using "token_endpoint_auth_method": "client_secret_post" 
+            as authentication method but omitting the client_secret parameter.
+        </Description>
+        <TestParameters>
+            <Parameter Key="is_single_rp_test">true</Parameter>
+            <Parameter Key="enforce-client-registration">true</Parameter>
+        </TestParameters>
+        <BrowserSimulator>
+            <ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+        </BrowserSimulator>
+
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
+            <Parameter Key="register-clientauth-method-client_secret_post">true</Parameter>
+            <Parameter Key="tokenreq-clientauth-empty-client-secret">true</Parameter>
+            <Parameter Key="code-redemption-fails-test">true</Parameter>
+        </RPConfig-1>
+        <RPConfig-2>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+
+            <!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+        </RPConfig-2>
+    </TestStep>
+    
+    
+    <TestStep Name="Downgrade to Implicit">
+        <Description>PrOfESSOS registers a Client with 'grant_type=authorization_code' but requests an implicit response 
+            in the authentication request by using the parameter 'response_type=token id_token'.
+        </Description>
+        <TestParameters>
+            <Parameter Key="is_single_rp_test">true</Parameter>
+            <!-- only needed if the default registration should be change -->
+            <!--<Parameter Key="enforce-client-registration">true</Parameter>-->
+        </TestParameters>
+        <BrowserSimulator>
+            <ImplementationClass>de.rub.nds.oidc.browser.op.DefaultOPBrowser</ImplementationClass>
+        </BrowserSimulator>
+
+        <RPConfig-1>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
+            <Parameter Key="register-grant-type-authorization_code">true</Parameter>
+            <Parameter Key="register-grant-type-authorization_code">true</Parameter>
+        </RPConfig-1>
+        <RPConfig-2>
+            <ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+
+            <!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+        </RPConfig-2>
+    </TestStep>
+    
 	<!--<TestStep Name="ID Spoofing 1">-->
 		<!--<Description><![CDATA[-->
 			<!--<h1>ID Spoofing Attack</h1>-->

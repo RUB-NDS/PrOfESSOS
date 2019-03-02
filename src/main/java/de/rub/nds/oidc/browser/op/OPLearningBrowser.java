@@ -46,8 +46,8 @@ public class OPLearningBrowser extends AbstractOPBrowser {
     	return TestStepResult.PASS;
     }
 
-
-    private TestStepResult runUserAuth(RPType rpType) throws InterruptedException {
+	@Override
+    protected TestStepResult runUserAuth(RPType rpType) throws InterruptedException {
 //		TestStepResult result = TestStepResult.NOT_RUN;
 		logger.log("run userAuth");
 
@@ -85,7 +85,7 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 		});
 		logger.log("HTML element found in Browser.");
 		// wait a bit more in case we have an angular app or some other JS heavy application
-		waitMillis(2000);
+		waitMillis(1000);
 
 		// don't run consentScript if we have already been redirected back to RP
 		if (driver.getCurrentUrl().startsWith(authnReq.getRedirectionURI().toString())) {
