@@ -1,4 +1,4 @@
-version: '3'
+version: '3.5'
 
 services:
   professos:
@@ -6,4 +6,4 @@ services:
   relying_party:
     image: relying_party:latest
   identity_provider:
-    image: identity_provider
+    image: identity_provider:latest
