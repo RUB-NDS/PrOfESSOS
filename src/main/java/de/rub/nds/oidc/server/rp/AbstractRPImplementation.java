@@ -1,6 +1,5 @@
 package de.rub.nds.oidc.server.rp;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.*;
@@ -154,9 +153,9 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 		// dont run setup steps for RP2 unless neccessary
 		if (
-			RPType.HONEST.equals(type)
-			|| !Boolean.valueOf((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST))
-			|| Boolean.valueOf((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))
+				RPType.HONEST.equals(type)
+						|| !Boolean.valueOf((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST))
+						|| Boolean.valueOf((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))
 		) {
 			success &= discoverOpIfNeeded();
 			success &= evalConfig();
@@ -176,13 +175,13 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		Scope scope = getAuthReqScope();
 		ClientID clientID = getAuthReqClientID();
 		URI redirectURI = getAuthReqRedirectUri();
-		
+
 		AuthenticationRequest.Builder ab = new AuthenticationRequest.Builder(
 				rt,
 				scope,
 				clientID,
 				redirectURI
-		);		
+		);
 		ab.state(getAuthReqState());
 		ab.nonce(getAuthReqNonce());
 		ab.responseMode(getAuthReqResponseMode());
@@ -200,22 +199,41 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	}
 
 	protected abstract URI getAuthReqRedirectUri();
+
 	protected abstract URI getTokenReqRedirectUri();
+
 	protected abstract ResponseType getAuthReqResponseType();
+
 	protected abstract Scope getAuthReqScope();
+
 	protected abstract ClientID getAuthReqClientID();
-	
-	@Nullable protected abstract State getAuthReqState();
-	@Nullable protected abstract Nonce getAuthReqNonce();
-	@Nullable protected abstract ResponseMode getAuthReqResponseMode();
-	@Nullable protected abstract Prompt getAuthReqPrompt();
-	@Nullable protected abstract ClaimsRequest getAuthReqClaims();
 
-	@Nullable protected abstract CodeChallenge getCodeChallenge();
-	@Nullable protected abstract JWT getIdTokenHint();
+	@Nullable
+	protected abstract State getAuthReqState();
 
-	@Nullable protected abstract ClientAuthenticationMethod getRegistrationClientAuthMethod();
+	@Nullable
+	protected abstract Nonce getAuthReqNonce();
+
+	@Nullable
+	protected abstract ResponseMode getAuthReqResponseMode();
+
+	@Nullable
+	protected abstract Prompt getAuthReqPrompt();
+
+	@Nullable
+	protected abstract ClaimsRequest getAuthReqClaims();
+
+	@Nullable
+	protected abstract CodeChallenge getCodeChallenge();
+
+	@Nullable
+	protected abstract JWT getIdTokenHint();
+
+	@Nullable
+	protected abstract ClientAuthenticationMethod getRegistrationClientAuthMethod();
+
 	protected abstract HashSet<ResponseType> getRegistrationResponseTypes();
+
 	protected abstract HashSet<GrantType> getRegistrationGrantTypes();
 
 
@@ -255,7 +273,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 		ClientAuthenticationMethod tokenEndpointAuthMethod = getRegistrationClientAuthMethod();
 		clientMetadata.setTokenEndpointAuthMethod(tokenEndpointAuthMethod);
-		
+
 		BearerAccessToken bearerAccessToken = null;
 		String at = getRegistrationAccessToken();
 		if (!Strings.isNullOrEmpty(at)) {
@@ -316,12 +334,12 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		}
 	}
 
-	protected void setClientInfo(OIDCClientInformation info) {
-		this.clientInfo = info;
-	}
-
 	protected OIDCClientInformation getClientInfo() {
 		return clientInfo;
+	}
+
+	protected void setClientInfo(OIDCClientInformation info) {
+		this.clientInfo = info;
 	}
 
 	private void storeClientInfo() {
@@ -368,7 +386,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		if (params.getBool(RPParameterConstants.FORCE_RANDOM_CLIENT_ID)) {
 			return new ClientID();
 		}
-		if(params.getBool(RPParameterConstants.FORCE_EVIL_CLIENT_ID)) {
+		if (params.getBool(RPParameterConstants.FORCE_EVIL_CLIENT_ID)) {
 			return getEvilClientID();
 		}
 		if (Boolean.valueOf((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))) {
@@ -377,23 +395,23 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		}
 		return supplyHonestOrEvil(this::getHonestClientID, this::getEvilClientID);
 	}
-	
+
 	protected ClientID getHonestClientID() {
 		return getStoredClientInfo(true).getID();
 	}
-	
+
 	protected ClientID getEvilClientID() {
 		return getStoredClientInfo(false).getID();
 	}
-	
+
 	protected Secret getHonesClientSecret() {
 		return getStoredClientInfo(true).getSecret();
 	}
-	
+
 	protected Secret getEvilClientSecret() {
 		return getStoredClientInfo(false).getSecret();
 	}
-	
+
 	protected Secret getClientSecret() {
 		if (params.getBool(RPParameterConstants.FORCE_EVIL_CLIENT_SECRET)) {
 			return getEvilClientSecret();
@@ -404,10 +422,10 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		if (Boolean.valueOf((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))) {
 			// TODO: conflict, if two RPs are registered?
 			return clientInfo.getSecret();
-		}		
+		}
 		return supplyHonestOrEvil(this::getHonesClientSecret, this::getEvilClientSecret);
 	}
-	
+
 	private String getRegistrationAccessToken() {
 		String registrationToken = supplyHonestOrEvil(
 				() -> testOPConfig.getAccessToken1(),
@@ -418,7 +436,6 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	}
 
 
-	
 	public boolean discoverOpIfNeeded() throws IOException, ParseException {
 
 		if (!Strings.isNullOrEmpty(testOPConfig.getOPMetadata()) && opMetaData == null) {
@@ -472,7 +489,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 			}
 		}
 		// TODO: add additional requirement checks as needed
-		
+
 		return true;
 	}
 
@@ -501,8 +518,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		callbackUri = new URI(lastUrl);
 		logger.log("Redirect URL as seen in Browser: " + lastUrl);
 
-		
-		
+
 		// parse received authentication response
 		AuthenticationResponse authnResp;
 		try {
@@ -514,25 +530,25 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		}
 		try {
 			authnResp = AuthenticationErrorResponse.parse(httpRequest);
-			
+
 			String user = (String) stepCtx.get(RPContextConstants.CURRENT_USER_USERNAME);
 			String pass = (String) stepCtx.get(RPContextConstants.CURRENT_USER_USERNAME);
 			String opAuthEndp = opMetaData.getAuthorizationEndpointURI().toString();
 
 			logger.log(String.format("Authentication at %s as %s with password %s failed:", opAuthEndp, user, pass));
 			logger.logHttpRequest(httpRequest, httpRequest.getQuery());
-			
+
 			ErrorObject error = authnResp.toErrorResponse().getErrorObject();
 			logger.log("Error received: " + error.getDescription());
 			logger.log(error.toJSONObject().toString());
-			
+
 			return authnResp;
 		} catch (ParseException e) {
 			logger.log("Invalid authentication response received");
 			logger.logHttpRequest(httpRequest, httpRequest.getQuery());
 
-			return new AuthenticationErrorResponse(callbackUri, 
-					new ErrorObject("ParseException","Failed to parse authentication response"),
+			return new AuthenticationErrorResponse(callbackUri,
+					new ErrorObject("ParseException", "Failed to parse authentication response"),
 					null, null
 			);
 		}
@@ -541,7 +557,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 	@Nonnull
 	protected TokenResponse redeemAuthCode(AuthorizationCode code) throws IOException, ParseException {
-		
+
 		URI redirectURI = getTokenReqRedirectUri();
 		AuthorizationCodeGrant codeGrant = new AuthorizationCodeGrant(code, redirectURI);
 
@@ -550,7 +566,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 				// temporarily set basic auth to construct the request 
 				new ClientSecretBasic(clientInfo.getID(), clientInfo.getSecret()),
 				codeGrant);
-		
+
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		// preform request customization as per testplan
 		tokenRequestApplyClientAuth(httpRequest);
@@ -581,13 +597,13 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	protected void tokenRequestApplyClientAuth(HTTPRequest req) {
 		// remove temporary Authorization header
 		req.setHeader("Authorization", null);
-		
+
 		try {
 			String encodedID = URLEncoder.encode(getClientID().getValue(), "UTF-8");
 			String encodedSecret = URLEncoder.encode(getClientSecret().getValue(), "UTF-8");
-			
+
 			StringBuilder sb = new StringBuilder();
-			
+
 			// client_secret_post
 			if (params.getBool(RPParameterConstants.TOKENREQ_FORCE_CLIENTAUTH_POST)) {
 				String encodedQuery = req.getQuery();
@@ -603,7 +619,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 				req.setQuery(sb.toString());
 				return;
 			}
-	
+
 			// client_secret_basic
 			sb.append("Basic ");
 			StringBuilder credentials = new StringBuilder();
@@ -614,10 +630,10 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 			if (!params.getBool(RPParameterConstants.TOKENREQ_CLIENTAUTH_EMPTY_SECRET)) {
 				credentials.append(getClientSecret().getValue());
 			}
-	
+
 			String b64Creds = Base64.getEncoder().encodeToString(credentials.toString().getBytes(Charset.forName("UTF-8")));
 			sb.append(b64Creds);
-			
+
 			req.setHeader("Authorization", sb.toString());
 		} catch (UnsupportedEncodingException e) {
 			// utf-8 should be supported ?
@@ -643,7 +659,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 //		UserInfo userInfo = userInfoResponse.toSuccessResponse().getUserInfo();
 		return userInfoResponse;
 	}
-	
+
 	// send a response to dangling browser
 	protected void sendCallbackResponse(HttpServletResponse resp, HttpServletRequest req) throws IOException, ParseException {
 
@@ -654,7 +670,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 				.replaceQuery(null)
 				.fragment(null)
 				.build().toString();
-		
+
 		HTTPResponse httpRes = null;
 		StringBuilder sb = new StringBuilder();
 		sb.append("<!DOCTYPE html>");

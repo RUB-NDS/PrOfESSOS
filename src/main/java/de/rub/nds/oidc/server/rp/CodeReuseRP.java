@@ -1,16 +1,12 @@
 package de.rub.nds.oidc.server.rp;
 
-import com.nimbusds.oauth2.sdk.AccessTokenResponse;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
-import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
-import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
-import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.TestStepResult;
 import org.apache.http.client.utils.URIBuilder;
@@ -27,8 +23,8 @@ public class CodeReuseRP extends DefaultRP {
 
 //	private boolean isFirstCallback = true;
 
-    @Override
-    public void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException {
+	@Override
+	public void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException {
 
 		CompletableFuture<TestStepResult> browserBlocker = (CompletableFuture<TestStepResult>) stepCtx.get(RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT);
 		AuthorizationCode oldAuthcode = (AuthorizationCode) stepCtx.get(RPContextConstants.STORED_AUTH_CODE); // TODO beware of typecast exception
@@ -71,7 +67,7 @@ public class CodeReuseRP extends DefaultRP {
 			tokenResponse = redeemAuthCode(oldAuthcode);
 			if (tokenResponse.indicatesSuccess()) {
 				AccessToken token = tokenResponse.toSuccessResponse().getTokens().getAccessToken();
-				String found = checkUserInfo(token, new String[] {testOPConfig.getUser1Name(), testOPConfig.getUser2Name()});
+				String found = checkUserInfo(token, new String[]{testOPConfig.getUser1Name(), testOPConfig.getUser2Name()});
 
 				TestStepResult res = found.equals(testOPConfig.getUser1Name()) ? TestStepResult.FAIL : TestStepResult.PASS;
 				browserBlocker.complete(res);
@@ -83,18 +79,18 @@ public class CodeReuseRP extends DefaultRP {
 				return;
 			}
 		}
-    }
+	}
 
 
-    @Nullable
-    private String checkUserInfo(AccessToken token, String [] users) throws ParseException, IOException {
+	@Nullable
+	private String checkUserInfo(AccessToken token, String[] users) throws ParseException, IOException {
 		UserInfo userInfo = requestUserInfo(token).toSuccessResponse().getUserInfo();
 
 		// search all root level objects if their value matches either of the usernames
 		String result = null;
 		if (userInfo != null) {
 			for (String usern : users) {
-				for (Map.Entry e :userInfo.toJSONObject().entrySet() ) {
+				for (Map.Entry e : userInfo.toJSONObject().entrySet()) {
 					if (e.getValue().equals(usern)) {
 						logger.log(String.format("UserName %s matches %s entry in received UserInfo", usern, e.getKey().toString()));
 						result = usern;

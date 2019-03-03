@@ -1,8 +1,10 @@
 package de.rub.nds.oidc.server.rp;
 
-import com.nimbusds.oauth2.sdk.*;
-import com.nimbusds.oauth2.sdk.http.ServletUtils;
-import com.nimbusds.openid.connect.sdk.*;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.TokenResponse;
+import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
+import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
+import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.TestStepResult;
@@ -41,7 +43,7 @@ public class RumRP extends DefaultRP {
 				browserBlocker.complete(TestStepResult.FAIL);
 				return;
 			}
-			
+
 			logger.log("AuthenticationResponse Error received in Honest Client");
 			logger.logHttpRequest(req, response.toString());
 			browserBlocker.complete(TestStepResult.PASS);
@@ -55,8 +57,8 @@ public class RumRP extends DefaultRP {
 			logger.logHttpRequest(req, null);
 			browserBlocker.complete(TestStepResult.FAIL);
 			return;
-		} 
-	
+		}
+
 		logger.log("Authentication SuccessResponse received in Honest Client");
 		logger.logHttpRequest(req, null);
 
@@ -89,19 +91,18 @@ public class RumRP extends DefaultRP {
 				browserBlocker.complete(TestStepResult.FAIL);
 				return;
 			}
-			
+
 			browserBlocker.complete(TestStepResult.PASS);
 		}
-		
-		
+
+
 //		else if (successResponse.impliedResponseType().impliesImplicitFlow()) {
 //			at = successResponse.getAccessToken();
 //			idToken = successResponse.getIDToken();
 //		}
 
 
-
-			// do we need to issue a token request?
+		// do we need to issue a token request?
 //		OIDCTokenResponse tokenResponse = redeemAuthCode(successResponse);
 //		if (tokenResponse == null) {
 //			// error messages have been logged already
@@ -117,11 +118,9 @@ public class RumRP extends DefaultRP {
 //			browserBlocker.complete(TestStepResult.FAIL);
 //			return;
 //		}
-		}
+	}
 
 
-
-	
 //	@Override
 //	@Nullable
 //	protected URI getAuthReqRedirectUri() {
@@ -135,6 +134,6 @@ public class RumRP extends DefaultRP {
 //	
 //		return redirURI;
 //	}
-	
+
 
 }
