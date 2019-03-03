@@ -231,15 +231,6 @@ public abstract class BrowserSimulator {
 //		return result;
 //	}
 
-	private void loadFormSubmissionDelayScript() {
-		try {
-			String script = IOUtils.toString(getClass().getResourceAsStream("/delayFormSubmission.js"), "UTF-8");
-			formSubmitDelayScript = script;
-		} catch (IOException e) {
-			//TODO
-		}
-	}
-
 	protected String getFormSubmitDelayScript() {
 		return formSubmitDelayScript;
 	}
@@ -251,10 +242,6 @@ public abstract class BrowserSimulator {
 		} catch (IOException e) {
 			//TODO
 		}
-	}
-
-	protected String getFormSubmitDelayScript() {
-		return formSubmitDelayScript;
 	}
 
 }
