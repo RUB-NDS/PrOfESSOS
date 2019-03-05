@@ -41,36 +41,40 @@ public class PkceRP extends DefaultRP {
 
 	@Override
 	protected void tokenRequestApplyPKCEParams(HTTPRequest req) {
-		String encodedQuery = req.getQuery();
+		
+		if (params.getBool(TOKENREQ_PKCE_EXCLUDED)) {
+			return;
+		}
 
+		CodeVerifier verifier = getStoredPKCEVerifier();
+		String encodedQuery = req.getQuery();
 		StringBuilder sb = new StringBuilder();
 		sb.append(encodedQuery);
+		
 		if (params.getBool(TOKENREQ_ADD_PKCE_METHOD_PLAIN)){
 			// attempt "downgrade", use code_challenge from AuhtnReq and 
 			// add plain as code_challenge_method (invalid per RFC7636)
-			CodeChallenge cc = CodeChallenge.compute(getCodeChallengeMethod(), getStoredPKCEVerifier());
+			CodeChallengeMethod cm = getCodeChallengeMethod();
+			cm = (cm == null) ? CodeChallengeMethod.S256 : cm;
+			CodeChallenge cc = CodeChallenge.compute(cm, verifier);
 			sb.append("&code_challenge_method=plain&code_verifier=");
 			sb.append(cc.getValue());
-		}
-		if (params.getBool(TOKENREQ_PKCE_EXCLUDED)) {
 			req.setQuery(sb.toString());
 			return;
 		}
+
 		if (params.getBool(TOKENREQ_PKCE_INVALID)){
 			// attempt downgrade in tokenreq, invalid per RFC7636
 			sb.append("&code_verifier=");
 
-			CodeVerifier cv = getStoredPKCEVerifier();
-			String verifier = cv.getValue();
 			// change last char
 			// only certain ASCII chars are allowed; to keep it simple, use A or B
-			String last = verifier.endsWith("A") ? "B" : "A";
-			sb.append(verifier.substring(0, verifier.length()-1) + last);
+			String last = verifier.getValue().endsWith("A") ? "B" : "A";
+			sb.append(verifier.getValue().substring(0, verifier.getValue().length()-1) + last);
 		} else {
-			CodeVerifier cv = getStoredPKCEVerifier();
-			if (cv != null) {
+			if (verifier != null) {
 				sb.append("&code_verifier=");
-				sb.append(cv);
+				sb.append(verifier.getValue());
 			}
 		}
 

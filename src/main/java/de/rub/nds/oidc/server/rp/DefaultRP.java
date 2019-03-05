@@ -491,7 +491,7 @@ public class DefaultRP extends AbstractRPImplementation {
 		CodeVerifier cv = getStoredPKCEVerifier();
 		if (cv != null) {
 			sb.append("&code_verifier=");
-			sb.append(cv);
+			sb.append(cv.getValue());
 		}
 		req.setQuery(sb.toString());
 	}

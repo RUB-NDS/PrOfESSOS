@@ -13,6 +13,7 @@ import com.nimbusds.oauth2.sdk.http.ServletUtils;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
@@ -24,6 +25,7 @@ import com.nimbusds.openid.connect.sdk.Prompt;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderConfigurationRequest;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.*;
+import com.sun.org.apache.bcel.internal.classfile.Code;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.test_model.ParameterType;
@@ -184,16 +186,40 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		ab.claims(getAuthReqClaims());
 		ab.idTokenHint(getIdTokenHint());
 		ab.endpointURI(opMetaData.getAuthorizationEndpointURI());
-		ab.codeChallenge(getCodeChallengeVerifier(), getCodeChallengeMethod());
-
+//		ab.codeChallenge(getCodeChallengeVerifier(), getCodeChallengeMethod());
+		
 		AuthenticationRequest authnReq = ab.build();
+		URI authnReqUri = applyPkceParamstoAuthReqUri(authnReq.toURI());
 
 		// make prepared request available for the browser
 		String currentRP = type == RPType.HONEST ? RPContextConstants.RP1_PREPARED_AUTHNREQ
 				: RPContextConstants.RP2_PREPARED_AUTHNREQ;
-		stepCtx.put(currentRP, authnReq.toURI());
+		stepCtx.put(currentRP, authnReqUri);
 	}
 
+	// util method because nimbus SDK does not allow 
+	// 'wrong' or empty  method parameters
+	protected URI applyPkceParamstoAuthReqUri(URI uri) {
+		CodeVerifier cv = getCodeChallengeVerifier();
+		CodeChallengeMethod cm = getCodeChallengeMethod();
+		if (cv == null && cm == null) {
+			return uri;
+		}
+		
+		UriBuilder ub = UriBuilder.fromUri(uri);
+		if (cm != null) {
+			ub.queryParam("code_challenge_method", cm.getValue());
+		} else {
+			// don't add method param but set to default
+			cm = CodeChallengeMethod.S256;
+		}
+		if (cv != null) {
+			ub.queryParam("code_challenge", CodeChallenge.compute(cm, cv).getValue());
+		}
+
+		return ub.build();
+	}
+	
 	protected abstract URI getAuthReqRedirectUri();
 
 	protected abstract URI getTokenReqRedirectUri();

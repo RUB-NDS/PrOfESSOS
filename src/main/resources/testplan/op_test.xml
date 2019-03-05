@@ -424,7 +424,7 @@
 		</BrowserSimulator>
 
 		<RPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRPRP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRP</ImplementationClass>
 			<Parameter Key="authnreq-pkce-method-s256">true</Parameter>
 			<Parameter Key="tokenreq-invalid-pkce-verifier">true</Parameter>
 			<Parameter Key="code-redemption-fails-test">true</Parameter>
@@ -449,12 +449,12 @@
 		</BrowserSimulator>
 
 		<RPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRPRP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRP</ImplementationClass>
 			<Parameter Key="authnreq-pkce-exclude-method-param">true</Parameter>
 			<Parameter Key="tokenreq-add-pkce-method-param-plain">true</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRPRP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRP</ImplementationClass>
 			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
 		</RPConfig-2>
 	</TestStep>
