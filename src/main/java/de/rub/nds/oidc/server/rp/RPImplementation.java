@@ -30,17 +30,11 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- * @author Tobias Wich
- */
 public interface RPImplementation {
 
 	String REDIRECT_PATH = "/callback";
 	String JWKS_PATH = "/jwks";
-	//TODO: request_uri, sector_identifier_uri, ???
-//    String SECTOR_ID_PATH = "/sectoridentifier.json";
-
+	
 
 	void setRPConfig(RPConfigType cfg);
 
@@ -71,7 +65,8 @@ public interface RPImplementation {
 	// serve redirect_uri
 	void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException;
 
-	// TODO: add endpoints for request_uri, sector_identifier_uri, ???
+	// TODO: add endpoints for jwks, request_uri, sector_identifier_uri, ???
+//	void jwks(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
 //	void requestUri(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
 //	void sectorIdentifierUri(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
 

@@ -138,6 +138,7 @@ public class TestStepLogger {
 				entry.setBody(formatBody(req.getContentType().toString(), req.getQuery()));
 			}
 		}
+//		reqLine += " " + req.getProtocol();
 		entry.setRequestLine(reqLine);
 
 		// add special headers to indicate the protocol scheme and port
