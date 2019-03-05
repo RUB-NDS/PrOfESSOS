@@ -1,9 +1,9 @@
 package de.rub.nds.oidc.server.rp;
 
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 import javax.annotation.Nullable;
 
@@ -15,10 +15,10 @@ public class PkceRP extends DefaultRP {
 	@Nullable
 	protected CodeChallengeMethod getCodeChallengeMethod(){
 		CodeChallengeMethod cm = null;
-		if (params.getBool(PKCE_METHOD_PLAIN)) {
+		if (params.getBool(AUTHNREQ_PKCE_METHOD_PLAIN)) {
 			cm = CodeChallengeMethod.PLAIN;
 		}
-		if (params.getBool(PKCE_METHOD_S256)) {
+		if (params.getBool(AUTHNREQ_PKCE_METHOD_S_256)) {
 			cm = CodeChallengeMethod.S256;
 		}
 		
@@ -29,7 +29,7 @@ public class PkceRP extends DefaultRP {
 	@Nullable
 	protected CodeVerifier getCodeChallengeVerifier() {
 		CodeVerifier verifier = null;
-		if (params.getBool(PKCE_METHOD_PLAIN) || params.getBool(PKCE_METHOD_S256) || params.getBool(PKCE_METHOD_EXCL)) {
+		if (params.getBool(AUTHNREQ_PKCE_METHOD_PLAIN) || params.getBool(AUTHNREQ_PKCE_METHOD_S_256) || params.getBool(AUTHNREQ_PKCE_METHOD_EXCLUDED)) {
 			verifier = new CodeVerifier();
 			// store for later
 			if (!params.getBool(TOKENREQ_PKCE_FROM_OTHER_SESSION)) {
@@ -46,8 +46,11 @@ public class PkceRP extends DefaultRP {
 		StringBuilder sb = new StringBuilder();
 		sb.append(encodedQuery);
 		if (params.getBool(TOKENREQ_ADD_PKCE_METHOD_PLAIN)){
-			// attempt downgrade in tokenreq, invalid per RFC7636
-			sb.append("&code_challenge_method=plain");
+			// attempt "downgrade", use code_challenge from AuhtnReq and 
+			// add plain as code_challenge_method (invalid per RFC7636)
+			CodeChallenge cc = CodeChallenge.compute(getCodeChallengeMethod(), getStoredPKCEVerifier());
+			sb.append("&code_challenge_method=plain&code_verifier=");
+			sb.append(cc.getValue());
 		}
 		if (params.getBool(TOKENREQ_PKCE_EXCLUDED)) {
 			req.setQuery(sb.toString());

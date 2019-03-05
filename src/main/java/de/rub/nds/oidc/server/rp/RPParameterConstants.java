@@ -45,9 +45,9 @@ public class RPParameterConstants {
 	public static final String AUTHNREQ_RESPONSE_TYPE_TOKEN_IDTOKEN = "authnreq-response_type-token-id_token";
 	public static final String AUTHNREQ_RESPONSE_TYPE_CODE_TOKEN_IDTOKEN = "authnreq-response_type-code-token-id_token";
 
-	public static final String PKCE_METHOD_PLAIN = "authnreq-pkce-method-plain";
-	public static final String PKCE_METHOD_S256 = "authnreq-pkce-method-s256";
-	public static final String PKCE_METHOD_EXCL = "authnreq-pkce-eclude-method-param";
+	public static final String AUTHNREQ_PKCE_METHOD_PLAIN = "authnreq-pkce-method-plain";
+	public static final String AUTHNREQ_PKCE_METHOD_S_256 = "authnreq-pkce-method-s256";
+	public static final String AUTHNREQ_PKCE_METHOD_EXCLUDED = "authnreq-pkce-exclude-method-param";
 
 	public static final String TOKENREQ_FORCE_EVIL_REDIRURI = "tokenreq-force-evil-redirect-uri";
 	public static final String TOKENREQ_REDIRURI_EXCLUDED = "tokenreq-exclude-redirect-uri";
