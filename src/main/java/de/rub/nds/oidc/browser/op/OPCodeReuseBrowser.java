@@ -1,32 +1,27 @@
 package de.rub.nds.oidc.browser.op;
 
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import de.rub.nds.oidc.server.rp.RPContextConstants;
 import de.rub.nds.oidc.server.rp.RPParameterConstants;
 import de.rub.nds.oidc.server.rp.RPType;
 import de.rub.nds.oidc.test_model.TestStepResult;
 
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.ArrayList;
 
 public class OPCodeReuseBrowser extends AbstractOPBrowser {
 
-    @Override
-    public final TestStepResult run() throws InterruptedException {
+	@Override
+	public final TestStepResult run() throws InterruptedException {
 		logger.log("OPCodeReuseBrowser started");
-        if (! (boolean) stepCtx.get(RPContextConstants.STEP_SETUP_FINISHED)) {
-            logger.log("Test-setup indicates configuration error");
-            return TestStepResult.UNDETERMINED;
-        }
+		if (!(boolean) stepCtx.get(RPContextConstants.STEP_SETUP_FINISHED)) {
+			logger.log("Test-setup indicates configuration error");
+			return TestStepResult.UNDETERMINED;
+		}
 
 		ArrayList<String[]> users = new ArrayList<>();
-		users.add(new String[] {opConfig.getUser1Name(), opConfig.getUser1Pass()});
-		users.add(new String[] {opConfig.getUser2Name(), opConfig.getUser2Pass()});
+		users.add(new String[]{opConfig.getUser1Name(), opConfig.getUser1Pass()});
+		users.add(new String[]{opConfig.getUser2Name(), opConfig.getUser2Pass()});
 
-		for (int i = 0; i<2; i++) {
+		for (int i = 0; i < 2; i++) {
 			userName = users.get(i)[0];
 			userPass = users.get(i)[1];
 
@@ -41,7 +36,7 @@ public class OPCodeReuseBrowser extends AbstractOPBrowser {
 			// reload browser to clear sessions
 			loadDriver(true);
 		}
-    	return TestStepResult.PASS;
-    }
+		return TestStepResult.PASS;
+	}
     
 }

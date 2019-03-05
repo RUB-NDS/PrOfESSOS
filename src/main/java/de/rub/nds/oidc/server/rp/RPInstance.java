@@ -18,15 +18,14 @@ package de.rub.nds.oidc.server.rp;
 
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
-import de.rub.nds.oidc.test_model.TestOPConfigType;
-import de.rub.nds.oidc.utils.ImplementationLoader;
 import de.rub.nds.oidc.test_model.RPConfigType;
+import de.rub.nds.oidc.test_model.TestOPConfigType;
 import de.rub.nds.oidc.utils.ImplementationLoadException;
+import de.rub.nds.oidc.utils.ImplementationLoader;
 
 import java.util.Map;
 
 /**
- *
  * @author Tobias Wich
  */
 public class RPInstance {

@@ -15,21 +15,20 @@ import java.util.concurrent.TimeoutException;
 public class OPLearningBrowser extends AbstractOPBrowser {
 
 
-
-    @Override
-    public final TestStepResult run() throws InterruptedException {
+	@Override
+	public final TestStepResult run() throws InterruptedException {
 		logger.log("OPLearningBrowser started");
-        if (! (boolean) stepCtx.get(RPContextConstants.STEP_SETUP_FINISHED)) {
-            logger.log("Test-setup indicates configuration error");
-            return TestStepResult.UNDETERMINED;
-        }
+		if (!(boolean) stepCtx.get(RPContextConstants.STEP_SETUP_FINISHED)) {
+			logger.log("Test-setup indicates configuration error");
+			return TestStepResult.UNDETERMINED;
+		}
 
-		HashMap<String,String> users = new HashMap<>();
-        users.put(opConfig.getUser1Name(), opConfig.getUser1Pass());
-        users.put(opConfig.getUser2Name(), opConfig.getUser2Pass());
+		HashMap<String, String> users = new HashMap<>();
+		users.put(opConfig.getUser1Name(), opConfig.getUser1Pass());
+		users.put(opConfig.getUser2Name(), opConfig.getUser2Pass());
 
-        for (RPType type : RPType.values()) {
-			for (Map.Entry<String,String> entry : users.entrySet()) {
+		for (RPType type : RPType.values()) {
+			for (Map.Entry<String, String> entry : users.entrySet()) {
 				userName = entry.getKey();
 				userPass = entry.getValue();
 
@@ -43,11 +42,11 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 			}
 		}
 
-    	return TestStepResult.PASS;
-    }
+		return TestStepResult.PASS;
+	}
 
 	@Override
-    protected TestStepResult runUserAuth(RPType rpType) throws InterruptedException {
+	protected TestStepResult runUserAuth(RPType rpType) throws InterruptedException {
 //		TestStepResult result = TestStepResult.NOT_RUN;
 		logger.log("run userAuth");
 
@@ -61,7 +60,7 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 		CompletableFuture<TestStepResult> blockAndResult = new CompletableFuture<>();
 		stepCtx.put(RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT, blockAndResult);
 
-        // build authnReq and call in browser
+		// build authnReq and call in browser
 		AuthenticationRequest authnReq = getAuthnReq(rpType);
 
 		// run login script
@@ -70,7 +69,7 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 		// delay form submissions for screenshots
 		driver.executeScript(getFormSubmitDelayScript());
 		waitMillis(500);
-		
+
 		// prepare scripts for login and consent page
 		evalScriptTemplates();
 		logger.log(String.format("Using Login script:%n %s", submitScript));
@@ -113,7 +112,7 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 
 
 		try {
-			return blockAndResult.get(5,TimeUnit.SECONDS);
+			return blockAndResult.get(5, TimeUnit.SECONDS);
 		} catch (ExecutionException | TimeoutException e) {
 			logger.log("Browser Timeout while waiting for RP");
 			return TestStepResult.UNDETERMINED;

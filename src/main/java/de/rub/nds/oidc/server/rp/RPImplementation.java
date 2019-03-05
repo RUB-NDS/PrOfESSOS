@@ -20,7 +20,9 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.server.RequestPath;
-import de.rub.nds.oidc.test_model.*;
+import de.rub.nds.oidc.test_model.ParameterType;
+import de.rub.nds.oidc.test_model.RPConfigType;
+import de.rub.nds.oidc.test_model.TestOPConfigType;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,7 +36,7 @@ public interface RPImplementation {
 
 	String REDIRECT_PATH = "/callback";
 	String JWKS_PATH = "/jwks";
-	
+
 
 	void setRPConfig(RPConfigType cfg);
 
@@ -54,7 +56,7 @@ public interface RPImplementation {
 
 	void setTestOPConfig(TestOPConfigType cfg);
 
-	void runTestStepSetup() throws ParseException, IOException ;
+	void runTestStepSetup() throws ParseException, IOException;
 
 	void prepareAuthnReq();
 //

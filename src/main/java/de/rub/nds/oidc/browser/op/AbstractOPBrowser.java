@@ -28,7 +28,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 	protected String userName;
 	protected String userPass;
 
-    protected void evalScriptTemplates() {
+	protected void evalScriptTemplates() {
 		String templateString;
 
 		try {
@@ -40,7 +40,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 			}
 
 			opConfig.setLoginScript(templateString); // TODO: if we add an inputfieldname, we need to evaluate this once
-			Map<String,String> user = ImmutableMap.of("current_user_username", userName,"current_user_password", userPass);
+			Map<String, String> user = ImmutableMap.of("current_user_username", userName, "current_user_password", userPass);
 			submitScript = te.eval(Maps.newHashMap(user), templateString);
 
 			if (!Strings.isNullOrEmpty(opConfig.getConsentScript())) {
@@ -53,16 +53,16 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 
 		} catch (IOException e) {
 			logger.log("Scripttemplate evaluation failed");
-			throw new RuntimeException( new InterruptedException(e.getMessage()));
+			throw new RuntimeException(new InterruptedException(e.getMessage()));
 		}
-    }
+	}
 
 
-    protected AuthenticationRequest getAuthnReq(RPType rpType) {
+	protected AuthenticationRequest getAuthnReq(RPType rpType) {
 		URI authnReq;
 		authnReq = RPType.HONEST.equals(rpType)
 				? (URI) stepCtx.get(RPContextConstants.RP1_PREPARED_AUTHNREQ)
-					: (URI) stepCtx.get(RPContextConstants.RP2_PREPARED_AUTHNREQ);
+				: (URI) stepCtx.get(RPContextConstants.RP2_PREPARED_AUTHNREQ);
 		try {
 			AuthenticationRequest req = AuthenticationRequest.parse(authnReq);
 			return req;
@@ -100,29 +100,29 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 		// prepare scripts for login and consent page
 		evalScriptTemplates();
 //		logger.log(String.format("Using Login script:%n %s", submitScript));
-		
+
 		try {
 			// wait until a new html element appears, indicating a page load
 			waitForPageLoad(() -> {
 				driver.executeScript(submitScript);
 				// capture state where the text is entered
-	//			logScreenshot();
+				//			logScreenshot();
 				logger.log("Login Credentials entered");
 				return null;
 			});
-	//		logger.log("HTML element found in Browser.");
+			//		logger.log("HTML element found in Browser.");
 			// wait a bit more in case we have an angular app or some other JS heavy application
 			waitMillis(1000);
-	
+
 			// don't run consentScript if we have already been redirected back to RP
 			if (driver.getCurrentUrl().startsWith(authnReq.getRedirectionURI().toString())) {
 				logger.log("No consent page encountered in browser");
 			} else {
 				driver.executeScript(getFormSubmitDelayScript());
-	
+
 				waitForPageLoad(() -> {
 					driver.executeScript(consentScript);
-	//				logScreenshot();
+					//				logScreenshot();
 					logger.log("ConsentScript executed, client authorized");
 					return null;
 				});
@@ -139,8 +139,8 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 			logger.log("Authentication failed, assuming test passed.");
 			return TestStepResult.PASS;
 		}
-		
-		
+
+
 		String finalUrl = driver.getCurrentUrl();
 		stepCtx.put(RPContextConstants.LAST_BROWSER_URL, finalUrl);
 		// confirm submission of redirect uri
@@ -158,14 +158,14 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 		} catch (ExecutionException | TimeoutException e) {
 			logger.log("Browser Timeout while waiting for RP");
 			logScreenshot();
-			
+
 			URI url = UriBuilder.fromUri(finalUrl).build();
 			if (url.getHost().startsWith((String) stepCtx.get(RPContextConstants.REDIRECT_URI_MANIPULATOR))) {
 				// TODO: add seleniumProxy (BrowserMob) and intercept DNS/HTTP for manipulated URIs?
 				logger.log("Redirect to manipulated redirect_uri detected, assuming test failed.");
 				return TestStepResult.FAIL;
 			}
-			
+
 			return TestStepResult.UNDETERMINED;
 		}
 	}

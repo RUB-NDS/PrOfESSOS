@@ -19,37 +19,32 @@ package de.rub.nds.oidc.browser;
 import de.rub.nds.oidc.learn.TemplateEngine;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.op.OPParameterConstants;
-import de.rub.nds.oidc.server.rp.RPContextConstants;
 import de.rub.nds.oidc.test_model.*;
 import de.rub.nds.oidc.utils.Func;
 import de.rub.nds.oidc.utils.InstanceParameters;
-import java.io.IOException;
-import java.io.InputStream;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.JavascriptExecutor;
-import java.util.Properties;
-
-//import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.support.ui.Duration;
 import org.openqa.selenium.support.ui.Sleeper;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+
+//import org.openqa.selenium.phantomjs.PhantomJSDriver;
+
 /**
- *
  * @author Tobias Wich
  */
 public abstract class BrowserSimulator {
@@ -153,15 +148,15 @@ public abstract class BrowserSimulator {
 		this.params = new InstanceParameters(params);
 	}
 
-	protected HashMap<String,Object> createRPContext() {
-		HashMap<String,Object> ctx = createTemplateContext();
+	protected HashMap<String, Object> createRPContext() {
+		HashMap<String, Object> ctx = createTemplateContext();
 		ctx.put("rp", rpConfig);
 
 		return ctx;
 	}
 
-	protected HashMap<String,Object> createOPContext() {
-		HashMap<String,Object> ctx = createTemplateContext();
+	protected HashMap<String, Object> createOPContext() {
+		HashMap<String, Object> ctx = createTemplateContext();
 		ctx.put("op", opConfig);
 
 		return ctx;
@@ -169,7 +164,7 @@ public abstract class BrowserSimulator {
 
 	private HashMap<String, Object> createTemplateContext() {
 
-		HashMap<String,Object> teCtx = new HashMap<>();
+		HashMap<String, Object> teCtx = new HashMap<>();
 
 		// required for default submitScript template
 		teCtx.put("browser-input-op_url", (String) stepCtx.get(OPParameterConstants.BROWSER_INPUT_OP_URL));
@@ -195,7 +190,7 @@ public abstract class BrowserSimulator {
 		WebDriverWait wait = new WebDriverWait(driver, 15);
 		wait.until((WebDriver input) -> {
 			RemoteWebElement newHtml = (RemoteWebElement) driver.findElement(By.tagName("html"));
-			return ! newHtml.getId().equals(oldHtml.getId());
+			return !newHtml.getId().equals(oldHtml.getId());
 		});
 
 		return result;

@@ -6,18 +6,18 @@ import de.rub.nds.oidc.test_model.TestStepResult;
 
 public class OPRumBrowser extends AbstractOPBrowser {
 
-    @Override
-    public final TestStepResult run() throws InterruptedException {
+	@Override
+	public final TestStepResult run() throws InterruptedException {
 		logger.log("Redirect URI Manipulation Browser started");
-        if (! (boolean) stepCtx.get(RPContextConstants.STEP_SETUP_FINISHED)) {
-            logger.log("Test-setup indicates configuration error");
-            return TestStepResult.UNDETERMINED;
-        }
+		if (!(boolean) stepCtx.get(RPContextConstants.STEP_SETUP_FINISHED)) {
+			logger.log("Test-setup indicates configuration error");
+			return TestStepResult.UNDETERMINED;
+		}
 
 		userName = opConfig.getUser1Name();
-        userPass = opConfig.getUser1Pass();
+		userPass = opConfig.getUser1Pass();
 
-    	return runUserAuth(RPType.HONEST);
-    }
-    
+		return runUserAuth(RPType.HONEST);
+	}
+
 }
