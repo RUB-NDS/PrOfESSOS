@@ -45,6 +45,10 @@ public class RPParameterConstants {
 	public static final String AUTHNREQ_RESPONSE_TYPE_TOKEN_IDTOKEN = "authnreq-response_type-token-id_token";
 	public static final String AUTHNREQ_RESPONSE_TYPE_CODE_TOKEN_IDTOKEN = "authnreq-response_type-code-token-id_token";
 
+	public static final String PKCE_METHOD_PLAIN = "authnreq-pkce-method-plain";
+	public static final String PKCE_METHOD_S256 = "authnreq-pkce-method-s256";
+	public static final String PKCE_METHOD_EXCL = "authnreq-pkce-eclude-method-param";
+
 	public static final String TOKENREQ_FORCE_EVIL_REDIRURI = "tokenreq-force-evil-redirect-uri";
 	public static final String TOKENREQ_REDIRURI_EXCLUDED = "tokenreq-exclude-redirect-uri";
 	public static final String TOKENREQ_REDIRURI_ADD_SUBDOMAIN = "tokenreq-random-subdomain-in-redirect-uri";
@@ -54,7 +58,11 @@ public class RPParameterConstants {
 	public static final String TOKENREQ_CLIENTAUTH_EMPTY_ID = "tokenreq-clientauth-empty-client-id";
 	public static final String TOKENREQ_CLIENTAUTH_EMPTY_SECRET = "tokenreq-clientauth-empty-client-secret";
 
-
+	public static final String TOKENREQ_ADD_PKCE_METHOD_PLAIN = "tokenreq-add-pkce-method-param-plain";
+	public static final String TOKENREQ_PKCE_INVALID = "tokenreq-invalid-pkce-verifier";
+	public static final String TOKENREQ_PKCE_EXCLUDED = "tokenreq-pkce-verifier-excluded";
+	public static final String TOKENREQ_PKCE_FROM_OTHER_SESSION = "tokenreq-pkce-from-other-session";
+	
 	public static final String FORCE_CODE_REUSE_USER = "force_auth-code_reuse_user";
 	public static final String FORCE_NO_REDEEM_AUTH_CODE = "force-no-redeem-auth-code";
 //	public static final String FORCE_USE_STORED_AUTH_CODE 	= "force-use-stored-auth-code";

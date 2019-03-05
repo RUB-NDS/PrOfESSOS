@@ -31,6 +31,7 @@ public class RPContextConstants {
 	public static final String LAST_BROWSER_URL = PFX + "last-url-seeen-in-browser";
 
 	public static final String STORED_AUTH_CODE = PFX + "stored-auth-code";
+	public static final String STORED_PKCE_VERIFIER = PFX + "stored-pkce-verifier";
 
 	public static final String MANIPULATED_REDIRECT_URI = PFX + "stored-manipulated-redirect-uri";
 	public static final String REDIRECT_URI_MANIPULATOR = PFX + "stored-uri-manipulator-string";
