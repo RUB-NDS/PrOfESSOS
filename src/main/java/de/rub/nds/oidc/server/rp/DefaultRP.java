@@ -38,8 +38,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static de.rub.nds.oidc.server.rp.RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT;
-import static de.rub.nds.oidc.server.rp.RPContextConstants.BLOCK_RP_FOR_BROWSER_FUTURE;
+import static de.rub.nds.oidc.server.rp.RPContextConstants.*;
 import static de.rub.nds.oidc.server.rp.RPParameterConstants.*;
 
 public class DefaultRP extends AbstractRPImplementation {
@@ -67,7 +66,7 @@ public class DefaultRP extends AbstractRPImplementation {
 		AccessToken at = null;
 		JWT idToken = null;
 		AuthenticationSuccessResponse successResponse = authnResp.toSuccessResponse();
-		if (successResponse.impliedResponseType().impliesCodeFlow()) {
+		if (successResponse.impliedResponseType().impliesCodeFlow() && !params.getBool(FORCE_NO_REDEEM_AUTH_CODE)) {
 			// attempt code redemption
 			TokenResponse tokenResponse = redeemAuthCode(successResponse.getAuthorizationCode());
 			if (!tokenResponse.indicatesSuccess()) {
@@ -186,6 +185,7 @@ public class DefaultRP extends AbstractRPImplementation {
 	protected TokenResponse redeemAuthCode(AuthorizationCode code) throws IOException, ParseException {
 
 		URI redirectURI = getTokenReqRedirectUri();
+//		AuthorizationCodeGrant codeGrant = new AuthorizationCodeGrant(code, redirectURI, (CodeVerifier) stepCtx.get(STORED_PKCE_VERIFIER));
 		AuthorizationCodeGrant codeGrant = new AuthorizationCodeGrant(code, redirectURI);
 
 		TokenRequest request = new TokenRequest(
@@ -203,7 +203,7 @@ public class DefaultRP extends AbstractRPImplementation {
 		logger.log("Token request prepared.");
 		logger.logHttpRequest(httpRequest, httpRequest.getQuery());
 
-		TokenResponse response = OIDCTokenResponseParser.parse(request.toHTTPRequest().send());
+		TokenResponse response = OIDCTokenResponseParser.parse(httpRequest.send());
 
 		if (!response.indicatesSuccess()) {
 			TokenErrorResponse errorResponse = response.toErrorResponse();
@@ -484,15 +484,16 @@ public class DefaultRP extends AbstractRPImplementation {
 	}
 
 	protected void tokenRequestApplyPKCEParams(HTTPRequest req) {
+		CodeVerifier cv = getStoredPKCEVerifier();
+		if (cv == null) {
+			return;
+		}
 		String encodedQuery = req.getQuery();
-
 		StringBuilder sb = new StringBuilder();
 		sb.append(encodedQuery);
-		CodeVerifier cv = getStoredPKCEVerifier();
-		if (cv != null) {
-			sb.append("&code_verifier=");
-			sb.append(cv.getValue());
-		}
+		sb.append("&code_verifier=");
+		sb.append(cv.getValue());
+
 		req.setQuery(sb.toString());
 	}
 
