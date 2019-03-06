@@ -159,8 +159,9 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 			logger.log("Browser Timeout while waiting for RP");
 			logScreenshot();
 
+			String uriManipulator = (String) stepCtx.get(RPContextConstants.REDIRECT_URI_MANIPULATOR);
 			URI url = UriBuilder.fromUri(finalUrl).build();
-			if (url.getHost().startsWith((String) stepCtx.get(RPContextConstants.REDIRECT_URI_MANIPULATOR))) {
+			if (url != null && url.getHost().startsWith(uriManipulator)) {
 				// TODO: add seleniumProxy (BrowserMob) and intercept DNS/HTTP for manipulated URIs?
 				logger.log("Redirect to manipulated redirect_uri detected, assuming test failed.");
 				return TestStepResult.FAIL;
