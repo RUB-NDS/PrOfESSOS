@@ -1,11 +1,13 @@
 package de.rub.nds.oidc.server.rp;
 
+import com.google.common.base.Strings;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
+import com.nimbusds.openid.connect.sdk.UserInfoResponse;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.TestStepResult;
@@ -18,6 +20,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
+import static de.rub.nds.oidc.server.rp.RPParameterConstants.USER2_IN_USERINFO_FAILS_TEST;
 
 public class CodeReuseRP extends DefaultRP {
 
@@ -68,9 +72,13 @@ public class CodeReuseRP extends DefaultRP {
 			if (tokenResponse.indicatesSuccess()) {
 				AccessToken token = tokenResponse.toSuccessResponse().getTokens().getAccessToken();
 				String found = checkUserInfo(token, new String[]{testOPConfig.getUser1Name(), testOPConfig.getUser2Name()});
-
-				TestStepResult res = found.equals(testOPConfig.getUser1Name()) ? TestStepResult.FAIL : TestStepResult.PASS;
-				browserBlocker.complete(res);
+				if (!Strings.isNullOrEmpty(found)) {
+					TestStepResult res = found.equals(testOPConfig.getUser1Name()) ? TestStepResult.FAIL : TestStepResult.PASS;
+					browserBlocker.complete(res);
+				} else {
+					// TODO: is this always a pass?
+					browserBlocker.complete(TestStepResult.PASS);
+				}
 				return;
 
 			} else {
@@ -84,16 +92,21 @@ public class CodeReuseRP extends DefaultRP {
 
 	@Nullable
 	private String checkUserInfo(AccessToken token, String[] users) throws ParseException, IOException {
-		UserInfo userInfo = requestUserInfo(token).toSuccessResponse().getUserInfo();
-
-		// search all root level objects if their value matches either of the usernames
+		//UserInfo userInfo = requestUserInfo(token).toSuccessResponse().getUserInfo();
 		String result = null;
-		if (userInfo != null) {
-			for (String usern : users) {
-				for (Map.Entry e : userInfo.toJSONObject().entrySet()) {
-					if (e.getValue().equals(usern)) {
-						logger.log(String.format("UserName %s matches %s entry in received UserInfo", usern, e.getKey().toString()));
-						result = usern;
+
+		UserInfoResponse userInfo = requestUserInfo(token);
+		if (userInfo != null && userInfo.indicatesSuccess()) {
+			UserInfo ui = userInfo.toSuccessResponse().getUserInfo();
+
+			// search all root level objects if their value matches either of the usernames
+			if (userInfo != null) {
+				for (String usern : users) {
+					for (Map.Entry e : ui.toJSONObject().entrySet()) {
+						if (e.getValue().equals(usern)) {
+							logger.log(String.format("UserName %s matches %s entry in received UserInfo", usern, e.getKey().toString()));
+							result = usern;
+						}
 					}
 				}
 			}

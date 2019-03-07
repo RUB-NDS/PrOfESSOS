@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
-import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.client.ClientInformation;
 import com.nimbusds.oauth2.sdk.client.ClientRegistrationResponse;
@@ -15,16 +14,20 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
-import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
+import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import com.nimbusds.openid.connect.sdk.*;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
+import com.nimbusds.openid.connect.sdk.ClaimsRequest;
+import com.nimbusds.openid.connect.sdk.Nonce;
+import com.nimbusds.openid.connect.sdk.Prompt;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderConfigurationRequest;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.*;
+import com.sun.org.apache.bcel.internal.classfile.Code;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
-import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.ParameterType;
 import de.rub.nds.oidc.test_model.RPConfigType;
 import de.rub.nds.oidc.test_model.TestOPConfigType;
@@ -32,22 +35,16 @@ import de.rub.nds.oidc.utils.InstanceParameters;
 import net.minidev.json.JSONObject;
 import org.apache.commons.lang.RandomStringUtils;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 
@@ -128,7 +125,8 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 	protected URI manipulateURI(URI uri, boolean addSubdomain, boolean addPath) {
 		String rnd = RandomStringUtils.randomAlphanumeric(12);
-
+		rnd = rnd.toLowerCase();
+		
 		UriBuilder ub = UriBuilder.fromUri(uri);
 		if (addSubdomain) {
 			ub.host(rnd + "." + uri.getHost());
@@ -189,15 +187,40 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		ab.claims(getAuthReqClaims());
 		ab.idTokenHint(getIdTokenHint());
 		ab.endpointURI(opMetaData.getAuthorizationEndpointURI());
-
+//		ab.codeChallenge(getCodeChallengeVerifier(), getCodeChallengeMethod());
+		
 		AuthenticationRequest authnReq = ab.build();
+		URI authnReqUri = applyPkceParamstoAuthReqUri(authnReq.toURI());
 
 		// make prepared request available for the browser
 		String currentRP = type == RPType.HONEST ? RPContextConstants.RP1_PREPARED_AUTHNREQ
 				: RPContextConstants.RP2_PREPARED_AUTHNREQ;
-		stepCtx.put(currentRP, authnReq.toURI());
+		stepCtx.put(currentRP, authnReqUri);
 	}
 
+	// util method because nimbus SDK does not allow 
+	// 'wrong' or empty  method parameters
+	protected URI applyPkceParamstoAuthReqUri(URI uri) {
+		CodeVerifier cv = getCodeChallengeVerifier();
+		CodeChallengeMethod cm = getCodeChallengeMethod();
+		if (cv == null && cm == null) {
+			return uri;
+		}
+		
+		UriBuilder ub = UriBuilder.fromUri(uri);
+		if (cm != null) {
+			ub.queryParam("code_challenge_method", cm.getValue());
+		} else {
+			// don't add method param but set to default
+			cm = CodeChallengeMethod.S256;
+		}
+		if (cv != null) {
+			ub.queryParam("code_challenge", CodeChallenge.compute(cm, cv).getValue());
+		}
+
+		return ub.build();
+	}
+	
 	protected abstract URI getAuthReqRedirectUri();
 
 	protected abstract URI getTokenReqRedirectUri();
@@ -224,7 +247,10 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	protected abstract ClaimsRequest getAuthReqClaims();
 
 	@Nullable
-	protected abstract CodeChallenge getCodeChallenge();
+	protected abstract CodeVerifier getCodeChallengeVerifier();
+
+	@Nullable
+	protected abstract CodeChallengeMethod getCodeChallengeMethod();
 
 	@Nullable
 	protected abstract JWT getIdTokenHint();
@@ -324,7 +350,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		try {
 //			Object jsonConfig = new JSONParser(JSONParser.MODE_PERMISSIVE).parse(config);
 			JSONObject jsonConfig = JSONObjectUtils.parse(config);
-			OIDCClientInformation clientInfo = (OIDCClientInformation) ClientInformation.parse(jsonConfig);
+			OIDCClientInformation clientInfo = OIDCClientInformation.parse(jsonConfig);
 			setClientInfo(clientInfo);
 			storeClientInfo();
 			return true;
@@ -494,171 +520,6 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	}
 
 
-	@Nonnull
-	protected AuthenticationResponse processCallback(HttpServletRequest req, HttpServletResponse resp, @Nullable RequestPath path) throws IOException, URISyntaxException, ParseException {
-		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(req);
-//		logger.log("Callback received");
-//		logger.logHttpRequest(req, httpRequest.getQuery());
-
-		CompletableFuture waitForBrowser = (CompletableFuture) stepCtx.get(RPContextConstants.BLOCK_RP_FOR_BROWSER_FUTURE);
-
-
-		// send default response to hanging browser
-		sendCallbackResponse(resp, req);
-		// wait for browser confirmation ...
-		try {
-			// TODO: is this always necessary or only if we need the browser later on?
-			waitForBrowser.get(5, TimeUnit.SECONDS);
-		} catch (TimeoutException | ExecutionException | InterruptedException e) {
-			logger.log("Timeout waiting for browser redirect URL", e);
-		}
-		// ...and extract redirect URI from browser (fragment includes tokens and or error messages in implicit flows)
-		URI callbackUri;
-		String lastUrl = (String) stepCtx.get(RPContextConstants.LAST_BROWSER_URL);
-		callbackUri = new URI(lastUrl);
-		logger.log("Redirect URL as seen in Browser: " + lastUrl);
-
-
-		// parse received authentication response
-		AuthenticationResponse authnResp;
-		try {
-			// handles query, fragment and form_post response_modes
-			authnResp = AuthenticationSuccessResponse.parse(httpRequest);
-			return authnResp;
-		} catch (ParseException e) {
-			// but fails on error response
-		}
-		try {
-			authnResp = AuthenticationErrorResponse.parse(httpRequest);
-
-			String user = (String) stepCtx.get(RPContextConstants.CURRENT_USER_USERNAME);
-			String pass = (String) stepCtx.get(RPContextConstants.CURRENT_USER_USERNAME);
-			String opAuthEndp = opMetaData.getAuthorizationEndpointURI().toString();
-
-			logger.log(String.format("Authentication at %s as %s with password %s failed:", opAuthEndp, user, pass));
-			logger.logHttpRequest(httpRequest, httpRequest.getQuery());
-
-			ErrorObject error = authnResp.toErrorResponse().getErrorObject();
-			logger.log("Error received: " + error.getDescription());
-			logger.log(error.toJSONObject().toString());
-
-			return authnResp;
-		} catch (ParseException e) {
-			logger.log("Invalid authentication response received");
-			logger.logHttpRequest(httpRequest, httpRequest.getQuery());
-
-			return new AuthenticationErrorResponse(callbackUri,
-					new ErrorObject("ParseException", "Failed to parse authentication response"),
-					null, null
-			);
-		}
-	}
-
-
-	@Nonnull
-	protected TokenResponse redeemAuthCode(AuthorizationCode code) throws IOException, ParseException {
-
-		URI redirectURI = getTokenReqRedirectUri();
-		AuthorizationCodeGrant codeGrant = new AuthorizationCodeGrant(code, redirectURI);
-
-		TokenRequest request = new TokenRequest(
-				opMetaData.getTokenEndpointURI(),
-				// temporarily set basic auth to construct the request 
-				new ClientSecretBasic(clientInfo.getID(), clientInfo.getSecret()),
-				codeGrant);
-
-		HTTPRequest httpRequest = request.toHTTPRequest();
-		// preform request customization as per testplan
-		tokenRequestApplyClientAuth(httpRequest);
-
-		logger.log("Token request prepared.");
-		logger.logHttpRequest(httpRequest, httpRequest.getQuery());
-
-		TokenResponse response = OIDCTokenResponseParser.parse(request.toHTTPRequest().send());
-
-		if (!response.indicatesSuccess()) {
-			TokenErrorResponse errorResponse = response.toErrorResponse();
-			logger.log("Code redemption failed");
-			logger.logHttpResponse(errorResponse.toHTTPResponse(), errorResponse.toHTTPResponse().getContent());
-//			stepCtx.put(RPContextConstants.RP_INDICATED_STEP_RESULT, TestStepResult.FAIL);
-			return response.toErrorResponse();
-		}
-
-		OIDCTokenResponse tokenSuccessResponse = (OIDCTokenResponse) response.toSuccessResponse();
-		logger.log("Code redeemed for Token:");
-		logger.logHttpResponse(response.toHTTPResponse(), response.toHTTPResponse().getContent());
-
-//		JWT idToken = tokenSuccessResponse.getOIDCTokens().getIDToken();
-//		AccessToken accessToken = tokenSuccessResponse.getOIDCTokens().getAccessToken();
-//		RefreshToken refreshToken = tokenSuccessResponse.getOIDCTokens().getRefreshToken();
-		return tokenSuccessResponse;
-	}
-
-	protected void tokenRequestApplyClientAuth(HTTPRequest req) {
-		// remove temporary Authorization header
-		req.setHeader("Authorization", null);
-
-		try {
-			String encodedID = URLEncoder.encode(getClientID().getValue(), "UTF-8");
-			String encodedSecret = URLEncoder.encode(getClientSecret().getValue(), "UTF-8");
-
-			StringBuilder sb = new StringBuilder();
-
-			// client_secret_post
-			if (params.getBool(RPParameterConstants.TOKENREQ_FORCE_CLIENTAUTH_POST)) {
-				String encodedQuery = req.getQuery();
-				sb.append(encodedQuery);
-				if (!params.getBool(RPParameterConstants.TOKENREQ_CLIENTAUTH_EMPTY_ID)) {
-					sb.append("&client_id=");
-					sb.append(encodedID);
-				}
-				if (!params.getBool(RPParameterConstants.TOKENREQ_CLIENTAUTH_EMPTY_SECRET)) {
-					sb.append("&client_secret=");
-					sb.append(encodedSecret);
-				}
-				req.setQuery(sb.toString());
-				return;
-			}
-
-			// client_secret_basic
-			sb.append("Basic ");
-			StringBuilder credentials = new StringBuilder();
-			if (!params.getBool(RPParameterConstants.TOKENREQ_CLIENTAUTH_EMPTY_ID)) {
-				credentials.append(getClientID().getValue());
-			}
-			credentials.append(":");
-			if (!params.getBool(RPParameterConstants.TOKENREQ_CLIENTAUTH_EMPTY_SECRET)) {
-				credentials.append(getClientSecret().getValue());
-			}
-
-			String b64Creds = Base64.getEncoder().encodeToString(credentials.toString().getBytes(Charset.forName("UTF-8")));
-			sb.append(b64Creds);
-
-			req.setHeader("Authorization", sb.toString());
-		} catch (UnsupportedEncodingException e) {
-			// utf-8 should be supported ?
-			logger.log("Could not encode client credentials for token request.");
-		}
-	}
-
-	@Nonnull
-	protected UserInfoResponse requestUserInfo(AccessToken at) throws IOException, ParseException {
-		BearerAccessToken bat = (BearerAccessToken) at;
-
-		HTTPResponse httpResponse = new UserInfoRequest(opMetaData.getUserInfoEndpointURI(), bat)
-				.toHTTPRequest()
-				.send();
-		logger.log("UserInfo requested");
-		logger.logHttpResponse(httpResponse, httpResponse.getContent());
-
-		UserInfoResponse userInfoResponse = UserInfoResponse.parse(httpResponse);
-//		if (!userInfoResponse.indicatesSuccess()) {
-//			return null;
-//		}
-//
-//		UserInfo userInfo = userInfoResponse.toSuccessResponse().getUserInfo();
-		return userInfoResponse;
-	}
 
 	// send a response to dangling browser
 	protected void sendCallbackResponse(HttpServletResponse resp, HttpServletRequest req) throws IOException, ParseException {

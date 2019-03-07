@@ -341,8 +341,8 @@
 		</RPConfig-2>
 	</TestStep>
 	
-	
-	<TestStep Name="Downgrade to Implicit">
+	<!--TODO: this requires detection of sucessful implicit token/id_token to fail the test-->
+	<TestStep Name="Downgrade to Implicit FUTURE_WORK">
 		<Description>PrOfESSOS registers a Client with 'grant_type=authorization_code' but requests an implicit response 
 			in the authentication request by using the parameter 'response_type=token id_token'.
 		</Description>
@@ -352,13 +352,41 @@
 			<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.DefaultOPBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
 		</BrowserSimulator>
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
 			<Parameter Key="register-grant-type-authorization_code">true</Parameter>
+			<Parameter Key="authnreq-response_type-token-id_token">true</Parameter>
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+
+	<TestStep Name="Downgrade response_mode FUTURE_WORK">
+		<Description>PrOfESSOS requests an 'id_token' in implicit flow and sets the response_mode to query.
+			The OP must not include tokens in the query parameters as per 'OAuth 2.0 Multiple Response Type Encoding Practices' 
+			sepcification.
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+			<!-- only needed if the default registration should be change -->
+			<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
 			<Parameter Key="register-grant-type-authorization_code">true</Parameter>
+			<Parameter Key="authnreq-response_type-token-id_token">true</Parameter>
+			<Parameter Key="authnreq-response_mode-query">true</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
@@ -367,47 +395,127 @@
 		</RPConfig-2>
 	</TestStep>
 	
-	<!--<TestStep Name="ID Spoofing 1">-->
-		<!--<Description><![CDATA[-->
-			<!--<h1>ID Spoofing Attack</h1>-->
-			<!--In this test we use the Attacker OP and create an ID Token containing the identity (sub) of the victim,-->
-			<!--which is controlled by another OP: Honest OP.-->
+	
 
-			<!--<h2>Prerequisites.</h2>-->
-			<!--The target Client supports the implicit or the code flow. -->
+	<TestStep Name="PKCE 1">
+		<Description>PrOfESSOS tests the validation of the PKCE code_verifier. An invalid code_verifier is submitted 
+			to the OP in the tpken request.
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+			<!-- only needed if the default registration should be change -->
+			<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+		</BrowserSimulator>
 
-			<!--<h2>Execution.</h2>-->
-			<!--PrOfESSOS issues an invalid ID token containing the victim's identity in the "sub".-->
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRP</ImplementationClass>
+			<Parameter Key="authnreq-pkce-method-s256">true</Parameter>
+			<Parameter Key="tokenreq-invalid-pkce-verifier">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
 
-			<!--<h2>Result Evaluation.</h2>-->
-			<!--The attack is successful if the Client accepts and ID Token AND logs the attacker into the victim's account.-->
-			<!---->
-			<!--<h2>Mitigation</h2>-->
-			<!--The identity of an user is represented by the combination of "iss" -->
-			<!--and "sub". Thus, both values MUST be used to authenticate the user.-->
-		<!--]]>-->
+	<TestStep Name="PKCE 2">
+		<Description>PrOfESSOS tests the validation of the PKCE code_verifier. No code_challenge_method parameter is 
+			included in the Authentication Request, which should indicate the default method "S256". For the Token 
+			Request, PrOfESSOS submits the original code_challenge value as if using "plain". In addition, an 
+			(invalid) parameter code_challenge_method=plain is added to the Token Request.
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRP</ImplementationClass>
+			<Parameter Key="authnreq-pkce-exclude-method-param">true</Parameter>
+			<Parameter Key="tokenreq-add-pkce-method-param-plain">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRP</ImplementationClass>
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="PKCE 3">
+		<Description>PrOfESSOS tests the validation of the PKCE code_verifier. Submits a code_verifier from a 
+			different session (that has not been redeemed).
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.OPCodeReuseBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRP</ImplementationClass>
+			<Parameter Key="force-no-redeem-auth-code">true</Parameter>
+			<Parameter Key="tokenreq-pkce-from-other-session">true</Parameter>
+			<Parameter Key="authnreq-pkce-method-s256">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRP</ImplementationClass>
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+	<!--<TestStep Name="PKCE 4 positive test using DefaultRP ">-->
+		<!--<Description>PKCE positive test-->
 		<!--</Description>-->
 		<!--<TestParameters>-->
-			<!--<Parameter Key="discovery_support_needed">false</Parameter>-->
-			<!--<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>-->
+			<!--<Parameter Key="is_single_rp_test">true</Parameter>-->
 		<!--</TestParameters>-->
 		<!--<BrowserSimulator>-->
-			<!--<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>-->
-			<!--<Parameter Key="use_evil_needle">false</Parameter>-->
+			<!--<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>-->
 		<!--</BrowserSimulator>-->
-		<!--<OPConfig-1>-->
-			<!--<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>-->
-		<!--</OPConfig-1>-->
-		<!--<OPConfig-2>-->
-			<!--<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>-->
 
-			<!--&lt;!&ndash; gets the "sub" configured in the Honest OP" &ndash;&gt;-->
-			<!--<Parameter Key="force_honest_idtoken_iss">false</Parameter>-->
-			<!--<Parameter Key="force_honest_idtoken_sub">true</Parameter>-->
-			<!--<Parameter Key="force_honest_idtoken_name">false</Parameter>-->
-			<!--<Parameter Key="force_honest_idtoken_username">false</Parameter>-->
-			<!--<Parameter Key="force_honest_idtoken_email">false</Parameter>-->
-		<!--</OPConfig-2>-->
+		<!--<RPConfig-1>-->
+			<!--<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>-->
+			<!--&lt;!&ndash;<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRP</ImplementationClass>&ndash;&gt;-->
+			<!--&lt;!&ndash;<Parameter Key="force-no-redeem-auth-code">true</Parameter>&ndash;&gt;-->
+			<!--&lt;!&ndash;<Parameter Key="tokenreq-pkce-from-other-session">true</Parameter>&ndash;&gt;-->
+			<!--<Parameter Key="authnreq-pkce-method-s256">true</Parameter>-->
+		<!--</RPConfig-1>-->
+		<!--<RPConfig-2>-->
+			<!--<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRP</ImplementationClass>-->
+			<!--&lt;!&ndash;<Parameter Key="force-use-stored-auth-code">true</Parameter>&ndash;&gt;-->
+		<!--</RPConfig-2>-->
 	<!--</TestStep>-->
+
+	<!--<TestStep Name="PKCE positive test using PkceRP">-->
+		<!--<Description>PKCE positive test-->
+		<!--</Description>-->
+		<!--<TestParameters>-->
+			<!--<Parameter Key="is_single_rp_test">true</Parameter>-->
+		<!--</TestParameters>-->
+		<!--<BrowserSimulator>-->
+			<!--<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>-->
+		<!--</BrowserSimulator>-->
+
+		<!--<RPConfig-1>-->
+			<!--&lt;!&ndash;<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>&ndash;&gt;-->
+			<!--<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRP</ImplementationClass>-->
+			<!--&lt;!&ndash;<Parameter Key="force-no-redeem-auth-code">true</Parameter>&ndash;&gt;-->
+			<!--&lt;!&ndash;<Parameter Key="tokenreq-pkce-from-other-session">true</Parameter>&ndash;&gt;-->
+			<!--<Parameter Key="authnreq-pkce-method-s256">true</Parameter>-->
+		<!--</RPConfig-1>-->
+		<!--<RPConfig-2>-->
+			<!--<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRP</ImplementationClass>-->
+			<!--&lt;!&ndash;<Parameter Key="force-use-stored-auth-code">true</Parameter>&ndash;&gt;-->
+		<!--</RPConfig-2>-->
+	<!--</TestStep>-->
+
 
 </TestPlan>

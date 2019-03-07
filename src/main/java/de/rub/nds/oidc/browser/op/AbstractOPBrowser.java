@@ -143,6 +143,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 
 		String finalUrl = driver.getCurrentUrl();
 		stepCtx.put(RPContextConstants.LAST_BROWSER_URL, finalUrl);
+		logger.log("Final URL as seen in Browser:\n" + finalUrl);
 		// confirm submission of redirect uri
 		blockRP.complete(null);
 
@@ -159,13 +160,22 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 			logger.log("Browser Timeout while waiting for RP");
 			logScreenshot();
 
+			// check for manipulated URI
+			String uriManipulator = (String) stepCtx.get(RPContextConstants.REDIRECT_URI_MANIPULATOR);
+
+//			if (finalUrl.contains(uriManipulator)) {
+//				// TODO: improve this check (parse URL and use getHost ) also make sure that we are not matching the authrequest
+//				logger.log("Redirect to manipulated redirect_uri detected, assuming test failed.");
+//				return TestStepResult.FAIL;
+//			}
+			
 			URI url = UriBuilder.fromUri(finalUrl).build();
-			if (url.getHost().startsWith((String) stepCtx.get(RPContextConstants.REDIRECT_URI_MANIPULATOR))) {
+			if (url != null && url.getHost().startsWith(uriManipulator)) {
 				// TODO: add seleniumProxy (BrowserMob) and intercept DNS/HTTP for manipulated URIs?
 				logger.log("Redirect to manipulated redirect_uri detected, assuming test failed.");
 				return TestStepResult.FAIL;
 			}
-
+			
 			return TestStepResult.UNDETERMINED;
 		}
 	}
