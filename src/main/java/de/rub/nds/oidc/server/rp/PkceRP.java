@@ -1,52 +1,130 @@
 package de.rub.nds.oidc.server.rp;
 
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.ServletUtils;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
+import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
+import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
+import com.nimbusds.openid.connect.sdk.UserInfoResponse;
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
+import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
+import de.rub.nds.oidc.server.RequestPath;
+import de.rub.nds.oidc.test_model.TestStepResult;
 
 import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.concurrent.CompletableFuture;
+
+import static de.rub.nds.oidc.server.rp.RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT;
+import static de.rub.nds.oidc.server.rp.RPContextConstants.BLOCK_RP_FOR_BROWSER_FUTURE;
 import static de.rub.nds.oidc.server.rp.RPParameterConstants.*;
 
 public class PkceRP extends DefaultRP {
-	
-	@Override
-	@Nullable
-	protected CodeChallengeMethod getCodeChallengeMethod(){
-		CodeChallengeMethod cm = null;
-		if (params.getBool(AUTHNREQ_PKCE_METHOD_PLAIN)) {
-			cm = CodeChallengeMethod.PLAIN;
-		}
-		if (params.getBool(AUTHNREQ_PKCE_METHOD_S_256)) {
-			cm = CodeChallengeMethod.S256;
-		}
-		
-		return cm;
-	}
+	private boolean firstrequest = true;
 
 	@Override
-	@Nullable
-	protected CodeVerifier getCodeChallengeVerifier() {
-		CodeVerifier verifier = null;
-		if (params.getBool(AUTHNREQ_PKCE_METHOD_PLAIN) || params.getBool(AUTHNREQ_PKCE_METHOD_S_256) || params.getBool(AUTHNREQ_PKCE_METHOD_EXCLUDED)) {
-			verifier = new CodeVerifier();
-			// store for later
-			if (!params.getBool(TOKENREQ_PKCE_FROM_OTHER_SESSION)) {
-				stepCtx.put(RPContextConstants.STORED_PKCE_VERIFIER, verifier);
-			}
-		}
-		return verifier;
-	}
+	public void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException {
 
-	@Override
-	protected void tokenRequestApplyPKCEParams(HTTPRequest req) {
+		// TODO: this will not parse form_post responses
+		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(req);
+		logger.log("Callback received");
+		logger.logHttpRequest(req, httpRequest.getQuery());
+
+
 		
-		if (params.getBool(TOKENREQ_PKCE_EXCLUDED)) {
+		CompletableFuture waitForBrowser = (CompletableFuture) stepCtx.get(BLOCK_RP_FOR_BROWSER_FUTURE);
+		CompletableFuture<TestStepResult> browserBlocker = (CompletableFuture<TestStepResult>) stepCtx.get(BLOCK_BROWSER_AND_TEST_RESULT);
+
+		AuthenticationResponse authnResp = processCallback(req, resp, path);
+
+		if (!authnResp.indicatesSuccess()) {
+			TestStepResult result = params.getBool(AUTH_ERROR_FAILS_TEST) ? TestStepResult.FAIL : TestStepResult.PASS;
+			browserBlocker.complete(result);
 			return;
 		}
 
+		AccessToken at = null;
+		JWT idToken = null;
+		AuthenticationSuccessResponse successResponse = authnResp.toSuccessResponse();
+		if (successResponse.impliedResponseType().impliesCodeFlow() 
+				&& (!params.getBool(FORCE_NO_REDEEM_AUTH_CODE) || !firstrequest)) {
+			// attempt code redemption
+			TokenResponse tokenResponse = redeemAuthCode(successResponse.getAuthorizationCode());
+			if (!tokenResponse.indicatesSuccess()) {
+				// code redemption failed, error messages have been logged already
+				browserBlocker.complete(TestStepResult.PASS);
+				return;
+			}
+
+			if (params.getBool(SUCCESSFUL_CODE_REDEMPTION_FAILS_TEST)) {
+				logger.log("AuthorizationCode successfully redeemed, assuming test failed.");
+				browserBlocker.complete(TestStepResult.FAIL);
+				return;
+			}
+
+			OIDCTokens tokens = ((OIDCTokenResponse) tokenResponse).getOIDCTokens();
+			at = tokens.getAccessToken();
+			idToken = tokens.getIDToken();
+		} else if (successResponse.impliedResponseType().impliesImplicitFlow()) {
+			at = successResponse.getAccessToken();
+			idToken = successResponse.getIDToken();
+		}
+
+		firstrequest = false;
+		// generate authrequest for second 
+		prepareAuthnReq();
+		
+		if (idToken != null) {
+			boolean found = checkIdToken(idToken, testOPConfig.getUser2Name(), "sub");
+			if (found && params.getBool(USER2_IN_IDTOKEN_SUB_FAILS_TEST)) {
+				browserBlocker.complete(TestStepResult.FAIL);
+				return;
+			}
+		}
+
+		if (at != null) {
+			UserInfoResponse userInfoResponse = requestUserInfo(at);
+			if (userInfoResponse.indicatesSuccess()) {
+				UserInfo ui = userInfoResponse.toSuccessResponse().getUserInfo();
+				boolean match = checkUserInfo(ui, testOPConfig.getUser2Name());
+
+				if (match && params.getBool(USER2_IN_USERINFO_FAILS_TEST)) {
+					browserBlocker.complete(TestStepResult.FAIL);
+					return;
+				}
+			}
+		}
+
+		// TODO: chekcIdToken and checkUserInfo should return TestStepResults and pick targetClaim and searchstring from instance variables
+
+		// TODO: refreshToken handling
+
+//		logger.log("release browser lock");
+		browserBlocker.complete(TestStepResult.PASS);
+		return;
+	}
+	
+
+
+	@Override
+	protected void tokenRequestApplyPKCEParams(HTTPRequest req) {
+
 		CodeVerifier verifier = getStoredPKCEVerifier();
+		if (verifier == null || params.getBool(TOKENREQ_PKCE_EXCLUDED)) {
+			return;
+		}
+
 		String encodedQuery = req.getQuery();
 		StringBuilder sb = new StringBuilder();
 		sb.append(encodedQuery);
@@ -72,12 +150,10 @@ public class PkceRP extends DefaultRP {
 			String last = verifier.getValue().endsWith("A") ? "B" : "A";
 			sb.append(verifier.getValue().substring(0, verifier.getValue().length()-1) + last);
 		} else {
-			if (verifier != null) {
-				sb.append("&code_verifier=");
-				sb.append(verifier.getValue());
-			}
+			sb.append("&code_verifier=");
+			sb.append(verifier.getValue());
 		}
-
+//sb.append("\r\n");
 		req.setQuery(sb.toString());
 	}
 
