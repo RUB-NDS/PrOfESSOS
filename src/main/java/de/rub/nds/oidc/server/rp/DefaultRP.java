@@ -399,15 +399,48 @@ public class DefaultRP extends AbstractRPImplementation {
 //		claims.addUserInfoClaim("email");
 //		claims.addIDTokenClaim("given_name");
 //		claims.addIDTokenClaim("middle_name");
+
+
+
+	@Override
 	@Nullable
-	protected CodeVerifier getCodeChallengeVerifier() {
-		return null;
+	protected CodeChallengeMethod getCodeChallengeMethod(){
+		CodeChallengeMethod cm = null;
+		if (params.getBool(AUTHNREQ_PKCE_METHOD_PLAIN)) {
+			cm = CodeChallengeMethod.PLAIN;
+		}
+		if (params.getBool(AUTHNREQ_PKCE_METHOD_S_256)) {
+			cm = CodeChallengeMethod.S256;
+		}
+
+		return cm;
 	}
 
+	@Override
 	@Nullable
-	protected CodeChallengeMethod getCodeChallengeMethod() {
-		return null;
+	protected CodeVerifier getCodeChallengeVerifier() {
+		CodeVerifier verifier = null;
+		if (params.getBool(AUTHNREQ_PKCE_METHOD_PLAIN) || params.getBool(AUTHNREQ_PKCE_METHOD_S_256) || params.getBool(AUTHNREQ_PKCE_METHOD_EXCLUDED)) {
+			verifier = new CodeVerifier();
+			// store for later
+			if (!params.getBool(TOKENREQ_PKCE_FROM_OTHER_SESSION)) {
+				logger.log("Storing generated CodeVerifier: " + verifier.getValue());
+				stepCtx.put(RPContextConstants.STORED_PKCE_VERIFIER, verifier);
+			}
+		}
+		return verifier;
 	}
+
+
+//	@Nullable
+//	protected CodeVerifier getCodeChallengeVerifier() {
+//		return null;
+//	}
+//
+//	@Nullable
+//	protected CodeChallengeMethod getCodeChallengeMethod() {
+//		return null;
+//	}
 
 	@Nullable
 	protected JWT getIdTokenHint() {
