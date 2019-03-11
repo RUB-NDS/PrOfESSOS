@@ -301,7 +301,6 @@ public class KeyConfusionOP extends DefaultOP {
 			
 			// TODO test this, should be a x509 cert, not json
 			untrustedKeyResponseString = untrustedEntry.getCertificate().toString(); 
-			System.out.println(untrustedKeyResponseString); 
 		}
 
 		/* *********************************** */

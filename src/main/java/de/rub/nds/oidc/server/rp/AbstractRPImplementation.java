@@ -5,7 +5,6 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.auth.Secret;
-import com.nimbusds.oauth2.sdk.client.ClientInformation;
 import com.nimbusds.oauth2.sdk.client.ClientRegistrationResponse;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
@@ -25,7 +24,6 @@ import com.nimbusds.openid.connect.sdk.Prompt;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderConfigurationRequest;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.*;
-import com.sun.org.apache.bcel.internal.classfile.Code;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.test_model.ParameterType;
@@ -149,13 +147,13 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		success &= areStepRequirementsMet();
 
 		// dont run setup steps for RP2 unless neccessary
-		if (
-				RPType.HONEST.equals(type)
-						|| !Boolean.valueOf((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST))
-						|| Boolean.valueOf((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))
-		) {
+		if (RPType.HONEST.equals(type)
+				|| !Boolean.valueOf((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST))
+				|| Boolean.valueOf((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))
+				|| Boolean.valueOf((String) stepCtx.get(RPContextConstants.IS_RP_LEARNING_STEP))) {
+
 			success &= discoverOpIfNeeded();
-			success &= evalConfig();
+			success &= isValidClientConfig();
 			success &= registerClientIfNeeded();
 			if (success) {
 				prepareAuthnReq();
@@ -187,7 +185,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		ab.idTokenHint(getIdTokenHint());
 		ab.endpointURI(opMetaData.getAuthorizationEndpointURI());
 //		ab.codeChallenge(getCodeChallengeVerifier(), getCodeChallengeMethod());
-		
+
 		AuthenticationRequest authnReq = ab.build();
 		URI authnReqUri = applyPkceParamstoAuthReqUri(authnReq.toURI());
 
@@ -197,7 +195,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		stepCtx.put(currentRP, authnReqUri);
 	}
 
-	// util method because nimbus SDK does not allow 
+	// util method because nimbus SDK does not allow
 	// 'wrong' or empty  method parameters
 	protected URI applyPkceParamstoAuthReqUri(URI uri) {
 		CodeVerifier cv = getCodeChallengeVerifier();
@@ -205,7 +203,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		if (cv == null && cm == null) {
 			return uri;
 		}
-		
+
 		UriBuilder ub = UriBuilder.fromUri(uri);
 		if (cm != null) {
 			ub.queryParam("code_challenge_method", cm.getValue());
@@ -219,7 +217,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 		return ub.build();
 	}
-	
+
 	protected abstract URI getAuthReqRedirectUri();
 
 	protected abstract URI getTokenReqRedirectUri();
@@ -338,7 +336,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	}
 
 
-	private boolean evalConfig() {
+	private boolean isValidClientConfig() {
 		// attempt to parse user provided ClientConfig JSON strings
 		String config = type.equals(RPType.HONEST) ? testOPConfig.getClient1Config() : testOPConfig.getClient2Config();
 		if (Strings.isNullOrEmpty(config)) {
@@ -349,7 +347,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		try {
 //			Object jsonConfig = new JSONParser(JSONParser.MODE_PERMISSIVE).parse(config);
 			JSONObject jsonConfig = JSONObjectUtils.parse(config);
-			OIDCClientInformation clientInfo = (OIDCClientInformation) ClientInformation.parse(jsonConfig);
+			OIDCClientInformation clientInfo = OIDCClientInformation.parse(jsonConfig); //(OIDCClientInformation) ClientInformation.parse(jsonConfig);
 			setClientInfo(clientInfo);
 			storeClientInfo();
 			return true;
@@ -462,14 +460,15 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 
 	public boolean discoverOpIfNeeded() throws IOException, ParseException {
-
+		boolean isLearningStep = Boolean.valueOf((String) stepCtx.get(RPContextConstants.IS_RP_LEARNING_STEP));
 		if (!Strings.isNullOrEmpty(testOPConfig.getOPMetadata()) && opMetaData == null) {
 			logger.log("Parsing OP Metadata from provided JSON string");
 			opMetaData = OIDCProviderMetadata.parse(testOPConfig.getOPMetadata());
 			suiteCtx.put(RPContextConstants.DISCOVERED_OP_CONFIGURATION, opMetaData);
 			// throw
-		} else if (opMetaData == null) {
-			if (suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION) == null) {
+		} else if (opMetaData == null || isLearningStep) {
+			if ((isLearningStep && type == RPType.HONEST)
+					|| suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION) == null) {
 				return discoverRemoteOP();
 			} else {
 				opMetaData = (OIDCProviderMetadata) suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION);

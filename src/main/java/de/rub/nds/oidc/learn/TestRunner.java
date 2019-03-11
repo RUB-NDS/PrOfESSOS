@@ -16,6 +16,7 @@
 
 package de.rub.nds.oidc.learn;
 
+import com.google.common.base.Strings;
 import com.nimbusds.oauth2.sdk.ParseException;
 import de.rub.nds.oidc.browser.BrowserSimulator;
 import de.rub.nds.oidc.log.TestStepLogger;
@@ -95,8 +96,6 @@ public class TestRunner {
 		result.setStepReference(learningStep);
 		result.setResult(TestStepResult.NOT_RUN);
 
-		Class testCoordinator = BrowserSimulator.class;
-
 		result.setResult(runTestFun(instReg, result, (simulator) -> {
 			return simulator.run();
 		}, TestStepResult.UNDETERMINED));
@@ -152,9 +151,10 @@ public class TestRunner {
 				return errorResponse;
 			}
 
+			boolean success;
 			// RP-Verifier specific config
 			if (isRPTest()) {
-				boolean success = prepareRPTestStep(instReg, testStepCtx, stepDef, logger);
+				 success = prepareRPTestStep(instReg, testStepCtx, stepDef, logger);
 				if (!success) {
 					return errorResponse;
 				}
@@ -162,7 +162,11 @@ public class TestRunner {
 
 			// OP-Verifier specific config
 			if (isOPTest()) {
-				prepareOPTestStep(instReg, testStepCtx, stepDef, logger);
+				success = prepareOPTestStep(instReg, testStepCtx, stepDef, logger);
+				if (!success) {
+					logger.log("Test step preparation failed.");
+					return errorResponse;
+				}
 			}
 
 			String browserClass = stepDef.getBrowserSimulator().getImplementationClass();
@@ -333,10 +337,14 @@ public class TestRunner {
 		return true;
 	}
 
-	private void prepareOPTestStep(TestInstanceRegistry instReg, Map<String, Object> testStepCtx, TestStepType stepDef,
+	private boolean prepareOPTestStep(TestInstanceRegistry instReg, Map<String, Object> testStepCtx, TestStepType stepDef,
 								   TestStepLogger logger ) throws ImplementationLoadException, IOException, ParseException {
 		// TODO
 		TestOPConfigType remoteOPConfig = (TestOPConfigType) getTestObj().getTestConfig();
+		if (!isMinimalValidOPConfig(remoteOPConfig)) {
+			logger.log("Incomplete configuration provided");
+			return false;
+		}
 
 		testStepCtx.put(RPContextConstants.TARGET_OP_URL, remoteOPConfig.getUrlOPTarget());
 		RPInstance rp1Inst = new RPInstance(stepDef.getRPConfig1(), logger, testSuiteCtx, testStepCtx, remoteOPConfig, RPType.HONEST, hostCfg);
@@ -345,19 +353,19 @@ public class TestRunner {
 		RPInstance rp2Inst = new RPInstance(stepDef.getRPConfig2(), logger, testSuiteCtx, testStepCtx, remoteOPConfig, RPType.EVIL, hostCfg);
 		instReg.addRP2(testId, new ServerInstance<>(rp2Inst, logger));
 
-//				rp1Inst.getImpl().discoverOPIfNeeded();
-//
-//				if (stepDef.getName().equals("LearningStep")) {
-//					// register clients at tested OP
-//					rp1Inst.getImpl().registerClientIfNeeded();
-//					rp2Inst.getImpl().registerClientIfNeeded();
-//				}
-//
-//				rp1Inst.getImpl().prepareAuthnReq();
-//				rp2Inst.getImpl().prepareAuthnReq();
-
 		rp1Inst.getImpl().runTestStepSetup();
 		rp2Inst.getImpl().runTestStepSetup();
+		return true;
+	}
 
+	private boolean isMinimalValidOPConfig(TestOPConfigType cfg) {
+		boolean areMinRequiredFieldsSet = true;
+		areMinRequiredFieldsSet &= !Strings.isNullOrEmpty(cfg.getUser1Name());
+		areMinRequiredFieldsSet &= !Strings.isNullOrEmpty(cfg.getUser2Name());
+		areMinRequiredFieldsSet &= !Strings.isNullOrEmpty(cfg.getUser1Pass());
+		areMinRequiredFieldsSet &= !Strings.isNullOrEmpty(cfg.getUser2Pass());
+		areMinRequiredFieldsSet &= !(Strings.isNullOrEmpty(cfg.getUrlOPTarget()) && Strings.isNullOrEmpty(cfg.getOPMetadata()));
+
+		return areMinRequiredFieldsSet;
 	}
 }

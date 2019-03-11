@@ -7,6 +7,9 @@
 	</SuiteParameters>
 
 	<LearningStep Name="LearningStep">
+		<TestParameters>
+			<Parameter Key="rp.is_learning_teststep">true</Parameter>
+		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.OPLearningBrowser</ImplementationClass>
 		</BrowserSimulator>
