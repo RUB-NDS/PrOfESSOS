@@ -72,15 +72,21 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 
 		// prepare scripts for login and consent page
 		evalScriptTemplates();
-		logger.log(String.format("Using Login script:%n %s", submitScript));
-		// wait until a new html element appears, indicating a page load
-		waitForPageLoad(() -> {
-			driver.executeScript(submitScript);
-			// capture state where the text is entered
-			logScreenshot();
-			logger.log("Login Credentials entered");
-			return null;
-		});
+		try {
+			logger.log(String.format("Using Login script:%n %s", submitScript));
+			// wait until a new html element appears, indicating a page load
+			waitForPageLoad(() -> {
+				driver.executeScript(submitScript);
+				// capture state where the text is entered
+				logScreenshot();
+				logger.log("Login Credentials entered");
+				return null;
+			});
+		} catch (Exception e) {
+			logger.log("Execution of login script failed");
+			logger.log(e.toString());
+			return TestStepResult.UNDETERMINED;
+		}
 		logger.log("HTML element found in Browser.");
 		// wait a bit more in case we have an angular app or some other JS heavy application
 		waitMillis(1000);
@@ -89,14 +95,20 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 		if (driver.getCurrentUrl().startsWith(authnReq.getRedirectionURI().toString())) {
 			logger.log("No consent page encountered in browser");
 		} else {
-			driver.executeScript(getFormSubmitDelayScript());
+			try {
+				driver.executeScript(getFormSubmitDelayScript());
 
-			waitForPageLoad(() -> {
-				driver.executeScript(consentScript);
-				logScreenshot();
-				logger.log("ConsentScript executed, client authorized");
-				return null;
-			});
+				waitForPageLoad(() -> {
+					driver.executeScript(consentScript);
+					logScreenshot();
+					logger.log("ConsentScript executed, client authorized.");
+					return null;
+				});
+			} catch (Exception e) {
+				logger.log("Execution of consent script failed.");
+				logger.log(e.toString());
+				return TestStepResult.UNDETERMINED;
+			}
 		}
 
 		String finalUrl = driver.getCurrentUrl();
