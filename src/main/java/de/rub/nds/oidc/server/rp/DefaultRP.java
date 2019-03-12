@@ -9,12 +9,10 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.http.ServletUtils;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
-import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
-import com.nimbusds.oauth2.sdk.token.BearerTokenError;
 import com.nimbusds.openid.connect.sdk.*;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
@@ -62,6 +60,16 @@ public class DefaultRP extends AbstractRPImplementation {
 			TestStepResult result = params.getBool(AUTH_ERROR_FAILS_TEST) ? TestStepResult.FAIL : TestStepResult.PASS;
 			browserBlocker.complete(result);
 			return;
+		}
+		
+		AuthenticationRequest usedAuthnReq = AuthenticationRequest.parse((URI) supplyHonestOrEvil(
+				() -> stepCtx.get(RP1_PREPARED_AUTHNREQ),
+				() ->stepCtx.get(RP2_PREPARED_AUTHNREQ)
+		));
+		
+		if (authnResp.toSuccessResponse().impliedResponseMode().equals(ResponseMode.QUERY) 
+				&& !usedAuthnReq.getResponseType().impliesCodeFlow()) {
+			browserBlocker.complete(TestStepResult.FAIL);
 		}
 
 		AccessToken at = null;
@@ -143,42 +151,50 @@ public class DefaultRP extends AbstractRPImplementation {
 		URI callbackUri;
 		String lastUrl = (String) stepCtx.get(RPContextConstants.LAST_BROWSER_URL);
 		callbackUri = new URI(lastUrl);
-		logger.log("Redirect URL as seen in Browser: " + lastUrl);
+//		logger.log("Redirect URL as seen in Browser: " + lastUrl);
 
 
 		// parse received authentication response
 		AuthenticationResponse authnResp;
 		try {
-			// handles query, fragment and form_post response_modes
-			authnResp = AuthenticationSuccessResponse.parse(httpRequest);
-			return authnResp;
+			// handle query and fragment response_modes
+			authnResp = AuthenticationResponseParser.parse(callbackUri);
+
 		} catch (ParseException e) {
-			// but fails on error response
+			// form_post response_modes
+			// TODO: Untested
+			try {
+				authnResp = AuthenticationResponseParser.parse(getRedirectUri(), httpRequest.getQueryParameters());
+			} catch (ParseException ex) {
+				logger.log("Failed to parse Authentication Response.", ex);
+				logger.log("Earlier exception was: ", e);
+
+				logger.log("Invalid authentication response received");
+				logger.logHttpRequest(httpRequest, httpRequest.getQuery());
+
+				return new AuthenticationErrorResponse(callbackUri,
+						new ErrorObject("ParseException", "Failed to parse authentication response"),
+						null, null
+				);
+			}
 		}
-		try {
-			authnResp = AuthenticationErrorResponse.parse(httpRequest);
-
-			String user = (String) stepCtx.get(RPContextConstants.CURRENT_USER_USERNAME);
-			String pass = (String) stepCtx.get(RPContextConstants.CURRENT_USER_USERNAME);
-			String opAuthEndp = opMetaData.getAuthorizationEndpointURI().toString();
-
-			logger.log(String.format("Authentication at %s as %s with password %s failed:", opAuthEndp, user, pass));
-			logger.logHttpRequest(httpRequest, httpRequest.getQuery());
-
-			ErrorObject error = authnResp.toErrorResponse().getErrorObject();
-			logger.log("Error received: " + error.getDescription());
-			logger.log(error.toJSONObject().toString());
-
+			
+		if (authnResp.indicatesSuccess()) {
 			return authnResp;
-		} catch (ParseException e) {
-			logger.log("Invalid authentication response received");
-			logger.logHttpRequest(httpRequest, httpRequest.getQuery());
-
-			return new AuthenticationErrorResponse(callbackUri,
-					new ErrorObject("ParseException", "Failed to parse authentication response"),
-					null, null
-			);
 		}
+		
+		String user = (String) stepCtx.get(RPContextConstants.CURRENT_USER_USERNAME);
+		String pass = (String) stepCtx.get(RPContextConstants.CURRENT_USER_USERNAME);
+		String opAuthEndp = opMetaData.getAuthorizationEndpointURI().toString();
+
+		logger.log(String.format("Authentication at %s as %s with password %s failed:", opAuthEndp, user, pass));
+		logger.logHttpRequest(httpRequest, httpRequest.getQuery());
+
+		ErrorObject error = authnResp.toErrorResponse().getErrorObject();
+		logger.logCodeBlock(error.getDescription(), "Error received: ");
+		logger.logCodeBlock(error.toJSONObject().toString(), null);
+
+		return authnResp;
 	}
 
 
@@ -352,12 +368,24 @@ public class DefaultRP extends AbstractRPImplementation {
 	}
 
 	protected ResponseType getAuthReqResponseType() {
-		if (params.getBool(AUTHNREQ_RESPONSE_TYPE_TOKEN_IDTOKEN)) {
-			return new ResponseType("token id_token");
+		ResponseType rt = new ResponseType();
+		
+		if (params.getBool(AUTHNREQ_RESPONSE_TYPE_TOKEN)) {
+			rt.add(ResponseType.Value.TOKEN);
+		}
+		if (params.getBool(AUTHNREQ_RESPONSE_TYPE_IDTOKEN)) {
+			rt.add(OIDCResponseTypeValue.ID_TOKEN);
+		}
+		if (params.getBool(AUTHNREQ_RESPONSE_TYPE_CODE)) {
+			rt.add(ResponseType.Value.CODE);
 		}
 
-		// default
-		return new ResponseType("code");
+		if (rt.isEmpty()) {
+			// default
+			rt.add(ResponseType.Value.CODE);
+		}
+		
+		return rt;
 	}
 
 	protected Scope getAuthReqScope() {
@@ -384,7 +412,16 @@ public class DefaultRP extends AbstractRPImplementation {
 
 	@Nullable
 	protected ResponseMode getAuthReqResponseMode() {
-		return null;
+		
+		if (params.getBool(AUTHNREQ_RESPONSE_MODE_FRAGMENT)) {
+			return ResponseMode.FRAGMENT;
+		}
+		if (params.getBool(AUTHNREQ_RESPONSE_TYPE_FORM_POST)) {
+			// TODO: check if a form_post response is succesfully reeceived
+			return ResponseMode.FORM_POST;
+		}
+					
+		return ResponseMode.QUERY;
 	}
 
 	@Nullable
@@ -427,13 +464,15 @@ public class DefaultRP extends AbstractRPImplementation {
 	@Nullable
 	protected CodeVerifier getCodeChallengeVerifier() {
 		CodeVerifier verifier = null;
-		if (params.getBool(AUTHNREQ_PKCE_METHOD_PLAIN) || params.getBool(AUTHNREQ_PKCE_METHOD_S_256) || params.getBool(AUTHNREQ_PKCE_METHOD_EXCLUDED)) {
+		if (params.getBool(AUTHNREQ_PKCE_METHOD_PLAIN) || params.getBool(AUTHNREQ_PKCE_METHOD_S_256)
+				|| params.getBool(AUTHNREQ_PKCE_METHOD_EXCLUDED)) {
 			verifier = new CodeVerifier();
 			// store for later
-			if (!params.getBool(TOKENREQ_PKCE_FROM_OTHER_SESSION)) {
-				logger.log("Storing generated CodeVerifier: " + verifier.getValue());
-				stepCtx.put(RPContextConstants.STORED_PKCE_VERIFIER, verifier);
-			}
+			logger.log("Storing generated CodeVerifier: " + verifier.getValue());
+			stepCtx.put(RPContextConstants.STORED_PKCE_VERIFIER, verifier);
+		}
+		if (params.getBool(AUTHNREQ_PKCE_CHALLENGE_EXCLUDED)) {
+			return null;
 		}
 		return verifier;
 	}

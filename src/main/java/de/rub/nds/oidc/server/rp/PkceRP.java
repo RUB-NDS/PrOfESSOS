@@ -32,15 +32,13 @@ import static de.rub.nds.oidc.server.rp.RPParameterConstants.*;
 
 public class PkceRP extends DefaultRP {
 	private boolean firstrequest = true;
-
+	private CodeVerifier firstVerifier;
+	
 	@Override
 	public void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException {
-
-		// TODO: this will not parse form_post responses
 		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(req);
 		logger.log("Callback received");
 		logger.logHttpRequest(req, httpRequest.getQuery());
-
 
 		
 		CompletableFuture waitForBrowser = (CompletableFuture) stepCtx.get(BLOCK_RP_FOR_BROWSER_FUTURE);
@@ -82,6 +80,7 @@ public class PkceRP extends DefaultRP {
 		}
 
 		firstrequest = false;
+		firstVerifier = getStoredPKCEVerifier();
 		// generate authrequest for second 
 		prepareAuthnReq();
 		
@@ -106,10 +105,9 @@ public class PkceRP extends DefaultRP {
 			}
 		}
 
-		// TODO: chekcIdToken and checkUserInfo should return TestStepResults and pick targetClaim and searchstring from instance variables
-
-		// TODO: refreshToken handling
-
+		// TODO: chekcIdToken and checkUserInfo should return TestStepResults and pick targetClaim 
+		//  and searchstring from instance variables
+		
 //		logger.log("release browser lock");
 		browserBlocker.complete(TestStepResult.PASS);
 		return;
@@ -121,10 +119,17 @@ public class PkceRP extends DefaultRP {
 	protected void tokenRequestApplyPKCEParams(HTTPRequest req) {
 
 		CodeVerifier verifier = getStoredPKCEVerifier();
+		if (firstrequest) {
+			firstVerifier = verifier;
+		}
+		if (!firstrequest && params.getBool(TOKENREQ_PKCE_FROM_OTHER_SESSION)) {
+			verifier = firstVerifier;
+		}
 		if (verifier == null || params.getBool(TOKENREQ_PKCE_EXCLUDED)) {
 			return;
 		}
 
+		
 		String encodedQuery = req.getQuery();
 		StringBuilder sb = new StringBuilder();
 		sb.append(encodedQuery);
@@ -142,9 +147,7 @@ public class PkceRP extends DefaultRP {
 		}
 
 		if (params.getBool(TOKENREQ_PKCE_INVALID)){
-			// attempt downgrade in tokenreq, invalid per RFC7636
 			sb.append("&code_verifier=");
-
 			// change last char
 			// only certain ASCII chars are allowed; to keep it simple, use A or B
 			String last = verifier.getValue().endsWith("A") ? "B" : "A";
@@ -153,7 +156,7 @@ public class PkceRP extends DefaultRP {
 			sb.append("&code_verifier=");
 			sb.append(verifier.getValue());
 		}
-//sb.append("\r\n");
+		
 		req.setQuery(sb.toString());
 	}
 

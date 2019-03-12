@@ -48,6 +48,7 @@ public class RPParameterConstants {
 	public static final String AUTHNREQ_PKCE_METHOD_PLAIN = "authnreq-pkce-method-plain";
 	public static final String AUTHNREQ_PKCE_METHOD_S_256 = "authnreq-pkce-method-s256";
 	public static final String AUTHNREQ_PKCE_METHOD_EXCLUDED = "authnreq-pkce-exclude-method-param";
+	public static final String AUTHNREQ_PKCE_CHALLENGE_EXCLUDED = "authnreq-pkce-exclude-challenge-param";
 
 	public static final String TOKENREQ_FORCE_EVIL_REDIRURI = "tokenreq-force-evil-redirect-uri";
 	public static final String TOKENREQ_REDIRURI_EXCLUDED = "tokenreq-exclude-redirect-uri";
