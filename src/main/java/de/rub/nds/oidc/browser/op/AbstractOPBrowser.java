@@ -75,7 +75,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 
 	protected TestStepResult runUserAuth(RPType rpType) throws InterruptedException {
 //		TestStepResult result = TestStepResult.NOT_RUN;
-		logger.log("run userAuth");
+//		logger.log("run userAuth");
 
 		// store user credentials to make them accessible to RP
 		stepCtx.put(RPContextConstants.CURRENT_USER_USERNAME, userName);
@@ -91,7 +91,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 		AuthenticationRequest authnReq = getAuthnReq(rpType);
 
 		// run login script
-		logger.log(String.format("AuthnReq: opening browser with URL '%s'.", authnReq.toURI().toString()));
+		logger.logCodeBlock(authnReq.toURI().toString(), "Authentication Request URL:");
 		driver.get(authnReq.toURI().toString());
 		// delay form submissions for screenshots
 		driver.executeScript(getFormSubmitDelayScript());

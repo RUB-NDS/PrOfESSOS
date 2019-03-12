@@ -61,6 +61,10 @@ body {
 	color: #fff;
 }
 
+.log-entry div pre {
+	white-space: pre-wrap;
+}
+
 mark.err {
 	background-color: #cccccc;
 	color: red;

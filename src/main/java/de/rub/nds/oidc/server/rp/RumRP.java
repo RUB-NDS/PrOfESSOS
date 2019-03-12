@@ -84,7 +84,7 @@ public class RumRP extends DefaultRP {
 			}
 
 			OIDCTokens tokens = ((OIDCTokenResponse) tokenResponse).getOIDCTokens();
-			logger.log("TokenRequest successful: " + tokens.toJSONObject().toJSONString());
+//			logger.log("TokenRequest successful: " + tokens.toJSONObject().toJSONString());
 
 			if (params.getBool(SUCCESSFUL_CODE_REDEMPTION_FAILS_TEST)) {
 				logger.log("AuthorizationCode successfully redeemed, assuming test failed.");
@@ -94,46 +94,8 @@ public class RumRP extends DefaultRP {
 
 			browserBlocker.complete(TestStepResult.PASS);
 		}
-
-
-//		else if (successResponse.impliedResponseType().impliesImplicitFlow()) {
-//			at = successResponse.getAccessToken();
-//			idToken = successResponse.getIDToken();
-//		}
-
-
-		// do we need to issue a token request?
-//		OIDCTokenResponse tokenResponse = redeemAuthCode(successResponse);
-//		if (tokenResponse == null) {
-//			// error messages have been logged already
-//			browserBlocker.complete(TestStepResult.PASS);
-//			return;
-//		} else {
-//			logger.log("Code sucessfully redeemed");
-//			logger.logHttpResponse(tokenResponse.toHTTPResponse(), tokenResponse.toHTTPResponse().getContent());
-//
-//			// for logging
-//			requestUserInfo(tokenResponse.getTokens().getAccessToken());
-//
-//			browserBlocker.complete(TestStepResult.FAIL);
-//			return;
-//		}
+		
 	}
 
-
-//	@Override
-//	@Nullable
-//	protected URI getAuthReqRedirectUri() {
-//		URI redirURI = params.getBool(AUTHNREQ_FORCE_EVIL_REDIRURI) ? getEvilRedirectUri() : getRedirectUri();
-//		
-//		boolean subdom = params.getBool(RPParameterConstants.AUTHNREQ_ADD_SUBDOMAIN_REDIRURI);
-//		boolean path = params.getBool(RPParameterConstants.AUTHNREQ_ADD_PATHSUFFIX_REDIRURI);
-//		if (subdom || path) {
-//			return manipulateURI(redirURI, subdom, path);
-//		}
-//	
-//		return redirURI;
-//	}
-
-
+	
 }

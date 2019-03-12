@@ -411,6 +411,8 @@ var OPIV = (function(module) {
 				entryContainer.appendChild(createHttpRequestLogEntry(entry.HttpRequest));
 			} else if (entry.HttpResponse) {
 				entryContainer.appendChild(createHttpResponseLogEntry(entry.HttpResponse));
+			} else if (entry.CodeBlock) {
+				entryContainer.appendChild(createCodeBlockLogEntry(entry.CodeBlock))
 			}
 		}
 	}
@@ -424,6 +426,22 @@ var OPIV = (function(module) {
 		//textContainer.appendChild(textNode);
 		textContainer.innerHTML = text.replace(/\n/g, "<br>");
 		return textContainer;
+	}
+	
+	function createCodeBlockLogEntry(listing) {
+		var container = document.createElement("div");
+
+		if (listing.Description) {
+			var description = document.createElement("p");
+			description.innerHTML = listing.Description;
+			container.appendChild(description);
+		}
+		var content = document.createElement("pre");
+		content.style.whiteSpace = "pre-wrap";
+		content.appendChild(document.createTextNode(listing.Content));
+		container.appendChild(content);
+
+		return container;
 	}
 
 	function createScreenshotLogEntry(screenshot) {
@@ -456,7 +474,7 @@ var OPIV = (function(module) {
 		var methodDoc = document.createElement("mark");
 		methodDoc.innerHTML = method;
 		if (host) {
-			// TODO: why do all requests miss the Host header???
+			// TODO: why do some requests miss the Host header?
 			var urlDoc = document.createTextNode("[" + host + "] " + url);
 		} else {
 			var urlDoc = document.createTextNode(" " + url);

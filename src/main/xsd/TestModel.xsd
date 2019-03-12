@@ -146,6 +146,7 @@ limitations under the License.
 			<element name="Date" type="dateTime" />
 			<choice>
 				<element name="Text" type="string" />
+				<element name="CodeBlock" type="tm:CodeBlockEntryType" />
 				<element name="Screenshot" type="tm:ScreenshotEntryType" />
 				<element name="HttpRequest" type="tm:HttpRequestEntryType" />
 				<element name="HttpResponse" type="tm:HttpResponseEntryType" />
@@ -173,6 +174,13 @@ limitations under the License.
 			<element name="Status" type="nonNegativeInteger" />
 			<element name="Header" type="tm:HeaderType" minOccurs="0" maxOccurs="unbounded" />
 			<element name="Body" type="string" minOccurs="0" />
+		</sequence>
+	</complexType>
+	
+	<complexType name="CodeBlockEntryType">
+		<sequence>
+			<element name="Description" type="string" minOccurs="0" />
+			<element name="Content" type="string"/>
 		</sequence>
 	</complexType>
 

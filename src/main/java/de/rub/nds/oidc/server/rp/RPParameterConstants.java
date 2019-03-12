@@ -39,11 +39,15 @@ public class RPParameterConstants {
 	public static final String AUTHNREQ_ADD_SUBDOMAIN_REDIRURI = "authnreq-random-subdomain-in-redirect-uri";
 	public static final String AUTHNREQ_ADD_PATHSUFFIX_REDIRURI = "authnreq-random-path-suffix-in-redirect-uri";
 
-	//	public static final String AUTHNREQ_RESPONSE_TYPE_CODE = "authnreq-response_type-code"; // default
+	public static final String AUTHNREQ_RESPONSE_MODE_QUERY = "authnreq-response_mode-query";
+	public static final String AUTHNREQ_RESPONSE_MODE_FRAGMENT = "authnreq-response_mode-fragment";
+	public static final String AUTHNREQ_RESPONSE_TYPE_FORM_POST = "authnreq-response_mode-formpost"; // not yet implemented
+	
+	
+	public static final String AUTHNREQ_RESPONSE_TYPE_CODE = "authnreq-response_type-code"; // default
 	public static final String AUTHNREQ_RESPONSE_TYPE_TOKEN = "authnreq-response_type-token";
 	public static final String AUTHNREQ_RESPONSE_TYPE_IDTOKEN = "authnreq-response_type-id_token";
-	public static final String AUTHNREQ_RESPONSE_TYPE_TOKEN_IDTOKEN = "authnreq-response_type-token-id_token";
-	public static final String AUTHNREQ_RESPONSE_TYPE_CODE_TOKEN_IDTOKEN = "authnreq-response_type-code-token-id_token";
+
 
 	public static final String AUTHNREQ_PKCE_METHOD_PLAIN = "authnreq-pkce-method-plain";
 	public static final String AUTHNREQ_PKCE_METHOD_S_256 = "authnreq-pkce-method-s256";

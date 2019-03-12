@@ -80,7 +80,7 @@ public class KeyConfusionOP extends DefaultOP {
 
         // TODO: add default case to make sure signedJwt is never null
 		Base64 header = new Base64(signedJwt.serialize().split("\\.")[0]);
-        logger.log("Generated id_token header:\n\n" + header.decodeToString());
+        logger.logCodeBlock(header.decodeToString(), "Generated id_token header:");
 //        logger.log("generated id_token body:\n" + signedJwt.getPayload().toString());
 
         return signedJwt;
@@ -494,25 +494,27 @@ public class KeyConfusionOP extends DefaultOP {
 	/**
 	 * KeyConfusion with SessionOverwriting
 	 */
-    private SignedJWT sessionOverwritingKeyConfusion(JWTClaimsSet claims) throws GeneralSecurityException {
+	private SignedJWT sessionOverwritingKeyConfusion(JWTClaimsSet claims) throws GeneralSecurityException {
 		// replace client ID (use same ID for evil and honest
-        OIDCClientInformation cinfo = (OIDCClientInformation) stepCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL);
-        logger.log(cinfo.getOIDCMetadata().toString());
+		OIDCClientInformation cinfo = (OIDCClientInformation) stepCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL);
+		logger.log(cinfo.getOIDCMetadata().toString());
 
-        JWSHeader.Builder hb = new JWSHeader.Builder(JWSAlgorithm.HS256).type(JOSEObjectType.JWT);
-        JWSHeader header = hb.build();
-        SignedJWT signedJwt = new SignedJWT(header, claims);
+		JWSHeader.Builder hb = new JWSHeader.Builder(JWSAlgorithm.HS256).type(JOSEObjectType.JWT);
+		JWSHeader header = hb.build();
+		SignedJWT signedJwt = new SignedJWT(header, claims);
 
-        try {
-        	byte [] key = cinfo.getSecret().getValueBytes();
-        	if (key == null) {logger.log("key is null...");}
-            JWSSigner signer = new MACSigner(key);
-            signedJwt.sign(signer);
+		try {
+			byte [] key = cinfo.getSecret().getValueBytes();
+			if (key == null) {
+				logger.log("Error: client_secret not set.");
+			}
+			JWSSigner signer = new MACSigner(key);
+			signedJwt.sign(signer);
 
-            return signedJwt;
-        } catch (JOSEException e) {
-            throw new GeneralSecurityException(e);
-        }
-    }
+			return signedJwt;
+		} catch (JOSEException e) {
+			throw new GeneralSecurityException(e);
+		}
+	}
 
 }

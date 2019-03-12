@@ -140,8 +140,6 @@ public class SubClaimSpoofingOP extends DefaultOP {
 		
 		if (params.getBool(OPParameterConstants.FORCE_TOKENHEADER_HONEST_ISS)) {
 			jsonHeader.put("iss", getHonestIssuer());
-			logger.log("generated Header w issuer" + jsonHeader.toJSONString());
-			
 		}
 		if (params.getBool(OPParameterConstants.FORCE_TOKENHEADER_HONEST_SUB)) {
 			jsonHeader.put("sub", getHonestSubject());
@@ -154,7 +152,7 @@ public class SubClaimSpoofingOP extends DefaultOP {
 		}
 
 
-		logger.log("Generated JWT Header:" + jsonHeader.toJSONString());
+		logger.logCodeBlock(jsonHeader.toJSONString(), "Generated JWT Header:");
 		
 		JWSHeader.Builder headerBuilder = new JWSHeader.Builder(JWSAlgorithm.RS256)
 				.type(JOSEObjectType.JWT);
@@ -167,7 +165,7 @@ public class SubClaimSpoofingOP extends DefaultOP {
 		signedJwt.sign(signer);
 
 		/*
-			// TODO: Encryption is missing11!!
+			// TODO: TestCase with actual encryption is missing
 			Retrieve JWK from client
 			filter for RSA Public key qith use claim encryption
 			encrypt 

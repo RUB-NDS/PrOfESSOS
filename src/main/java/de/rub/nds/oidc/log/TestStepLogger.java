@@ -16,14 +16,11 @@
 
 package de.rub.nds.oidc.log;
 
+import com.google.common.base.Strings;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import de.rub.nds.oidc.test_model.HeaderType;
-import de.rub.nds.oidc.test_model.HttpRequestEntryType;
-import de.rub.nds.oidc.test_model.HttpResponseEntryType;
-import de.rub.nds.oidc.test_model.LogEntryType;
-import de.rub.nds.oidc.test_model.ScreenshotEntryType;
-import de.rub.nds.oidc.test_model.TestStepResultType;
+import de.rub.nds.oidc.test_model.*;
+
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -102,6 +99,18 @@ public class TestStepLogger {
 		log(e);
 	}
 
+	public void logCodeBlock(@Nonnull String content, @Nullable String description) {
+		CodeBlockEntryType entry = new CodeBlockEntryType();
+		if (!Strings.isNullOrEmpty(description)) {
+			entry.setDescription(description);
+		}
+		entry.setContent(content);
+		
+		LogEntryType e = createLogEntry();
+		e.setCodeBlock(entry);
+		log(e);
+	}
+	
 	public void logHttpRequest(@Nonnull HttpServletRequest req, @Nullable String body) {
 		HttpRequestEntryType entry = new HttpRequestEntryType();
 
