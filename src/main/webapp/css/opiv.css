@@ -13,12 +13,18 @@ body {
 	height: 20px;
 }
 
-#learn-log img {
+.log-entry img:not(.hide-image) {
 	border: 2px;
 	border-style: groove;
 	border-radius: 5px;
 	margin: 2px;
 	padding: 5px;
+}
+
+.hide-image {
+	border : none;
+	padding : 5px;
+	marginRight : 3px;
 }
 
 .learn-controls .tab-content form {
@@ -141,3 +147,4 @@ code {
 .panel-default .panel-heading {
 	background-image: none;
 }
+

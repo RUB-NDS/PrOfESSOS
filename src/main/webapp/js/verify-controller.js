@@ -370,14 +370,18 @@ var OPIV = (function(module) {
 	function createHideImage(containerToHide, hideText) {
 		var hideImg = document.createElement("img");
 		hideImg.src = "img/arrow-right.png";
-		hideImg.width = 20;
+		hideImg.width = 25;
+		hideImg.className = "hide-image";
 		var hideImgLink = document.createElement("a");
 		hideImgLink.appendChild(hideImg);
 		hideImgLink.href = "javascript:;";
-		hideImgLink.innerHTML = hideText;
+		let text = document.createElement("b");
+		text.textContent = hideText;
+		hideImgLink.appendChild(text);
+
 		hideImgLink.onclick = function() {
 			if (containerToHide.style.display === "none") {
-				containerToHide.style.display = null;
+				containerToHide.style.display = "block";
 				hideImg.src = "img/arrow-down.png";
 			} else {
 				containerToHide.style.display = "none";
@@ -569,13 +573,13 @@ var OPIV = (function(module) {
 	function createHttpHeaders(headers) {
 		var container = document.createElement("div");
 
-		var caption = document.createElement("b");
-		caption.innerHTML = "Headers";
-		container.appendChild(caption);
+		// var caption = document.createElement("b");
+		// caption.innerHTML = "Headers";
+		// container.appendChild(caption);
 
 		var dl = document.createElement("dl");
 		dl.className = "dl-horizontal";
-		container.appendChild(createHideImage(dl, "->"));
+		container.appendChild(createHideImage(dl, "Headers"));
 		container.appendChild(dl);
 
 		if (headers) {
