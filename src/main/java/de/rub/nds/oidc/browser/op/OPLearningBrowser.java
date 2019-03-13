@@ -7,6 +7,7 @@ import de.rub.nds.oidc.test_model.TestStepResult;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.net.URI;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -60,13 +61,17 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 		CompletableFuture<TestStepResult> blockAndResult = new CompletableFuture<>();
 		stepCtx.put(RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT, blockAndResult);
 
-		// build authnReq and call in browser
-		AuthenticationRequest authnReq = getAuthnReq(rpType);
+		// fetch prepared authentication request and start authentication
+//		AuthenticationRequest authnReq = getAuthnReq(rpType);
+		String authnReq = getAuthnReqString(rpType);
+		URI honestRedirect = (URI) stepCtx.get(RPContextConstants.RP1_PREPARED_REDIRECT_URI);
+		URI evilRedirect = (URI) stepCtx.get(RPContextConstants.RP2_PREPARED_REDIRECT_URI);
 
 		// run login script
-		logger.logCodeBlock(authnReq.toURI().toString(), "Authentication Request, opening browser with URL:");
-		driver.get(authnReq.toURI().toString());
-		// delay form submissions for screenshots
+		logger.logCodeBlock(authnReq, "Authentication Request, opening browser with URL:");
+		driver.get(authnReq);
+		// delay form submissions to allow for taking screenshots
+		// using selenium (after executeScript() returned)
 		driver.executeScript(getFormSubmitDelayScript());
 		waitMillis(500);
 
@@ -92,7 +97,8 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 		waitMillis(1000);
 
 		// don't run consentScript if we have already been redirected back to RP
-		if (driver.getCurrentUrl().startsWith(authnReq.getRedirectionURI().toString())) {
+		String location = driver.getCurrentUrl();
+		if (location.startsWith(honestRedirect.toString()) || location.startsWith(evilRedirect.toString())) {
 			logger.log("No consent page encountered in browser");
 		} else {
 			try {

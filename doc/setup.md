@@ -18,10 +18,15 @@ Some configurations for the demo RP and Idp can be adjusted in `./docker/simple-
 
 ## Production
 
+The docker-compose file `docker-compose.prod.yml` contains basic configuration that should be adjusted to the specific requirements of the deployment. Its main purpose is to not expose debugging ports as it is done in the override file for development. Furthermore, the demo RP and the demo IdP are not part of the composed setup.
 
-The docker-compose file `docker-compose.prod.yml` contains basic configuration that should be adjusted ot the specific requirements of the deployment. Its main purpose is to not expose debugging ports as it is done in the override file for development.
+The compose file must explicitly provided as argument to make use of this configuration:
+```
+docker-compose -f docker-compose.prod.yml up --build
+```
+Also note that the compiled .war archive is not mounted into the container when using the productive docker-compose configuration. For this reason the container needs to be recreated after any changes have been made to the web archive.
 
 *TODO*
-- adjust the URLs in `src/main/resources/servernames.properties` if necessary
+- adjust the settings in `src/main/resources/servernames.properties` if necessary
 - TLS termination using a reverse proxy (config examples?)
-- tbc ...
+- to be continued...

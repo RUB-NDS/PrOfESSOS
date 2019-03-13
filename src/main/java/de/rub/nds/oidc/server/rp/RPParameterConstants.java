@@ -38,11 +38,16 @@ public class RPParameterConstants {
 	public static final String AUTHNREQ_FORCE_EVIL_REDIRURI = "authnreq-force-evil-redirect-uri";
 	public static final String AUTHNREQ_ADD_SUBDOMAIN_REDIRURI = "authnreq-random-subdomain-in-redirect-uri";
 	public static final String AUTHNREQ_ADD_PATHSUFFIX_REDIRURI = "authnreq-random-path-suffix-in-redirect-uri";
+	public static final String AUTHNREQ_RU_PP_HONEST_FIRST = "authnreq-redirect_uri-parameter-pollution-honest-first";
+	public static final String AUTHNREQ_RU_PP_EVIL_FIRST = "authnreq-redirect_uri-parameter-pollution-evil-first";
+	public static final String AUTHNREQ_HONEST_USERPART_REDIRURI = "authnreq-honesturl-in-userpart-of-redirect-uri";
+	public static final String USERINFOPART_EXCLUDE_SCHEME = "authnreq-userinfo-scheme-excluded";
+	public static final String USERINFOPART_URL_ENCODE = "authnreq-userinfo-url-encode";
 
 	public static final String AUTHNREQ_RESPONSE_MODE_QUERY = "authnreq-response_mode-query";
 	public static final String AUTHNREQ_RESPONSE_MODE_FRAGMENT = "authnreq-response_mode-fragment";
 	public static final String AUTHNREQ_RESPONSE_TYPE_FORM_POST = "authnreq-response_mode-formpost";
-	
+
 	public static final String AUTHNREQ_RESPONSE_TYPE_CODE = "authnreq-response_type-code"; // default
 	public static final String AUTHNREQ_RESPONSE_TYPE_TOKEN = "authnreq-response_type-token";
 	public static final String AUTHNREQ_RESPONSE_TYPE_IDTOKEN = "authnreq-response_type-id_token";
@@ -65,7 +70,7 @@ public class RPParameterConstants {
 	public static final String TOKENREQ_PKCE_INVALID = "tokenreq-invalid-pkce-verifier";
 	public static final String TOKENREQ_PKCE_EXCLUDED = "tokenreq-pkce-verifier-excluded";
 	public static final String TOKENREQ_PKCE_FROM_OTHER_SESSION = "tokenreq-pkce-from-other-session";
-	
+
 	public static final String FORCE_CODE_REUSE_USER = "force_auth-code_reuse_user";
 	public static final String FORCE_NO_REDEEM_AUTH_CODE = "force-no-redeem-auth-code";
 //	public static final String FORCE_USE_STORED_AUTH_CODE 	= "force-use-stored-auth-code";

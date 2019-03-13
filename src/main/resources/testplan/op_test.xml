@@ -22,7 +22,11 @@
 	</LearningStep>
 
 	<TestStep Name="Authorization Code Reuse 1">
-		<Description>PrOfESSOS attempts to redeem an authorization code that has already been used by another user of the same client</Description>
+		<Description>
+			<![CDATA[
+			PrOfESSOS attempts to redeem an Authorization Code that has already been used by another user of the same client
+			]]>
+		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
@@ -32,7 +36,7 @@
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
-			
+
 			<Parameter Key="force_auth-code_reuse_user">true</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
@@ -42,7 +46,12 @@
 	</TestStep>
 
 	<TestStep Name="Authorization Code Reuse 2">
-		<Description>PrOfESSOS attempts to redeem an authorization code that was issued to and has already been used by a different client - Honest RP</Description>
+		<Description>
+			<![CDATA[
+			PrOfESSOS attempts to redeem an Authorization Code that was issued to and has already been used by a
+			different client - Honest RP.
+			]]>
+		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">false</Parameter>
 		</TestParameters>
@@ -52,12 +61,12 @@
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
-			
+
 			<Parameter Key="force-no-redeem-auth-code">false</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
-			
+
 			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
 		</RPConfig-2>
 	</TestStep>
@@ -65,8 +74,12 @@
 
 
 	<TestStep Name="Redirect URI Manipulation 1">
-		<Description>PrOfESSOS tests the validation of the redirect_uri parameter. To this end, an authentication request 
-			containing the redirect_uri value of another client is send to the OP</Description>
+		<Description>
+			<![CDATA[
+			PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter. To this end, an Authentication Request
+			containing the <code>redirect_uri</code> value of another client is send to the OP
+			]]>
+		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
@@ -76,7 +89,7 @@
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-			
+
 			<Parameter Key="authnreq-force-evil-redirect-uri">true</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
@@ -85,8 +98,12 @@
 	</TestStep>
 
 	<TestStep Name="Redirect URI Manipulation 2">
-		<Description>PrOfESSOS tests the validation of the redirect_uri parameter at the OP. To this end, a random subdomain
-		 is prepended to the redirect_uri contained in the authentication request.</Description>
+		<Description>
+		<![CDATA[
+			PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP. To this end, a random subdomain
+		 is prepended to the <code>redirect_uri</code> contained in the Authentication Request.</Description>
+		]]>
+		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
@@ -96,7 +113,7 @@
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-			
+
 			<Parameter Key="authnreq-random-subdomain-in-redirect-uri">true</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
@@ -105,8 +122,11 @@
 	</TestStep>
 
 	<TestStep Name="Redirect URI Manipulation 3">
-		<Description>PrOfESSOS tests the validation of the redirect_uri parameter at the OP. To this end, a random path 
-			fragment is appended to the redirect_uri contained in the authentication request.</Description>
+		<Description><![CDATA[
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP. To this end, a random path
+			fragment is appended to the <code>redirect_uri</code> contained in the Authentication Request.
+		]]>
+		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
@@ -116,7 +136,7 @@
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-			
+
 			<Parameter Key="authnreq-random-path-suffix-in-redirect-uri">true</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
@@ -124,9 +144,178 @@
 		</RPConfig-2>
 	</TestStep>
 
+	<TestStep Name="Redirect URI Manipulation 4">
+		<Description><![CDATA[
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP. In this test,
+		 the benign <code>redirect_uri</code> is embedded into the <code>userinfo</code> part of the
+		 Authentication Request URL, while the URL's actual authority section points to an attacker controlled
+		 endpoint. As an example, such an URL might look like the URL shown below:
+		 <pre><code>http://http://honest-rp.com:pass@attacker.com</code></pre>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+
+			<Parameter Key="authnreq-honesturl-in-userpart-of-redirect-uri">true</Parameter>
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Redirect URI Manipulation 5">
+		<Description><![CDATA[
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP. In this test,
+		 the benign <code>redirect_uri</code> is URL encoded and embedded into the <code>userinfo</code> part of the
+		 Authentication Request URL, while the URL's actual authority section points to an attacker controlled
+		 endpoint. As an example, such an URL might look like the URL shown below:
+		 <pre><code>http://http%3A%2F%2Fhonest-rp.com:pass@attacker.com</code></pre>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+			<Parameter Key="authnreq-honesturl-in-userpart-of-redirect-uri">true</Parameter>
+			<Parameter Key="authnreq-userinfo-url-encode">true</Parameter>
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Redirect URI Manipulation 6">
+		<Description><![CDATA[
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP. In this test,
+		 the URI scheme (e.g., <code>https://</code>) is stripped from the benign <code>redirect_uri</code> before
+		 it is embedded into the <code>userinfo</code> part of the
+		 Authentication Request URL. The Authentication Request URL's actual authority section points to an attacker
+		 controlled endpoint. As an example, such an URL might look like the URL shown below:
+		 <pre><code>http://honest-rp.com:pass@attacker.com</code></pre>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+			<Parameter Key="authnreq-honesturl-in-userpart-of-redirect-uri">true</Parameter>
+			<Parameter Key="authnreq-userinfo-scheme-excluded">true</Parameter>
+
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Redirect URI Manipulation 7">
+		<Description><![CDATA[
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP. In this test,
+		 the URI scheme (e.g., <code>https://</code>) is stripped from the benign <code>redirect_uri</code> before
+		 it is URL encoded and embedded into the <code>userinfo</code> part of the
+		 Authentication Request URL. The Authentication Request URL's actual authority section points to an attacker
+		 controlled endpoint. As an example, such an URL might look like the URL shown below:
+		 <pre><code>http://honest-rp.com%3A8080:pass@attacker.com</code></pre>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+			<Parameter Key="authnreq-honesturl-in-userpart-of-redirect-uri">true</Parameter>
+			<Parameter Key="authnreq-userinfo-scheme-excluded">true</Parameter>
+			<Parameter Key="authnreq-userinfo-url-encoded">true</Parameter>
+
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Redirect URI Manipulation 8">
+		<Description><![CDATA[
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP, probing for a <em>HTTP
+		Parameter Pollution</em> weakness. The Authentication Request contains two <code>redirect_uri</code>
+		parameters, the first one pointing towards the correct Redirect URI of the benign RP while the second
+		<code>redirect_uri</code> parameter points to an attacker controlled endpoint. If different URL parsing
+		mechanisms are employed during processing of the Authentication Request, the validation logic might choose and
+		successfully validate the benign Redirecet URI while the actual response generating logic makes use of the
+		malicious endpoint.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+			<Parameter Key="authnreq-redirect_uri-parameter-pollution-honest-first">true</Parameter>
+
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Redirect URI Manipulation 9">
+		<Description><![CDATA[
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP, probing for a <em>HTTP
+		Parameter Pollution</em> weakness. The Authentication Request contains two <code>redirect_uri</code>
+		parameters, the first one pointing towards an attacker controlled endpoint while the second
+		<code>redirect_uri</code> parameter points to the correct Redirect URI of the benign RP. If different URL parsing
+		mechanisms are employed during processing of the Authentication Request, the validation logic might choose and
+		successfully validate the benign Redirecet URI while the actual response generating logic makes use of the
+		malicious endpoint.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+			<Parameter Key="authnreq-redirect_uri-parameter-pollution-evil-first">true</Parameter>
+
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+		</RPConfig-2>
+	</TestStep>
+
+
+
 	<TestStep Name="Code Hijack 1">
-		<Description>PrOfESSOS issues a token request containing no redirect_uri parameter, even though one was present 
-			in the authentication request.
+		<Description><![CDATA[
+		PrOfESSOS issues a Token Request containing no <code>redirect_uri</code> parameter, even though one was present
+			in the Authentication Request.
+		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
@@ -144,13 +333,15 @@
 		<RPConfig-2>
 			<!--not used in this test-->
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-			
+
 		</RPConfig-2>
 	</TestStep>
 
 	<TestStep Name="Code Hijack 2">
-		<Description>PrOfESSOS issues a token request containing a redirect_uri value that is registered with another 
+		<Description><![CDATA[
+		PrOfESSOS issues a token request containing a redirect_uri value that is registered with another
 			client.
+		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">false</Parameter>
@@ -161,22 +352,24 @@
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-			
+
 			<Parameter Key="tokenreq-force-evil-redirect-uri">true</Parameter>
 			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
 			<!--not used in this test-->
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-			
+
 		</RPConfig-2>
 	</TestStep>
 
 
 	<TestStep Name="Code Hijack 3">
-		<Description>PrOfESSOS issues a token request containing a redirect_uri value that does not match the
-			one presented in the authentication request and is not registered for the client to which the code
-			has been issued. A random path element is appended to the redirect_uri.
+		<Description><![CDATA[
+		PrOfESSOS issues a Token Request containing a <code>redirect_uri</code> value that does not match the
+			one presented in the Authentication Request and is not registered for the client to which the code
+			has been issued. A random path element is appended to the <code>redirect_uri</code>.
+		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">false</Parameter>
@@ -187,21 +380,23 @@
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-			
+
 			<Parameter Key="tokenreq-random-path-suffix-in-redirect-uri">true</Parameter>
 			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
 			<!--not used in this test-->
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-			
+
 		</RPConfig-2>
 	</TestStep>
 
 	<TestStep Name="Code Hijack 4">
-		<Description>PrOfESSOS issues a token request containing a redirect_uri value that does not match the
-			one presented in the authentication request and is not registered for the client to which the code
-			has been issued. A random subdomain is prepended to the redirect_uri;
+		<Description><![CDATA[
+		PrOfESSOS issues a token request containing a <code>redirect_uri</code> value that does not match the
+			one presented in the Authentication Request and is not registered for the client to which the code
+			has been issued. A random subdomain is prepended to the <code>redirect_uri</code>.
+		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">false</Parameter>
@@ -212,20 +407,22 @@
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-			
+
 			<Parameter Key="tokenreq-random-subdomain-in-redirect-uri">true</Parameter>
 			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
 			<!--not used in this test-->
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-			
+
 		</RPConfig-2>
 	</TestStep>
 
 	<TestStep Name="Code Hijack 5">
-		<Description>PrOfESSOS attempts to redeem an authorization code that was issued to a different client and has 
-			not yet been used in a TokenRequest
+		<Description><![CDATA[
+		PrOfESSOS attempts to redeem an Authorization Code that was issued to a different client and has
+			not yet been used in a Token Request
+		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">false</Parameter>
@@ -235,22 +432,24 @@
 		</BrowserSimulator>
 
 		<RPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>            
+			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
 			<Parameter Key="force-no-redeem-auth-code">true</Parameter>
 			<Parameter Key="code-redemption-fails-test">true</Parameter>
 
 		</RPConfig-1>
 		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
-			
+
 			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
 		</RPConfig-2>
 	</TestStep>
 
 
 	<TestStep Name="Code Hijack 6">
-		<Description>PrOfESSOS attempts to redeem an authorization code using Basic Authentication with a randomly
-			generate value as ClientSecret.
+		<Description><![CDATA[
+		PrOfESSOS attempts to redeem an authorization code using Basic Authentication with a randomly
+			generated value as <code>client_secret</code>.
+		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
@@ -270,11 +469,13 @@
 			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
 		</RPConfig-2>
 	</TestStep>
-	
+
 	<TestStep Name="Code Hijack 7">
-		<Description>PrOfESSOS attempts to redeem an authorization code including its client credentials as body 
+		<Description><![CDATA[
+		PrOfESSOS attempts to redeem an authorization code including its client credentials as body
 			parameters in the POST request even though only the (default) authentication method
-			"token_endpoint_auth_method": "client_secret_basic" has been registered.
+			<code>"token_endpoint_auth_method": "client_secret_basic"</cdoe> has been registered.
+		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
@@ -296,9 +497,10 @@
 	</TestStep>
 
 	<TestStep Name="Code Hijack 8">
-		<Description>PrOfESSOS attempts to redeem an authorization code using "token_endpoint_auth_method": "client_secret_post"
-			as authentication method but using a random valur for the "client_secret" parameter.
-		</Description>
+		<Description><![CDATA[
+			PrOfESSOS attempts to redeem an authorization code using <code>"token_endpoint_auth_method": "client_secret_post"</code>
+			as authentication method but using a random value for the <code>client_secret</code> parameter.
+		]]></Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
 			<Parameter Key="enforce-client-registration">true</Parameter>
@@ -320,10 +522,12 @@
 			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
 		</RPConfig-2>
 	</TestStep>
-	
+
 	<TestStep Name="Code Hijack 9">
-		<Description>PrOfESSOS attempts to redeem an authorization code using "token_endpoint_auth_method": "client_secret_post" 
-			as authentication method but omitting the client_secret parameter.
+		<Description><![CDATA[
+		PrOfESSOS attempts to redeem an authorization code using <code>client_secret_post</code> authentication method in
+		the Token Request without includign the <code>client_secret</code> parameter.
+		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
@@ -345,10 +549,10 @@
 			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
 		</RPConfig-2>
 	</TestStep>
-	
+
 	<TestStep Name="Message Flow Confusion - Response Type">
 		<Description><![CDATA[
-		PrOfESSOS registers a Client with <code>grant_type=authorization_code</code>. In the Authentication Request, an 
+		PrOfESSOS registers a Client with <code>grant_type=authorization_code</code>. In the Authentication Request, an
 		Implicit Flow is requested by using the parameter <code>response_type=token id_token</code>.
 		]]>
 		</Description>
@@ -377,8 +581,8 @@
 
 	<TestStep Name="Message Flow Confusion - Response Mode">
 		<Description><![CDATA[
-		 PrOfESSOS requests an <code>id_token</code> using the Implicit Flow and sets the <code>response_mode</code> 
-		 parameter to <code>query</code>. As per <strong>OAuth 2.0 Multiple Response Type Encoding Practices</strong>, the OP must 
+		 PrOfESSOS requests an <code>id_token</code> using the Implicit Flow and sets the <code>response_mode</code>
+		 parameter to <code>query</code>. As per <em>OAuth 2.0 Multiple Response Type Encoding Practices</em>, the OP must
 		 not include tokens in the URL query parameters.
 			]]>
 		</Description>
@@ -405,11 +609,11 @@
 			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
 		</RPConfig-2>
 	</TestStep>
-	
-	
+
+
 	<TestStep Name="PKCE 1 - TR: Invalid Verifier">
 		<Description><![CDATA[
-		PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>. An invalid <code>code_verifier</code> is submitted 
+		PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>. An invalid <code>code_verifier</code> is submitted
 			to the OP in the Token Request.
 		]]>
 		</Description>
@@ -436,7 +640,7 @@
 
 	<TestStep Name="PKCE 2 - TR: Exclude Verifier">
 		<Description><![CDATA[
-		 PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>. A <code>code_challenge</code> is included in the 
+		 PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>. A <code>code_challenge</code> is included in the
 			Authentication Request but the following Token Request does not include a <code>code_verifier</code>.
 		]]>
 		</Description>
@@ -487,13 +691,13 @@
 			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
 		</RPConfig-2>
 	</TestStep>
-	
+
 	<TestStep Name="PKCE 4 - Downgrade to Plain">
 		<Description>
 			<![CDATA[
-			PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>. No <code>code_challenge_method</code> parameter is 
-			included in the Authentication Request, indicating that the default method 'S256' is to be used. In the 
-			following Token Request, PrOfESSOS submits the original value of the <code>code_challenge</code> as <code>code_verifier</code>, 
+			PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>. No <code>code_challenge_method</code> parameter is
+			included in the Authentication Request, indicating that the default method 'S256' is to be used. In the
+			following Token Request, PrOfESSOS submits the original value of the <code>code_challenge</code> as <code>code_verifier</code>,
 			as if using <code>code_challenge_method=plain</code>. In addition, an (invalid) parameter <code>code_challenge_method=plain</code>
 			is added to the Token Request.
 			]]>
@@ -518,9 +722,9 @@
 	</TestStep>
 
 	<TestStep Name="PKCE 5 - Verifier Confusion">
-		<Description><![CDATA[ 
-			PrOfESSOS tests if the PKCE <code>code_verifier</code> is bound to the Authorization Code. Here, 
-			PrOfESSOS submits an unused <code>code_verifier</code> that was issued for a different Authorization Code. 
+		<Description><![CDATA[
+			PrOfESSOS tests if the PKCE <code>code_verifier</code> is bound to the Authorization Code. Here,
+			PrOfESSOS submits an unused <code>code_verifier</code> that was issued for a different Authorization Code.
 		]]>
 		</Description>
 		<TestParameters>

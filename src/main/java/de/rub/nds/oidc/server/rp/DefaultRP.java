@@ -46,7 +46,6 @@ public class DefaultRP extends AbstractRPImplementation {
 	@Override
 	public void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException {
 
-		// TODO: this will not parse form_post responses
 		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(req);
 		logger.log("Callback received");
 		logger.logHttpRequest(req, httpRequest.getQuery());
@@ -61,14 +60,14 @@ public class DefaultRP extends AbstractRPImplementation {
 			browserBlocker.complete(result);
 			return;
 		}
-		
-		AuthenticationRequest usedAuthnReq = AuthenticationRequest.parse((URI) supplyHonestOrEvil(
-				() -> stepCtx.get(RP1_PREPARED_AUTHNREQ),
-				() ->stepCtx.get(RP2_PREPARED_AUTHNREQ)
-		));
-		
-		if (authnResp.toSuccessResponse().impliedResponseMode().equals(ResponseMode.QUERY) 
-				&& !usedAuthnReq.getResponseType().impliesCodeFlow()) {
+
+		ResponseType usedResponseType = (ResponseType) supplyHonestOrEvil(
+				() -> stepCtx.get(RP1_AUTHNREQ_RT),
+				() -> stepCtx.get(RP2_AUTHNREQ_RT)
+		);
+
+		if (authnResp.toSuccessResponse().impliedResponseMode().equals(ResponseMode.QUERY)
+				&& !usedResponseType.impliesCodeFlow()) {
 			browserBlocker.complete(TestStepResult.FAIL);
 		}
 
@@ -178,11 +177,11 @@ public class DefaultRP extends AbstractRPImplementation {
 				);
 			}
 		}
-			
+
 		if (authnResp.indicatesSuccess()) {
 			return authnResp;
 		}
-		
+
 		String user = (String) stepCtx.get(RPContextConstants.CURRENT_USER_USERNAME);
 		String pass = (String) stepCtx.get(RPContextConstants.CURRENT_USER_USERNAME);
 		String opAuthEndp = opMetaData.getAuthorizationEndpointURI().toString();
@@ -311,8 +310,8 @@ public class DefaultRP extends AbstractRPImplementation {
 //
 //		UserInfo userInfo = userInfoResponse.toSuccessResponse().getUserInfo();
 	}
-	
-	
+
+
 	protected boolean checkUserInfo(UserInfo userInfo, String searchString) {
 		// temporary: iterate first level keys of userinfo and compare w username
 		boolean found = false;
@@ -349,6 +348,16 @@ public class DefaultRP extends AbstractRPImplementation {
 		return redirURI;
 	}
 
+	protected String getStoredAuthnReqString() {
+
+		String currentRP = (type == RPType.HONEST) ? RPContextConstants.RP1_PREPARED_AUTHNREQ
+				: RPContextConstants.RP2_PREPARED_AUTHNREQ;
+		URI ar = (URI) stepCtx.get(currentRP);
+		return ar.toString();
+	}
+
+
+
 	@Nullable
 	protected URI getTokenReqRedirectUri() {
 		if (params.getBool(TOKENREQ_FORCE_EVIL_REDIRURI)) {
@@ -369,7 +378,7 @@ public class DefaultRP extends AbstractRPImplementation {
 
 	protected ResponseType getAuthReqResponseType() {
 		ResponseType rt = new ResponseType();
-		
+
 		if (params.getBool(AUTHNREQ_RESPONSE_TYPE_TOKEN)) {
 			rt.add(ResponseType.Value.TOKEN);
 		}
@@ -384,7 +393,9 @@ public class DefaultRP extends AbstractRPImplementation {
 			// default
 			rt.add(ResponseType.Value.CODE);
 		}
-		
+
+		String key = (type == RPType.HONEST) ? RP1_AUTHNREQ_RT : RP2_AUTHNREQ_RT;
+		stepCtx.put(key, rt);
 		return rt;
 	}
 
@@ -412,7 +423,7 @@ public class DefaultRP extends AbstractRPImplementation {
 
 	@Nullable
 	protected ResponseMode getAuthReqResponseMode() {
-		
+
 		if (params.getBool(AUTHNREQ_RESPONSE_MODE_FRAGMENT)) {
 			return ResponseMode.FRAGMENT;
 		}
@@ -420,7 +431,7 @@ public class DefaultRP extends AbstractRPImplementation {
 			// TODO: check if a form_post response is succesfully reeceived
 			return ResponseMode.FORM_POST;
 		}
-					
+
 		return ResponseMode.QUERY;
 	}
 

@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import de.rub.nds.oidc.browser.BrowserSimulator;
+import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.server.rp.RPContextConstants;
 import de.rub.nds.oidc.server.rp.RPParameterConstants;
 import de.rub.nds.oidc.server.rp.RPType;
@@ -72,6 +73,19 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 		}
 	}
 
+	protected String getAuthnReqString(RPType rpType) {
+		Object authnReq;
+		authnReq = RPType.HONEST.equals(rpType)
+					? stepCtx.get(RPContextConstants.RP1_PREPARED_AUTHNREQ)
+					: stepCtx.get(RPContextConstants.RP2_PREPARED_AUTHNREQ);
+		if (authnReq instanceof String) {
+			return (String) authnReq;
+		} else if (authnReq instanceof URI) {
+			return ((URI) authnReq).toString();
+		} else {
+			throw new ClassCastException("Stored Authentication Request object is neither String nor URI");
+		}
+	}
 
 	protected TestStepResult runUserAuth(RPType rpType) throws InterruptedException {
 //		TestStepResult result = TestStepResult.NOT_RUN;
@@ -87,13 +101,16 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 		CompletableFuture<TestStepResult> blockAndResult = new CompletableFuture<>();
 		stepCtx.put(RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT, blockAndResult);
 
-		// build authnReq and call in browser
-		AuthenticationRequest authnReq = getAuthnReq(rpType);
+		// load configured values
+		String authnReq = getAuthnReqString(rpType);
+		URI honestRedirect = (URI) stepCtx.get(RPContextConstants.RP1_PREPARED_REDIRECT_URI);
+		URI evilRedirect = (URI) stepCtx.get(RPContextConstants.RP2_PREPARED_REDIRECT_URI);
 
-		// run login script
-		logger.logCodeBlock(authnReq.toURI().toString(), "Authentication Request URL:");
-		driver.get(authnReq.toURI().toString());
-		// delay form submissions for screenshots
+		// start authentication
+		logger.logCodeBlock(authnReq, "Authentication Request URL:");
+		driver.get(authnReq);
+
+		// delay form submissions to allow capturing screenshots
 		driver.executeScript(getFormSubmitDelayScript());
 		waitMillis(500);
 
@@ -110,12 +127,13 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 				logger.log("Login Credentials entered");
 				return null;
 			});
-			//		logger.log("HTML element found in Browser.");
+			// logger.log("HTML element found in Browser.");
 			// wait a bit more in case we have an angular app or some other JS heavy application
 			waitMillis(1000);
 
-			// don't run consentScript if we have already been redirected back to RP
-			if (driver.getCurrentUrl().startsWith(authnReq.getRedirectionURI().toString())) {
+			// don not run consentScript if we have already been redirected back to RP
+			String location = driver.getCurrentUrl();
+			if (location.startsWith(honestRedirect.toString()) || location.startsWith(evilRedirect.toString())) {
 				logger.log("No consent page encountered in browser");
 			} else {
 				driver.executeScript(getFormSubmitDelayScript());
@@ -140,16 +158,14 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 			return TestStepResult.PASS;
 		}
 
-
 		String finalUrl = driver.getCurrentUrl();
 		stepCtx.put(RPContextConstants.LAST_BROWSER_URL, finalUrl);
-		logger.log("Final URL as seen in Browser:\n" + finalUrl);
+		logger.logCodeBlock(finalUrl, "Final URL as seen in Browser:");
 		// confirm submission of redirect uri
 		blockRP.complete(null);
 
-
 		try {
-			return blockAndResult.get(5, TimeUnit.SECONDS); // TODO: is 5 seconds long enough? 
+			return blockAndResult.get(5, TimeUnit.SECONDS); // TODO: is 5 seconds long enough?
 		} catch (ExecutionException | TimeoutException e) {
 			logger.log("Browser Timeout while waiting for RP");
 			logScreenshot();

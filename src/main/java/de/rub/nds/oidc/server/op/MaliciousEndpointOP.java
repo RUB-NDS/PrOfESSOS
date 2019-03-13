@@ -105,7 +105,7 @@ public class MaliciousEndpointOP extends DefaultOP {
 				f.complete(TestStepResult.FAIL);
 			} else if (at != null) {
 				logger.log("Detected unknown AccessToken in Evil OP.");
-				f.complete(TestStepResult.FAIL);
+				f.complete(TestStepResult.UNDETERMINED);
 			}
 		}
 

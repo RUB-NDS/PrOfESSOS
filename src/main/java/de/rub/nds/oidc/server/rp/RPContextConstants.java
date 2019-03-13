@@ -4,13 +4,18 @@ public class RPContextConstants {
 
 	public static final String CURRENT_USER_USERNAME = "current_user_username";
 	public static final String CURRENT_USER_PASSWORD = "current_user_password";
-	
+
 	private static final String PFX = "rp.";
 
 	public static final String IS_RP_LEARNING_STEP = PFX + "is_learning_teststep";
 	public static final String STEP_SETUP_FINISHED = PFX + "test-setup-result";
 	public static final String RP1_PREPARED_AUTHNREQ = PFX + "prepared-rp1-authnreq";
 	public static final String RP2_PREPARED_AUTHNREQ = PFX + "prepared-rp2-authnreq";
+	public static final String RP1_PREPARED_REDIRECT_URI = PFX + "rp1-redirect-uri";
+	public static final String RP2_PREPARED_REDIRECT_URI = PFX + "rp2-redirect-uri";
+	public static final String RP1_AUTHNREQ_RT = PFX + "rp1-authnreq-response-type";
+	public static final String RP2_AUTHNREQ_RT = PFX + "rp2-authnreq-response-type";
+
 	public static final String OP_INFO_HONEST_CLIENT = PFX + "op-info-honest-client";
 	public static final String OP_INFO_EVIL_CLIENT = PFX + "op-info-evil-client";
 

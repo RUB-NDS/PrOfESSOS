@@ -125,7 +125,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	protected URI manipulateURI(URI uri, boolean addSubdomain, boolean addPath) {
 		String rnd = RandomStringUtils.randomAlphanumeric(12);
 		rnd = rnd.toLowerCase();
-		
+
 		UriBuilder ub = UriBuilder.fromUri(uri);
 		if (addSubdomain) {
 			ub.host(rnd + "." + uri.getHost());
@@ -162,6 +162,8 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 			}
 		}
 		if (RPType.EVIL.equals(type)) {
+			stepCtx.put(RPContextConstants.RP1_PREPARED_REDIRECT_URI, getHonestRedirectUri());
+			stepCtx.put(RPContextConstants.RP2_PREPARED_REDIRECT_URI, getEvilRedirectUri());
 			stepCtx.put(RPContextConstants.STEP_SETUP_FINISHED, success);
 		}
 	}
@@ -197,7 +199,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		stepCtx.put(currentRP, authnReqUri);
 	}
 
-	// util method because nimbus SDK does not allow 
+	// util method because nimbus SDK does not allow
 	// 'wrong' or empty  method parameters
 	protected URI applyPkceParamstoAuthReqUri(URI uri) {
 		CodeVerifier cv = getCodeChallengeVerifier();
@@ -205,7 +207,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		if (cv == null && cm == null) {
 			return uri;
 		}
-		
+
 		UriBuilder ub = UriBuilder.fromUri(uri);
 		if (cm != null) {
 			ub.queryParam("code_challenge_method", cm.getValue());
@@ -219,7 +221,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 		return ub.build();
 	}
-	
+
 	protected abstract URI getAuthReqRedirectUri();
 
 	protected abstract URI getTokenReqRedirectUri();

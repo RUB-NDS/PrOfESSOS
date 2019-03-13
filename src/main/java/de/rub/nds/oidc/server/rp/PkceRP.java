@@ -33,7 +33,7 @@ import static de.rub.nds.oidc.server.rp.RPParameterConstants.*;
 public class PkceRP extends DefaultRP {
 	private boolean firstrequest = true;
 	private CodeVerifier firstVerifier;
-	
+
 	@Override
 	public void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException {
 		HTTPRequest httpRequest = ServletUtils.createHTTPRequest(req);
@@ -54,7 +54,7 @@ public class PkceRP extends DefaultRP {
 		AccessToken at = null;
 		JWT idToken = null;
 		AuthenticationSuccessResponse successResponse = authnResp.toSuccessResponse();
-		if (successResponse.impliedResponseType().impliesCodeFlow() 
+		if (successResponse.impliedResponseType().impliesCodeFlow()
 				&& (!params.getBool(FORCE_NO_REDEEM_AUTH_CODE) || !firstrequest)) {
 			// attempt code redemption
 			TokenResponse tokenResponse = redeemAuthCode(successResponse.getAuthorizationCode());
@@ -80,10 +80,10 @@ public class PkceRP extends DefaultRP {
 
 		firstrequest = false;
 		firstVerifier = getStoredPKCEVerifier();
-		
-		// generate authrequest for second 
+
+		// generate authrequest for second
 		prepareAuthnReq();
-		
+
 		if (idToken != null) {
 			boolean found = checkIdToken(idToken, testOPConfig.getUser2Name(), "sub");
 			if (found && params.getBool(USER2_IN_IDTOKEN_SUB_FAILS_TEST)) {
@@ -105,14 +105,14 @@ public class PkceRP extends DefaultRP {
 			}
 		}
 
-		// TODO: chekcIdToken and checkUserInfo should return TestStepResults and pick targetClaim 
+		// TODO: chekcIdToken and checkUserInfo should return TestStepResults and pick targetClaim
 		//  and searchstring from instance variables
-		
+
 //		logger.log("release browser lock");
 		browserBlocker.complete(TestStepResult.PASS);
 		return;
 	}
-	
+
 
 
 	@Override
@@ -125,13 +125,16 @@ public class PkceRP extends DefaultRP {
 		if (!firstrequest && params.getBool(TOKENREQ_PKCE_FROM_OTHER_SESSION)) {
 			verifier = firstVerifier;
 		}
-		
+		if (params.getBool(TOKENREQ_PKCE_EXCLUDED)) {
+			return;
+		}
+
 		String encodedQuery = req.getQuery();
 		StringBuilder sb = new StringBuilder();
 		sb.append(encodedQuery);
-		
+
 		if (params.getBool(TOKENREQ_ADD_PKCE_METHOD_PLAIN)){
-			// attempt "downgrade", use code_challenge from AuhtnReq and 
+			// attempt "downgrade", use code_challenge from AuhtnReq and
 			// add plain as code_challenge_method (invalid per RFC7636)
 			CodeChallengeMethod cm = getCodeChallengeMethod();
 			cm = (cm == null) ? CodeChallengeMethod.S256 : cm;
@@ -152,7 +155,7 @@ public class PkceRP extends DefaultRP {
 			sb.append("&code_verifier=");
 			sb.append(verifier.getValue());
 		}
-		
+
 		req.setQuery(sb.toString());
 	}
 }
