@@ -155,113 +155,168 @@ limitations under the License.
 	<h2>Stage 1: Setup - OpenID Provider Parameters</h2>
 	<div class="row">
 		<div class="learn-controls col-sm-12">
-			<form class="form-horizontal" id="op-learn-form" action="javascript:;" onsubmit="javascript:OPIV.learnOP();">
-				<!--TODO: add client side form validation before submit: ClientConfigs > RegistrationURI > DiscoURI -->
-				<fieldset>
-					<legend>Client Parameters</legend>
-					<p>Test ID: <code id="test-id-display">not-loaded</code><br>
-						Honest RP Identity: <code id="honest-rp-id-display">not-loaded</code><br>
-						Evil RP Identity: <code id="evil-rp-id-display">not-loaded</code></p>
+			<legend>Client Parameters</legend>
+			<p>Test ID: <code id="test-id-display">not-loaded</code><br>
+				Honest RP Identity: <code id="honest-rp-id-display">not-loaded</code><br>
+				Evil RP Identity: <code id="evil-rp-id-display">not-loaded</code></p>
 
-					<legend>Target OP Parameters</legend>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="url-op-target">Issuer (OP) URL:</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="url" name="url-op-target" id="url-op-target" form="op-learn-form" size="80">
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="op-metadata-json">OP Metadata (JSON)</label>
-						<div class="col-sm-10">
-							<textarea class="form-control" type="text" name="op-metadata-json" id="op-metadata-json" form="op-learn-form" rows="5" size="80"></textarea>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="registration-access-token-1">Reg. AccessToken 1:</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="text" id="registration-access-token-1" name="registration-access-token-1" form="op-learn-form" size="80">
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="registration-access-token-2">Reg. AccessToken 2:</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="text" id="registration-access-token-2" name="registration-access-token-2" form="op-learn-form" size="80">
-						</div>
-					</div>
-					<legend>Manual Client Config</legend>
-					<!--TODO add Tooltipps: Config in JSON, e.g. as received in a registration response-->
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="client-1-config">Client-1 Config (JSON)</label>
-						<div class="col-sm-10">
-							<textarea class="form-control" type="text" id="client-1-config" name="client-1-config" form="op-learn-form" rows="5" cols="80"></textarea>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="client-2-config">Client-2 Config (JSON)</label>
-						<div class="col-sm-10">
-							<textarea class="form-control" type="text" id="client-2-config" name="client-2-config" form="op-learn-form" rows="5" cols="80"></textarea>
-						</div>
-					</div>
-					<!--<div class="form-group">-->
-						<!--<div class="col-sm-2">-->
-							<!--<label for="input-field-name">Input-Field Name:</label>-->
-						<!--</div>-->
-						<!--<div class="col-sm-10">-->
-							<!--<input class="form-control" type="text" name="input-field-name" form="op-learn-form" size="80">-->
-						<!--</div>-->
-					<!--</div>-->
-					<legend>Login/Consent Scripts</legend>
-					<!--TODO add field for Username-Formfieldname and Password-Formfieldname ??? -->
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="selenium-login-script">Login-Script:</label>
-						<div class="col-sm-10">
-							<textarea class="form-control" name="selenium-login-script" id="selenium-login-script" form="op-learn-form" rows="5" cols="80"></textarea>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="selenium-consent-script">Consent-Script:</label>
-						<div class="col-sm-10">
-							<textarea class="form-control" name="selenium-consent-script" id="selenium-consent-script" form="op-learn-form" rows="5" cols="80"></textarea>
-						</div>
-					</div>
-					<legend>EndUser/ResourceOwner Credentials</legend>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="user-1-name">Username 1:</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="text" name="user-1-name" id="user-1-name" form="op-learn-form" required size="80">
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="user-1-password">User 1 Password:</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="text" name="user-1-password" id="user-1-password" form="op-learn-form" required size="80">
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="user-2-name">Username 2:</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="text" name="user-2-name" id="user-2-name" form="op-learn-form" required size="80">
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-sm-2" for="user-2-password">User 2 Password:</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="text" name="user-2-password" id="user-2-password" form="op-learn-form" required size="80">
-						</div>
-					</div>
+			<legend>Target OP Parameters</legend>
 
-					<div class="col-sm-2"></div>
-					<div class="col-sm-10">
+			<ul class="nav nav-tabs">
+				<li class="active"><a data-toggle="tab" href="#form-config-tab">HTML Form</a></li>
+				<li><a data-toggle="tab" href="#json-config-tab">JSON</a></li>
+			</ul>
+			<div class="tab-content">
+				<div id="form-config-tab" class="tab-pane fade in active">
 
-					</div>
-				</fieldset>
-			</form>
+					<form class="form-horizontal" id="op-learn-form" action="javascript:;" onsubmit="javascript:OPIV.learnOP();">
+
+							<div class="container col-sm-12" id="config-accordion">
+								<div class="panel-group" id="accordion">
+									<div class="panel panel-default">
+										<div class="panel-heading" data-toggle="collapse" data-parent="#accordion" href="#collapse1" aria-expanded="true">
+											<h4 class="panel-title">Dynamic Registration</h4>
+										</div>
+										<div id="collapse1" class="panel-collapse collapse in">
+											<div class="panel-body">
+
+												<div class="form-group">
+													<label class="control-label col-sm-2" for="url-op-target">Issuer (OP) URL:</label>
+													<div class="col-sm-10">
+														<input class="form-control" type="url" name="url-op-target" id="url-op-target" form="op-learn-form" size="80">
+													</div>
+												</div>
+
+											</div>
+										</div>
+									</div>
+									<div class="panel panel-default">
+										<div class="panel-heading" data-toggle="collapse" data-parent="#accordion" href="#collapse2" aria-expanded="false">
+											<h4 class="panel-title">Manual Configuration</h4>
+										</div>
+										<div id="collapse2" class="panel-collapse collapse">
+											<div class="panel-body">
+
+												<div class="form-group">
+													<label class="control-label col-sm-2" for="op-metadata-json">OP Metadata (JSON)</label>
+													<div class="col-sm-10">
+														<textarea class="form-control" type="text" name="op-metadata-json" id="op-metadata-json" form="op-learn-form" rows="5" size="80"></textarea>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-sm-2" for="registration-access-token-1">Reg. AccessToken 1:</label>
+													<div class="col-sm-10">
+														<input class="form-control" type="text" id="registration-access-token-1" name="registration-access-token-1" form="op-learn-form" size="80">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-sm-2" for="registration-access-token-2">Reg. AccessToken 2:</label>
+													<div class="col-sm-10">
+														<input class="form-control" type="text" id="registration-access-token-2" name="registration-access-token-2" form="op-learn-form" size="80">
+													</div>
+												</div>
+												<legend>Client Config</legend>
+												<!--TODO add Tooltipps: Config in JSON, e.g. as received in a registration response-->
+												<div class="form-group">
+													<label class="control-label col-sm-2" for="client-1-config">Client-1 Config (JSON)</label>
+													<div class="col-sm-10">
+														<textarea class="form-control" type="text" id="client-1-config" name="client-1-config" form="op-learn-form" rows="5" cols="80"></textarea>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-sm-2" for="client-2-config">Client-2 Config (JSON)</label>
+													<div class="col-sm-10">
+														<textarea class="form-control" type="text" id="client-2-config" name="client-2-config" form="op-learn-form" rows="5" cols="80"></textarea>
+													</div>
+												</div>
+
+
+
+											</div>
+										</div>
+									</div>
+
+								</div>
+							</div>
+
+
+							<legend>Login/Consent Scripts</legend>
+							<!--TODO add field for Username-Formfieldname and Password-Formfieldname ??? -->
+							<div class="form-group">
+								<label class="control-label col-sm-2" for="selenium-login-script">Login-Script:</label>
+								<div class="col-sm-10">
+									<textarea class="form-control" name="selenium-login-script" id="selenium-login-script" form="op-learn-form" rows="5" cols="80"></textarea>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-sm-2" for="selenium-consent-script">Consent-Script:</label>
+								<div class="col-sm-10">
+									<textarea class="form-control" name="selenium-consent-script" id="selenium-consent-script" form="op-learn-form" rows="5" cols="80"></textarea>
+								</div>
+							</div>
+							<legend>EndUser/ResourceOwner Credentials</legend>
+							<div class="form-group">
+								<label class="control-label col-sm-2" for="user-1-name">Username 1:</label>
+								<div class="col-sm-10">
+									<input class="form-control" type="text" name="user-1-name" id="user-1-name" form="op-learn-form" required size="80">
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-sm-2" for="user-1-password">User 1 Password:</label>
+								<div class="col-sm-10">
+									<input class="form-control" type="text" name="user-1-password" id="user-1-password" form="op-learn-form" required size="80">
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-sm-2" for="user-2-name">Username 2:</label>
+								<div class="col-sm-10">
+									<input class="form-control" type="text" name="user-2-name" id="user-2-name" form="op-learn-form" required size="80">
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-sm-2" for="user-2-password">User 2 Password:</label>
+								<div class="col-sm-10">
+									<input class="form-control" type="text" name="user-2-password" id="user-2-password" form="op-learn-form" required size="80">
+								</div>
+							</div>
+
+							<div class="col-sm-2"></div>
+							<div class="col-sm-10">
+
+						</div>
+					</form>
+
+				</div>
+
+
+
+				<div id="json-config-tab" class="tab-pane fade">
+					<form class="form-horizontal" id="op-learn-json-form" action="javascript:;" onsubmit="javascript:OPIV.learnOP();">
+						<!--<fieldset>-->
+
+						<!--<legend>Client Parameters JSON</legend>-->
+						<div class="form-group">
+							<label class="control-label col-sm-2" for="json-config">JSON Config:</label>
+							<div class="col-sm-10">
+								<textarea class="form-control" type="text" name="json-config" id="json-config" form="op-learn-json-form" required rows="10" cols="80"></textarea>
+							</div>
+
+						</div>
+
+						<div class="col-sm-2"></div>
+						<div class="col-sm-10">
+						</div>
+						<!--</fieldset>-->
+					</form>
+				</div>
+			</div>
 		</div>
 	</div>
 
 
 	<h2>Stage 2: Configuration Evaluation</h2>
-	<button class="btn btn-default" type="submit" value="Learn" form="op-learn-form">Learn</button>
+	<!--<button class="btn btn-default" type="submit" value="Learn" form="op-learn-form"  onclick="javascript:OPIV.submitOPLearningForm()">Learn</button>-->
+	<button class="btn btn-default" type="button" value="Learn" onclick="javascript:OPIV.submitOPLearningForm()">Learn</button>
 
 	<div id="learn-report">
 		<script>

@@ -40,7 +40,6 @@ public class PkceRP extends DefaultRP {
 		logger.log("Callback received");
 		logger.logHttpRequest(req, httpRequest.getQuery());
 
-		
 		CompletableFuture waitForBrowser = (CompletableFuture) stepCtx.get(BLOCK_RP_FOR_BROWSER_FUTURE);
 		CompletableFuture<TestStepResult> browserBlocker = (CompletableFuture<TestStepResult>) stepCtx.get(BLOCK_BROWSER_AND_TEST_RESULT);
 
@@ -81,6 +80,7 @@ public class PkceRP extends DefaultRP {
 
 		firstrequest = false;
 		firstVerifier = getStoredPKCEVerifier();
+		
 		// generate authrequest for second 
 		prepareAuthnReq();
 		
@@ -125,10 +125,6 @@ public class PkceRP extends DefaultRP {
 		if (!firstrequest && params.getBool(TOKENREQ_PKCE_FROM_OTHER_SESSION)) {
 			verifier = firstVerifier;
 		}
-		if (verifier == null || params.getBool(TOKENREQ_PKCE_EXCLUDED)) {
-			return;
-		}
-
 		
 		String encodedQuery = req.getQuery();
 		StringBuilder sb = new StringBuilder();
@@ -159,6 +155,4 @@ public class PkceRP extends DefaultRP {
 		
 		req.setQuery(sb.toString());
 	}
-
-
 }

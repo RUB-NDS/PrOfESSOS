@@ -133,3 +133,11 @@ code {
 	background: inherit;
 	font-size: inherit;
 }
+
+#config-accordion {
+	padding-right: unset;
+}
+
+.panel-default .panel-heading {
+	background-image: none;
+}

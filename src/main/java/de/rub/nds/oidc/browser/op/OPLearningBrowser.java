@@ -4,9 +4,10 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import de.rub.nds.oidc.server.rp.RPContextConstants;
 import de.rub.nds.oidc.server.rp.RPType;
 import de.rub.nds.oidc.test_model.TestStepResult;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -22,15 +23,14 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 			logger.log("Test-setup indicates configuration error");
 			return TestStepResult.UNDETERMINED;
 		}
-
-		HashMap<String, String> users = new HashMap<>();
-		users.put(opConfig.getUser1Name(), opConfig.getUser1Pass());
-		users.put(opConfig.getUser2Name(), opConfig.getUser2Pass());
+		Pair<String,String> user1 = new ImmutablePair<>(opConfig.getUser1Name(), opConfig.getUser1Pass());
+		Pair<String,String> user2 = new ImmutablePair<>(opConfig.getUser2Name(), opConfig.getUser2Pass());
+		List<Pair> users = Arrays.asList(user1, user2);
 
 		for (RPType type : RPType.values()) {
-			for (Map.Entry<String, String> entry : users.entrySet()) {
-				userName = entry.getKey();
-				userPass = entry.getValue();
+			for (Pair entry : users) {
+				userName = (String) entry.getKey();
+				userPass = (String) entry.getValue();
 
 				TestStepResult result = runUserAuth(type);
 				if (result != TestStepResult.PASS) {

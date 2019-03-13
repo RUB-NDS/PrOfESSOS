@@ -5,7 +5,6 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.auth.Secret;
-import com.nimbusds.oauth2.sdk.client.ClientInformation;
 import com.nimbusds.oauth2.sdk.client.ClientRegistrationResponse;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
@@ -150,13 +149,13 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		success &= areStepRequirementsMet();
 
 		// dont run setup steps for RP2 unless neccessary
-		if (
-				RPType.HONEST.equals(type)
-						|| !Boolean.valueOf((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST))
-						|| Boolean.valueOf((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))
-		) {
+		if (RPType.HONEST.equals(type)
+				|| !Boolean.valueOf((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST))
+				|| Boolean.valueOf((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))
+				|| Boolean.valueOf((String) stepCtx.get(RPContextConstants.IS_RP_LEARNING_STEP))) {
+
 			success &= discoverOpIfNeeded();
-			success &= evalConfig();
+			success &= isValidClientConfig();
 			success &= registerClientIfNeeded();
 			if (success) {
 				prepareAuthnReq();
@@ -188,7 +187,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		ab.idTokenHint(getIdTokenHint());
 		ab.endpointURI(opMetaData.getAuthorizationEndpointURI());
 //		ab.codeChallenge(getCodeChallengeVerifier(), getCodeChallengeMethod());
-		
+
 		AuthenticationRequest authnReq = ab.build();
 		URI authnReqUri = applyPkceParamstoAuthReqUri(authnReq.toURI());
 
@@ -339,7 +338,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	}
 
 
-	private boolean evalConfig() {
+	private boolean isValidClientConfig() {
 		// attempt to parse user provided ClientConfig JSON strings
 		String config = type.equals(RPType.HONEST) ? testOPConfig.getClient1Config() : testOPConfig.getClient2Config();
 		if (Strings.isNullOrEmpty(config)) {
@@ -463,14 +462,15 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 
 	public boolean discoverOpIfNeeded() throws IOException, ParseException {
-
+		boolean isLearningStep = Boolean.valueOf((String) stepCtx.get(RPContextConstants.IS_RP_LEARNING_STEP));
 		if (!Strings.isNullOrEmpty(testOPConfig.getOPMetadata()) && opMetaData == null) {
 			logger.log("Parsing OP Metadata from provided JSON string");
 			opMetaData = OIDCProviderMetadata.parse(testOPConfig.getOPMetadata());
 			suiteCtx.put(RPContextConstants.DISCOVERED_OP_CONFIGURATION, opMetaData);
 			// throw
-		} else if (opMetaData == null) {
-			if (suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION) == null) {
+		} else if (opMetaData == null || isLearningStep) {
+			if ((isLearningStep && type == RPType.HONEST)
+					|| suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION) == null) {
 				return discoverRemoteOP();
 			} else {
 				opMetaData = (OIDCProviderMetadata) suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION);
@@ -565,6 +565,5 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 			throw new IllegalStateException("OP is neither honest nor evil.");
 		}
 	}
-
 
 }

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 Ruhr-Universität Bochum.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,14 +66,21 @@ var OPIV = (function(module) {
 			}
 			if (testConfig["Type"] === OP_CONFIG_TYPE) {
 				testConfig.UrlOPTarget = "http://honestidp.de:8080/openid-connect-server-webapp";
-				// registration not needed for demo when using discovery
-				// testConfig.OPMetadata = "http://honestidp.de:8080/openid-connect-server-webapp/register";
 				testConfig.User1Name = "user1";
 				testConfig.User1Pass = "user1pass";
 				testConfig.User2Name = "user2";
 				testConfig.User2Pass = "user2pass";
+				testConfig.OPMetadata = "";
+				testConfig.Client1Config = "";
+				testConfig.Client2Config = "";
+				testConfig.AccessToken1 = "";
+				testConfig.AccessToken2 = "";
+				testConfig.LoginScript = "";
+				testConfig.ConsentScript = "";
 
 				writeOPConfigGUI(testConfig);
+				$("#collapse1").collapse('show');
+				$("#collapse2").collapse('hide');
 			}
 		}
 	};
@@ -98,7 +105,6 @@ var OPIV = (function(module) {
 			var completeHandler = function(xhr, status) {
 				var nextContainer = containerIt();
 				if (nextContainer) {
-					// TODO: RP verifier specific behavior
 					OPIV.testStep(nextContainer.TestId, nextContainer.Container, completeHandler);
 				} else {
 					hideWaitDialog();
@@ -108,7 +114,6 @@ var OPIV = (function(module) {
 			// call for the first time
 			var nextContainer = containerIt();
 			if (nextContainer) {
-				// TODO: RP verifier specific behavior
 				OPIV.testStep(nextContainer.TestId, nextContainer.Container, completeHandler);
 			}
 		} else {
@@ -140,11 +145,10 @@ var OPIV = (function(module) {
 	module.learnRP = function(completeHandler) {
 		// min check based on form's "required" attribute
 		let activeForm = getActiveRPConfigForm();
-        if (!activeForm[0].checkValidity() ) {
-            markFormErrors(activeForm);
+		if (markFormErrors(activeForm)) {
 			return false;
-        }
-        removeFormErrorMark(activeForm);
+		}
+		removeFormErrorMark(activeForm);
 
 		updateRPConfig();
 
@@ -153,6 +157,13 @@ var OPIV = (function(module) {
 	};
 
 	module.learnOP = function(completeHandler) {
+		// min check based on form's "required" attribute
+		let activeForm = getActiveOPConfigForm();
+		if (markFormErrors(activeForm)) {
+			return false;
+		}
+		removeFormErrorMark(activeForm);
+
 		updateOPConfig();
 		let url = "api/op/" + testId + "/learn";
 		learn(completeHandler, url);
@@ -167,22 +178,41 @@ var OPIV = (function(module) {
 		return $("#form-config-tab").hasClass("active") ? $("#rp-learn-form") : $("#rp-learn-json-form");
 	}
 
-	function markFormErrors(form) {
-        $(form).find("[required]").each(function(){
-            if ( !$(this).val() ) {
-                $(this).parent().addClass("has-error");
-            }
-        });
-    }
+	module.submitOPLearningForm = function() {
+		let activeForm = getActiveOPConfigForm();
+		activeForm.submit();
+	}
 
-    function removeFormErrorMark() {
-	    $("#rp-learn-form").find(".has-error").each(function(){
-            $(this).removeClass("has-error");
-        });
-        $("#rp-learn-json-form").find(".has-error").each(function(){
-            $(this).removeClass("has-error");
-        });
-    }
+	function getActiveOPConfigForm() {
+		return $("#form-config-tab").hasClass("active") ? $("#op-learn-form") : $("#op-learn-json-form");
+	}
+
+	function markFormErrors(form) {
+		let hasError = false;
+		$(form).find("[required]").each(function(){
+			if ( !$(this).val() ) {
+				hasError = true;
+				$(this).parent().addClass("has-error");
+			}
+		});
+		if (testConfigType === OP_CONFIG_TYPE && $("#form-config-tab").hasClass("active")) {
+			if (!$("#url-op-target").val() && !$("#op-metadata-json").val()) {
+				$("#url-op-target").parent().addClass("has-error");
+				hasError = true;
+			}
+		}
+
+		return hasError;
+	}
+
+	function removeFormErrorMark() {
+		$("#rp-learn-form").find(".has-error").each(function(){
+			$(this).removeClass("has-error");
+		});
+		$("#rp-learn-json-form").find(".has-error").each(function(){
+			$(this).removeClass("has-error");
+		});
+	}
 
 	function learn(completeHandler, url) {
 		showWaitDialog();
@@ -202,12 +232,11 @@ var OPIV = (function(module) {
 	};
 
 	module.testStep = function(stepId, stepContainer, completeHandler) {
-		showWaitDialog();
 		// default parameters
 		completeHandler = typeof completeHandler !== 'undefined' ? completeHandler : function() { hideWaitDialog(); };
 
 		if (learningComplete) {
-			// TODO: refactor apiPath condition
+			showWaitDialog();
 			let apiPath = testConfig["Type"] === RP_CONFIG_TYPE ? "api/rp/" : "api/op/";
 
 			// call test function
@@ -583,7 +612,7 @@ var OPIV = (function(module) {
 			testConfig.UrlClientTarget = $("input[name='url-client-target']").val();
 			testConfig.InputFieldName = $("input[name='input-field-name']").val();
 			testConfig.SeleniumScript = $("textarea[name='selenium-script']").val();
-			testConfig.FinalValidUrl = $("input[name='url-client-target-success']").val();
+			testConfig.FinalValidUrl = $("input[name='url-client-target-success']").val().split('#')[0];
 			testConfig.HonestUserNeedle = $("input[name='honest-user-needle']").val();
 			testConfig.EvilUserNeedle = $("input[name='evil-user-needle']").val();
 			testConfig.ProfileUrl = $("input[name='user-profile-url']").val();
@@ -619,26 +648,51 @@ var OPIV = (function(module) {
 	}
 
 	function jsonFilter(key, val) {
-		if (key === 'HonestWebfingerResourceId' || key === 'EvilWebfingerResourceId' || key === 'Type') {
+		if (key === 'HonestWebfingerResourceId' || key === 'EvilWebfingerResourceId' || key === "HonestRpResourceId"
+			|| key === "EvilRpResourceId" || key === 'Type') {
 			// remove from json result
 			return undefined;
+		} else if (key === 'Client1Config' || key === 'Client2Config' || key === 'OPMetadata') {
+			try {
+				return JSON.parse(val);
+			} catch (e) {
+				console.log('JSON String to JSON conversion failed');
+				return val;
+			}
 		}
+
 		return val;
 	}
 
 	function updateOPConfig() {
-		testConfig.UrlOPTarget = $("#url-op-target").val();
-		testConfig.OPMetadata = $("#op-metadata-json").val();
-		testConfig.AccessToken1 = $("#registration-access-token-1").val();
-		testConfig.AccessToken2 = $("#registration-access-token-2").val();
-		testConfig.User2Name = $("#user-2-name").val();
-		testConfig.User2Pass = $("#user-2-password").val();
-		testConfig.User1Name = $("#user-1-name").val();
-		testConfig.User1Pass = $("#user-1-password").val();
-		testConfig.LoginScript =   $("#selenium-login-script").val();
-		testConfig.ConsentScript = $("#selenium-consent-script").val();
-		testConfig.Client1Config = $("#client-1-config").val();
-		testConfig.Client2Config = $("#client-2-config").val();
+		if ($("#form-config-tab").hasClass("active")) {
+			testConfig.UrlOPTarget = $("#url-op-target").val();
+			testConfig.OPMetadata = $("#op-metadata-json").val();
+			testConfig.AccessToken1 = $("#registration-access-token-1").val();
+			testConfig.AccessToken2 = $("#registration-access-token-2").val();
+			testConfig.User2Name = $("#user-2-name").val();
+			testConfig.User2Pass = $("#user-2-password").val();
+			testConfig.User1Name = $("#user-1-name").val();
+			testConfig.User1Pass = $("#user-1-password").val();
+			testConfig.LoginScript =   $("#selenium-login-script").val();
+			testConfig.ConsentScript = $("#selenium-consent-script").val();
+			testConfig.Client1Config = $("#client-1-config").val();
+			testConfig.Client2Config = $("#client-2-config").val();
+		} else if ($("#json-config-tab").hasClass("active")) {
+			// let jsonConfig = JSON.parse($("#json-config").val());
+			let cfg = JSON.parse($("#json-config").val());
+			if (cfg.Client1Config && (typeof cfg.Client1Config) !== "string") {
+				cfg.Client1Config = JSON.stringify(cfg.Client1Config);
+			}
+			if (cfg.Client2Config && (typeof cfg.Client2Config) !== "string") {
+				cfg.Client2Config = JSON.stringify(cfg.Client2Config);
+			}
+			if (cfg.OPMetadata && (typeof cfg.OPMetadata) !== "string") {
+				cfg.OPMetadata = JSON.stringify(cfg.OPMetadata);
+			}
+
+			jQuery.extend(true, testConfig, cfg);
+		}
 	}
 
 	function writeOPConfig(newTestOPConfig) {
@@ -673,6 +727,9 @@ var OPIV = (function(module) {
 		$("#selenium-consent-script").val(newTestOPConfig.ConsentScript);
 		$("#client-1-config").val(newTestOPConfig.Client1Config);
 		$("#client-2-config").val(newTestOPConfig.Client2Config);
+		// JSON form
+		let jsonConf = JSON.stringify(newTestOPConfig, jsonFilter, 4);
+		$("#json-config").val(jsonConf);
 	}
 
 	function processLearnResponse(learnResult) {

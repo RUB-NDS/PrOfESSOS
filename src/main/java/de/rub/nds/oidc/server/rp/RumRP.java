@@ -94,8 +94,5 @@ public class RumRP extends DefaultRP {
 
 			browserBlocker.complete(TestStepResult.PASS);
 		}
-		
 	}
-
-	
 }
