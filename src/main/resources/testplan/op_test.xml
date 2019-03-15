@@ -24,7 +24,7 @@
 	<TestStep Name="Authorization Code Reuse 1">
 		<Description>
 			<![CDATA[
-			PrOfESSOS attempts to redeem an Authorization Code that has already been used by another user of the same client
+			PrOfESSOS attempts to redeem an Authorization Code that has already been used by the same client.
 			]]>
 		</Description>
 		<TestParameters>
@@ -36,8 +36,8 @@
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
-
 			<Parameter Key="force_auth-code_reuse_user">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
 			<!-- not used but required in config-->
@@ -61,17 +61,13 @@
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
-
 			<Parameter Key="force-no-redeem-auth-code">false</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
-
-			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-2>
 	</TestStep>
-
-
 
 	<TestStep Name="Redirect URI Manipulation 1">
 		<Description>
@@ -434,13 +430,11 @@
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
 			<Parameter Key="force-no-redeem-auth-code">true</Parameter>
-			<Parameter Key="code-redemption-fails-test">true</Parameter>
 
 		</RPConfig-1>
 		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
-
-			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-2>
 	</TestStep>
 
@@ -472,9 +466,35 @@
 
 	<TestStep Name="Code Hijack 7">
 		<Description><![CDATA[
+		PrOfESSOS attempts to redeem an authorization code using Basic Authentication with an empty string as
+			<code>client_secret</code>. That is, the Authorization Header's value is made up as
+			<code>Base64("client_id:")</code>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
+			<Parameter Key="tokenreq-clientauth-empty-client-id">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Code Hijack 8">
+		<Description><![CDATA[
 		PrOfESSOS attempts to redeem an authorization code including its client credentials as body
 			parameters in the POST request even though only the (default) authentication method
-			<code>"token_endpoint_auth_method": "client_secret_basic"</cdoe> has been registered.
+			<code>"token_endpoint_auth_method": "client_secret_basic"</code> has been registered.
 		]]>
 		</Description>
 		<TestParameters>
@@ -496,10 +516,10 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Code Hijack 8">
+	<TestStep Name="Code Hijack 9">
 		<Description><![CDATA[
 			PrOfESSOS attempts to redeem an authorization code using <code>"token_endpoint_auth_method": "client_secret_post"</code>
-			as authentication method but using a random value for the <code>client_secret</code> parameter.
+			as authentication method with a random value for the <code>client_secret</code> parameter.
 		]]></Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
@@ -523,10 +543,10 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Code Hijack 9">
+	<TestStep Name="Code Hijack 10">
 		<Description><![CDATA[
 		PrOfESSOS attempts to redeem an authorization code using <code>client_secret_post</code> authentication method in
-		the Token Request without includign the <code>client_secret</code> parameter.
+		the Token Request without including the <code>client_secret</code> parameter.
 		]]>
 		</Description>
 		<TestParameters>
