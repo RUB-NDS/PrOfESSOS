@@ -17,6 +17,7 @@ public class OPCodeReuseBrowser extends AbstractOPBrowser {
 			return TestStepResult.UNDETERMINED;
 		}
 
+		TestStepResult result = null;
 		ArrayList<String[]> users = new ArrayList<>();
 		users.add(new String[]{opConfig.getUser1Name(), opConfig.getUser1Pass()});
 		users.add(new String[]{opConfig.getUser2Name(), opConfig.getUser2Pass()});
@@ -28,15 +29,16 @@ public class OPCodeReuseBrowser extends AbstractOPBrowser {
 			boolean isSingleRP = Boolean.valueOf((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST));
 			RPType type = isSingleRP ? RPType.HONEST : (i == 1) ? RPType.EVIL : RPType.HONEST;
 
-			TestStepResult result = runUserAuth(type);
-			if (result != TestStepResult.PASS) {
-				logger.log(String.format("Authentication of User %s with password %s failed", userName, userPass));
-				return result;
-			}
+			result = runUserAuth(type);
+			//TODO why should we ever want to break out here?
+//			if (result != TestStepResult.PASS && i == 1) {
+//				logger.log(String.format("Authentication of User %s with password %s failed", userName, userPass));
+//				return result;
+//			}
 			// reload browser to clear sessions
 			loadDriver(true);
 		}
-		return TestStepResult.PASS;
+		return result;
 	}
-    
+
 }

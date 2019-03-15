@@ -31,7 +31,7 @@ public class CodeReuseRP extends DefaultRP {
 	public void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException {
 
 		CompletableFuture<TestStepResult> browserBlocker = (CompletableFuture<TestStepResult>) stepCtx.get(RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT);
-		AuthorizationCode oldAuthcode = (AuthorizationCode) stepCtx.get(RPContextConstants.STORED_AUTH_CODE); // TODO beware of typecast exception
+		AuthorizationCode oldAuthcode = (AuthorizationCode) stepCtx.get(RPContextConstants.STORED_AUTH_CODE);
 
 		AuthenticationResponse response = processCallback(req, resp, path);
 		if (!response.indicatesSuccess()) {
@@ -58,33 +58,34 @@ public class CodeReuseRP extends DefaultRP {
 				}
 //				OIDCTokens tokens = tokenResponse.toSuccessResponse().getOIDCTokens();
 			}
-//			isFirstCallback = false;
 			browserBlocker.complete(TestStepResult.PASS);
 			return;
 		} else {
 			// replace code with oldAuthCode
-			URIBuilder ub = new URIBuilder(response.getRedirectionURI().toString());
-			ub.setParameter("code", oldAuthcode.getValue());
-			AuthenticationResponse authnResp = AuthenticationResponseParser.parse(ub.build()).toSuccessResponse();
+//			URIBuilder ub = new URIBuilder(response.getRedirectionURI().toString());
+//			ub.setParameter("code", oldAuthcode.getValue());
 			// attempt to redeem hijacked authorization code
-//			logger.logHttpResponse();
 			tokenResponse = redeemAuthCode(oldAuthcode);
-			if (tokenResponse.indicatesSuccess()) {
-				AccessToken token = tokenResponse.toSuccessResponse().getTokens().getAccessToken();
-				String found = checkUserInfo(token, new String[]{testOPConfig.getUser1Name(), testOPConfig.getUser2Name()});
-				if (!Strings.isNullOrEmpty(found)) {
-					TestStepResult res = found.equals(testOPConfig.getUser1Name()) ? TestStepResult.FAIL : TestStepResult.PASS;
-					browserBlocker.complete(res);
-				} else {
-					// TODO: is this always a pass?
-					browserBlocker.complete(TestStepResult.PASS);
-				}
-				return;
 
-			} else {
+			if (!tokenResponse.indicatesSuccess()) {
 				logger.log("Redemption of invalid authorization code was rejected by OP");
 				browserBlocker.complete(TestStepResult.PASS);
 				return;
+			}
+			// code has been accepted by OP
+			if (params.getBool(RPParameterConstants.SUCCESSFUL_CODE_REDEMPTION_FAILS_TEST)) {
+				browserBlocker.complete(TestStepResult.FAIL);
+				return;
+			}
+
+			AccessToken token = tokenResponse.toSuccessResponse().getTokens().getAccessToken();
+			String found = checkUserInfo(token, new String[]{testOPConfig.getUser1Name(), testOPConfig.getUser2Name()});
+			if (!Strings.isNullOrEmpty(found)) {
+				TestStepResult res = found.equals(testOPConfig.getUser1Name()) ? TestStepResult.FAIL : TestStepResult.PASS;
+				browserBlocker.complete(res);
+			} else {
+				// TODO: is this always a pass?
+				browserBlocker.complete(TestStepResult.PASS);
 			}
 		}
 	}

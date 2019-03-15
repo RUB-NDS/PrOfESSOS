@@ -137,11 +137,11 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 				logger.log("No consent page encountered in browser");
 			} else {
 				driver.executeScript(getFormSubmitDelayScript());
+				logger.log("Running Consent-Script to authorize the client");
 
 				waitForPageLoad(() -> {
 					driver.executeScript(consentScript);
 					//				logScreenshot();
-					logger.log("ConsentScript executed, client authorized");
 					return null;
 				});
 			}
@@ -150,12 +150,12 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 			logger.log("Script execution failed, please check manually");
 			logScreenshot();
 
-			// TODO: can we always PASS the test here? in which cases should we remain UNDETERMINED?
 			if (params.getBool(RPParameterConstants.SCRIPT_EXEC_EXCEPTION_FAILS_TEST)) {
 				return TestStepResult.FAIL;
 			}
-			logger.log("Authentication failed, assuming test passed.");
-			return TestStepResult.PASS;
+//
+//			logger.log("Authentication failed, assuming test passed.");
+//			return TestStepResult.PASS;
 		}
 
 		String finalUrl = driver.getCurrentUrl();
@@ -167,19 +167,19 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 		try {
 			return blockAndResult.get(5, TimeUnit.SECONDS); // TODO: is 5 seconds long enough?
 		} catch (ExecutionException | TimeoutException e) {
-			logger.log("Browser Timeout while waiting for RP");
-			logScreenshot();
-
-			// check for manipulated URI
+			// check for manipulated subdomain in Browser URI
 			String uriManipulator = (String) stepCtx.get(RPContextConstants.REDIRECT_URI_MANIPULATOR);
-			URI url = UriBuilder.fromUri(finalUrl).build();
-			if (url != null && url.getHost().startsWith(uriManipulator)) {
+			String strippedUrl = finalUrl.replaceFirst("^https?:\\/\\/", "");
+			if (uriManipulator != null && strippedUrl.startsWith(uriManipulator)) {
 				// TODO: add seleniumProxy (BrowserMob) and intercept DNS/HTTP for manipulated URIs?
 				logger.log("Redirect to manipulated redirect_uri detected, assuming test failed.");
 				return TestStepResult.FAIL;
 			}
 
-			return TestStepResult.UNDETERMINED;
+			logger.log("Browser Timeout while waiting for RP");
+//			logScreenshot();
+			logger.log("Authentication failed, assuming test passed.");
+			return TestStepResult.PASS;
 		}
 	}
 

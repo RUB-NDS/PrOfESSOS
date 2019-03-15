@@ -68,6 +68,13 @@ public class DefaultRP extends AbstractRPImplementation {
 
 		if (authnResp.toSuccessResponse().impliedResponseMode().equals(ResponseMode.QUERY)
 				&& !usedResponseType.impliesCodeFlow()) {
+			logger.log("Detected Token(s) in Query String, assuming test failed.");
+			browserBlocker.complete(TestStepResult.FAIL);
+		}
+		if (authnResp.toSuccessResponse().impliedResponseMode().equals(ResponseMode.FRAGMENT)
+			&& !getRegistrationGrantTypes().contains(GrantType.IMPLICIT)) {
+			logger.log("Implicit response detected but authorization_grant_type=implicit not registered by client.");
+			logger.log("Assuming test failed.");
 			browserBlocker.complete(TestStepResult.FAIL);
 		}
 
@@ -141,7 +148,6 @@ public class DefaultRP extends AbstractRPImplementation {
 		sendCallbackResponse(resp, req);
 		// wait for browser confirmation ...
 		try {
-			// TODO: is this always necessary or only if we need the browser later on?
 			waitForBrowser.get(5, TimeUnit.SECONDS);
 		} catch (TimeoutException | ExecutionException | InterruptedException e) {
 			logger.log("Timeout waiting for browser redirect URL", e);
@@ -201,18 +207,17 @@ public class DefaultRP extends AbstractRPImplementation {
 	protected TokenResponse redeemAuthCode(AuthorizationCode code) throws IOException, ParseException {
 
 		URI redirectURI = getTokenReqRedirectUri();
-//		AuthorizationCodeGrant codeGrant = new AuthorizationCodeGrant(code, redirectURI, (CodeVerifier) stepCtx.get(STORED_PKCE_VERIFIER));
 		AuthorizationCodeGrant codeGrant = new AuthorizationCodeGrant(code, redirectURI);
 
 		TokenRequest request = new TokenRequest(
 				opMetaData.getTokenEndpointURI(),
-				// set basic auth to construct a temporary request that is
-				// customized later on
+				// set Basic Authorization header to construct a temporary request
+				// that is customized according to TestStepReference later on
 				new ClientSecretBasic(clientInfo.getID(), clientInfo.getSecret()),
 				codeGrant);
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
-		// preform request customization as per testplan
+		// perform request customization as per TestStepReference
 		tokenRequestApplyClientAuth(httpRequest);
 		tokenRequestApplyPKCEParams(httpRequest);
 
@@ -225,7 +230,6 @@ public class DefaultRP extends AbstractRPImplementation {
 			TokenErrorResponse errorResponse = response.toErrorResponse();
 			logger.log("Code redemption failed");
 			logger.logHttpResponse(errorResponse.toHTTPResponse(), errorResponse.toHTTPResponse().getContent());
-//			stepCtx.put(RPContextConstants.RP_INDICATED_STEP_RESULT, TestStepResult.FAIL);
 			return response.toErrorResponse();
 		}
 
@@ -233,9 +237,6 @@ public class DefaultRP extends AbstractRPImplementation {
 		logger.log("Code redeemed for Token:");
 		logger.logHttpResponse(response.toHTTPResponse(), response.toHTTPResponse().getContent());
 
-//		JWT idToken = tokenSuccessResponse.getOIDCTokens().getIDToken();
-//		AccessToken accessToken = tokenSuccessResponse.getOIDCTokens().getAccessToken();
-//		RefreshToken refreshToken = tokenSuccessResponse.getOIDCTokens().getRefreshToken();
 		return tokenSuccessResponse;
 	}
 
@@ -281,7 +282,7 @@ public class DefaultRP extends AbstractRPImplementation {
 
 			req.setHeader("Authorization", sb.toString());
 		} catch (UnsupportedEncodingException e) {
-			// utf-8 should be supported ?
+			// utf-8 should always be supported
 			logger.log("Could not encode client credentials for token request.");
 		}
 	}
@@ -304,11 +305,6 @@ public class DefaultRP extends AbstractRPImplementation {
 			logger.log(e.getMessage());
 			return new UserInfoErrorResponse(new ErrorObject("invalid response", "Invalid response upon userinfo request"));
 		}
-//		if (!userInfoResponse.indicatesSuccess()) {
-//			return null;
-//		}
-//
-//		UserInfo userInfo = userInfoResponse.toSuccessResponse().getUserInfo();
 	}
 
 
