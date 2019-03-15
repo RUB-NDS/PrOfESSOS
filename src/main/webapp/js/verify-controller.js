@@ -151,7 +151,7 @@ var OPIV = (function(module) {
 		removeFormErrorMark(activeForm);
 
 		updateRPConfig();
-
+		clearAllTests();
 		let url = "api/rp/" + testId + "/learn";
 		learn(completeHandler, url);
 	};
@@ -165,6 +165,7 @@ var OPIV = (function(module) {
 		removeFormErrorMark(activeForm);
 
 		updateOPConfig();
+		clearAllTests();
 		let url = "api/op/" + testId + "/learn";
 		learn(completeHandler, url);
 	};
