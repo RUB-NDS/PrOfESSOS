@@ -16,124 +16,118 @@
 
 package de.rub.nds.oidc.server.op;
 
-import com.nimbusds.oauth2.sdk.AuthorizationCode;
-import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
-import com.nimbusds.oauth2.sdk.AuthorizationGrant;
-import com.nimbusds.oauth2.sdk.ErrorObject;
-import com.nimbusds.oauth2.sdk.GrantType;
-import com.nimbusds.oauth2.sdk.OAuth2Error;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.TokenErrorResponse;
-import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.ServletUtils;
-import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.TestStepResult;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 
 public class SessionOverwritingOP extends DefaultOP {
 
-    @Override
-    public void authRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        
-        if (isFirstAuthReq()) {
-            try {
-                CompletableFuture<?> waitFor2ndAuthReq = new CompletableFuture<>();
-                stepCtx.put(OPContextConstants.BLOCK_OP_FUTURE, waitFor2ndAuthReq);
+	@Override
+	public void authRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-                logger.log(String.format("Authentication requested at %s-OP.", type.name()));
-                HTTPRequest reqMsg = ServletUtils.createHTTPRequest(req);
-                logger.logHttpRequest(req, reqMsg.getQuery());
+		if (isFirstAuthReq()) {
+			logger.log(String.format("Authentication requested at %s-OP.", type.name()));
 
-                waitFor2ndAuthReq.get(15, TimeUnit.SECONDS);
-                // forward request by the actual honest implementation
-                logger.log(String.format("processing authreq in %s-OP", type.name()));
-                super.authRequest(path, req, resp);
-            } catch (InterruptedException ex) {
-                logger.log("Waiting for client to discover evil OP was interrupted.", ex);
-            } catch (ExecutionException |TimeoutException ex) {
-                logger.log("Waiting for client to discover evil failed.", ex);
-            }
-        } else {
-            try {
-                logger.log(String.format("Authentication requested at %s-OP.", type.name()));
-                HTTPRequest reqMsg = ServletUtils.createHTTPRequest(req);
-                logger.logHttpRequest(req, reqMsg.getQuery());
-                AuthenticationRequest authReq = AuthenticationRequest.parse(reqMsg);
-    
-                // extract values and save for later use
-    //                State opState = authReq.getState();
-    //                stepCtx.put(OPContextConstants.AUTH_REQ_EVIL_STATE, opState);
-    //                logger.log("State from Evil OP saved, releasing AuthResponse from Honest OP ");
-    
-    //				resp.setStatus(204);
-    //				resp.flushBuffer();
-                CompletableFuture<?> waitFor2ndAuthReq = (CompletableFuture<?>) stepCtx.get(OPContextConstants.BLOCK_OP_FUTURE);
-                logger.log("Releasing delayed AuthResponse");
-                waitFor2ndAuthReq.complete(null);
-            } catch (ParseException ex) {
-                logger.log("Failed to parse Authorization Request.");
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            }
-        }
-        
-    }
+			CompletableFuture<?> waitFor2ndAuthReq = new CompletableFuture<>();
+			stepCtx.put(OPContextConstants.BLOCK_OP_FUTURE, waitFor2ndAuthReq);
+			CompletableFuture<?> browserLock = (CompletableFuture<?>) stepCtx.get(OPContextConstants.BLOCK_BROWSER_WAITING_FOR_HONEST);
 
-    // TODO: this does not work for implicit flow - need to also check for userinforeqeusts (?)
-    @Override
-    public void tokenRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        CompletableFuture<TestStepResult> blocker = (CompletableFuture<TestStepResult>) stepCtx.get(OPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT);
+			HTTPRequest reqMsg = ServletUtils.createHTTPRequest(req);
+			logger.logHttpRequest(req, reqMsg.getQuery());
 
-        // send error response in either case
-        ErrorObject error = OAuth2Error.INVALID_REQUEST;
-        TokenErrorResponse errorResp = new TokenErrorResponse(error);
+			CompletableFuture<?> backgroundWaiter = CompletableFuture.runAsync(() -> {
+				try {
+					waitFor2ndAuthReq.get(15, TimeUnit.SECONDS);
+					// forward request to the actual honest implementation
+					logger.log(String.format("Start processing Authentication Request in %s-OP", type.name()));
+					super.authRequest(path, req, resp);
+				} catch (InterruptedException | TimeoutException | ExecutionException | IOException e) {
+					logger.log("Exception while waiting to release first Authentication Response", e);
+				}
+			});
 
-        try {
-            logger.log("Token requested.");
+			// signal browser to start second auth request within the same session
+			browserLock.complete(null);
 
-            HTTPRequest httpReq = ServletUtils.createHTTPRequest(req);
-            TokenRequest tokenReq = TokenRequest.parse(httpReq);
-            logger.logHttpRequest(req, httpReq.getQuery());
+			// wait for the AuthnResp before flushing response
+			backgroundWaiter.join();
+		} else {
+			try {
+				logger.log(String.format("Authentication requested at %s-OP.", type.name()));
+				HTTPRequest reqMsg = ServletUtils.createHTTPRequest(req);
+				logger.logHttpRequest(req, reqMsg.getQuery());
+				AuthenticationRequest authReq = AuthenticationRequest.parse(reqMsg);
 
-            if (type == OPType.EVIL) {
-                AuthorizationGrant grant = tokenReq.getAuthorizationGrant();
-                if (grant != null && grant.getType() == GrantType.AUTHORIZATION_CODE) {
-                    AuthorizationCodeGrant codeGrant = (AuthorizationCodeGrant) grant;
-                    AuthorizationCode code = codeGrant.getAuthorizationCode();
-                    // TODO compare actual code
-                    // ^^ what ???
-                    AuthorizationCode honestCode = (AuthorizationCode) stepCtx.get(OPContextConstants.HONEST_CODE);
-                    if (code.equals(honestCode)) {
-                        logger.log("Honest code received in attacker.");
-                        blocker.complete(TestStepResult.FAIL);
-                    } else {
-                        logger.log("Honest code not received in attacker.");
-                        blocker.complete(TestStepResult.PASS);
-                    }
-                    sendErrorResponse("Token", errorResp, resp);
-                    return;
-                }
-            }
-            sendErrorResponse("Token", errorResp, resp);
-            blocker.complete(TestStepResult.PASS);
-        } catch (ParseException ex) {
-            sendErrorResponse("Token", errorResp, resp);
-            blocker.complete(TestStepResult.UNDETERMINED);
-        }
+				// send nop response to waiting browser
+				resp.setStatus(204);
+				resp.flushBuffer();
+				CompletableFuture<?> waitFor2ndAuthReq = (CompletableFuture<?>) stepCtx.get(OPContextConstants.BLOCK_OP_FUTURE);
+				logger.log("Releasing delayed AuthResponse");
+				waitFor2ndAuthReq.complete(null);
+			} catch (ParseException ex) {
+				logger.log("Failed to parse Authorization Request.");
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			}
+		}
+	}
 
-    }
-    
-    private boolean isFirstAuthReq() {
-        return ! stepCtx.containsKey(OPContextConstants.BLOCK_OP_FUTURE);
-    }
+	// TODO: this does not work for implicit flow - need to also check for userinforeqeusts (?)
+	@Override
+	public void tokenRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		CompletableFuture<TestStepResult> blocker = (CompletableFuture<TestStepResult>) stepCtx.get(OPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT);
+
+		// send error response in either case
+		ErrorObject error = OAuth2Error.INVALID_REQUEST;
+		TokenErrorResponse errorResp = new TokenErrorResponse(error);
+
+		try {
+			logger.log("Token requested.");
+
+			HTTPRequest httpReq = ServletUtils.createHTTPRequest(req);
+			TokenRequest tokenReq = TokenRequest.parse(httpReq);
+			logger.logHttpRequest(req, httpReq.getQuery());
+
+			if (type == OPType.EVIL) {
+				AuthorizationGrant grant = tokenReq.getAuthorizationGrant();
+				if (grant != null && grant.getType() == GrantType.AUTHORIZATION_CODE) {
+					AuthorizationCodeGrant codeGrant = (AuthorizationCodeGrant) grant;
+					AuthorizationCode code = codeGrant.getAuthorizationCode();
+
+					AuthorizationCode honestCode = (AuthorizationCode) stepCtx.get(OPContextConstants.HONEST_CODE);
+					if (code.equals(honestCode)) {
+						logger.log("Honest code received in attacker.");
+						blocker.complete(TestStepResult.FAIL);
+					} else {
+						logger.log("Honest code not received in attacker.");
+						blocker.complete(TestStepResult.PASS);
+					}
+					sendErrorResponse("Token", errorResp, resp);
+					return;
+				}
+			}
+			sendErrorResponse("Token", errorResp, resp);
+			blocker.complete(TestStepResult.PASS);
+		} catch (ParseException ex) {
+			sendErrorResponse("Token", errorResp, resp);
+			blocker.complete(TestStepResult.UNDETERMINED);
+		}
+
+	}
+
+	private boolean isFirstAuthReq() {
+		return !stepCtx.containsKey(OPContextConstants.BLOCK_OP_FUTURE);
+	}
 
 }
