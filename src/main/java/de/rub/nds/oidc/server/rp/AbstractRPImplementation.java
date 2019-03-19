@@ -143,7 +143,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 
 	@Override
-	public void runTestStepSetup() throws ParseException, IOException {
+	public boolean runTestStepSetup() throws ParseException, IOException {
 		boolean success = true;
 
 		success &= areStepRequirementsMet();
@@ -166,6 +166,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 			stepCtx.put(RPContextConstants.RP2_PREPARED_REDIRECT_URI, getEvilRedirectUri());
 			stepCtx.put(RPContextConstants.STEP_SETUP_FINISHED, success);
 		}
+		return success;
 	}
 
 	@Override
@@ -265,8 +266,16 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 
 	private boolean registerClientIfNeeded() throws IOException, ParseException {
+		if (!Strings.isNullOrEmpty(testOPConfig.getClient1Config())
+				|| !Strings.isNullOrEmpty(testOPConfig.getClient2Config())
+				|| opMetaData.getRegistrationEndpointURI() == null) {
+			logger.log("Configuration indicates that dynamic registration is not supported.");
+			return false;
+		}
+
 		if (Boolean.valueOf((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))) {
-			// don't store new clientConfig in suiteCtx
+			// run registration with current step context but 
+			// don not store new clientConfig in suiteCtx
 			return registerClient(type);
 		}
 		OIDCClientInformation ci = getStoredClientInfo(type == RPType.HONEST);
@@ -277,6 +286,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		}
 		// otherwise, run dynamic registration
 		if (registerClient(type)) {
+			// store registration response in suiteCtx
 			storeClientInfo();
 			return true;
 		}
@@ -288,7 +298,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		logger.log("Starting client registration");
 
 		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
-		// TODO: grant types need to be configurable in test plan.
+
 		Set<GrantType> grantTypes = getRegistrationGrantTypes();
 		clientMetadata.setGrantTypes(grantTypes);
 
@@ -308,7 +318,6 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		}
 
 		OIDCClientRegistrationRequest regRequest = new OIDCClientRegistrationRequest(
-//				getRegistrationEndpoint(),
 				opMetaData.getRegistrationEndpointURI(),
 				clientMetadata,
 				bearerAccessToken
@@ -321,7 +330,6 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		ClientRegistrationResponse regResponse = OIDCClientRegistrationResponseParser.parse(response);
 
 		if (!regResponse.indicatesSuccess()) {
-//			ClientRegistrationErrorResponse errorResponse = (ClientRegistrationErrorResponse)regResponse;
 			logger.log("Dynamic Client Registration failed");
 			logger.logHttpResponse(response, response.getContent());
 			return false;
@@ -333,8 +341,6 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		setClientInfo(clientInfo);
 		logger.log("Successfully registered client");
 		logger.logHttpResponse(response, response.getContent());
-
-		stepCtx.put(RPContextConstants.CLIENT_REGISTRATION_FAILED, false);
 
 		return true;
 	}
