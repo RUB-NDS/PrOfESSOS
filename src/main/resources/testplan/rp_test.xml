@@ -1152,7 +1152,7 @@
 		</Description>
 		<TestParameters>
 			<Parameter Key="discovery_support_needed">true</Parameter>
-			<Parameter Key="dynamic_client_registration_support_needed">true</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
