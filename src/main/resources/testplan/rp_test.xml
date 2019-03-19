@@ -654,12 +654,14 @@
 			Session Overwriting attack in order to confuse the client to use the wrong key.
 
 			Test desciption
-				Step 1: starts authentication with Malicious OP
-				Step 2: pause before sending the Authentication Response (code or idtoken/access token) to the SP
-				Step 3: start authentication with Honest OP within the same HTTP session as Step 1 (i.e., use the same Cookies)
-				Step 4: abort Step 3 after the Honest IdP has been contacted by the Browser from Step 3.
-				Step 5: continue with Step 2 (break the pause) and sends the Authentication Response (code or idtoken/access token)
-
+			<ul>
+				<li>Step 1: starts authentication with Malicious OP</li>
+				<li>Step 2: pause before sending the Authentication Response (code or idtoken/access token) to the SP</li>
+				<li>Step 3: start authentication with Honest OP within the same HTTP session as Step 1 (i.e., use the same Cookies)</li>
+				<li>Step 4: abort Step 3 after the Honest IdP has been contacted by the Browser from Step 3.</li>
+				<li>Step 5: continue with Step 2 (break the pause) and sends the Authentication Response (code or idtoken/access token)</li>
+			</ul>
+			
 			<h2>Result Evaluation.</h2>
 			The attack is successful if the token is accepted by the Client.
 		]]>
