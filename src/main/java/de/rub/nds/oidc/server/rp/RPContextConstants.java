@@ -24,8 +24,6 @@ public class RPContextConstants {
 	public static final String HONEST_CLIENT_CLIENTINFO = PFX + "1-registered-client-info";
 	public static final String EVIL_CLIENT_CLIENTINFO = PFX + "2-registered-client-info";
 
-	public static final String CLIENT_REGISTRATION_FAILED = PFX + "client-not-registered";
-
 	public static final String BLOCK_BROWSER_FOR_RP_FUTURE = PFX + "block-browser-for-rp-future";
 	public static final String BLOCK_RP_FOR_BROWSER_FUTURE = PFX + "block-browser-for-rp-future";
 	public static final String BLOCK_BROWSER_AND_TEST_RESULT = PFX + "block-browser-for-rp-testresult-future";
