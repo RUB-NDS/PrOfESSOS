@@ -29,19 +29,11 @@ import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.server.op.OPType;
 import de.rub.nds.oidc.server.rp.RPContextConstants;
 import de.rub.nds.oidc.server.rp.RPInstance;
-import de.rub.nds.oidc.server.rp.RPParameterConstants;
 import de.rub.nds.oidc.server.rp.RPType;
 import de.rub.nds.oidc.test_model.*;
-import de.rub.nds.oidc.utils.ImplementationLoadException;
-import de.rub.nds.oidc.utils.ImplementationLoader;
-import de.rub.nds.oidc.utils.UriUtils;
-import de.rub.nds.oidc.utils.ValueGenerator;
+import de.rub.nds.oidc.utils.*;
 import org.apache.commons.lang.RandomStringUtils;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
 import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -49,6 +41,13 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  *
@@ -62,6 +61,7 @@ public class TestRunner {
 	private final TestPlanType testPlan;
 	private final TemplateEngine te;
 	private ValueGenerator valueGenerator;
+	private JsWaiter jsWaiter;
 
 	private final Map<String, Object> testSuiteCtx;
 
@@ -353,9 +353,10 @@ public class TestRunner {
 		RPInstance rp2Inst = new RPInstance(stepDef.getRPConfig2(), logger, testSuiteCtx, testStepCtx, remoteOPConfig, RPType.EVIL, hostCfg);
 		instReg.addRP2(testId, new ServerInstance<>(rp2Inst, logger));
 
-		rp1Inst.getImpl().runTestStepSetup();
-		rp2Inst.getImpl().runTestStepSetup();
-		return true;
+		boolean isRunnable;
+		isRunnable = rp1Inst.getImpl().runTestStepSetup();
+		isRunnable &= rp2Inst.getImpl().runTestStepSetup();
+		return isRunnable;
 	}
 
 	private boolean isMinimalValidOPConfig(TestOPConfigType cfg) {
