@@ -122,7 +122,7 @@ public class RPLearningBrowser extends BrowserSimulator {
 		//waitForPageLoad(() -> driver.executeScript(js));
 
 		// wait until a new html element appears, indicating a page load
-		waitForPageLoad(() -> {
+		waitForDocumentReadyAndJsReady(() -> {
 			driver.executeScript(submitScript);
 			// capture state where the text is entered
 			logger.log("Webfinger identity entered into the login form.");
@@ -145,7 +145,7 @@ public class RPLearningBrowser extends BrowserSimulator {
 		String profileUrl = rpConfig.getProfileUrl();
 		if (profileUrl != null && ! profileUrl.isEmpty()) {
 			logger.log("Loading profile URL page.");
-			waitForPageLoad(() -> {
+			waitForDocumentReadyAndJsReady(() -> {
 				driver.get(profileUrl);
 				return null;
 			});

@@ -22,6 +22,7 @@ import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.test_model.*;
 import de.rub.nds.oidc.utils.Func;
 import de.rub.nds.oidc.utils.InstanceParameters;
+import de.rub.nds.oidc.utils.JsWaiter;
 import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
@@ -65,6 +66,9 @@ public abstract class BrowserSimulator {
 
 	private String formSubmitDelayScript;
 
+	private JsWaiter jsWaiter;
+
+
 	public BrowserSimulator() {
 		loadDriver(false);
 		loadFormSubmissionDelayScript();
@@ -75,6 +79,8 @@ public abstract class BrowserSimulator {
 			quit();
 		}
 		driver = getDriverInstance();
+		jsWaiter = new JsWaiter();
+		jsWaiter.setJsWaitDriver(driver);
 	}
 
 	protected RemoteWebDriver getDriverInstance() {
@@ -148,6 +154,11 @@ public abstract class BrowserSimulator {
 		this.params = new InstanceParameters(params);
 	}
 
+	public void setJsWaiter(JsWaiter waiter) {
+		this.jsWaiter = waiter;
+		jsWaiter.setJsWaitDriver(driver);
+	}
+
 	protected HashMap<String, Object> createRPContext() {
 		HashMap<String, Object> ctx = createTemplateContext();
 		ctx.put("rp", rpConfig);
@@ -183,6 +194,7 @@ public abstract class BrowserSimulator {
 		driver.quit();
 	}
 
+	// This does not work in SPA scenarios where only the <html> element's content is changed
 	protected final <T> T waitForPageLoad(Func<T> func) {
 		RemoteWebElement oldHtml = (RemoteWebElement) driver.findElement(By.tagName("html"));
 
@@ -192,6 +204,15 @@ public abstract class BrowserSimulator {
 			RemoteWebElement newHtml = (RemoteWebElement) driver.findElement(By.tagName("html"));
 			return !newHtml.getId().equals(oldHtml.getId());
 		});
+
+		return result;
+	}
+
+	protected final <T> T waitForDocumentReadyAndJsReady(Func<T> func) {
+		T result = func.call();
+
+		// checks if document.readyState is complete and various JS frameworks are loaded and ready
+		jsWaiter.waitAllRequest();
 
 		return result;
 	}
@@ -218,13 +239,6 @@ public abstract class BrowserSimulator {
 			driver.manage().timeouts().implicitlyWait(NORMAL_WAIT_TIMEOUT, TimeUnit.SECONDS);
 		}
 	}
-
-//	protected TestStepResult getCombinedStepResult(TestStepResult result) {
-//		TestStepResult rpResult = (TestStepResult) stepCtx.get(RPContextConstants.RP_INDICATED_STEP_RESULT);
-//		// return max(rpResult, result), where PASS < NOT_RUN < UNDETERMINED < FAIL
-//		result = rpResult.compareTo(result) >= 0 ? rpResult : result;
-//		return result;
-//	}
 
 	protected String getFormSubmitDelayScript() {
 		return formSubmitDelayScript;

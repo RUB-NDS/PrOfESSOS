@@ -274,7 +274,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		}
 
 		if (Boolean.valueOf((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))) {
-			// run registration with current step context but 
+			// run registration with current step context but
 			// don not store new clientConfig in suiteCtx
 			return registerClient(type);
 		}

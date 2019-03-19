@@ -40,7 +40,7 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 		String submitScript = te.eval(createRPContext(), submitScriptRaw);
 
 		// wait until a new html element appears, indicating a page load
-		waitForPageLoad(() -> {
+		waitForDocumentReadyAndJsReady(() -> {
 			driver.executeScript(submitScript);
 			// capture state where the text is entered
 			logger.log("Webfinger identity entered into the login form.");
@@ -85,7 +85,7 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 		String profileUrl = rpConfig.getProfileUrl();
 		if (profileUrl != null && ! profileUrl.isEmpty()) {
 			logger.log("Loading profile URL page.");
-			waitForPageLoad(() -> {
+			waitForDocumentReadyAndJsReady(() -> {
 				driver.get(rpConfig.getProfileUrl());
 				return null;
 			});

@@ -120,7 +120,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 
 		try {
 			// wait until a new html element appears, indicating a page load
-			waitForPageLoad(() -> {
+			waitForDocumentReadyAndJsReady(() -> {
 				driver.executeScript(submitScript);
 				// capture state where the text is entered
 				//			logScreenshot();
@@ -139,7 +139,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 				driver.executeScript(getFormSubmitDelayScript());
 				logger.log("Running Consent-Script to authorize the client");
 
-				waitForPageLoad(() -> {
+				waitForDocumentReadyAndJsReady(() -> {
 					driver.executeScript(consentScript);
 					//				logScreenshot();
 					return null;

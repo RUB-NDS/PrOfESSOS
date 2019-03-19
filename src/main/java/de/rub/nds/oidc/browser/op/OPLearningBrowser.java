@@ -79,17 +79,19 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 		evalScriptTemplates();
 		try {
 			logger.logCodeBlock(submitScript, "Using Login script:");
-			// wait until a new html element appears, indicating a page load
-			waitForPageLoad(() -> {
+
+			waitForDocumentReadyAndJsReady(() -> {
 				driver.executeScript(submitScript);
 				// capture state where the text is entered
-				logScreenshot();
 				logger.log("Login Credentials entered");
+				logScreenshot();
 				return null;
 			});
 		} catch (Exception e) {
 			logger.log("Execution of login script failed");
 			logger.log(e.toString());
+			logScreenshot();
+
 			return TestStepResult.UNDETERMINED;
 		}
 		logger.log("HTML element found in Browser.");
@@ -103,8 +105,9 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 		} else {
 			try {
 				driver.executeScript(getFormSubmitDelayScript());
+				logger.logCodeBlock(consentScript, "Using Consent script:");
 
-				waitForPageLoad(() -> {
+				waitForDocumentReadyAndJsReady(() -> {
 					driver.executeScript(consentScript);
 					logScreenshot();
 					logger.log("ConsentScript executed, client authorized.");
@@ -113,6 +116,8 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 			} catch (Exception e) {
 				logger.log("Execution of consent script failed.");
 				logger.log(e.toString());
+				logScreenshot();
+
 				return TestStepResult.UNDETERMINED;
 			}
 		}
