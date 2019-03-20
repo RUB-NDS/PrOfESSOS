@@ -371,6 +371,9 @@ public class DefaultOP extends AbstractOPImplementation {
 		OIDCTokens tokens = new OIDCTokens(idToken, at, null);
 		OIDCTokenResponse tokenRes = new OIDCTokenResponse(tokens);
 
+		// save the token request target (Honest OP or Evil OP)
+		stepCtx.put(OPContextConstants.TOKEN_REQ_RECEIVED_AT_OP_TYPE, type);
+
 		return tokenRes;
 	}
 
@@ -422,7 +425,6 @@ public class DefaultOP extends AbstractOPImplementation {
 			logger.logHttpRequest(req, httpReq.getQuery());
 
 			resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED);
-			// resp.flushBuffer();
 	}
 
 }

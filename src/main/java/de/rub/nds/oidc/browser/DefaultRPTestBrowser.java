@@ -57,7 +57,7 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 		// run condition check code
 		TestStepResult checkResult = checkConditionAfterLogin();
 		if (checkResult != null) {
-			logger.log("Result returned from check condition funtion: " + checkResult.name());
+			logger.log("Result returned from check condition function: " + checkResult.name());
 			return checkResult;
 		}
 
