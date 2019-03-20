@@ -57,7 +57,7 @@ public class MaliciousEndpointOP extends DefaultOP {
 		}
 
 		// get values from honest OP for comparison
-		OIDCClientInformation info = (OIDCClientInformation) suiteCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST);
+		OIDCClientInformation info = getHonestRegisteredClientInfo();
 		ClientID refClientId = info.getID();
 		AuthorizationCode refCode = (AuthorizationCode) stepCtx.get(OPContextConstants.HONEST_CODE);
 

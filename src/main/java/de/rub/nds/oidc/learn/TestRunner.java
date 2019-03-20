@@ -61,7 +61,6 @@ public class TestRunner {
 	private final TestPlanType testPlan;
 	private final TemplateEngine te;
 	private ValueGenerator valueGenerator;
-	private JsWaiter jsWaiter;
 
 	private final Map<String, Object> testSuiteCtx;
 
@@ -151,22 +150,17 @@ public class TestRunner {
 				return errorResponse;
 			}
 
-			boolean success;
-			// RP-Verifier specific config
+			boolean setupFinished = false;
 			if (isRPTest()) {
-				 success = prepareRPTestStep(instReg, testStepCtx, stepDef, logger);
-				if (!success) {
-					return errorResponse;
-				}
+				// RP-Verifier specific config
+				setupFinished = prepareRPTestStep(instReg, testStepCtx, stepDef, logger);
+			} else if (isOPTest()) {
+				// OP-Verifier specific config
+				setupFinished = prepareOPTestStep(instReg, testStepCtx, stepDef, logger);
 			}
-
-			// OP-Verifier specific config
-			if (isOPTest()) {
-				success = prepareOPTestStep(instReg, testStepCtx, stepDef, logger);
-				if (!success) {
-					logger.log("Test step preparation failed.");
-					return errorResponse;
-				}
+			if (!setupFinished) {
+				logger.log("Test step preparation failed.");
+				return errorResponse;
 			}
 
 			String browserClass = stepDef.getBrowserSimulator().getImplementationClass();
@@ -295,19 +289,19 @@ public class TestRunner {
 		// resolve OP URL
 
 		String honestWebfinger;
+		honestWebfinger = testConfig.getHonestWebfingerResourceId();
+
 		String evilWebfinger;
-		Boolean enforceReg = Boolean.parseBoolean((String) testStepCtx.get(OPContextConstants.REGISTRATION_NEEDED));
-		if (enforceReg) {
-			logger.log("attempt to enforce new registration");
-			String prefix = "enforce-rp-reg-"; // TODO: this is also used in RequestPath, should be a constant defined somewhere
-//			String regEnforcer = prefix + valueGenerator.generateRandString(8);
+		Boolean enforceRegistration = Boolean.valueOf((String) testStepCtx.get(OPContextConstants.REGISTRATION_NEEDED));
+		if (enforceRegistration) {
+			// add a randomized path fragment so that the Client assumes that 
+			// Evil OP is yet unknown and starts new Discovery/Registration
+			String prefix = "enforce-rp-reg-";
 			String regEnforcer = prefix + RandomStringUtils.randomAlphanumeric(8);
-			honestWebfinger = hostCfg.getHonestOPUri().toString() + regEnforcer + "/" + testId;
 			evilWebfinger = hostCfg.getEvilOPUri().toString() + regEnforcer + "/" + testId;
-			logger.log("Enforcing new registration, set stepcontext URIs to " + evilWebfinger + " and "+ honestWebfinger);
+			logger.logCodeBlock( evilWebfinger, "Trigger new registration at Evil OP, set discovery URI:");
 			testStepCtx.put(OPContextConstants.REGISTRATION_ENFORCING_PATH_FRAGMENT, regEnforcer);
 		} else {
-			honestWebfinger = testConfig.getHonestWebfingerResourceId();
 			evilWebfinger = testConfig.getEvilWebfingerResourceId();
 		}
 		// save both in context under their own name

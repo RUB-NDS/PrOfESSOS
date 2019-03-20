@@ -66,7 +66,7 @@ public class KeyConfusionOP extends DefaultOP {
 
 		JWTClaimsSet claims = getIdTokenClaims(clientId, nonce, atHash, cHash);
 		SignedJWT signedJwt;
-		if (params.getBool(FORCE_REGISTER_SAME_CLIENTID)) {
+		if (params.getBool(FORCE_REGISTER_HONEST_CLIENTID)) {
 			// keyConfusion 6 (KC w/ SessionOverwriting)
 			signedJwt = sessionOverwritingKeyConfusion(claims);
 		} else {
@@ -87,7 +87,7 @@ public class KeyConfusionOP extends DefaultOP {
 
 	@Override
 	public void authRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		if (!Boolean.parseBoolean((String) stepCtx.get(FORCE_REGISTER_SAME_CLIENTID))) {
+		if (!Boolean.parseBoolean((String) stepCtx.get(FORCE_REGISTER_HONEST_CLIENTID))) {
 			// all KC tests except KC6
 			super.authRequest(path, req, resp);
 			return;
@@ -493,8 +493,8 @@ public class KeyConfusionOP extends DefaultOP {
 	 */
 	private SignedJWT sessionOverwritingKeyConfusion(JWTClaimsSet claims) throws GeneralSecurityException {
 		// replace client ID (use same ID for evil and honest
-		OIDCClientInformation cinfo = (OIDCClientInformation) stepCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL);
-		logger.log(cinfo.getOIDCMetadata().toString());
+		OIDCClientInformation cinfo = getRegisteredClientInfo(); //(OIDCClientInformation) stepCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL);
+		logger.logCodeBlock(cinfo.toString(), "Generating HS256 using client_secret from stored ClientInfo:");
 
 		JWSHeader.Builder hb = new JWSHeader.Builder(JWSAlgorithm.HS256).type(JOSEObjectType.JWT);
 		JWSHeader header = hb.build();

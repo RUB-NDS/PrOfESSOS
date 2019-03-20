@@ -37,7 +37,6 @@ import com.nimbusds.oauth2.sdk.ResponseMode;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
-import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.http.ServletUtils;
@@ -46,7 +45,6 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.Display;
 import com.nimbusds.openid.connect.sdk.Nonce;
-import com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.claims.AccessTokenHash;
 import com.nimbusds.openid.connect.sdk.claims.CodeHash;
@@ -157,9 +155,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 
 
 	protected Issuer getHonestIssuer() {
-		return new Issuer(UriBuilder.fromUri(opivCfg.getHonestOPUri())
-				.path((String) stepCtx.getOrDefault(OPContextConstants.REGISTRATION_ENFORCING_PATH_FRAGMENT,""))
-				.path(testId).build());
+		return new Issuer(UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).build());
 	}
 
 	protected Issuer getEvilIssuer() {
@@ -346,8 +342,8 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 	protected OIDCClientInformation getHonestRegisteredClientInfo() {
-		// TODO: check stepCtx vs suiteCtx??
-		OIDCClientInformation ci = (OIDCClientInformation) stepCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST);
+		// Note that ClientInfo @ Honest OP is stored in suite context and does not depend on test step setup
+		OIDCClientInformation ci = (OIDCClientInformation) suiteCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST);
 		return ci;
 	}
 
@@ -363,12 +359,14 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 
 	protected ClientID getRegistrationClientId() {
 		OIDCClientInformation ci;
-		if (Boolean.parseBoolean((String) stepCtx.get(OPParameterConstants.FORCE_REGISTER_SAME_CLIENTID))) {
-			ci = getRegisteredClientInfo();
+		if (params.getBool(OPParameterConstants.FORCE_REGISTER_HONEST_CLIENTID)) {
+			ci = getHonestRegisteredClientInfo();
 			if (ci != null && !Strings.isNullOrEmpty(ci.getID().toString())) {
 				ClientID id = ci.getID();
 				logger.log(String.format("Re-using client ID: %s", id.toString()));
 				return id;
+			} else {
+				logger.log("ClientId at Honest OP could not be found.");
 			}
 		}
 		logger.log("Generating random ClientID");

@@ -48,20 +48,16 @@ public class RequestPath {
 		String fullPath = req.getRequestURI();
 
 		// seperate out the prefix
-		// TODO: enforce-reg should be some static constant in OPIVconfig?
+		// TODO: "enforce-rp-reg" should be a constant, maybe in OPIVconfig?
 		String regexp = String.format("^%s%s(/enforce-rp-reg-.{8})?(/.*)$", Pattern.quote(ctxPath), Pattern.quote(servletPath));
 		Pattern p = Pattern.compile(regexp);
 		Matcher m = p.matcher(fullPath);
 		m.matches();
 
 		if (m.groupCount() == 2 ) {
-//			System.out.println("group count is 2");
 			registrationEnforced = m.group(1);
-//			System.out.println("group 1: " + registrationEnforced);
 			resourcePath = m.group(2);
-//			System.out.println("group 2: " + resourcePath);
 		} else {
-//			System.out.println("group count is NOT  2");
 			registrationEnforced = "";
 			resourcePath = m.group(1);
 		}
