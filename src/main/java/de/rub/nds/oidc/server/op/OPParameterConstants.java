@@ -127,7 +127,7 @@ public class OPParameterConstants {
 
 	// KC6 with Session Overwriting
 	public static final String FORCE_IDTOKEN_SIGNING_ALG_HS256 = "force_idtoken_signing_alg_hs256";
-	public static final String FORCE_REGISTER_SAME_CLIENTID = "force_register_same_client_id";
+	public static final String FORCE_REGISTER_HONEST_CLIENTID = "force_register_honest_client_id";
 
 	// end KeyConfusion
 
