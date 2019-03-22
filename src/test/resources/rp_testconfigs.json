@@ -1,0 +1,9 @@
+[
+  {"StepName": "ID Spoofing 1", "LogEntryFile": "src/test/data/rp/id_spoofing_1_logentry.json", "Expected": "PASS"},
+  {"StepName": "Issuer Confusion", "LogEntryFile": "src/test/data/rp/issuer_confusion_logentry.json", "Expected": "PASS"},
+  {"StepName": "Key Confusion 6 - Session Overwriting", "LogEntryFile": "src/test/data/rp/kc6_logentry.json", "Expected": "PASS"},
+  {"StepName": "IdP Confusion", "LogEntryFile": "src/test/data/rp/idp_confusion_logentry.json", "Expected": "FAIL"},
+  {"StepName": "Malicious Endpoint Attack", "LogEntryFile": "src/test/data/rp/mepa_logentry.json", "Expected": "FAIL"},
+  {"StepName": "Session Overwriting", "LogEntryFile": "src/test/data/rp/so_a_logentry.json", "Expected": "PASS"},
+  {"StepName": "Session Overwriting B", "LogEntryFile": "src/test/data/rp/so_b_logentry.json", "Expected": "PASS"}
+]

@@ -11,6 +11,10 @@ To connect a debugger, Wildfly's debugging port `8787` is exposed to the host an
 
 The demo services do not use TLS and are communicating through the docker bridge network `professos-default-net`. To intercept the message flow between PrOfESSOS and the demo services using Wireshark or a similar tool for network sniffing, figure out the docker network ID using `docker network ls`. Note that this will not include PrOfESSOS internal traffic such as between the Selenium WebDriver and PrOfESSOS OPs.
 
+### Tests
+
+Some basic integration tests against the demo services are provided using TestNG. 
+
 ---
 
 Some configurations for the demo RP and Idp can be adjusted in `./docker/simple-web-app/config/` and `./docker/mitreid-connect-server-webapp/config/*`. Do not forget to run `docker-compose build` after changing the demo service configuration.
