@@ -103,7 +103,7 @@ public abstract class AbstractIntegrationTest implements ITest {
 			String outcome = jsonResult.getAsString("Result");
 			JSONArray logentry = (JSONArray) jsonResult.get("LogEntry");
 
-//			String logStirng = logentry.toJSONString();
+			String logStirng = logentry.toJSONString();
 
 			return Pair.of(outcome, logentry);
 		} catch (ParseException e) {
