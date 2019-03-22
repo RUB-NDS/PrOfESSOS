@@ -11,9 +11,34 @@ To connect a debugger, Wildfly's debugging port `8787` is exposed to the host an
 
 The demo services do not use TLS and are communicating through the docker bridge network `professos-default-net`. To intercept the message flow between PrOfESSOS and the demo services using Wireshark or a similar tool for network sniffing, figure out the docker network ID using `docker network ls`. Note that this will not include PrOfESSOS internal traffic such as between the Selenium WebDriver and PrOfESSOS OPs.
 
-### Tests
+### Integration Tests
 
-Some basic integration tests against the demo services are provided using TestNG. 
+Some basic integration tests against the demo services are provided using TestNG. These tests start a number of PrOfESSOS 
+TestSteps and verify the expected TestResult as well as performing a basic pattern matching of the JSON response. This is 
+not a comprehensive test suite nevertheless it may help to detect unwittingly introduced changes early on.
+ 
+ The test methods are annotated with TestNG groups to allow for varying test scenarios. Following groups are defined
+ 
+ * `rp-it`: Used to start the RelyingParty integration tests. The RP as well as PrOfESSOS must be
+ running as configured in the default docker-compose file `docker-compose.override.yml`, that is PrOfESSOS must be 
+ available at `localhost:8080` and needs to be able to connect to the RP at `www.honestsp.de:8080`.
+ * `op-it`: Run the OpenID Provider integration tests against (manually started) running services. Again, the services should be
+ configured similarly to the default docker-compose file.
+ * `docker-rp`, `docker-op`, `docker`: Automatically starts the docker-compose profile using the `testcontainers` package and run 
+ the respective tests. The group `docker` includes both RP and OP tests.
+
+Currently, the integration tests are not bound to a Maven lifecycle phase, as the expensive and long running test suite would
+introduce a rather poor development experience. Therefore, the integration tests need to be started manually, either by
+ configuring the used IDE or using the bundled `maven-failsafe` plugin. To start the Relying Party tests against running services, user:
+```
+mvn -Dgroups=rp-it failsafe:integration-test
+```
+
+To run the Relying Party tests against automatically started testcontainers, use:
+```
+mvn -Dgroups=docker-rp failsafe:integration-test
+```
+
 
 ---
 
