@@ -13,6 +13,7 @@ public class IssuerConfusionRPBrowser extends DefaultRPTestBrowser {
 
 		if (OPType.HONEST.equals(tokenRequestReceivedAt)) {
 			logger.log("TokenRequest received at HonestOP, although not specified in malicious Discovery response");
+			logger.log("This may indicate a violation of \"https://openid.net/specs/openid-connect-discovery-1_0.html\", Section 3, and/or Section 4.3");
 			logger.log("Assuming test passed");
 			return TestStepResult.PASS;
 		}
