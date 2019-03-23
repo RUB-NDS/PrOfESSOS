@@ -20,13 +20,16 @@ import de.rub.nds.oidc.server.TestInstanceRegistry;
 import de.rub.nds.oidc.test_model.*;
 import de.rub.nds.oidc.utils.ImplementationLoadException;
 import de.rub.nds.oidc.utils.ValueGenerator;
+
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBElement;
 
 /**
- *
  * @author Tobias Wich
  */
 //@Path("/{role: rp|op}")
@@ -59,6 +62,7 @@ public class Learner {
 	public JAXBElement<TestObjectType> exportXml(@PathParam("testId") String testId) throws NoSuchTestObject {
 		return new ObjectFactory().createTestObject(exportJson(testId));
 	}
+
 	@GET
 	@Path("/{role: rp|op}/{testId}/export")
 	@Produces({MediaType.APPLICATION_JSON})
@@ -70,8 +74,14 @@ public class Learner {
 	@POST
 	@Path("/{role: rp|op}/create-test-object")
 	@Produces(MediaType.APPLICATION_JSON)
-	public TestObjectType createTestObject(@PathParam("role") String role) {
+	public TestObjectType createTestObject(@PathParam("role") String role, @Context HttpServletRequest req) {
+		// bind the testid to a session to easily delete references to stale
+		// testObjects on session invalidation (default: 60min inactive, set in web.xml)
+		HttpSession session = req.getSession(true);
+
 		String testId = valueGenerator.generateTestId();
+		session.setAttribute("testId", testId);
+
 		TestRunner runner;
 		if (role.equals("rp"))
 			runner = testObjs.createRPTestObject(testId);
@@ -134,7 +144,7 @@ public class Learner {
 		else
 			obj.getTestObj().getTestConfig().setType(TestOPConfigType.class.getName());
 
-			return obj.getTestObj().getTestConfig();
+		return obj.getTestObj().getTestConfig();
 	}
 
 	@POST
