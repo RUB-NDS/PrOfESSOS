@@ -1,4 +1,4 @@
 [
   {"StepName": "PKCE 4 - Downgrade to Plain", "LogEntryFile": "src/test/data/op/pkce4_logentry.json", "Expected": "FAIL"},
-  {"StepName": "Issuer Confusion", "LogEntryFile": "src/test/data/op/issuer_confusion_logentry.json", "Expected": "PASS"}
+  {"StepName": "PKCE 1 - TR: Invalid Verifier", "LogEntryFile": "src/test/data/op/pkce1_logentry.json", "Expected": "PASS"}
 ]
