@@ -27,7 +27,7 @@ import de.rub.nds.oidc.utils.KeyConfusionHelper;
 import de.rub.nds.oidc.utils.KeyConfusionPayloadType;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

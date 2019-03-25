@@ -77,7 +77,7 @@ import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.minidev.json.JSONObject;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 /**
  *
@@ -280,7 +280,7 @@ public class DefaultOP extends AbstractOPImplementation {
 					sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
 					sb.append("<form method=\"post\" action=\"" + authRes.getRedirectionURI().toString() + "\">");
 					for (Map.Entry<String, String> entry : authRes.toParameters().entrySet()) {
-						String entryValue = StringEscapeUtils.escapeHtml(entry.getValue());
+						String entryValue = StringEscapeUtils.escapeHtml4(entry.getValue());
 						sb.append("<input type=\"hidden\" name=\"" + entry.getKey() + "\" value=\"" + entryValue + "\"/>");
 					}
 					sb.append("</form>");

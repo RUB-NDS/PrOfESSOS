@@ -24,7 +24,6 @@ import com.nimbusds.openid.connect.sdk.Prompt;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderConfigurationRequest;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.*;
-import com.sun.org.apache.bcel.internal.classfile.Code;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.test_model.ParameterType;
@@ -32,7 +31,7 @@ import de.rub.nds.oidc.test_model.RPConfigType;
 import de.rub.nds.oidc.test_model.TestOPConfigType;
 import de.rub.nds.oidc.utils.InstanceParameters;
 import net.minidev.json.JSONObject;
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;

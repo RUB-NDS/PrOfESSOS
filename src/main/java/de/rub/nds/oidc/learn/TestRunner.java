@@ -32,7 +32,7 @@ import de.rub.nds.oidc.server.rp.RPInstance;
 import de.rub.nds.oidc.server.rp.RPType;
 import de.rub.nds.oidc.test_model.*;
 import de.rub.nds.oidc.utils.*;
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
