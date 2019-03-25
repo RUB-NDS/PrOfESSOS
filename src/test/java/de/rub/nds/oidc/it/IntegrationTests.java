@@ -2,6 +2,7 @@ package de.rub.nds.oidc.it;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -23,23 +24,27 @@ import java.util.Set;
 
 import static io.restassured.RestAssured.with;
 
-public abstract class AbstractIntegrationTest implements ITest {
+//public class IntegrationTests implements ITest {
+public class IntegrationTests {
 	protected DockerComposeContainer docker;
 	protected String professosHost;
 	protected int professosPort = 0;
 	private ThreadLocal<String> testName = new ThreadLocal<>();
+	protected RequestSpecification specification;
 
-	@Override
-	public String getTestName() {
-		return testName.get();
-	}
-
-	@BeforeMethod(alwaysRun = true)
-	public void setName(Method method, Object[] testData) {
-		if (testData != null && testData.length > 0) {
-			testName.set(testData[0].toString());
-		}
-	}
+//  Implementing ITest and  the below methods prevents maven-failsafe 
+//  to work correctly, could not find a workaround	
+//	@Override
+//	public String getTestName() {
+//		return testName.get();
+//	}
+//
+//	@BeforeMethod(alwaysRun = true)
+//	public void setName(Method method, Object[] testData) {
+//		if (testData != null && testData.length > 0) {
+//			testName.set(testData[0].toString());
+//		}
+//	}
 
 	protected Iterator<Object[]> readTestConfigs(String configFile) throws IOException, ParseException {
 		String configs = FileUtils.readFileToString(new File(configFile), "utf-8");
@@ -58,7 +63,7 @@ public abstract class AbstractIntegrationTest implements ITest {
 	}
 
 
-	@BeforeGroups(groups = {"docker-rp", "docker-op"})
+	@BeforeGroups(groups = {"docker", "docker-rp", "docker-op"})
 	public void startDockerServices() {
 		// code that will be invoked when this test is instantiated
 		docker = new DockerComposeContainer(new File("./docker-compose.override.yml"))
@@ -72,8 +77,8 @@ public abstract class AbstractIntegrationTest implements ITest {
 //				.waitingFor("professos", Wait.forLogMessage("^.*Deployed \"professos.war\" (runtime-name : \"professos.war\")$", 45))
 //				.waitingFor("relying_party", Wait.forLogMessage("^.*Registered web context: '/simple-web-app' for server 'default-server'$", 45))
 
-		// use locally installed compose binary as we need to build the images
-		docker.withLocalCompose(true).start();
+		// use locally installed compose binary (recommended for building images)
+		docker.withLocalCompose(true).withPull(false).start();
 
 		// store service address as exposed to host
 		professosHost = docker.getServiceHost("professos", 8080);
@@ -87,9 +92,9 @@ public abstract class AbstractIntegrationTest implements ITest {
 //	}
 
 	protected Pair<String, JSONArray> runTestForLogentry(String testName) {
-
+		System.out.println("Start test: " + testName);
 		Response resp =
-				with()
+				with().spec(specification)
 					.log().uri()
 					.contentType(ContentType.JSON)
 					.post("/test/" + testName)

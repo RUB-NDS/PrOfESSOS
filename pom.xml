@@ -68,14 +68,7 @@
 			   <artifactId>selenium-chrome-driver</artifactId>
 			<version>3.9.1</version>
 		</dependency>
-
-		<!--TODO remove all dependencies on velocity-->
-		<dependency>
-			<groupId>org.apache.velocity</groupId>
-			<artifactId>velocity</artifactId>
-			<version>1.7</version>
-		</dependency>
-
+		
 		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>jquery</artifactId>
@@ -106,6 +99,12 @@
 			<version>3.8.1</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+			<version>1.6</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>annotations</artifactId>
@@ -223,42 +222,21 @@
 						<suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
 					</suiteXmlFiles>
 					<groups>unittests</groups>
-					<excludedGroups>docker[RO]p,[ro]p-it</excludedGroups>
+					<excludedGroups>docker,docker-[ro]p,[ro]p-it</excludedGroups>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<version>3.0.0-M3</version>
-				<!--<executions>-->
-					<!--<execution>-->
-						<!--<id>integration-test</id>-->
-						<!--<goals>-->
-							<!--<goal>integration-test</goal>-->
-						<!--</goals>-->
-					<!--</execution>-->
-					<!--<execution>-->
-						<!--<id>verify</id>-->
-						<!--<goals>-->
-							<!--<goal>verify</goal>-->
-						<!--</goals>-->
-					<!--</execution>-->
-				<!--</executions>-->
 				<configuration>
 					<forkCount>0</forkCount>
 					<suiteXmlFiles>
 						<suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
 					</suiteXmlFiles>
-					<!--<properties>-->
-						<!--<property>-->
-							<!--<name>testnames</name>-->
-							<!--<value>rp-integration-tests</value>-->
-					<!--</property>-->
-					<!--</properties>-->
-					<!--<groups>rp-it</groups>-->
-					<!--<excludedGroups>dockerOp,dockerRp,unittests,op-it</excludedGroups>-->
 				</configuration>
-			</plugin><!--
+			</plugin>
+			<!--
 			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>

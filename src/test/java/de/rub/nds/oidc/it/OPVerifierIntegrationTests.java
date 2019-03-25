@@ -1,9 +1,11 @@
-package de.rub.nds.oidc.it.op;
+package de.rub.nds.oidc.it;
 
-import de.rub.nds.oidc.it.AbstractIntegrationTest;
+import de.rub.nds.oidc.it.IntegrationTests;
+import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.parsing.Parser;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import net.javacrumbs.jsonunit.JsonAssert;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -22,32 +24,36 @@ import java.util.Iterator;
 
 import static io.restassured.RestAssured.*;
 
-public class IdPIntegrationTest extends AbstractIntegrationTest {
+public class OPVerifierIntegrationTests extends IntegrationTests {
 	private String testsFile;
 
 	@Parameters({"opTestConfigs"})
-	public IdPIntegrationTest(String testsFile) {
+	public OPVerifierIntegrationTests(String testsFile) {
 		this.testsFile = testsFile;
 	}
 
-	@Test(groups = {"op-it", "docker-op"})
+	@Test(groups = {"op-it", "docker-op", "docker"})
 	public void setUp() {
 		// check if testcontainers are used to manage docker services
+		RequestSpecBuilder specB = new RequestSpecBuilder();
 		if (docker != null && professosHost != null && professosPort != 0) {
-			baseURI = "http://" + professosHost + "/api/op";
-			port = professosPort;
+			specB.setBaseUri("http://" + professosHost + "/api/op");
+			specB.setPort(professosPort);
 		} else {
 			// assuming that docker compose was started using default file docker-compose.override.yml
-			baseURI = "http://localhost/api/op";
-			port = 8080;
+			specB.setBaseUri("http://localhost/api/op");
+			specB.setPort(8080);
 		}
+		RequestSpecification spec = specB.build();
 
+		System.out.println("Request new TestObject");
 		Response response =
 				with()
-						.post("/create-test-object")
-						.then()
-						.contentType(ContentType.JSON)
-						.extract().response();
+					.spec(spec)
+					.post("/create-test-object")
+				.then()
+					.contentType(ContentType.JSON)
+					.extract().response();
 
 		// retrieve the test config and test id
 		HashMap<String, Object> testObjectMap = response.path("");
@@ -66,19 +72,26 @@ public class IdPIntegrationTest extends AbstractIntegrationTest {
 		String jsonConfig = new JSONObject(testConfig).toJSONString();
 
 		// update RestAssured base URL w/ testID
-		baseURI = String.format(baseURI + "/" + testId);
+		spec.basePath(testId);
+//		baseURI = String.format(baseURI + "/" + testId);
 		defaultParser = Parser.JSON;
 
+		System.out.println("Run learning phase");
 		String learnResult =
 				with()
+					.spec(spec)
 					.contentType(ContentType.JSON).and()
 					.body(jsonConfig)
 					.post("/learn")
 				.then()
+					.contentType(ContentType.JSON)
+					.log().ifError().and()
 					.extract().path("TestStepResult.Result");
 
 		// learning phase should always pass
 		Assert.assertEquals("PASS", learnResult);
+		// make request spec available to following teststeps
+		specification = spec;
 	}
 
 	@DataProvider(name = "getOPTestConfigs")
@@ -87,7 +100,7 @@ public class IdPIntegrationTest extends AbstractIntegrationTest {
 	}
 
 	@Test(
-			groups = {"docker-op", "op-it"},
+			groups = {"docker-op", "op-it", "docker"},
 			dependsOnMethods = {"setUp"},
 			dataProvider = "getOPTestConfigs"
 	)

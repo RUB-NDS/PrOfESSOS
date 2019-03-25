@@ -4,61 +4,9 @@
 	<parameter name="rpTestConfigs"  value="src/test/resources/rp_testconfigs.json"/>
 	<parameter name="opTestConfigs"  value="src/test/resources/op_testconfigs.json"/>
 
-	<test name="all">
-		<groups>
-			<run>
-				<include name="docker-rp" />
-				<include name="docker-op" />
-			</run>
-		</groups>
+	<test name="it">
 		<packages>
-			<package name="de.rub.nds.oidc.it" />
-		</packages>
-	</test>
-
-	<test name="docker-rpTest">
-		<groups>
-			<run>
-				<include name="docker-rp" />
-				<!--<exclude name="rp-it" />-->
-			</run>
-		</groups>
-		<packages>
-			<package name="de.rub.nds.oidc.it" />
-		</packages>
-	</test>
-
-	<test name="rp-integration-tests">
-		<groups>
-			<run>
-				<include name="rp-it" />
-			</run>
-		</groups>
-		<packages>
-			<package name="de.rub.nds.oidc.it.rp" />
-		</packages>
-	</test>
-
-	<test name="op-integration-tests">
-		<groups>
-			<run>
-				<include name="op-it" />
-			</run>
-		</groups>
-		<packages>
-			<package name="de.rub.nds.oidc.it.op"/>
-		</packages>
-	</test>
-
-	<test name="docker-opTest">
-		<groups>
-			<run>
-				<include name="docker-op" />
-				<!--<exclude name="rp-it" />-->
-			</run>
-		</groups>
-		<packages>
-			<package name="de.rub.nds.oidc.it" />
+			<package name="de.rub.nds.oidc.it"/>
 		</packages>
 	</test>
 
