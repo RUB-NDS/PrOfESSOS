@@ -1,0 +1,21 @@
+[
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Obtaining permission to perform test from url 'http:\/\/www.honestsp.de:8080\/.professos'.","Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Opening browser with URL 'http:\/\/www.honestsp.de:8080\/simple-web-app\/login'.","Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Start authentication for Honest OP.","Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Authentication requested.","Date":"${json-unit.any-number}"},
+  {"HttpRequest":{"RequestLine":"${json-unit.any-string}","Header":"${json-unit.ignore}","Body":"${json-unit.ignore}"},"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":null,"Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"State and Nonce from Honest OP saved.","Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Opening browser with URL 'http:\/\/www.honestsp.de:8080\/simple-web-app\/login'.","Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Start authentication for Evil OP.","Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Authentication requested.","Date":"${json-unit.any-number}"},
+  {"HttpRequest":{"RequestLine":"${json-unit.any-string}","Header":"${json-unit.ignore}","Body":"${json-unit.ignore}"},"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":null,"Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Redirecting browser to honest OP.","Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":{"Status":302,"Header":"${json-unit.ignore}","Body":"${json-unit.ignore}"},"Text":null,"Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Authentication requested.","Date":"${json-unit.any-number}"},
+  {"HttpRequest":{"RequestLine":"${json-unit.any-string}","Header":"${json-unit.ignore}","Body":"${json-unit.ignore}"},"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":null,"Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Returning default Authorization Response.","Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":{"Status":302,"Header":"${json-unit.ignore}","Body":"${json-unit.ignore}"},"Text":null,"Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Token requested.","Date":"${json-unit.any-number}"},
+  {"HttpRequest":{"RequestLine":"${json-unit.any-string}","Header":"${json-unit.ignore}","Body":"${json-unit.ignore}"},"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":null,"Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Honest code received in attacker.","Date":"${json-unit.any-number}"}
+]
