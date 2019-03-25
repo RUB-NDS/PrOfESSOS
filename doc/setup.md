@@ -13,22 +13,24 @@ The demo services do not use TLS and are communicating through the docker bridge
 
 ### Integration Tests
 
-Some basic integration tests against the demo services are provided using TestNG. These tests start a number of PrOfESSOS 
-TestSteps and verify the expected TestResult as well as performing a basic pattern matching of the JSON response. This is 
-not a comprehensive test suite nevertheless it may help to detect unwittingly introduced changes early on.
+A few basic integration tests against the demo services are provided. TestNG is used to run a number of PrOfESSOS 
+TestSteps, verify the expected result as well as performing a basic pattern matching against the JSON response. This is 
+not a comprehensive test suite, nevertheless it may help to detect unwittingly introduced changes or regreessions early on.
  
- The test methods are annotated with TestNG groups to allow for varying test scenarios. Following groups are defined
+The test methods are annotated with TestNG groups to allow for varying test scenarios: run tests against manually started 
+ PrOfESSOS and demo service instances or automatically spin up the docker setup using docker-compose before running the tests.
+ Following groups are defined
  
  * `rp-it`: Used to start the RelyingParty integration tests. The RP as well as PrOfESSOS must be
  running as configured in the default docker-compose file `docker-compose.override.yml`, that is PrOfESSOS must be 
  available at `localhost:8080` and needs to be able to connect to the RP at `www.honestsp.de:8080`.
  * `op-it`: Run the OpenID Provider integration tests against (manually started) running services. Again, the services should be
  configured similarly to the default docker-compose file.
- * `docker-rp`, `docker-op`, `docker`: Automatically starts the docker-compose profile using the `testcontainers` package and run 
- the respective tests. The group `docker` includes both RP and OP tests.
+ * `docker-rp`, `docker-op`: Automatically starts the docker-compose profile using the `testcontainers` package and run 
+ the respective tests.
 
-Currently, the integration tests are not bound to a Maven lifecycle phase, as the expensive and long running test suite would
-introduce a rather poor development experience. Therefore, the integration tests need to be started manually, either by
+Currently, the integration tests are not bound to a Maven lifecycle phase to not start the long-running integration tests 
+during every build. Therefore, the integration tests need to be started manually, either by
  configuring the used IDE or using the bundled `maven-failsafe` plugin. To start the Relying Party tests against running services, user:
 ```
 mvn -Dgroups=rp-it failsafe:integration-test
