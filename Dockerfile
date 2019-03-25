@@ -1,4 +1,4 @@
-FROM ubuntu:xenial
+FROM ubuntu:bionic
 
 # install chromedriver, chromium
 USER root
@@ -23,7 +23,7 @@ RUN groupadd -r jboss -g 1000 && useradd -u 1000 -r -g jboss -m -d /opt/jboss -s
 WORKDIR /opt/jboss
 
 # Set the WILDFLY_VERSION env variable
-ENV WILDFLY_VERSION 14.0.1.Final
+ENV WILDFLY_VERSION 16.0.0.Final
 ENV JBOSS_HOME /opt/jboss/wildfly
 ARG PROFESSOS_WAR="./target/professos-1.0.0-SNAPSHOT.war"
 
