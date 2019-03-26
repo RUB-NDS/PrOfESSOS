@@ -96,7 +96,7 @@ public class RPVerifierIntegrationTests extends IntegrationTests {
 					.log().ifError().and()
 					.extract().path("TestStepResult.Result");
 
-		Assert.assertEquals("PASS", learnResult);
+		Assert.assertEquals(learnResult, "PASS");
 		specification = spec;
 	}
 

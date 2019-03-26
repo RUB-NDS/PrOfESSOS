@@ -89,7 +89,7 @@ public class OPVerifierIntegrationTests extends IntegrationTests {
 					.extract().path("TestStepResult.Result");
 
 		// learning phase should always pass
-		Assert.assertEquals("PASS", learnResult);
+		Assert.assertEquals(learnResult,"PASS");
 		// make request spec available to following teststeps
 		specification = spec;
 	}
