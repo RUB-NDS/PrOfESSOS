@@ -427,6 +427,87 @@
 		</OPConfig-2>
 	</TestStep>
 
+	<TestStep Name="Key Confusion 2.4 - jwk contains spoofed x5u">
+		<Description><![CDATA[
+						   <h1>Key Confusion</h1>
+	
+						   <h2>Prerequisites.</h2>
+						   The target Client supports the implicit or the code flow.
+	
+						   <h2>Execution.</h2>
+						   PrOfESSOS issues an ID Token containing valid signature signed with an untrusted key.
+						   The signing key is included in the jwk parameter. To lure the client into trusting the key,
+						   the JWK's <code>x5u</code> member points to an URL that responds with the signing key.
+	
+						   <h2>Result Evaluation.</h2>
+						   The attack is successful if the ID token is accepted by the Client or if the x5u URI is contacted.
+	
+						   <h2>Mitigation</h2>
+						   As per OpenID Connect Core 1.0, Section 2, "ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c,
+						   jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in
+						   advance using Discovery and Registration parameters"
+				   ]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_x5u_in_jwk">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<Parameter Key="idtoken_crit_jwk">true</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+			<Parameter Key="request_to_untrusted_key_uri_fails_test">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 2.5 - jwk contains spoofed x5c">
+		<Description><![CDATA[
+                       <h1>Key Confusion</h1>
+
+                       <h2>Prerequisites.</h2>
+                       The target Client supports the implicit or the code flow.
+
+                       <h2>Execution.</h2>
+                       PrOfESSOS issues an ID Token containing valid signature signed with an untrusted key.
+                       The signing key is included in the JWK's <code>x5c</code> member.
+
+                       <h2>Result Evaluation.</h2>
+                       The attack is successful if the ID token is accepted by the Client.
+
+                       <h2>Mitigation</h2>
+                       As per OpenID Connect Core 1.0, Section 2, "ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c,
+                       jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in
+                       advance using Discovery and Registration parameters"
+               ]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_x5c_in_jwk">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<Parameter Key="idtoken_crit_jwk">true</Parameter>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+			<Parameter Key="request_to_untrusted_key_uri_fails_test">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
 	<TestStep Name="Key Confusion 3 - x5u Spoofing">
 		<Description><![CDATA[
 			<h1>Key Confusion</h1>

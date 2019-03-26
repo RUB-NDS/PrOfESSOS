@@ -103,6 +103,8 @@ public class OPParameterConstants {
 	public static final String IDTOKEN_SPOOFED_JWK_AS_KID = "force_spoofed_jwk_as_kid";
 	public static final String IDTOKEN_SPOOFED_JKU_AS_JWK = "idtoken_spoofed_jku_as_jwk";
 	public static final String IDTOKEN_SPOOFED_JKU_IN_JWK = "idtoken_spoofed_jku_in_jwk";
+	public static final String IDTOKEN_SPOOFED_X5U_IN_JWK = "idtoken_spoofed_x5u_in_jwk";
+	public static final String IDTOKEN_SPOOFED_X5C_IN_JWK = "idtoken_spoofed_x5c_in_jwk";
 	// */* //
 
 	public static final String IDTOKEN_SPOOFED_SECRET_KEY_= "idtoken_spoofed_secret_key_in_jwk";
@@ -111,6 +113,7 @@ public class OPParameterConstants {
 	public static final String IDTOKEN_HMAC_PUBKEY_kty = "hmac_pubkey_kty";
 	public static final String IDTOKEN_HMAC_PUBKEY_alg = "hmac_pubkey_alg";
 	public static final String IDTOKEN_HMAC_PUBKEY_JWKSTRING = "hmac_jsonstring_jwk";
+	public static final String LEFTPAD_SHORT_HMAC_KEYS = "zeropad_short_hmac_keys_to_32byte"; // TODO: no test step yet
 
 	public static final String IDTOKEN_HMAC_PUBKEY_PKCS1 = "hmac_pkcs1_pubkey";
 	public static final String P1_KEY_CONFUSION_PAYLOAD_TYPE = "pkcs1_keyconfusion_payload_type";
