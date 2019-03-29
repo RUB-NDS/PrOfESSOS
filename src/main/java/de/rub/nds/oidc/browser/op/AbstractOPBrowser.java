@@ -34,20 +34,18 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 
 		try {
 			if (!Strings.isNullOrEmpty(opConfig.getLoginScript())) {
-				// Todo: check for input field name and run template engine
 				templateString = opConfig.getLoginScript();
 			} else {
 				templateString = IOUtils.toString(getClass().getResourceAsStream("/login-form.st"), "UTF-8");
 			}
 
-			opConfig.setLoginScript(templateString); // TODO: if we add an inputfieldname, we need to evaluate this once
+			opConfig.setLoginScript(templateString);
 			Map<String, String> user = ImmutableMap.of("current_user_username", userName, "current_user_password", userPass);
 			submitScript = te.eval(Maps.newHashMap(user), templateString);
 
 			if (!Strings.isNullOrEmpty(opConfig.getConsentScript())) {
 				consentScript = opConfig.getConsentScript();
 			} else {
-				// TODO: currently using consent script as is, not a template
 				consentScript = IOUtils.toString(getClass().getResourceAsStream("/consent-form.st"), "UTF-8");
 			}
 			opConfig.setConsentScript(consentScript);
@@ -73,6 +71,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 		}
 	}
 
+
 	protected String getAuthnReqString(RPType rpType) {
 		Object authnReq;
 		authnReq = RPType.HONEST.equals(rpType)
@@ -87,9 +86,8 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 		}
 	}
 
+
 	protected TestStepResult runUserAuth(RPType rpType) throws InterruptedException {
-//		TestStepResult result = TestStepResult.NOT_RUN;
-//		logger.log("run userAuth");
 
 		// store user credentials to make them accessible to RP
 		stepCtx.put(RPContextConstants.CURRENT_USER_USERNAME, userName);
@@ -119,7 +117,6 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 //		logger.log(String.format("Using Login script:%n %s", submitScript));
 
 		try {
-			// wait until a new html element appears, indicating a page load
 			waitForDocumentReadyAndJsReady(() -> {
 				driver.executeScript(submitScript);
 				// capture state where the text is entered
@@ -127,11 +124,8 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 				logger.log("Login Credentials entered");
 				return null;
 			});
-			// logger.log("HTML element found in Browser.");
-			// wait a bit more in case we have an angular app or some other JS heavy application
-			waitMillis(1000);
 
-			// don not run consentScript if we have already been redirected back to RP
+			// do not run consentScript if we have already been redirected back to RP
 			String location = driver.getCurrentUrl();
 			if (location.startsWith(honestRedirect.toString()) || location.startsWith(evilRedirect.toString())) {
 				logger.log("No consent page encountered in browser");
@@ -139,9 +133,9 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 				driver.executeScript(getFormSubmitDelayScript());
 				logger.log("Running Consent-Script to authorize the client");
 
-				waitForDocumentReadyAndJsReady(() -> {
+				waitForPageLoad(() -> {
 					driver.executeScript(consentScript);
-					//				logScreenshot();
+//					logScreenshot();
 					return null;
 				});
 			}
@@ -153,9 +147,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 			if (params.getBool(RPParameterConstants.SCRIPT_EXEC_EXCEPTION_FAILS_TEST)) {
 				return TestStepResult.FAIL;
 			}
-//
-//			logger.log("Authentication failed, assuming test passed.");
-//			return TestStepResult.PASS;
+
 		}
 
 		String finalUrl = driver.getCurrentUrl();
@@ -182,6 +174,4 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 			return TestStepResult.PASS;
 		}
 	}
-
-
 }

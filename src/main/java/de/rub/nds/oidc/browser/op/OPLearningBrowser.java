@@ -95,8 +95,6 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 			return TestStepResult.UNDETERMINED;
 		}
 		logger.log("HTML element found in Browser.");
-		// wait a bit more in case we have an angular app or some other JS heavy application
-		waitMillis(1000);
 
 		// don't run consentScript if we have already been redirected back to RP
 		String location = driver.getCurrentUrl();
@@ -107,7 +105,7 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 				driver.executeScript(getFormSubmitDelayScript());
 				logger.logCodeBlock(consentScript, "Using Consent script:");
 
-				waitForDocumentReadyAndJsReady(() -> {
+				waitForPageLoad(() -> {
 					driver.executeScript(consentScript);
 					logScreenshot();
 					logger.log("ConsentScript executed, client authorized.");
@@ -135,7 +133,7 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 
 
 		try {
-			return blockAndResult.get(5, TimeUnit.SECONDS);
+			return blockAndResult.get(10, TimeUnit.SECONDS);
 		} catch (ExecutionException | TimeoutException e) {
 			logger.log("Browser Timeout while waiting for RP");
 			return TestStepResult.UNDETERMINED;

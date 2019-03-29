@@ -210,7 +210,12 @@ public abstract class BrowserSimulator {
 
 	protected final <T> T waitForDocumentReadyAndJsReady(Func<T> func) {
 		T result = func.call();
-
+		try {
+			// short wait to make sure func has been executed before checking page state
+			waitMillis(600);
+		} catch (InterruptedException e) {
+			// ignore
+		}
 		// checks if document.readyState is complete and various JS frameworks are loaded and ready
 		jsWaiter.waitAllRequest();
 
