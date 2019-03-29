@@ -56,26 +56,33 @@ public class DefaultRP extends AbstractRPImplementation {
 		AuthenticationResponse authnResp = processCallback(req, resp, path);
 
 		if (!authnResp.indicatesSuccess()) {
-			TestStepResult result = params.getBool(AUTH_ERROR_FAILS_TEST) ? TestStepResult.FAIL : TestStepResult.PASS;
+			TestStepResult result = TestStepResult.PASS;
+			if (params.getBool(AUTH_ERROR_FAILS_TEST) || Boolean.valueOf((String) stepCtx.get(IS_RP_LEARNING_STEP))) {
+				result = TestStepResult.FAIL;
+			}
 			browserBlocker.complete(result);
 			return;
 		}
+
 
 		ResponseType usedResponseType = (ResponseType) supplyHonestOrEvil(
 				() -> stepCtx.get(RP1_AUTHNREQ_RT),
 				() -> stepCtx.get(RP2_AUTHNREQ_RT)
 		);
 
-		if (authnResp.toSuccessResponse().impliedResponseMode().equals(ResponseMode.QUERY)
-				&& !usedResponseType.impliesCodeFlow()) {
-			logger.log("Detected Token(s) in Query String, assuming test failed.");
+		// TODO: tokens should never ever be transmitted in query-string of URL, consider ignoring usedResponseType
+		if (req.getQueryString() != null && req.getQueryString().matches(".*[&\\?](id|access)?_token=.*") &&
+				(usedResponseType.impliesImplicitFlow() || usedResponseType.impliesHybridFlow())) {
+			logger.log("Detected Token(s) in URL-QueryString (not URL-Fragment), assuming test failed.");
 			browserBlocker.complete(TestStepResult.FAIL);
+			return;
 		}
 		if (authnResp.toSuccessResponse().impliedResponseMode().equals(ResponseMode.FRAGMENT)
-			&& !getRegistrationGrantTypes().contains(GrantType.IMPLICIT)) {
+				&& !getRegistrationGrantTypes().contains(GrantType.IMPLICIT)) {
 			logger.log("Implicit response detected but authorization_grant_type=implicit not registered by client.");
 			logger.log("Assuming test failed.");
 			browserBlocker.complete(TestStepResult.FAIL);
+			return;
 		}
 
 		AccessToken at = null;
@@ -143,7 +150,6 @@ public class DefaultRP extends AbstractRPImplementation {
 
 		CompletableFuture waitForBrowser = (CompletableFuture) stepCtx.get(RPContextConstants.BLOCK_RP_FOR_BROWSER_FUTURE);
 
-
 		// send default response to hanging browser
 		sendCallbackResponse(resp, req);
 		// wait for browser confirmation ...
@@ -157,7 +163,6 @@ public class DefaultRP extends AbstractRPImplementation {
 		String lastUrl = (String) stepCtx.get(RPContextConstants.LAST_BROWSER_URL);
 		callbackUri = new URI(lastUrl);
 //		logger.log("Redirect URL as seen in Browser: " + lastUrl);
-
 
 		// parse received authentication response
 		AuthenticationResponse authnResp;
@@ -185,6 +190,14 @@ public class DefaultRP extends AbstractRPImplementation {
 		}
 
 		if (authnResp.indicatesSuccess()) {
+			AuthenticationSuccessResponse sr = authnResp.toSuccessResponse();
+			StringBuilder sb = new StringBuilder();
+			Map<String, String> map = sr.toParameters();
+			sr.toParameters().forEach((k, v) -> {
+				sb.append(k + ": " + v + ", ");
+			});
+			sb.setLength(sb.length() - 2);
+			logger.logCodeBlock(sb.toString(), "Authentication Success Response received:");
 			return authnResp;
 		}
 
@@ -353,7 +366,6 @@ public class DefaultRP extends AbstractRPImplementation {
 	}
 
 
-
 	@Nullable
 	protected URI getTokenReqRedirectUri() {
 		if (params.getBool(TOKENREQ_FORCE_EVIL_REDIRURI)) {
@@ -452,10 +464,9 @@ public class DefaultRP extends AbstractRPImplementation {
 //		claims.addIDTokenClaim("middle_name");
 
 
-
 	@Override
 	@Nullable
-	protected CodeChallengeMethod getCodeChallengeMethod(){
+	protected CodeChallengeMethod getCodeChallengeMethod() {
 		CodeChallengeMethod cm = null;
 		if (params.getBool(AUTHNREQ_PKCE_METHOD_PLAIN)) {
 			cm = CodeChallengeMethod.PLAIN;
@@ -587,8 +598,6 @@ public class DefaultRP extends AbstractRPImplementation {
 	protected CodeVerifier getStoredPKCEVerifier() {
 		return (CodeVerifier) stepCtx.get(RPContextConstants.STORED_PKCE_VERIFIER);
 	}
-
-
 
 
 }
