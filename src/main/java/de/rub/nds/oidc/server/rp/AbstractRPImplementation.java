@@ -30,6 +30,7 @@ import de.rub.nds.oidc.test_model.ParameterType;
 import de.rub.nds.oidc.test_model.RPConfigType;
 import de.rub.nds.oidc.test_model.TestOPConfigType;
 import de.rub.nds.oidc.utils.InstanceParameters;
+import de.rub.nds.oidc.utils.UnsafeOIDCProviderMetadata;
 import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -38,6 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
@@ -59,7 +61,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	protected InstanceParameters params;
 	protected TestOPConfigType testOPConfig;
 	protected OIDCClientInformation clientInfo;
-	protected OIDCProviderMetadata opMetaData;
+	protected UnsafeOIDCProviderMetadata opMetaData;
 
 
 	@Override
@@ -267,6 +269,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	private boolean registerClientIfNeeded() throws IOException, ParseException {
 		if (!Strings.isNullOrEmpty(testOPConfig.getClient1Config())
 				|| !Strings.isNullOrEmpty(testOPConfig.getClient2Config())
+				|| opMetaData == null 
 				|| opMetaData.getRegistrationEndpointURI() == null) {
 			logger.log("Configuration indicates that dynamic registration is not supported.");
 			return false;
@@ -472,7 +475,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		boolean isLearningStep = Boolean.valueOf((String) stepCtx.get(RPContextConstants.IS_RP_LEARNING_STEP));
 		if (!Strings.isNullOrEmpty(testOPConfig.getOPMetadata()) && opMetaData == null) {
 			logger.log("Parsing OP Metadata from provided JSON string");
-			opMetaData = OIDCProviderMetadata.parse(testOPConfig.getOPMetadata());
+			opMetaData = UnsafeOIDCProviderMetadata.parse(testOPConfig.getOPMetadata());
 			suiteCtx.put(RPContextConstants.DISCOVERED_OP_CONFIGURATION, opMetaData);
 			// throw
 		} else if (opMetaData == null || isLearningStep) {
@@ -480,7 +483,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 					|| suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION) == null) {
 				return discoverRemoteOP();
 			} else {
-				opMetaData = (OIDCProviderMetadata) suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION);
+				opMetaData = (UnsafeOIDCProviderMetadata) suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION);
 			}
 		}
 //		logger.log("OP Configuration already retrieved, discovery not required");
@@ -493,7 +496,9 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		OIDCProviderConfigurationRequest request = new OIDCProviderConfigurationRequest(issuer);
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
-		HTTPResponse httpResponse = httpRequest.send();
+		try {
+			HTTPResponse httpResponse = httpRequest.send();
+
 		// TODO check status code, exit if negative
 		if (!httpResponse.indicatesSuccess()) {
 			logger.log("OP Discovery failed");
@@ -504,17 +509,21 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		logger.log("OP Configuration received");
 		logger.logHttpResponse(httpResponse, httpResponse.getContent());
 
-		OIDCProviderMetadata opMetadata = OIDCProviderMetadata.parse(httpResponse.getContentAsJSONObject());
+		UnsafeOIDCProviderMetadata opMetadata = UnsafeOIDCProviderMetadata.parse(httpResponse.getContentAsJSONObject());
 		this.opMetaData = opMetadata;
 		suiteCtx.put(RPContextConstants.DISCOVERED_OP_CONFIGURATION, opMetadata);
 		return true;
+		} catch (ConnectException e) {
+			logger.log("Connection exception", e);
+			return false;
+		}
 	}
 
 	private boolean areStepRequirementsMet() {
 		// check if RP Parameters provided in TestPlan contradict with user provided configuration
 		if (Boolean.valueOf((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))) {
 			if (opMetaData == null) {
-				opMetaData = (OIDCProviderMetadata) suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION);
+				opMetaData = (UnsafeOIDCProviderMetadata) suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION);
 			}
 			if (opMetaData == null || opMetaData.getRegistrationEndpointURI() == null) {
 				logger.log("TestStep requires dynamic registration but no registration endpoint was found");
