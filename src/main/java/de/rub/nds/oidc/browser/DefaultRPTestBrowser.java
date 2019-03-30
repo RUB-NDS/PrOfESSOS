@@ -19,11 +19,11 @@ package de.rub.nds.oidc.browser;
 import de.rub.nds.oidc.server.op.OPContextConstants;
 import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.test_model.TestStepResult;
-import javax.annotation.Nullable;
 import org.openqa.selenium.By;
 
+import javax.annotation.Nullable;
+
 /**
- *
  * @author Tobias Wich
  */
 public class DefaultRPTestBrowser extends BrowserSimulator {
@@ -77,14 +77,14 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 			return TestStepResult.FAIL;
 		}
 
-		if (! urlReached) {
+		if (!urlReached) {
 			logger.log("Target URL not reached. Assuming login is not successful.");
 			return TestStepResult.PASS;
 		}
 
 		// see if we need to go to another URL
 		String profileUrl = rpConfig.getProfileUrl();
-		if (profileUrl != null && ! profileUrl.isEmpty()) {
+		if (profileUrl != null && !profileUrl.isEmpty()) {
 			logger.log("Loading profile URL page.");
 			waitForDocumentReadyAndJsReady(() -> {
 				driver.get(rpConfig.getProfileUrl());
@@ -96,18 +96,20 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 			logScreenshot();
 		}
 
+		TestStepResult userInfoCheckResult = checkConditionOnFinalPage();
+		if (userInfoCheckResult != null) {
+			logger.log("Result returned from UserInfo conditions: " + userInfoCheckResult.name());
+			return userInfoCheckResult;
+		}
+
 		String needle;
 		if (params.getBool(OPParameterConstants.USE_EVIL_NEEDLE)) {
 			needle = rpConfig.getEvilUserNeedle();
 		} else {
 			needle = rpConfig.getHonestUserNeedle();
 		}
-		if (needle != null && ! needle.isEmpty()) {
-			needle = te.eval(createRPContext(), needle);
-			needle = needle.replace("\"", "\\\""); // escape quotation marks
-			String xpath = String.format("//*[contains(., \"%s\")]", needle);
-			// search string
-			boolean needleFound = withSearchTimeout(() -> ! driver.findElements(By.xpath(xpath)).isEmpty());
+		if (needle != null && !needle.isEmpty()) {
+			boolean needleFound = searchOnPage(needle);
 
 			logger.log("User needle search result: needle-found=" + needleFound);
 			return needleFound ? TestStepResult.FAIL : TestStepResult.PASS;
@@ -117,9 +119,21 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 		}
 	}
 
+	protected boolean searchOnPage(String searchTerm) {
+		searchTerm = searchTerm.replace("\"", "\\\""); // escape quotation marks
+		String xpath = String.format("//*[contains(., \"%s\")]", searchTerm);
+		// search string
+		boolean found = withSearchTimeout(() -> !driver.findElements(By.xpath(xpath)).isEmpty());
+		return found;
+	}
+
 	@Nullable
 	protected TestStepResult checkConditionAfterLogin() {
 		return null;
 	}
 
+	@Nullable
+	protected TestStepResult checkConditionOnFinalPage() {
+		return null;
+	}
 }
