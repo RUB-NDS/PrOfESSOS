@@ -30,6 +30,12 @@ public class OPContextConstants {
 	public static final String REGISTERED_CLIENT_INFO_HONEST = PFX + "registered-client-info-honest";
 	public static final String REGISTERED_CLIENT_INFO_EVIL = PFX + "registered-client-info-evil";
 
+	public static final String STORED_ID_TOKEN_HONEST = PFX + "stored-honest-idtoken";
+	public static final String STORED_ID_TOKEN_EVIL = PFX + "stored-evil-idtoken";
+
+	public static final String STORED_USERINFO_RESPONSE_HONEST = PFX + "stored-honest-userinfo-responser";
+	public static final String STORED_USERINFO_RESPONSE_EVIL = PFX + "stored-evil-userinfo-responser";
+	
 	public static final String AUTH_REQ_NONCE = PFX + "auth-reg-nonce";
 
 	public static final String TOKEN_REQ_RECEIVED_AT_OP_TYPE = PFX + "token-request-received-at-op-type";

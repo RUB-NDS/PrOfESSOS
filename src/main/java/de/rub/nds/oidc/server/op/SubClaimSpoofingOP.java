@@ -20,6 +20,7 @@ import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.claims.AccessTokenHash;
 import com.nimbusds.openid.connect.sdk.claims.CodeHash;
 import de.rub.nds.oidc.server.RequestPath;
+import de.rub.nds.oidc.server.rp.RPContextConstants;
 import de.rub.nds.oidc.utils.UnsafeJSONObject;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -101,6 +102,9 @@ public class SubClaimSpoofingOP extends DefaultOP {
 			}
 
 			String content = userInfoJson.toJSONString();
+			if (type == OPType.EVIL) {
+				stepCtx.put(OPContextConstants.STORED_USERINFO_RESPONSE_EVIL, userInfoJson);
+			}
 			
 			resp.setStatus(HttpServletResponse.SC_OK);
 			resp.setContentType(CommonContentTypes.APPLICATION_JSON.toString()); 
@@ -125,6 +129,7 @@ public class SubClaimSpoofingOP extends DefaultOP {
 										  @Nullable CodeHash cHash) throws GeneralSecurityException, JOSEException, ParseException {
 		if (!params.getBool(OPParameterConstants.FORCE_TOKENHEADER_CLAIMS)) {
 			JWT token = super.getIdToken(clientId, nonce, atHash, cHash);
+			storeTokenInContext(token);
 			return token;
 		}
 		
@@ -173,7 +178,16 @@ public class SubClaimSpoofingOP extends DefaultOP {
 			send the encrypted jwk
 			
 		 */
+		storeTokenInContext(signedJwt);
 		return signedJwt;
 	}
-	
+
+	private void storeTokenInContext(JWT token) {
+		if (type == OPType.HONEST) {
+			stepCtx.put(OPContextConstants.STORED_ID_TOKEN_HONEST, token);
+		} else {
+			stepCtx.put(OPContextConstants.STORED_ID_TOKEN_EVIL, token);
+		}
+	}
+
 }
