@@ -24,9 +24,9 @@ import javax.print.DocFlavor;
  */
 public class OPParameterConstants {
 
-	public static final String BROWSER_INPUT_OP_URL        = "browser.input.op_url";
-	public static final String BROWSER_INPUT_HONEST_OP_URL = "browser.input.honest_op_url";
-	public static final String BROWSER_INPUT_EVIL_OP_URL   = "browser.input.evil_op_url";
+	public static final String BROWSER_INPUT_OP_URL        = "browser_input_op_url";
+	public static final String BROWSER_INPUT_HONEST_OP_URL = "browser_input_honest-op_url";
+	public static final String BROWSER_INPUT_EVIL_OP_URL   = "browser_input_evil-op_url";
 
 	public static final String USE_EVIL_NEEDLE = "use_evil_needle";
 
