@@ -1866,16 +1866,14 @@
 			The target Client supports the implicit or the code flow.
 			<h4>Execution.</h4>
 			The Attacker OP returns the following configuration during the Discovery phase.
-			<pre><code>
-			 {
-				"issuer": "https://opivAttackerOP.com",
-				"registration_endpoint": "https://opivHonestOP.com/register",
-				"authorization_endpoint": "https://opivHonestOP.com/auth",
-				"token_endpoint": "https://opivAttackerOP.com/token",
-				"userinfo_endpoint": "https://opivAttackerOP.com/userinfo"
-				...
-			 }
-			</code></pre>
+			<pre><code>{
+	"issuer": "https://opivAttackerOP.com",
+	"registration_endpoint": "https://opivHonestOP.com/register",
+	"authorization_endpoint": "https://opivHonestOP.com/auth",
+	"token_endpoint": "https://opivAttackerOP.com/token",
+	"userinfo_endpoint": "https://opivAttackerOP.com/userinfo"
+	...
+}</code></pre>
 
 			<h4>Result Evaluation.</h4>
 			The goal of this test is to verify whether the End-User authentication can
@@ -1884,7 +1882,7 @@
 			Injection and DoS attacks are considered out of scope for the tests provided by PrOfESSOS.
 
 			<h4>Mitigation</h4>
-			The mitigation of the attack is not officially specifyed yet, but currently discussed.
+			The mitigation of the attack is not officially specified yet, but currently discussed.
 		]]>
 		</Description>
 		<TestParameters>
