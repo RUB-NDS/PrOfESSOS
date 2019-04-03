@@ -88,8 +88,7 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 				return null;
 			});
 		} catch (Exception e) {
-			logger.log("Execution of login script failed");
-			logger.log(e.toString());
+			logger.log("Execution of login script failed", e);
 			logScreenshot();
 
 			return TestStepResult.UNDETERMINED;
@@ -112,8 +111,7 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 					return null;
 				});
 			} catch (Exception e) {
-				logger.log("Execution of consent script failed.");
-				logger.log(e.toString());
+				logger.log("Execution of consent script failed.", e);
 				logScreenshot();
 
 				return TestStepResult.UNDETERMINED;

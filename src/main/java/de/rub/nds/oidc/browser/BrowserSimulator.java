@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-//import org.openqa.selenium.phantomjs.PhantomJSDriver;
 
 /**
  * @author Tobias Wich
@@ -114,9 +113,6 @@ public abstract class BrowserSimulator {
 
 		RemoteWebDriver d = new ChromeDriver(chromeOptions);
 
-
-		//driver = new PhantomJSDriver();
-		//driver.manage().window().setSize(new Dimension(1024, 768));
 		d.manage().timeouts().implicitlyWait(NORMAL_WAIT_TIMEOUT, TimeUnit.SECONDS);
 		return d;
 	}
@@ -195,11 +191,11 @@ public abstract class BrowserSimulator {
 	}
 
 	// This does not work in SPA scenarios where only the <html> element's content is changed
-	protected final <T> T waitForPageLoad(Func<T> func) {
+	protected final <T> T waitForPageLoad(Func<T> func, long timeout) {
 		RemoteWebElement oldHtml = (RemoteWebElement) driver.findElement(By.tagName("html"));
 
 		T result = func.call();
-		WebDriverWait wait = new WebDriverWait(driver, 15);
+		WebDriverWait wait = new WebDriverWait(driver, timeout);
 		wait.until((WebDriver input) -> {
 			RemoteWebElement newHtml = (RemoteWebElement) driver.findElement(By.tagName("html"));
 			return !newHtml.getId().equals(oldHtml.getId());
@@ -208,18 +204,23 @@ public abstract class BrowserSimulator {
 		return result;
 	}
 
-	protected final <T> T waitForDocumentReadyAndJsReady(Func<T> func) {
-		T result = func.call();
-		try {
-			// short wait to make sure func has been executed before checking page state
-			waitMillis(600);
-		} catch (InterruptedException e) {
-			// ignore
-		}
-		// checks if document.readyState is complete and various JS frameworks are loaded and ready
-		jsWaiter.waitAllRequest();
+	protected final <T> T waitForPageLoad(Func<T> func) {
+		return waitForPageLoad(func, 15);
+	}
 
-		return result;
+	protected final <T> T waitForDocumentReadyAndJsReady(Func<T> func) {
+		// first, try if a new <html> element can be detected within 3 seconds
+		try {
+			T result = waitForPageLoad(func, 3);
+		} catch (org.openqa.selenium.TimeoutException e) {
+			// ignore
+//			logger.log("debug: timeout during waitForPageLoad");
+		}
+		// next, even if no new html element was detected, wait until 
+		// document.readyState is complete and check various JS frameworks if 
+		// they finished loading and are ready. Currently, jsWaiter waits for up to 10 seconds
+		jsWaiter.waitAllRequest();
+		return null;
 	}
 
 	protected void waitForDocumentReady() {
@@ -254,7 +255,7 @@ public abstract class BrowserSimulator {
 			String script = IOUtils.toString(getClass().getResourceAsStream("/delayFormSubmission.js"), "UTF-8");
 			formSubmitDelayScript = script;
 		} catch (IOException e) {
-			//TODO
+			logger.log("Failed to load script template from resources.", e);
 		}
 	}
 
