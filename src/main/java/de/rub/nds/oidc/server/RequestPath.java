@@ -47,19 +47,24 @@ public class RequestPath {
 		servletPath = req.getServletPath();  // "" or "/bar"
 		String fullPath = req.getRequestURI();
 
-		// seperate out the prefix
-		// TODO: "enforce-rp-reg" should be a constant, maybe in OPIVconfig?
-		String regexp = String.format("^%s%s(/enforce-rp-reg-.{8})?(/.*)$", Pattern.quote(ctxPath), Pattern.quote(servletPath));
-		Pattern p = Pattern.compile(regexp);
-		Matcher m = p.matcher(fullPath);
-		m.matches();
-
-		if (m.groupCount() == 2 ) {
-			registrationEnforced = m.group(1);
-			resourcePath = m.group(2);
-		} else {
+		if ("/.well-known/webfinger" .equals(fullPath)) {
+			resourcePath = fullPath;
 			registrationEnforced = "";
-			resourcePath = m.group(1);
+		} else {
+			// seperate out the prefix
+			// TODO: "enforce-rp-reg" should be a constant, maybe in OPIVconfig?
+			String regexp = String.format("^%s%s(/enforce-rp-reg-.{8})?(/.*)$", Pattern.quote(ctxPath), Pattern.quote(servletPath));
+			Pattern p = Pattern.compile(regexp);
+			Matcher m = p.matcher(fullPath);
+			m.matches();
+
+			if (m.groupCount() == 2) {
+				registrationEnforced = m.group(1);
+				resourcePath = m.group(2);
+			} else {
+				registrationEnforced = "";
+				resourcePath = m.group(1);
+			}
 		}
 		// extract path segments
 		List<String> segmentList = Arrays.stream(resourcePath.split("/"))

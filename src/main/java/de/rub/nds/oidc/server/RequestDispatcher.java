@@ -37,7 +37,7 @@ import javax.ws.rs.core.UriBuilder;
  * @author Tobias Wich
  */
 @WebServlet(name = "dispatcher", urlPatterns = {
-	"/dispatch/*"
+	"/dispatch/*", "/.well-known/webfinger"
 })
 public class RequestDispatcher extends HttpServlet {
 
@@ -58,6 +58,7 @@ public class RequestDispatcher extends HttpServlet {
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String serverName = req.getScheme() + "://" + req.getHeader("Host");
+
 		RequestPath path = new RequestPath(req);
 
 		if (path.getFullResource().startsWith(OPImplementation.WEBFINGER_PATH)) {
