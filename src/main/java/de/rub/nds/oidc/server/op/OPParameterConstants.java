@@ -39,24 +39,27 @@ public class OPParameterConstants {
 	public static final String FORCE_HONEST_DISCOVERY_USERINFO_EP = "force_honest_discovery_userinfoEP";
 
 	public static final String FORCE_HONEST_TOKEN_ISS      = "force_honest_idtoken_iss";
+	public static final String FORCE_TOKEN_ISS_EXCL        = "force_idtoken_iss_excluded";
+	public static final String FORCE_TOKEN_ISS_EMPTY       = "force_idtoken_iss_empty_string";
 	public static final String FORCE_HONEST_TOKEN_SUB      = "force_honest_idtoken_sub";
 	public static final String FORCE_HONEST_TOKEN_NAME     = "force_honest_idtoken_name";
 	public static final String FORCE_HONEST_TOKEN_USERNAME = "force_honest_idtoken_username";
 	public static final String FORCE_HONEST_TOKEN_EMAIL    = "force_honest_idtoken_email";
+	public static final String FORCE_TOKEN_USERCLAIMS_EXCL = "force_token_userclaims_excluded";
 	
-	public static final String USERINFO_INCLUDE_HONEST_SUB = "include_honest_sub_in_userinfo";
-	public static final String USERINFO_INCLUDE_EVIL_SUB = "include_evil_sub_in_userinfo";
-	public static final String USERINFO_INCLUDE_HONEST_ISS = "include_honest_iss_in_userinfo";
-	public static final String USERINFO_INCLUDE_EVIL_ISS = "include_evil_iss_in_userinfo";
-	public static final String USERINFO_SUB_ARRAY = "include_sub_claims_as_json_array";
+	public static final String USERINFO_INCLUDE_HONEST_SUB    = "include_honest_sub_in_userinfo";
+	public static final String USERINFO_INCLUDE_EVIL_SUB      = "include_evil_sub_in_userinfo";
+	public static final String USERINFO_INCLUDE_HONEST_ISS    = "include_honest_iss_in_userinfo";
+	public static final String USERINFO_INCLUDE_EVIL_ISS      = "include_evil_iss_in_userinfo";
+	public static final String USERINFO_SUB_ARRAY             = "include_sub_claims_as_json_array";
 	public static final String FORCE_HONEST_USERINFO_NAME     = "force_honest_userinfo_name";
 	public static final String FORCE_HONEST_USERINFO_USERNAME = "force_honest_userinfo_username";
 	public static final String FORCE_HONEST_USERINFO_EMAIL    = "force_honest_userinfo_email";
 	
-	public static final String FORCE_TOKENHEADER_CLAIMS    = "token_header_add_claims";
-	public static final String FORCE_TOKENHEADER_HONEST_SUB    = "force_token_header_honest_sub";
-	public static final String FORCE_TOKENHEADER_HONEST_ISS    = "force_token_header_honest_iss";
-	public static final String FORCE_TOKENHEADER_HONEST_EMAIL    = "force_token_header_honest_email";
+	public static final String FORCE_TOKENHEADER_CLAIMS       = "token_header_add_claims";
+	public static final String FORCE_TOKENHEADER_HONEST_SUB   = "force_token_header_honest_sub";
+	public static final String FORCE_TOKENHEADER_HONEST_ISS   = "force_token_header_honest_iss";
+	public static final String FORCE_TOKENHEADER_HONEST_EMAIL = "force_token_header_honest_email";
 	
 
 	public static final String FORCE_TOKEN_EXP_DAY       = "force_idtoken_exp_oneday";

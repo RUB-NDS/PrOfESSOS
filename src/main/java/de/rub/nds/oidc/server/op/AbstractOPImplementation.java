@@ -174,14 +174,22 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return issuer;
 	}
 
-	protected Issuer getTokenIssuer() {
+
+	protected String getTokenIssuerString() {
+		if (params.getBool(FORCE_TOKEN_ISS_EXCL)) {
+			return null;
+		}
+		if (params.getBool(FORCE_TOKEN_ISS_EMPTY)) {
+			return "";
+		}
+		
 		Issuer issuer;
 		if (params.getBool(FORCE_HONEST_TOKEN_ISS)) {
 			issuer = getHonestIssuer();
 		} else {
 			issuer = supplyHonestOrEvil(this::getHonestIssuer, this::getEvilIssuer);
 		}
-		return issuer;
+		return issuer.getValue();
 	}
 
 
@@ -463,10 +471,16 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	protected JWTClaimsSet getIdTokenClaims(@Nonnull ClientID clientId, @Nullable Nonce nonce,
 			@Nullable AccessTokenHash atHash, @Nullable CodeHash cHash) throws ParseException {
 		UserInfo ui = getUserInfo();
+		if (params.getBool(FORCE_TOKEN_USERCLAIMS_EXCL)) {
+			// reset all user claims except "sub"
+			ui.setName(null);
+			ui.setPreferredUsername(null);
+			ui.setEmail(null);
+		}
 
 		JWTClaimsSet.Builder cb = new JWTClaimsSet.Builder(ui.toJWTClaimsSet());
 
-		cb.issuer(getTokenIssuer().getValue());
+		cb.issuer(getTokenIssuerString());
 		cb.audience(getTokenAudience(clientId));
 		cb.issueTime(getTokenIssuedAt());
 		cb.expirationTime(getTokenExpiration());

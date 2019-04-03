@@ -21,7 +21,7 @@ public class IDSpoofingRPBrowser extends DefaultRPTestBrowser {
 	protected TestStepResult checkConditionOnFinalPage() {
 		Object userInfoJson = stepCtx.get(OPContextConstants.STORED_USERINFO_RESPONSE_EVIL);
 		if (!(userInfoJson instanceof UnsafeJSONObject)) {
-			logger.log("Unexpected content ");
+			logger.logCodeBlock(userInfoJson.toString(), "Unexpected content:");
 			return TestStepResult.UNDETERMINED;
 		}
 
@@ -56,7 +56,7 @@ public class IDSpoofingRPBrowser extends DefaultRPTestBrowser {
 			logger.log("Failed to parse ID Token claims.");
 			return TestStepResult.UNDETERMINED;
 		}
-		// proceed 
+		// proceed with normal checks
 		return null;
 	}
 }
