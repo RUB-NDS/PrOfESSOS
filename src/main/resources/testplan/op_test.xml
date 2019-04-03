@@ -140,6 +140,32 @@
 		</RPConfig-2>
 	</TestStep>
 
+	<TestStep Name="Redirect URI Manipulation 3.2 TLD">
+		<Description><![CDATA[
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP. To this end, the host part
+		of the URI is extended by appending an invalid top level domain to the <code>redirect_uri</code> contained in 
+		the Authentication Request.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+
+			<Parameter Key="authnreq-invalid-top-level-domain-in-redirect-uri">true</Parameter>
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+		</RPConfig-2>
+	</TestStep>
+
+
+
 	<TestStep Name="Redirect URI Manipulation 4">
 		<Description><![CDATA[
 		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP. In this test,
@@ -413,6 +439,34 @@
 
 		</RPConfig-2>
 	</TestStep>
+
+	<TestStep Name="Code Hijack 4.2 TLD">
+		<Description><![CDATA[
+		PrOfESSOS issues a token request containing a <code>redirect_uri</code> value that does not match the
+			one presented in the Authentication Request and is not registered for the client to which the code
+			has been issued. An invalid top level domain part is appended to the host part of the <code>redirect_uri</code>.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+
+			<Parameter Key="tokenreq-add-invalid-tld-in-redirect-uri">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+		</RPConfig-1>
+		<RPConfig-2>
+			<!--not used in this test-->
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+
+		</RPConfig-2>
+	</TestStep>
+	
 
 	<TestStep Name="Code Hijack 5">
 		<Description><![CDATA[

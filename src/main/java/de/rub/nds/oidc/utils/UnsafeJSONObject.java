@@ -7,6 +7,8 @@ import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,9 +27,9 @@ import java.util.stream.Collectors;
  * 	returns {@code '{"a": "1", "b": 2, "a": "3"}'}
  */
 public class UnsafeJSONObject {
-	
+
 	private ArrayList<Pair<String, Object>> members;
-	
+
 	public UnsafeJSONObject() {
 		this.members = new ArrayList<>();
 	}
@@ -36,7 +38,7 @@ public class UnsafeJSONObject {
 		// append an immutable pair
 		members.add(Pair.of(key, val));
 	}
-	
+
 	public void append(String key, String val) {
 		put(key, val);
 	}
@@ -44,29 +46,45 @@ public class UnsafeJSONObject {
 	public void append(String key, int val) {
 		put(key, val);
 	}
-	
+
 	public void append(String key, JSONArray val) {
 		put(key, val);
 	}
-	
+
 	public void append(String key, JSONObject val) {
 		put(key, val);
 	}
-	
+
 	public List<Pair<String,Object>> get(String key) {
 		List<Pair<String,Object>> result = members.stream()
 				.filter((k) -> k.getKey().equals(key))
 				.collect(Collectors.toList());
 		return result;
 	}
-	
+
+	public String getAsString(String key) {
+		StringBuilder sb = new StringBuilder();
+		if (contains(key)) {
+			get(key).stream().forEach((p) -> sb.append(p.getValue().toString() + " "));
+			sb.setLength(sb.length() - 1);
+			return sb.toString();
+		}
+		return "";
+	}
+
+	public Collection<Object> values() {
+		List<Object> vals = new ArrayList<>();
+		members.forEach((p) -> vals.add(p.getValue()));
+		return vals;
+	} 
+
 	public boolean contains(String key) {
 		return ! get(key).isEmpty();
 	}
 
 	public String getMultiKVStringByKey(String key) {
 		List<Pair<String, Object>> entries = get(key);
-		
+
 		StringBuilder entryString = new StringBuilder();
 		entries.forEach(p -> {
 			entryString.append(getEntryString(p));
@@ -74,13 +92,13 @@ public class UnsafeJSONObject {
 		});
 		// remove trailing comma
 		entryString.setLength(entryString.length() - 2);
-		
+
 		return entryString.toString();
 	}
-	
+
 	public String toJSONString() {
 		StringBuilder jsonString = new StringBuilder();
-		
+
 		jsonString.append("{");
 		members.forEach(p -> {
 			jsonString.append(getEntryString(p));
@@ -89,10 +107,10 @@ public class UnsafeJSONObject {
 		// remove trailing comma
 		jsonString.setLength(jsonString.length() - 2);
 		jsonString.append("}");
-		
+
 		return jsonString.toString();
 	}
-	
+
 	@Override
 	public String toString() {
 		return toJSONString();

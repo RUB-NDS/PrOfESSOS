@@ -123,14 +123,20 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	}
 
 
-	protected URI manipulateURI(URI uri, boolean addSubdomain, boolean addPath) {
+	protected URI manipulateURI(URI uri, boolean addSubdomain, boolean addPath, boolean addTld) {
 		String rnd = RandomStringUtils.randomAlphanumeric(12);
 		rnd = rnd.toLowerCase();
 
 		UriBuilder ub = UriBuilder.fromUri(uri);
+		String newHost = uri.getHost();
 		if (addSubdomain) {
-			ub.host(rnd + "." + uri.getHost());
+			newHost = rnd + "." + newHost;
 		}
+		if (addTld) {
+			newHost = newHost + ".invalid";
+		}
+		ub.host(newHost);
+
 		if (addPath) {
 			ub.path(rnd);
 		}

@@ -38,6 +38,8 @@ public class RPParameterConstants {
 	public static final String AUTHNREQ_FORCE_EVIL_REDIRURI = "authnreq-force-evil-redirect-uri";
 	public static final String AUTHNREQ_ADD_SUBDOMAIN_REDIRURI = "authnreq-random-subdomain-in-redirect-uri";
 	public static final String AUTHNREQ_ADD_PATHSUFFIX_REDIRURI = "authnreq-random-path-suffix-in-redirect-uri";
+	public static final String AUTHNREQ_ADD_INVALID_TLD = "authnreq-invalid-top-level-domain-in-redirect-uri";
+
 	public static final String AUTHNREQ_RU_PP_HONEST_FIRST = "authnreq-redirect_uri-parameter-pollution-honest-first";
 	public static final String AUTHNREQ_RU_PP_EVIL_FIRST = "authnreq-redirect_uri-parameter-pollution-evil-first";
 	public static final String AUTHNREQ_HONEST_USERPART_REDIRURI = "authnreq-honesturl-in-userpart-of-redirect-uri";
@@ -61,6 +63,7 @@ public class RPParameterConstants {
 	public static final String TOKENREQ_REDIRURI_EXCLUDED = "tokenreq-exclude-redirect-uri";
 	public static final String TOKENREQ_REDIRURI_ADD_SUBDOMAIN = "tokenreq-random-subdomain-in-redirect-uri";
 	public static final String TOKENREQ_REDIRURI_ADD_PATHSUFFIX = "tokenreq-random-path-suffix-in-redirect-uri";
+	public static final String TOKENREQ_REDIRURI_ADD_TLD = "tokenreq-add-invalid-tld-in-redirect-uri";
 
 	public static final String TOKENREQ_FORCE_CLIENTAUTH_POST = "tokenreq-force-client-auth-post";
 	public static final String TOKENREQ_CLIENTAUTH_EMPTY_ID = "tokenreq-clientauth-empty-client-id";

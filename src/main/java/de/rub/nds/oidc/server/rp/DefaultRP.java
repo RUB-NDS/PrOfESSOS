@@ -350,8 +350,9 @@ public class DefaultRP extends AbstractRPImplementation {
 
 		boolean subdom = params.getBool(RPParameterConstants.AUTHNREQ_ADD_SUBDOMAIN_REDIRURI);
 		boolean path = params.getBool(RPParameterConstants.AUTHNREQ_ADD_PATHSUFFIX_REDIRURI);
-		if (subdom || path) {
-			return manipulateURI(redirURI, subdom, path);
+		boolean tld = params.getBool(RPParameterConstants.AUTHNREQ_ADD_INVALID_TLD);
+		if (subdom || path || tld) {
+			return manipulateURI(redirURI, subdom, path, tld);
 		}
 
 		return redirURI;
@@ -375,12 +376,15 @@ public class DefaultRP extends AbstractRPImplementation {
 			return null;
 		}
 		if (params.getBool(TOKENREQ_REDIRURI_ADD_SUBDOMAIN)) {
-			return manipulateURI(getRedirectUri(), true, false);
+			return manipulateURI(getRedirectUri(), true, false, false);
 		}
 		if (params.getBool(TOKENREQ_REDIRURI_ADD_PATHSUFFIX)) {
-			return manipulateURI(getRedirectUri(), false, true);
+			return manipulateURI(getRedirectUri(), false, true, false);
 		}
-
+		if (params.getBool(TOKENREQ_REDIRURI_ADD_TLD)) {
+			return manipulateURI(getRedirectUri(), false, false, true);
+		}
+		
 		return getRedirectUri();
 	}
 

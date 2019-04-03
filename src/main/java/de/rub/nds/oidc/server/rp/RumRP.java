@@ -158,16 +158,16 @@ public class RumRP extends DefaultRP {
 	}
 
 
-	//	@Override
 	protected String getManipulatedAuthReqRedirectUri() {
 		URI redirUri = params.getBool(AUTHNREQ_FORCE_EVIL_REDIRURI) ? getEvilRedirectUri() : getRedirectUri();
 		URI redirUriBenign = !params.getBool(AUTHNREQ_FORCE_EVIL_REDIRURI) ? getEvilRedirectUri() : getRedirectUri();
 
-		boolean subdom = params.getBool(RPParameterConstants.AUTHNREQ_ADD_SUBDOMAIN_REDIRURI);
-		boolean path = params.getBool(RPParameterConstants.AUTHNREQ_ADD_PATHSUFFIX_REDIRURI);
-		if (subdom || path) {
+		boolean subdom = params.getBool(AUTHNREQ_ADD_SUBDOMAIN_REDIRURI);
+		boolean path = params.getBool(AUTHNREQ_ADD_PATHSUFFIX_REDIRURI);
+		boolean tld = params.getBool(AUTHNREQ_ADD_INVALID_TLD);
+		if (subdom || path || tld) {
 			URI uri;
-			uri = manipulateURI(redirUri, subdom, path);
+			uri = manipulateURI(redirUri, subdom, path, tld);
 			return uri.toString();
 		}
 

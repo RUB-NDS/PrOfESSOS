@@ -157,13 +157,12 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 		blockRP.complete(null);
 
 		try {
-			return blockAndResult.get(5, TimeUnit.SECONDS); // TODO: is 5 seconds long enough?
+			return blockAndResult.get(10, TimeUnit.SECONDS);
 		} catch (ExecutionException | TimeoutException e) {
 			// check for manipulated subdomain in Browser URI
-			String uriManipulator = (String) stepCtx.get(RPContextConstants.REDIRECT_URI_MANIPULATOR);
-			String strippedUrl = finalUrl.replaceFirst("^https?:\\/\\/", "");
-			if (uriManipulator != null && strippedUrl.startsWith(uriManipulator)) {
-				// TODO: add seleniumProxy (BrowserMob) and intercept DNS/HTTP for manipulated URIs?
+			// TODO: add seleniumProxy (BrowserMob) and intercept DNS/HTTP for manipulated URIs?
+			URI manipulatedUri = (URI) stepCtx.get(RPContextConstants.MANIPULATED_REDIRECT_URI);
+			if (finalUrl.startsWith(manipulatedUri.toString())) {
 				logger.log("Redirect to manipulated redirect_uri detected, assuming test failed.");
 				return TestStepResult.FAIL;
 			}
