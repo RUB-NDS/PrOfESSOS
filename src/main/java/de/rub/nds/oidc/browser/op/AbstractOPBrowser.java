@@ -162,7 +162,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 			// check for manipulated subdomain in Browser URI
 			// TODO: add seleniumProxy (BrowserMob) and intercept DNS/HTTP for manipulated URIs?
 			URI manipulatedUri = (URI) stepCtx.get(RPContextConstants.MANIPULATED_REDIRECT_URI);
-			if (finalUrl.startsWith(manipulatedUri.toString())) {
+			if (manipulatedUri != null && finalUrl.startsWith(manipulatedUri.toString())) {
 				logger.log("Redirect to manipulated redirect_uri detected, assuming test failed.");
 				return TestStepResult.FAIL;
 			}
