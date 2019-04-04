@@ -6,7 +6,9 @@ import com.nimbusds.jwt.SignedJWT;
 import de.rub.nds.oidc.server.op.OPContextConstants;
 import de.rub.nds.oidc.test_model.TestStepResult;
 import de.rub.nds.oidc.utils.UnsafeJSONObject;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.apache.commons.lang3.tuple.Pair;
 import org.openqa.selenium.By;
 
 import java.text.ParseException;
@@ -21,19 +23,28 @@ public class IDSpoofingRPBrowser extends DefaultRPTestBrowser {
 	protected TestStepResult checkConditionOnFinalPage() {
 		Object userInfoJson = stepCtx.get(OPContextConstants.STORED_USERINFO_RESPONSE_EVIL);
 		if (!(userInfoJson instanceof UnsafeJSONObject)) {
-			logger.logCodeBlock(userInfoJson.toString(), "Unexpected content:");
-			return TestStepResult.UNDETERMINED;
+			logger.logCodeBlock(userInfoJson.toString(), "Failed to check final condition, unexpected content:");
+			return null;
+		}
+		
+		UnsafeJSONObject uiJson = (UnsafeJSONObject) userInfoJson;
+		List<Pair<String, Object>> subs = uiJson.get("sub");
+		if (subs.size() == 1 && subs.get(0).getValue() instanceof JSONArray
+				|| subs.size() > 1) {
+			// rely on standard user-needle search, if multiple sub claims
+			return null;
 		}
 
+		// This is more a compliance check than an attack:
+		// RP must check that sub claims in ID Token and UserInfo response are the same and
+		// must not use claims from the userinfo response otherwise.
 		try {
-			UnsafeJSONObject uiJson = (UnsafeJSONObject) userInfoJson;
 			String uiSub = uiJson.getAsString("sub");
 			SignedJWT idToken = (SignedJWT) stepCtx.get(OPContextConstants.STORED_ID_TOKEN_EVIL);
 			JWTClaimsSet idtClaims = idToken.getJWTClaimsSet();
 			String idtSub = idtClaims.getSubject();
 			
-			// RP must check that sub claims in ID Token and UserInfo response are the same
-			if (!uiSub.equals(idtSub) || Strings.isNullOrEmpty(idtSub)) {
+			if (!idtSub.equals(uiSub)) {
 				// check if page contains unvalidated UserInfo claims
 				Collection<Object> uiClaimValues = uiJson.values();
 				Collection<Object> idtClaimValues = idtClaims.getClaims().values();
@@ -47,7 +58,7 @@ public class IDSpoofingRPBrowser extends DefaultRPTestBrowser {
 					}
 				}
 				if (!usedClaims.isEmpty()) {
-					logger.logCodeBlock(String.join(" and ", usedClaims),
+					logger.logCodeBlock(String.join(", ", usedClaims),
 							"Detected use of invalid UserInfo claim(s):");
 					return TestStepResult.FAIL;
 				}
