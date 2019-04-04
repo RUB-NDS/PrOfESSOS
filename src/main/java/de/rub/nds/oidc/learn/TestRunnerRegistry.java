@@ -20,14 +20,13 @@ import de.rub.nds.oidc.TestPlanList;
 import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.test_model.*;
 
-import java.util.HashMap;
-import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- *
  * @author Tobias Wich
  */
 @ApplicationScoped
@@ -127,6 +126,10 @@ public class TestRunnerRegistry {
 		}
 	}
 
+	protected void deleteTestObject(@Nonnull String testId) {
+		testObjects.remove(testId);
+	}
+
 	private TestRPConfigType createTestRPConfig(String testId) {
 		TestRPConfigType testCfg = new TestRPConfigType();
 		testCfg.setType(TestRPConfigType.class.getName());
@@ -137,9 +140,9 @@ public class TestRunnerRegistry {
 
 	private TestOPConfigType createTestOPConfig(String testId) {
 		TestOPConfigType testCfg = new TestOPConfigType();
-        testCfg.setType(TestOPConfigType.class.getName());
-        testCfg.setHonestRpResourceId(hosts.getHonestRPUri() + testId);
-        testCfg.setEvilRpResourceId(hosts.getEvilRPUri() + testId);
+		testCfg.setType(TestOPConfigType.class.getName());
+		testCfg.setHonestRpResourceId(hosts.getHonestRPUri() + testId);
+		testCfg.setEvilRpResourceId(hosts.getEvilRPUri() + testId);
 		return testCfg;
 	}
 }
