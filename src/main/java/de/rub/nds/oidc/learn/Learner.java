@@ -74,14 +74,22 @@ public class Learner {
 	@POST
 	@Path("/{role: rp|op}/create-test-object")
 	@Produces(MediaType.APPLICATION_JSON)
-	public TestObjectType createTestObject(@PathParam("role") String role, @Context HttpServletRequest req) {
+	@Consumes("application/x-www-form-urlencoded")
+	public TestObjectType createTestObject(
+			@PathParam("role") String role,
+			@FormParam("test_id") String testId,
+			@Context HttpServletRequest req) {
 		// bind the testid to a session to easily delete references to stale
 		// testObjects on session invalidation (default: 60min inactive, set in web.xml)
 		HttpSession session = req.getSession(true);
 
-		String testId = valueGenerator.generateTestId();
+		if (!testObjs.isAllowCustomTestIds() || testId == null) {
+			testId = valueGenerator.generateTestId();
+		}
 		session.setAttribute("testId", testId);
 
+		// if a testObject with the same testID already exists in
+		// testRunnerRegistry, it will be replaced with new testObject
 		TestRunner runner;
 		if (role.equals("rp"))
 			runner = testObjs.createRPTestObject(testId);

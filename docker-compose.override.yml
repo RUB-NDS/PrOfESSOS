@@ -6,6 +6,8 @@ services:
       context: .
       args:
         wildflyconfigname: "standalone_w_test.xml"
+    environment:
+      - OPIV_ALLOW_CUSTOM_TEST_ID=true
     volumes:
       # on unix, overwriting volume-mounted files is not possible because file's 
       # inode changes (thus, the bind-mount in the container will not reflect the changes).

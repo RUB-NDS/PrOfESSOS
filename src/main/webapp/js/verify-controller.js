@@ -33,12 +33,12 @@ var OPIV = (function(module) {
 		document.location.reload();
 	};
 
-	module.createTestPlan = function(testPlanType) {
+	module.createTestPlan = function(testPlanType, testId) {
 		// request new test id
 		if (testPlanType === "RP-TestPlan") {
-			$.post("api/rp/create-test-object", initTestObject);
+			$.post("api/rp/create-test-object", testId, initTestObject);
 		} else if ((testPlanType === "OP-TestPlan")) {
-			$.post("api/op/create-test-object", initTestObject);
+			$.post("api/op/create-test-object", testId, initTestObject);
 		}
 	};
 

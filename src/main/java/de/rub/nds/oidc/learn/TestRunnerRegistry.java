@@ -65,6 +65,7 @@ public class TestRunnerRegistry {
 
 		// set both in a testobject instance and save it
 		TestRunner toi = new TestRunner(hosts, to, plan, te);
+		// overwrite, if toi with same testId already exists
 		testObjects.put(testId, toi);
 
 		return toi;
@@ -78,6 +79,7 @@ public class TestRunnerRegistry {
 
 		// set both in a testobject instance and save it
 		TestRunner toi = new TestRunner(hosts, to, plan, te);
+		// overwrite, if toi with same testId already exists
 		testObjects.put(testId, toi);
 
 		return toi;
@@ -129,6 +131,10 @@ public class TestRunnerRegistry {
 	protected void deleteTestObject(@Nonnull String testId) {
 		testObjects.remove(testId);
 	}
+
+	public boolean isAllowCustomTestIds() {
+		return hosts.isAllowCustomTestIDs();
+	} 
 
 	private TestRPConfigType createTestRPConfig(String testId) {
 		TestRPConfigType testCfg = new TestRPConfigType();

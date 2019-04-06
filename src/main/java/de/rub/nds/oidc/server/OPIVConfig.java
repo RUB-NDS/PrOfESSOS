@@ -45,6 +45,8 @@ public class OPIVConfig {
 	private final String keystorePass = "pass";
 	private final KeyStore keyStore;
 
+	private final boolean allowCustomTestIDs;
+
 	public OPIVConfig() throws IOException, URISyntaxException, GeneralSecurityException {
 		InputStream hostsFile = OPIVConfig.class.getResourceAsStream("/servernames.properties");
 		Properties p = new Properties();
@@ -59,6 +61,9 @@ public class OPIVConfig {
 		InputStream keystoreFile = OPIVConfig.class.getResourceAsStream("/keystore.jks");
 		keyStore = KeyStore.getInstance("JKS");
 		keyStore.load(keystoreFile, keystorePass.toCharArray());
+
+		String acceptTestIds = System.getenv("OPIV_ALLOW_CUSTOM_TEST_ID");
+		allowCustomTestIDs = Boolean.valueOf(acceptTestIds) ;
 	}
 
 
@@ -120,6 +125,10 @@ public class OPIVConfig {
 		int port = EVIL_OP_URL.getPort();
 		return host + (port == -1 ? "" : ":" + port);
 	}
+
+	public boolean isAllowCustomTestIDs() {
+		return allowCustomTestIDs;
+	} 
 
 	public KeyStore.PrivateKeyEntry getHonestOPSigningEntry() {	return getSigningEntry(honestSigAlias);	}
 
