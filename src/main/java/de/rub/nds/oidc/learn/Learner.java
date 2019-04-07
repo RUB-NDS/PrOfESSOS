@@ -32,7 +32,6 @@ import javax.xml.bind.JAXBElement;
 /**
  * @author Tobias Wich
  */
-//@Path("/{role: rp|op}")
 @Path("/")
 public class Learner {
 
@@ -55,7 +54,6 @@ public class Learner {
 		this.testInsts = testInsts;
 	}
 
-
 	@GET
 	@Path("/{role: rp|op}/{testId}/export")
 	@Produces({MediaType.APPLICATION_XML})
@@ -75,21 +73,21 @@ public class Learner {
 	@Path("/{role: rp|op}/create-test-object")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes("application/x-www-form-urlencoded")
-	public TestObjectType createTestObject(
-			@PathParam("role") String role,
-			@FormParam("test_id") String testId,
-			@Context HttpServletRequest req) {
-		// bind the testid to a session to easily delete references to stale
-		// testObjects on session invalidation (default: 60min inactive, set in web.xml)
-		HttpSession session = req.getSession(true);
+	public TestObjectType createTestObject(@PathParam("role") String role, @FormParam("test_id") String testId,
+										   @Context HttpServletRequest req) {
 
-		if (!testObjs.isAllowCustomTestIds() || testId == null) {
+		if (testId == null || !testObjs.isAllowCustomTestIds()) {
 			testId = valueGenerator.generateTestId();
 		}
+		// bind each testId to a new session and delete references to stale
+		// testObjects on session invalidation (default: 60min inactive, set in web.xml)
+		if (req.getSession(false) != null) {
+			// invalidate old session to delete references to testObjects
+			req.getSession().invalidate();
+		}
+		HttpSession session = req.getSession(true);
 		session.setAttribute("testId", testId);
 
-		// if a testObject with the same testID already exists in
-		// testRunnerRegistry, it will be replaced with new testObject
 		TestRunner runner;
 		if (role.equals("rp"))
 			runner = testObjs.createRPTestObject(testId);
@@ -164,7 +162,6 @@ public class Learner {
 		obj.getTestObj().setTestConfig(config);
 	}
 
-
 	@POST
 	@Path("/op/{testId}/config")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -173,5 +170,4 @@ public class Learner {
 		config.setType(TestOPConfigType.class.getName());
 		obj.getTestObj().setTestConfig(config);
 	}
-
 }
