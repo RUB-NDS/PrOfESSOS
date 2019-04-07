@@ -1,41 +1,35 @@
 /**
  * Delay form submissions and click events to allow 
  * PrOfESSOS taking a screenshot of the filled formfields.
- * 
  */
 const delayMillis = 550;
+// delay form submit
 let forms = document.forms;
-
 for (let frm of forms) {
-    let orig = frm.onsubmit;
-    if (orig) {
-        frm.onsubmit = function () {
-            setTimeout(orig, delayMillis);
+    if (typeof frm.submit === "function") {
+
+        let origFun = frm.submit;
+        frm.submit = function (e) {
+            setTimeout(function(){origFun.apply(frm);}, delayMillis);
         };
-    } else if (typeof frm.submit === "function") {
-        frm.onsubmit = function (e) {
-            setTimeout(function () {
-                frm.submit();
-            }, delayMillis);
-            return false;
-        };
-    }
-    orig = frm.submit;
-    if (orig) {
-        frm.submit = function () {setTimeout(function(){orig.apply(frm);}, delayMillis);}
-    }
+    }   
 }
 
-let buttons = document.querySelectorAll('input[type="submit"], button[type="submit"]');
-
+// also delay button events (may result in delaying twice)
+let buttons = document.querySelectorAll('input[type="submit"], button');
 for (let btn of buttons) {
-
     let orig = btn.onclick;
-    btn.onclick=function (e){setTimeout(function(){doClick(btn,orig)},delayMillis); e.stopPropagation();e.preventDefault();return false;};
-
+    btn.onclick=function (e){doClick(btn, orig);e.stopPropagation();e.preventDefault();return false;};
+    
+    let sbm = btn.onsubmit;
+    if (sbm) {
+        btn.onsubmit = function () {setTimeout(sbm, delayMillis);};
+    }
 }
 
 function doClick(btn, handler) {
-    handler ? btn.onclick=handler : btn.onclick="";
-    btn.click();
+    btn.onclick=handler;
+    let fn = function() {btn.click();};
+    setTimeout(fn, delayMillis);
+    return true;
 }
