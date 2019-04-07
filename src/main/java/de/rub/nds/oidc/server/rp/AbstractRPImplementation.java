@@ -26,6 +26,8 @@ import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.*;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
+import de.rub.nds.oidc.server.op.OPContextConstants;
+import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.test_model.ParameterType;
 import de.rub.nds.oidc.test_model.RPConfigType;
 import de.rub.nds.oidc.test_model.TestOPConfigType;
@@ -157,13 +159,13 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 		// dont run setup steps for RP2 unless neccessary
 		if (RPType.HONEST.equals(type)
-				|| !Boolean.valueOf((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST))
-				|| Boolean.valueOf((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))
-				|| Boolean.valueOf((String) stepCtx.get(RPContextConstants.IS_RP_LEARNING_STEP))) {
+				|| !Boolean.parseBoolean((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST))
+				|| Boolean.parseBoolean((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))
+				|| Boolean.parseBoolean((String) stepCtx.get(RPContextConstants.IS_RP_LEARNING_STEP))) {
 
 			success &= discoverOpIfNeeded();
-			success &= isValidClientConfig();
 			success &= registerClientIfNeeded();
+			success &= isValidClientConfig();
 			if (success) {
 				prepareAuthnReq();
 			}
@@ -273,25 +275,34 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 
 	private boolean registerClientIfNeeded() throws IOException, ParseException {
-		if (!Strings.isNullOrEmpty(testOPConfig.getClient1Config())
-				|| !Strings.isNullOrEmpty(testOPConfig.getClient2Config())
-				|| opMetaData == null 
-				|| opMetaData.getRegistrationEndpointURI() == null) {
-			logger.log("Configuration indicates that dynamic registration is not supported.");
-			return false;
-		}
+		boolean isRegistrationSupported = opMetaData != null && opMetaData.getRegistrationEndpointURI() != null;
 
-		if (Boolean.valueOf((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))) {
-			// run registration with current step context but
-			// don not store new clientConfig in suiteCtx
-			return registerClient(type);
+		boolean isClientConfigProvided = false;
+		if (!Strings.isNullOrEmpty(testOPConfig.getClient1Config())
+				&& !Strings.isNullOrEmpty(testOPConfig.getClient2Config())) {
+			isClientConfigProvided = true;
 		}
-		OIDCClientInformation ci = getStoredClientInfo(type == RPType.HONEST);
-		if (ci != null) {
-			// use clientInfo from suiteCtx (from user provided config or earlier registration)
-			clientInfo = ci;
+		
+		if (isClientConfigProvided && params.getBool(RPContextConstants.IS_RP_LEARNING_STEP)) {
 			return true;
 		}
+
+		if (Boolean.parseBoolean((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))) {
+			if (!isRegistrationSupported) {
+				logger.log("TestStep requires dynamic registration, which is not supported acc. to configuration.");
+				return false;
+			}
+			// run registration for current testStep but do not store new clientConfig in suiteCtx
+			return registerClient(type);
+		}
+		
+		// default: use clientInfo from suiteCtx (from previous test; user provided config or earlier registration)
+		OIDCClientInformation ci = getStoredClientInfo(type == RPType.HONEST);
+		if (ci != null) {
+			setClientInfo(ci);
+			return true;
+		}
+
 		// otherwise, run dynamic registration
 		if (registerClient(type)) {
 			// store registration response in suiteCtx
@@ -355,15 +366,19 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 
 	private boolean isValidClientConfig() {
+
+		if (getClientInfo() != null) {
+			// stored info found, either retrieved by registration or already vetted
+			return true;
+		}
+		
 		// attempt to parse user provided ClientConfig JSON strings
 		String config = type.equals(RPType.HONEST) ? testOPConfig.getClient1Config() : testOPConfig.getClient2Config();
 		if (Strings.isNullOrEmpty(config)) {
-//			logger.log("Client Config not provided");
-			// not an error, as long as dynamic registration works
-			return true;
+			// no client configuration provided
+			return false;
 		}
 		try {
-//			Object jsonConfig = new JSONParser(JSONParser.MODE_PERMISSIVE).parse(config);
 			JSONObject jsonConfig = JSONObjectUtils.parse(config);
 			OIDCClientInformation clientInfo = OIDCClientInformation.parse(jsonConfig);
 			setClientInfo(clientInfo);
@@ -380,7 +395,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	}
 
 	protected void setClientInfo(OIDCClientInformation info) {
-		this.clientInfo = info;
+		clientInfo = info;
 	}
 
 	private void storeClientInfo() {
@@ -430,7 +445,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		if (params.getBool(RPParameterConstants.FORCE_EVIL_CLIENT_ID)) {
 			return getEvilClientID();
 		}
-		if (Boolean.valueOf((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))) {
+		if (Boolean.parseBoolean((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))) {
 			// TODO: could cause conflicts as registration is enforced per testStep, not per RP
 			return clientInfo.getID();
 		}
@@ -460,7 +475,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		if (params.getBool(RPParameterConstants.FORCE_RANDOM_CLIENT_SECRET)) {
 			return new Secret(32);
 		}
-		if (Boolean.valueOf((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))) {
+		if (Boolean.parseBoolean((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))) {
 			// TODO: conflict, if two RPs are registered?
 			return clientInfo.getSecret();
 		}
@@ -478,7 +493,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 
 	public boolean discoverOpIfNeeded() throws IOException, ParseException {
-		boolean isLearningStep = Boolean.valueOf((String) stepCtx.get(RPContextConstants.IS_RP_LEARNING_STEP));
+		boolean isLearningStep = Boolean.parseBoolean((String) stepCtx.get(RPContextConstants.IS_RP_LEARNING_STEP));
 		if (!Strings.isNullOrEmpty(testOPConfig.getOPMetadata()) && opMetaData == null) {
 			logger.log("Parsing OP Metadata from provided JSON string");
 			opMetaData = UnsafeOIDCProviderMetadata.parse(testOPConfig.getOPMetadata());
@@ -505,11 +520,9 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		try {
 			HTTPResponse httpResponse = httpRequest.send();
 
-		// TODO check status code, exit if negative
 		if (!httpResponse.indicatesSuccess()) {
 			logger.log("OP Discovery failed");
 			logger.logHttpResponse(httpResponse, httpResponse.getContent());
-//			stepCtx.put(RPContextConstants.STEP_SETUP_FINISHED, false);
 			return false;
 		}
 		logger.log("OP Configuration received");
@@ -527,7 +540,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 	private boolean areStepRequirementsMet() {
 		// check if RP Parameters provided in TestPlan contradict with user provided configuration
-		if (Boolean.valueOf((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))) {
+		if (Boolean.parseBoolean((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))) {
 			if (opMetaData == null) {
 				opMetaData = (UnsafeOIDCProviderMetadata) suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION);
 			}
