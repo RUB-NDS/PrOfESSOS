@@ -414,8 +414,7 @@ public class DefaultRP extends AbstractRPImplementation {
 	protected Scope getAuthReqScope() {
 		Scope scopes = new Scope(
 				OIDCScopeValue.OPENID,
-				OIDCScopeValue.PROFILE,
-				OIDCScopeValue.EMAIL);
+				OIDCScopeValue.PROFILE);
 		return scopes;
 	}
 
@@ -444,7 +443,7 @@ public class DefaultRP extends AbstractRPImplementation {
 			return ResponseMode.FORM_POST;
 		}
 
-		return ResponseMode.QUERY;
+		return null;
 	}
 
 	@Nullable
