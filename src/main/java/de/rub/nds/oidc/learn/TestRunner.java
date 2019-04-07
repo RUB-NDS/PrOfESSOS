@@ -225,8 +225,8 @@ public class TestRunner {
 
 
 	private boolean testGranted(TestStepLogger logger, Map<String, Object> testStepCtx) {
-		Object grantNotNeeded = testStepCtx.get("grant_not_needed");
-		if (grantNotNeeded instanceof String && Boolean.valueOf((String) grantNotNeeded)) {
+		boolean grantNotNeeded = Boolean.parseBoolean(System.getenv("OPIV_TARGET_GRANT_NOT_NEEDED"));
+		if (grantNotNeeded || Boolean.parseBoolean((String) testStepCtx.get("grant_not_needed"))) {
 			logger.log("Permission to perform test on remote server not evaluated.");
 			return true;
 		} else {
