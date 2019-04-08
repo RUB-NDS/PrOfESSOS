@@ -283,7 +283,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 			isClientConfigProvided = true;
 		}
 		
-		if (isClientConfigProvided && params.getBool(RPContextConstants.IS_RP_LEARNING_STEP)) {
+		if (isClientConfigProvided && Boolean.parseBoolean((String) stepCtx.get(RPContextConstants.IS_RP_LEARNING_STEP))) {
 			return true;
 		}
 
@@ -491,47 +491,53 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		return registrationToken;
 	}
 
-
 	public boolean discoverOpIfNeeded() throws IOException, ParseException {
 		boolean isLearningStep = Boolean.parseBoolean((String) stepCtx.get(RPContextConstants.IS_RP_LEARNING_STEP));
-		if (!Strings.isNullOrEmpty(testOPConfig.getOPMetadata()) && opMetaData == null) {
+		// TODO: add and use startRPType instead of HONEST
+		if(isLearningStep && type == RPType.HONEST) {
+			return discoverRemoteOP();
+		}
+		if (opMetaData != null) {
+			return true;
+		}
+		if (suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION) != null) {
+			opMetaData = (UnsafeOIDCProviderMetadata) suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION);
+			return true;
+		}
+		if (!Strings.isNullOrEmpty(testOPConfig.getOPMetadata())) {
 			logger.log("Parsing OP Metadata from provided JSON string");
 			opMetaData = UnsafeOIDCProviderMetadata.parse(testOPConfig.getOPMetadata());
 			suiteCtx.put(RPContextConstants.DISCOVERED_OP_CONFIGURATION, opMetaData);
-			// throw
-		} else if (opMetaData == null || isLearningStep) {
-			if ((isLearningStep && type == RPType.HONEST)
-					|| suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION) == null) {
-				return discoverRemoteOP();
-			} else {
-				opMetaData = (UnsafeOIDCProviderMetadata) suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION);
-			}
+			return true;
 		}
-//		logger.log("OP Configuration already retrieved, discovery not required");
-		return true;
+		return false;
 	}
 
 	private boolean discoverRemoteOP() throws IOException, ParseException {
 		logger.log("Running OP discovery");
-		Issuer issuer = new Issuer(testOPConfig.getUrlOPTarget());
+		String targetOpUrlString = testOPConfig.getUrlOPTarget();
+		if (Strings.isNullOrEmpty(targetOpUrlString)) {
+			targetOpUrlString = opMetaData.getIssuer().getValue();
+		}
+		Issuer issuer = new Issuer(targetOpUrlString);
 		OIDCProviderConfigurationRequest request = new OIDCProviderConfigurationRequest(issuer);
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
 		try {
 			HTTPResponse httpResponse = httpRequest.send();
 
-		if (!httpResponse.indicatesSuccess()) {
-			logger.log("OP Discovery failed");
+			if (!httpResponse.indicatesSuccess()) {
+				logger.log("OP Discovery failed");
+				logger.logHttpResponse(httpResponse, httpResponse.getContent());
+				return false;
+			}
+			logger.log("OP Configuration received");
 			logger.logHttpResponse(httpResponse, httpResponse.getContent());
-			return false;
-		}
-		logger.log("OP Configuration received");
-		logger.logHttpResponse(httpResponse, httpResponse.getContent());
 
-		UnsafeOIDCProviderMetadata opMetadata = UnsafeOIDCProviderMetadata.parse(httpResponse.getContentAsJSONObject());
-		this.opMetaData = opMetadata;
-		suiteCtx.put(RPContextConstants.DISCOVERED_OP_CONFIGURATION, opMetadata);
-		return true;
+			UnsafeOIDCProviderMetadata opMetadata = UnsafeOIDCProviderMetadata.parse(httpResponse.getContentAsJSONObject());
+			opMetaData = opMetadata;
+			suiteCtx.put(RPContextConstants.DISCOVERED_OP_CONFIGURATION, opMetadata);
+			return true;
 		} catch (ConnectException e) {
 			logger.log("Connection exception", e);
 			return false;

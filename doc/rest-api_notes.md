@@ -44,7 +44,9 @@ Note that the members `HonestWebfingerResourceId` and `EvilWebfingerResourceId` 
 curl -vv -d @/tmp/test.json -H "Content-Type: application/json" http://localhost:8080/api/rp/{testId}/config
 ```
 
-Unless a complete (and completely valid config) is submitted, you will still need to run the learning phase to complete server side configuration steps. 
+Unless a complete (and completely valid config) is submitted, you will still need to run the learning phase to complete server side configuration steps.
+
+_Note:_ The configuration for OP tests may include the optional members `Client1Config` and `Client2Config`. These must be string representations of the JSON configuration, i.e., quotes need to be escaped.
 
 
 ## Read Config for TestID
