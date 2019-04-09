@@ -769,11 +769,11 @@
 	<TestStep Name="PKCE 4 - Downgrade to Plain">
 		<Description>
 			<![CDATA[
-			PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>. No <code>code_challenge_method</code> parameter is
-			included in the Authentication Request, indicating that the default method 'S256' is to be used. In the
-			following Token Request, PrOfESSOS submits the original value of the <code>code_challenge</code> as <code>code_verifier</code>,
-			as if using <code>code_challenge_method=plain</code>. In addition, an (invalid) parameter <code>code_challenge_method=plain</code>
-			is added to the Token Request.
+			PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>. A <code>code_challenge_method=S256</code> 
+			parameter is included in the Authentication Request, indicating that 'SHA-256' is used to compute the code 
+			challenge. In the following Token Request, PrOfESSOS submits the original value of the 
+			<code>code_challenge</code> as <code>code_verifier</code>, as if using <code>code_challenge_method=plain</code>.
+			 In addition, an (invalid) parameter <code>code_challenge_method=plain</code> is added to the Token Request.
 			]]>
 		</Description>
 		<TestParameters>
@@ -785,7 +785,8 @@
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRP</ImplementationClass>
-			<Parameter Key="authnreq-pkce-exclude-method-param">true</Parameter>
+			<!--<Parameter Key="authnreq-pkce-exclude-method-param">true</Parameter>-->
+			<Parameter Key="authnreq-pkce-method-s256">true</Parameter>
 			<Parameter Key="tokenreq-add-pkce-method-param-plain">true</Parameter>
 			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-1>

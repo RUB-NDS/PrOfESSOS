@@ -132,8 +132,9 @@ public class PkceRP extends DefaultRP {
 		sb.append(encodedQuery);
 
 		if (params.getBool(TOKENREQ_ADD_PKCE_METHOD_PLAIN)){
-			// attempt "downgrade", use code_challenge from AuhtnReq and
-			// add plain as code_challenge_method (invalid per RFC7636)
+			// attempt "downgrade", use code_challenge from AuthnReq 
+			// as code verifier in tokenreq and additionally
+			// add 'plain' as code_challenge_method (not a valid param as per RFC7636)
 			CodeChallengeMethod cm = getCodeChallengeMethod();
 			cm = (cm == null) ? CodeChallengeMethod.S256 : cm;
 			CodeChallenge cc = CodeChallenge.compute(cm, verifier);
