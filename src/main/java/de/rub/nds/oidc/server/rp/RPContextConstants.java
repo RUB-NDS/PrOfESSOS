@@ -32,6 +32,9 @@ public class RPContextConstants {
 
 	public static final String STORED_AUTH_CODE = PFX + "stored-auth-code";
 	public static final String STORED_PKCE_VERIFIER = PFX + "stored-pkce-verifier";
+	public static final String STORED_USER1_IDTOKEN = PFX + "stored-idtoken-user1";
+	public static final String STORED_USER2_IDTOKEN = PFX + "stored-idtoken-user2";
+	public static final String STORED_USER1_SUB_VAL = PFX + "stored-user1-sub-val";
 
 	public static final String MANIPULATED_REDIRECT_URI = PFX + "stored-manipulated-redirect-uri";
 	public static final String REDIRECT_URI_MANIPULATOR = PFX + "stored-uri-manipulator-string";

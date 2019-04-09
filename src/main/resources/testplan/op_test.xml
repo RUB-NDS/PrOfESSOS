@@ -867,5 +867,120 @@
 		<!--</RPConfig-2>-->
 	<!--</TestStep>-->
 
+	<TestStep Name="Sub Claim Spoofing 1 (sub_victim)">
+		<Description><![CDATA[
+PrOfESSOS tests the validation of the Authentication Request at the OP. To this end, a claimsrequest is 
+embedded in the Authentication Requests that contains the <code>sub</code> claim value of the victim. 
+]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SubClaimSpoofingOPBrowser</ImplementationClass>
+		</BrowserSimulator>
 
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.SubClaimSpoofingRP</ImplementationClass>
+			<Parameter Key="authnreq-add-claimsreq-user1-sub">true</Parameter>
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.SubClaimSpoofingRP</ImplementationClass>
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Sub Claim Spoofing 2 (sub array)">
+		<Description><![CDATA[
+PrOfESSOS tests the validation of the Authentication Request at the OP. To this end, a claimsrequest is 
+embedded in the Authentication Requests that contains the <code>sub</code> claim value of the victim in the 
+claimsrequest's <code>values</code> array.]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SubClaimSpoofingOPBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.SubClaimSpoofingRP</ImplementationClass>
+			<Parameter Key="authnreq-add-claimsreq-array-user1-sub">true</Parameter>
+
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.SubClaimSpoofingRP</ImplementationClass>
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Sub Claim Spoofing 3 (sub array, sub1 first)">
+		<Description><![CDATA[
+		PrOfESSOS tests the validation of the Authentication Request at the OP. To this end, a claimsrequest is 
+embedded in the Authentication Requests that contains the <code>sub</code> claim values of the victim and the 
+attacker in the claimsrequest's <code>values</code> array.]]></Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SubClaimSpoofingOPBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.SubClaimSpoofingRP</ImplementationClass>
+			<Parameter Key="authnreq-add-claimsreq-array-sub1-sub2">true</Parameter>
+
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.SubClaimSpoofingRP</ImplementationClass>
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Sub Claim Spoofing 4 (sub array, sub2 first)">
+		<Description><![CDATA[
+		PrOfESSOS tests the validation of the Authentication Request at the OP. To this end, a claimsrequest is 
+embedded in the Authentication Requests that contains the <code>sub</code> claim values of the attacker and the victim 
+in the claimsrequest's <code>values</code> array.]]></Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SubClaimSpoofingOPBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.SubClaimSpoofingRP</ImplementationClass>
+			<Parameter Key="authnreq-add-claimsreq-array-sub2-sub1">true</Parameter>
+
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.SubClaimSpoofingRP</ImplementationClass>
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Sub Claim Spoofing 5 (id_token_hint)">
+		<Description><![CDATA[
+		PrOfESSOS tests the validation of the Authentication Request at the OP. To this end, an <code>id_token_hint</code> 
+		 is embedded in the attacker's Authentication Requests that contains a valid ID Token of the victim. The attack is successful, 
+		 if the OP issues a new ID Token containing the victims identity.]]></Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SubClaimSpoofingOPBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.SubClaimSpoofingRP</ImplementationClass>
+			<Parameter Key="authnreq-add-id_token_hint-user1">true</Parameter>
+
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.SubClaimSpoofingRP</ImplementationClass>
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+	
 </TestPlan>

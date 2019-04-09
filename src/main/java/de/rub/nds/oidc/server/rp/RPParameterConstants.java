@@ -59,6 +59,12 @@ public class RPParameterConstants {
 	public static final String AUTHNREQ_PKCE_METHOD_EXCLUDED = "authnreq-pkce-exclude-method-param";
 	public static final String AUTHNREQ_PKCE_CHALLENGE_EXCLUDED = "authnreq-pkce-exclude-challenge-param";
 
+	public static final String AUTHNREQ_CLAIMSREQ_SUB1 = "authnreq-add-claimsreq-user1-sub";
+	public static final String AUTHNREQ_CLAIMSREQ_ARRAY_SUB1 = "authnreq-add-claimsreq-array-user1-sub";
+	public static final String AUTHNREQ_CLAIMSREQ_ARRAY_SUB1_SUB2 = "authnreq-add-claimsreq-array-sub1-sub2";
+	public static final String AUTHNREQ_CLAIMSREQ_ARRAY_SUB2_SUB1 = "authnreq-add-claimsreq-array-sub2-sub1";
+	public static final String AUTHNREQ_IDTOKEN_HINT_USER1 = "authnreq-add-id_token_hint-user1";
+
 	public static final String TOKENREQ_FORCE_EVIL_REDIRURI = "tokenreq-force-evil-redirect-uri";
 	public static final String TOKENREQ_REDIRURI_EXCLUDED = "tokenreq-exclude-redirect-uri";
 	public static final String TOKENREQ_REDIRURI_ADD_SUBDOMAIN = "tokenreq-random-subdomain-in-redirect-uri";
