@@ -64,22 +64,16 @@ public class SessionOverwritingOP extends DefaultOP {
 			// wait for the AuthnResp before flushing response
 			backgroundWaiter.join();
 		} else {
-			try {
-				logger.log(String.format("Authentication requested at %s-OP.", type.name()));
-				HTTPRequest reqMsg = ServletUtils.createHTTPRequest(req);
-				logger.logHttpRequest(req, reqMsg.getQuery());
-				AuthenticationRequest authReq = AuthenticationRequest.parse(reqMsg);
+			logger.log(String.format("Authentication requested at %s-OP.", type.name()));
+			HTTPRequest reqMsg = ServletUtils.createHTTPRequest(req);
+			logger.logHttpRequest(req, reqMsg.getQuery());
 
-				// send nop response to waiting browser
-				resp.setStatus(204);
-				resp.flushBuffer();
-				CompletableFuture<?> waitFor2ndAuthReq = (CompletableFuture<?>) stepCtx.get(OPContextConstants.BLOCK_OP_FUTURE);
-				logger.log("Releasing delayed AuthResponse");
-				waitFor2ndAuthReq.complete(null);
-			} catch (ParseException ex) {
-				logger.log("Failed to parse Authorization Request.");
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-			}
+			// send nop response to waiting browser
+			resp.setStatus(204);
+			resp.flushBuffer();
+			CompletableFuture<?> waitFor2ndAuthReq = (CompletableFuture<?>) stepCtx.get(OPContextConstants.BLOCK_OP_FUTURE);
+			logger.log("Releasing delayed AuthResponse");
+			waitFor2ndAuthReq.complete(null);
 		}
 	}
 

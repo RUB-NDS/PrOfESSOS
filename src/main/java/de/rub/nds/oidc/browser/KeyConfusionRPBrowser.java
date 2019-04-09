@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class KC6OPBrowser extends DefaultRPTestBrowser {
+public class KeyConfusionRPBrowser extends DefaultRPTestBrowser {
 
 	private Set<Cookie> cookieSet;
 	private String submitScriptRaw;

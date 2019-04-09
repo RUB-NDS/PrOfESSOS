@@ -1267,7 +1267,7 @@
 			<Parameter Key="dynamic_client_registration_support_needed">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.KC6OPBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.KeyConfusionRPBrowser</ImplementationClass>
 			<Parameter Key="force_success_url_fails">true</Parameter>
 		</BrowserSimulator>
 		<OPConfig-1>
@@ -2256,7 +2256,7 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.SessionOverwritingRPBrowser</ImplementationClass>
 			<Parameter Key="browser.input.op_url">HONEST</Parameter>
 			<Parameter Key="use_evil_needle">false</Parameter>
 		</BrowserSimulator>
@@ -2299,7 +2299,7 @@ TODO TBD
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.SessionOverwritingRPBrowser</ImplementationClass>
 			<Parameter Key="browser.input.op_url">EVIL</Parameter> <!-- default -->
 			<Parameter Key="use_evil_needle">false</Parameter>
 			<!--<Parameter Key="force_success_url_fails">true</Parameter>-->

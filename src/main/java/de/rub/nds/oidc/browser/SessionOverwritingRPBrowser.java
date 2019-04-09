@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class SessionOverwritingOPBrowser extends DefaultRPTestBrowser {
+public class SessionOverwritingRPBrowser extends DefaultRPTestBrowser {
 
 	@Override
 	public TestStepResult run() {

@@ -1,5 +1,6 @@
 package de.rub.nds.oidc.server.op;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -37,6 +38,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.PublicKey;
