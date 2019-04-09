@@ -46,6 +46,7 @@ public class OPIVConfig {
 	private final KeyStore keyStore;
 
 	private final boolean allowCustomTestIDs;
+	private final boolean allowTestWithoutRemotePermission;
 
 	public OPIVConfig() throws IOException, URISyntaxException, GeneralSecurityException {
 		InputStream hostsFile = OPIVConfig.class.getResourceAsStream("/servernames.properties");
@@ -64,6 +65,8 @@ public class OPIVConfig {
 
 		String acceptTestIds = System.getenv("OPIV_ALLOW_CUSTOM_TEST_ID");
 		allowCustomTestIDs = Boolean.valueOf(acceptTestIds) ;
+
+		allowTestWithoutRemotePermission = Boolean.parseBoolean(System.getenv("OPIV_TARGET_GRANT_NOT_NEEDED"));
 	}
 
 
@@ -129,6 +132,10 @@ public class OPIVConfig {
 	public boolean isAllowCustomTestIDs() {
 		return allowCustomTestIDs;
 	} 
+
+	public boolean isGrantNotNeededOverride() {
+		return allowTestWithoutRemotePermission;
+	}
 
 	public KeyStore.PrivateKeyEntry getHonestOPSigningEntry() {	return getSigningEntry(honestSigAlias);	}
 
