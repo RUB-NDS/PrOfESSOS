@@ -18,7 +18,6 @@ import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.TestStepResult;
 
-import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,7 +39,6 @@ public class PkceRP extends DefaultRP {
 		logger.log("Callback received");
 		logger.logHttpRequest(req, httpRequest.getQuery());
 
-		CompletableFuture waitForBrowser = (CompletableFuture) stepCtx.get(BLOCK_RP_FOR_BROWSER_FUTURE);
 		CompletableFuture<TestStepResult> browserBlocker = (CompletableFuture<TestStepResult>) stepCtx.get(BLOCK_BROWSER_AND_TEST_RESULT);
 
 		AuthenticationResponse authnResp = processCallback(req, resp, path);
@@ -85,9 +83,9 @@ public class PkceRP extends DefaultRP {
 		prepareAuthnReq();
 
 		if (idToken != null) {
-			boolean found = checkIdToken(idToken, testOPConfig.getUser2Name(), "sub");
-			if (found && params.getBool(USER2_IN_IDTOKEN_SUB_FAILS_TEST)) {
-				browserBlocker.complete(TestStepResult.FAIL);
+			TestStepResult idTokenConditionResult = checkIdTokenCondition(idToken);
+			if (idTokenConditionResult != null) {
+				browserBlocker.complete(idTokenConditionResult);
 				return;
 			}
 		}

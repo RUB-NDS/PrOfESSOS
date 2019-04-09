@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xmlns="http://maven.apache.org/POM/4.0.0"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -65,10 +65,10 @@
 		<!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-chrome-driver -->
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
-			   <artifactId>selenium-chrome-driver</artifactId>
+			<artifactId>selenium-chrome-driver</artifactId>
 			<version>3.9.1</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>jquery</artifactId>
@@ -104,7 +104,7 @@
 			<artifactId>commons-text</artifactId>
 			<version>1.6</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>annotations</artifactId>
@@ -179,7 +179,7 @@
 						<configuration>
 							<schemaDirectory>src/main/xsd</schemaDirectory>
 							<!--<bindingFiles>-->
-								<!--<bindingFile>${wsdl.source}/serialization.xjc</bindingFile>-->
+							<!--<bindingFile>${wsdl.source}/serialization.xjc</bindingFile>-->
 							<!--</bindingFiles>-->
 							<specVersion>2.2</specVersion>
 							<packageLevelAnnotations>false</packageLevelAnnotations>

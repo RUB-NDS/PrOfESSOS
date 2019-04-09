@@ -91,9 +91,6 @@ public class RumRP extends DefaultRP {
 				return;
 			}
 
-			OIDCTokens tokens = ((OIDCTokenResponse) tokenResponse).getOIDCTokens();
-//			logger.log("TokenRequest successful: " + tokens.toJSONObject().toJSONString());
-
 			if (params.getBool(SUCCESSFUL_CODE_REDEMPTION_FAILS_TEST)) {
 				logger.log("AuthorizationCode successfully redeemed, assuming test failed.");
 				browserBlocker.complete(TestStepResult.FAIL);

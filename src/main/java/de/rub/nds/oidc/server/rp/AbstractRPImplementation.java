@@ -196,12 +196,13 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		ab.responseMode(getAuthReqResponseMode());
 		ab.prompt(getAuthReqPrompt());
 		ab.claims(getAuthReqClaims());
-		ab.idTokenHint(getIdTokenHint());
+//		ab.idTokenHint(getIdTokenHint());
 		ab.endpointURI(opMetaData.getAuthorizationEndpointURI());
 //		ab.codeChallenge(getCodeChallengeVerifier(), getCodeChallengeMethod());
 
 		AuthenticationRequest authnReq = ab.build();
 		URI authnReqUri = applyPkceParamstoAuthReqUri(authnReq.toURI());
+		authnReqUri = applyIdTokenHintToAuthReqUri(authnReqUri);
 
 		// make prepared request available for the browser
 		String currentRP = type == RPType.HONEST ? RPContextConstants.RP1_PREPARED_AUTHNREQ
@@ -230,6 +231,11 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		}
 
 		return ub.build();
+	}
+
+	protected URI applyIdTokenHintToAuthReqUri(URI uri) {
+		// default: do nothing
+		return uri;
 	}
 
 	protected abstract URI getAuthReqRedirectUri();

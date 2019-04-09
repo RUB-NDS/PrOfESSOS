@@ -60,7 +60,6 @@ public class TestRunner {
 	private final TestObjectType testObj;
 	private final TestPlanType testPlan;
 	private final TemplateEngine te;
-	private ValueGenerator valueGenerator;
 
 	private final Map<String, Object> testSuiteCtx;
 
@@ -73,11 +72,6 @@ public class TestRunner {
 		this.te = te;
 
 		this.testSuiteCtx = Collections.synchronizedMap(new HashMap<>());
-	}
-
-	@Inject
-	public void setValueGenerator(ValueGenerator valueGenerator) {
-		this.valueGenerator = valueGenerator;
 	}
 
 	public TestObjectType getTestObj() {

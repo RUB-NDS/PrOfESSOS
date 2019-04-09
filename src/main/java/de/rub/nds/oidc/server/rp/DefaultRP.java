@@ -50,7 +50,6 @@ public class DefaultRP extends AbstractRPImplementation {
 		logger.log("Callback received");
 		logger.logHttpRequest(req, httpRequest.getQuery());
 
-		CompletableFuture waitForBrowser = (CompletableFuture) stepCtx.get(BLOCK_RP_FOR_BROWSER_FUTURE);
 		CompletableFuture<TestStepResult> browserBlocker = (CompletableFuture<TestStepResult>) stepCtx.get(BLOCK_BROWSER_AND_TEST_RESULT);
 
 		AuthenticationResponse authnResp = processCallback(req, resp, path);
@@ -112,9 +111,14 @@ public class DefaultRP extends AbstractRPImplementation {
 		}
 
 		if (idToken != null) {
-			boolean found = checkIdToken(idToken, testOPConfig.getUser2Name(), "sub");
-			if (found && params.getBool(USER2_IN_IDTOKEN_SUB_FAILS_TEST)) {
-				browserBlocker.complete(TestStepResult.FAIL);
+			if (Boolean.parseBoolean((String) stepCtx.get(IS_RP_LEARNING_STEP))) {
+				// store a reference to a valid, untampered id token for later
+				// comparison
+				storeIdToken(idToken);
+			}
+			TestStepResult idTokenConditionResult = checkIdTokenCondition(idToken);
+			if (idTokenConditionResult != null) {
+				browserBlocker.complete(idTokenConditionResult);
 				return;
 			}
 		}
@@ -192,7 +196,6 @@ public class DefaultRP extends AbstractRPImplementation {
 		if (authnResp.indicatesSuccess()) {
 			AuthenticationSuccessResponse sr = authnResp.toSuccessResponse();
 			StringBuilder sb = new StringBuilder();
-			Map<String, String> map = sr.toParameters();
 			sr.toParameters().forEach((k, v) -> {
 				sb.append(k + ": " + v + ", ");
 			});
@@ -334,16 +337,9 @@ public class DefaultRP extends AbstractRPImplementation {
 		return found;
 	}
 
-	protected boolean checkIdToken(JWT idToken, String searchString, String targetClaim) {
-		boolean found = false;
-		try {
-			found = idToken.getJWTClaimsSet().getClaim(targetClaim).equals(searchString);
-		} catch (java.text.ParseException e) {
-			logger.log("Failed to parse Claims from ID Token");
-			logger.log(idToken.getParsedString());
-		}
-		return found;
-	}
+	protected TestStepResult checkIdTokenCondition(JWT idToken) {
+		return null;
+	} 
 
 	protected URI getAuthReqRedirectUri() {
 		URI redirURI = params.getBool(AUTHNREQ_FORCE_EVIL_REDIRURI) ? getEvilRedirectUri() : getRedirectUri();
@@ -456,17 +452,6 @@ public class DefaultRP extends AbstractRPImplementation {
 		return null;
 	}
 
-	//
-//		ClaimsRequest claims = new ClaimsRequest();
-////		claims.addIDTokenClaim("group");
-//		claims.addIDTokenClaim("profile");
-//		claims.addIDTokenClaim("name");
-//		claims.addIDTokenClaim("email");
-//		claims.addUserInfoClaim("email");
-//		claims.addIDTokenClaim("given_name");
-//		claims.addIDTokenClaim("middle_name");
-
-
 	@Override
 	@Nullable
 	protected CodeChallengeMethod getCodeChallengeMethod() {
@@ -498,22 +483,18 @@ public class DefaultRP extends AbstractRPImplementation {
 		return verifier;
 	}
 
-
-//	@Nullable
-//	protected CodeVerifier getCodeChallengeVerifier() {
-//		return null;
-//	}
-//
-//	@Nullable
-//	protected CodeChallengeMethod getCodeChallengeMethod() {
-//		return null;
-//	}
-
 	@Nullable
 	protected JWT getIdTokenHint() {
 		return null;
 	}
 
+	protected void storeIdToken(JWT idToken) {
+		if (testOPConfig.getUser1Name().equals(stepCtx.get(CURRENT_USER_USERNAME))) {
+			suiteCtx.put(STORED_USER1_IDTOKEN, idToken);
+		} else {
+			suiteCtx.put(STORED_USER2_IDTOKEN, idToken);
+		}
+	}
 
 	@Override
 	protected HashSet<GrantType> getRegistrationGrantTypes() {
@@ -596,7 +577,6 @@ public class DefaultRP extends AbstractRPImplementation {
 
 		req.setQuery(sb.toString());
 	}
-
 
 	protected CodeVerifier getStoredPKCEVerifier() {
 		return (CodeVerifier) stepCtx.get(RPContextConstants.STORED_PKCE_VERIFIER);

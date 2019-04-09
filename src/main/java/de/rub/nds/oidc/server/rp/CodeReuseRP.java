@@ -101,13 +101,11 @@ public class CodeReuseRP extends DefaultRP {
 			UserInfo ui = userInfo.toSuccessResponse().getUserInfo();
 
 			// search all root level objects if their value matches either of the usernames
-			if (userInfo != null) {
-				for (String usern : users) {
-					for (Map.Entry e : ui.toJSONObject().entrySet()) {
-						if (e.getValue().equals(usern)) {
-							logger.log(String.format("UserName %s matches %s entry in received UserInfo", usern, e.getKey().toString()));
-							result = usern;
-						}
+			for (String usern : users) {
+				for (Map.Entry e : ui.toJSONObject().entrySet()) {
+					if (e.getValue().equals(usern)) {
+						logger.log(String.format("UserName %s matches %s entry in received UserInfo", usern, e.getKey().toString()));
+						result = usern;
 					}
 				}
 			}
