@@ -28,6 +28,8 @@ public class RPParameterConstants {
 	// BasicAuth is registered per default
 	public static final String REGISTER_CLIENTAUTH_POST = "register-clientauth-method-client_secret_post";
 	public static final String REGISTER_CLIENTAUTH_NONE = "register-clientauth-method-none";
+	public static final String REGISTER_CLIENTAUTH_JWT = "register-clientauth-method-client_secret_jwt";
+	public static final String REGISTER_CLIENTAUTH_PK_JWT = "register-clientauth-method-private_key_jwt";
 
 	public static final String FORCE_EVIL_CLIENT_URI = "force_evil_client_uri";
 	public static final String FORCE_EVIL_CLIENT_ID = "force_evil_client_id";
@@ -74,6 +76,10 @@ public class RPParameterConstants {
 	public static final String TOKENREQ_FORCE_CLIENTAUTH_POST = "tokenreq-force-client-auth-post";
 	public static final String TOKENREQ_CLIENTAUTH_EMPTY_ID = "tokenreq-clientauth-empty-client-id";
 	public static final String TOKENREQ_CLIENTAUTH_EMPTY_SECRET = "tokenreq-clientauth-empty-client-secret";
+	public static final String TOKENREQ_CLIENTSECRET_JWT_NONE_ALG = "tokenreq-client-jwt-none-alg";
+	public static final String TOKENREQ_CLIENTSECRET_JWT_NONE_ALG_MIXEDCASE = "tokenreq-client-jwt-none-alg-mixedcase";
+	public static final String TOKENREQ_CLIENTSECRET_JWT_INVALID_SIG = "tokenreq-client-jwt-invalid-sig";
+	public static final String TOKENREQ_CLIENTSECRET_JWT_EXCLUDE_SIG = "tokenreq-client-jwt-exclude-sig";
 
 	public static final String TOKENREQ_ADD_PKCE_METHOD_PLAIN = "tokenreq-add-pkce-method-param-plain";
 	public static final String TOKENREQ_PKCE_INVALID = "tokenreq-invalid-pkce-verifier";

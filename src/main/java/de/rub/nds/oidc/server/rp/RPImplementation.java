@@ -63,8 +63,9 @@ public interface RPImplementation {
 	// serve redirect_uri
 	void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException;
 
-	// TODO: add endpoints for jwks, request_uri, sector_identifier_uri, ???
-//	void jwks(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+	void jwks(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+
+	// TODO: add endpoints for request_uri, sector_identifier_uri, ?
 //	void requestUri(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
 //	void sectorIdentifierUri(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
 
