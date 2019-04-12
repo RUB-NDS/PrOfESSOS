@@ -1,5 +1,6 @@
 package de.rub.nds.oidc.server.rp;
 
+import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
@@ -14,7 +15,6 @@ import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.openid.connect.sdk.*;
-import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.TestStepResult;
@@ -31,7 +31,6 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -125,26 +124,68 @@ public class DefaultRP extends AbstractRPImplementation {
 
 		if (at != null) {
 			UserInfoResponse userInfoResponse = requestUserInfo(at);
-			if (userInfoResponse != null && userInfoResponse.indicatesSuccess()) {
-				UserInfo ui = userInfoResponse.toSuccessResponse().getUserInfo();
-				boolean match = checkUserInfo(ui, testOPConfig.getUser2Name());
-
-				if (match && params.getBool(USER2_IN_USERINFO_FAILS_TEST)) {
-					browserBlocker.complete(TestStepResult.FAIL);
-					return;
-				}
+			TestStepResult result = checkUserInfo(userInfoResponse, null);
+			if (result != null) {
+				logger.log(String.format("Result returned from UserInfo condition check: %s", result.value()));
+				browserBlocker.complete(result);
+				return;
 			}
 		}
 
-		// TODO: chekcIdToken and checkUserInfo should return TestStepResults and pick targetClaim and searchstring from instance variables
-
-		// TODO: refreshToken handling
-
-//		logger.log("release browser lock");
 		browserBlocker.complete(TestStepResult.PASS);
 		return;
 	}
 
+	@Override
+	public void jwks(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		try {
+			// TODO: read from config or keystore 
+			//  currently these are never used for signing anything, only to host a pub key that could be used
+			//  for key confusion (HMAC using pubkey)
+			JWKSet evilJwkSet = JWKSet.parse("{\n" +
+					"  \"keys\": [\n" +
+					"    {\n" +
+					"      \"kty\": \"RSA\",\n" +
+					"      \"d\": \"S3S2tSnhSyJgxcbPe7cOQWy6oKmF5zNB4M5RuOwU6na6EHgsG4-5NK-R8oO9uvxgtjnIP3ChyvHMEV26MeWLZtPLvatPGj2cTtyfANdlYyFRiltwC-3Av94BMqFfd-PFis_nU4TKquAUrNrf1HsL0df8vSLyqHoXJbRsM71yuFzZCQqcVolJcIba3JyI3CuqXUz9wqFV0lieVCqJIqvBXqeqGKnS22aLGl65yPBGFIDWFSa3Y8EFMhAOBw9PwfumCC9lQzBI-xrjHdtCRLTPvzb6v3s4zGeiRsFcVDF5N_cThWuY3uXRgZCLLFxh6GxKLDj4pmZC4_IICD_KnEw4fQ\",\n" +
+					"      \"e\": \"AQAB\",\n" +
+					"      \"use\": \"sig\",\n" +
+					"      \"kid\": \"Evil-Client-RSA\",\n" +
+					"      \"alg\": \"RS256\",\n" +
+					"      \"n\": \"jSxTW1XS6mba-GdY-0aIEXHTeUu5hlOR974-kUlDihJgcrnwsdKXnpoA76J02WuvP5ttdtw0u6wfn7hJ1vDB2KHLM5E2foK7z3NuuRsUI1VI3jTio2Ge-SDjM_Gaf3bv8rWnhbg0jvCZKHocZSM_8jrZofhTKdhXwXe3JxqRm5oxZaqhjhMFXzqoIgGRD0-KfSdmgaCyVu5uMIH7lZAWtdVQmRJAwuZ4RanOU0h2D0PKtv0g7Je7mCEoRD2c6XCuOXhaqyeqAljVqATsBm8ty6jWTubFNy5HjxGV7nHeQ_LGMNjWJh6zLL64RVOVYoCZ_PckBIAm5s8j6ZYWPnRFtQ\"\n" +
+					"    }\n" +
+					"  ]\n" +
+					"}");
+
+
+			JWKSet honestJwkSet = JWKSet.parse("{\n" +
+					"  \"keys\": [\n" +
+					"    {\n" +
+					"      \"kty\": \"RSA\",\n" +
+					"      \"d\": \"cPtR15jEDFRU6eHAGu_6M4qkHgNFYji6WeH2oNDHiXq50ftAsbsFXceNAGVDEEzFTp6st1qf_NrRfxbZwSTKeVLFuHL1BTUv5DbeGUPa3LZAfpFtEYgAbeLcn94mvPwd4S80KOJ5a77DD1ZhvhRSbJrjgAsgNAGc18ylIFi5x4LBh8m2EA1bE28f8j-DTxVLgT6waD5bbPgHStVMQ8eXUI7N9IfVvK34I--TVhAZvBhgtNRDnnT4KBlW7K_t-pW9sa64rKg12AG1ioXZ1mJDznlFYpYg30PeIcL7graGxDTX-UYwHf4IYdAPA9SLqhy57HzWJPGZVfSGbOc_bsbYWQ\",\n" +
+					"      \"e\": \"AQAB\",\n" +
+					"      \"use\": \"sig\",\n" +
+					"      \"kid\": \"Honest-Client-RSA\",\n" +
+					"      \"alg\": \"RS256\",\n" +
+					"      \"n\": \"l6NTAcPFLtGxVFkCl-7qMsulEwx2w9XqLuRlDS1PH7WHgYf_pg4bylc7VhttRq5RJ0ndqR1ocSF4miL2bUVREskqxAROg-V6UaynThg-KQDrJh_U5lO0U5tFFNP29QQNSAI1fytz8r9Z_GEvF5enAVFLJJjgt7aF58lgSs_vj2rEF3lpK4kdle8Ao6KtuLdh7wSnu-e-SPi2a7b8PRISOx6_gAvdP4tUzGDGlP9rGqL4ZcZgCIpxhTkdf7X7gwppKfJy3WmW06lPc6ve03-RrIJAaUf75pJ7Niq-RB_HX41edF2n7OSxzbdrcv9m85a_jM4YZdQ7NLJPaaslhONlqQ\"\n" +
+					"    }\n" +
+					"  ]\n" +
+					"}");
+
+			resp.setHeader("Content-Type", "application/json");
+
+			if (type == RPType.EVIL) {
+				resp.getWriter().write(evilJwkSet.toPublicJWKSet().toString());
+			} else {
+				resp.getWriter().write(honestJwkSet.toPublicJWKSet().toString());
+			}
+
+			resp.flushBuffer();
+
+		} catch (java.text.ParseException e) {
+			logger.log("Could not read hardcoded JWK keystring in " + getClass().getName());
+			throw new IOException(e);
+		}
+	}
 
 	@Nonnull
 	protected AuthenticationResponse processCallback(HttpServletRequest req, HttpServletResponse resp, @Nullable RequestPath path) throws IOException, URISyntaxException, ParseException {
@@ -323,23 +364,13 @@ public class DefaultRP extends AbstractRPImplementation {
 		}
 	}
 
-
-	protected boolean checkUserInfo(UserInfo userInfo, String searchString) {
-		// temporary: iterate first level keys of userinfo and compare w username
-		boolean found = false;
-		for (Map.Entry<String, Object> entry : userInfo.toJSONObject().entrySet()) {
-			if (searchString.equals(entry.getValue())) {
-				logger.log(String.format("String %s matches %s entry in received UserInfo", searchString, entry.getKey()));
-				found = true;
-			}
-		}
-
-		return found;
+	protected TestStepResult checkUserInfo(UserInfoResponse userInfoResponse, @Nullable String searchString) {
+		return null;
 	}
 
 	protected TestStepResult checkIdTokenCondition(JWT idToken) {
 		return null;
-	} 
+	}
 
 	protected URI getAuthReqRedirectUri() {
 		URI redirURI = params.getBool(AUTHNREQ_FORCE_EVIL_REDIRURI) ? getEvilRedirectUri() : getRedirectUri();
@@ -380,7 +411,7 @@ public class DefaultRP extends AbstractRPImplementation {
 		if (params.getBool(TOKENREQ_REDIRURI_ADD_TLD)) {
 			return manipulateURI(getRedirectUri(), false, false, true);
 		}
-		
+
 		return getRedirectUri();
 	}
 
@@ -558,6 +589,12 @@ public class DefaultRP extends AbstractRPImplementation {
 		}
 		if (params.getBool(REGISTER_CLIENTAUTH_NONE)) {
 			return new ClientAuthenticationMethod("client_secret_none");
+		}
+		if (params.getBool(REGISTER_CLIENTAUTH_JWT)) {
+			return new ClientAuthenticationMethod("client_secret_jwt");
+		}
+		if (params.getBool(REGISTER_CLIENTAUTH_PK_JWT)) {
+			return new ClientAuthenticationMethod("private_key_jwt");
 		}
 
 		// use Basic Auth per default (null):

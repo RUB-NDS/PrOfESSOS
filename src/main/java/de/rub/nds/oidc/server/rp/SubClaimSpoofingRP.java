@@ -11,6 +11,8 @@ import java.net.URI;
 import java.text.ParseException;
 import java.util.Arrays;
 
+import static de.rub.nds.oidc.server.rp.RPParameterConstants.*;
+
 public class SubClaimSpoofingRP extends DefaultRP {
 
 	@Override
@@ -19,16 +21,16 @@ public class SubClaimSpoofingRP extends DefaultRP {
 		final String user2sub = "§placeholder_user2_sub§";
 
 		ClaimsRequest claims = new ClaimsRequest();
-		if (params.getBool(RPParameterConstants.AUTHNREQ_CLAIMSREQ_SUB1)) {
+		if (params.getBool(AUTHNREQ_CLAIMSREQ_SUB1)) {
 			claims.addIDTokenClaim("sub", ClaimRequirement.ESSENTIAL, null, user1sub);
 		}
-		if (params.getBool(RPParameterConstants.AUTHNREQ_CLAIMSREQ_ARRAY_SUB1)) {
+		if (params.getBool(AUTHNREQ_CLAIMSREQ_ARRAY_SUB1)) {
 			claims.addIDTokenClaim("sub", ClaimRequirement.ESSENTIAL, null, Arrays.asList(user1sub));
 		}
-		if (params.getBool(RPParameterConstants.AUTHNREQ_CLAIMSREQ_ARRAY_SUB1_SUB2)) {
+		if (params.getBool(AUTHNREQ_CLAIMSREQ_ARRAY_SUB1_SUB2)) {
 			claims.addIDTokenClaim("sub", ClaimRequirement.ESSENTIAL, null, Arrays.asList(user1sub, user2sub));
 		}
-		if (params.getBool(RPParameterConstants.AUTHNREQ_CLAIMSREQ_ARRAY_SUB2_SUB1)) {
+		if (params.getBool(AUTHNREQ_CLAIMSREQ_ARRAY_SUB2_SUB1)) {
 			claims.addIDTokenClaim("sub", ClaimRequirement.ESSENTIAL, null, Arrays.asList(user2sub, user1sub));
 		}
 
@@ -38,7 +40,7 @@ public class SubClaimSpoofingRP extends DefaultRP {
 
 	protected URI applyIdTokenHintToAuthReqUri(URI uri) {
 		final String user1TokenHint = "§placeholder_user1_idtoken§";
-		if (params.getBool(RPParameterConstants.AUTHNREQ_IDTOKEN_HINT_USER1)) {
+		if (params.getBool(AUTHNREQ_IDTOKEN_HINT_USER1)) {
 			UriBuilder ub = UriBuilder.fromUri(uri);
 			ub.queryParam("id_token_hint", user1TokenHint);
 			return ub.build();
@@ -60,11 +62,16 @@ public class SubClaimSpoofingRP extends DefaultRP {
 				logger.log(String.format("ID Token contains sub claim of User1: %s. Assuming test failed.", user1Sub));
 				return TestStepResult.FAIL;
 			}
+
 			logger.log(String.format("User1 sub (%s) not found in ID Token, token contained sub: %s .", user1Sub, idtSub));
-			if (opMetaData.supportsClaimsParam() || params.getBool(RPParameterConstants.AUTHNREQ_IDTOKEN_HINT_USER1)) {
-				// see step 4 of https://openid.net/specs/openid-connect-core-1_0.html#AuthRequestValidation
+
+			if (params.getBool(AUTHNREQ_CLAIMSREQ_ARRAY_SUB1_SUB2) || params.getBool(AUTHNREQ_CLAIMSREQ_ARRAY_SUB2_SUB1)) {
+				return TestStepResult.PASS;
+			}
+			if (opMetaData.supportsClaimsParam() || params.getBool(AUTHNREQ_IDTOKEN_HINT_USER1)) {
+				// spec violation
 				logger.log("As per Step 4 of " +
-						"<a href=\"https://openid.net/specs/openid-connect-core-1_0.html#AuthRequestValidation\">https://openid.net/specs/openid-connect-core-1_0.html#AuthRequestValidation</a> " +
+						"<a href=\"https://openid.net/specs/openid-connect-core-1_0.html#AuthRequestValidation\" target=\"_blank\">https://openid.net/specs/openid-connect-core-1_0.html#AuthRequestValidation</a> " +
 						"the OP must not reply with an ID Token for a different user if <code>id_token_hint</code> or " +
 						"<code>claims</code> request parameters are used.");
 				return TestStepResult.UNDETERMINED;

@@ -36,7 +36,7 @@ import java.util.Map;
 
 import static de.rub.nds.oidc.server.op.OPParameterConstants.INCLUDE_SIGNING_CERT;
 
-public class SubClaimSpoofingOP extends DefaultOP {
+public class UserInfoIDSpoofingOP extends DefaultOP {
 	
 		/**
 		 * Returns custom UserInfo response as configured in TestPlan. In particular, this enables

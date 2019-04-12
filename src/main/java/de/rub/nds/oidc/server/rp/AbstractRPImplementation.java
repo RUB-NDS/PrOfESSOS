@@ -1,7 +1,7 @@
 package de.rub.nds.oidc.server.rp;
 
 import com.google.common.base.Strings;
-import com.nimbusds.jwt.JWT;
+import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.auth.Secret;
@@ -22,12 +22,9 @@ import com.nimbusds.openid.connect.sdk.ClaimsRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.Prompt;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderConfigurationRequest;
-import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.*;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
-import de.rub.nds.oidc.server.op.OPContextConstants;
-import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.test_model.ParameterType;
 import de.rub.nds.oidc.test_model.RPConfigType;
 import de.rub.nds.oidc.test_model.TestOPConfigType;
@@ -124,6 +121,18 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		return UriBuilder.fromUri(opivCfg.getHonestRPUri()).path(testId).path(REDIRECT_PATH).build();
 	}
 
+	protected URI getJwkSetURI() {
+		return type == RPType.HONEST ? getHonestJwkSetUri() : getEvilJwkSetUri();
+	}
+
+	protected URI getEvilJwkSetUri() {
+		return UriBuilder.fromUri(opivCfg.getEvilRPUri()).path(testId).path(JWKS_PATH).build();
+	}
+
+	protected URI getHonestJwkSetUri() {
+		return UriBuilder.fromUri(opivCfg.getHonestRPUri()).path(testId).path(JWKS_PATH).build();
+	}
+
 
 	protected URI manipulateURI(URI uri, boolean addSubdomain, boolean addPath, boolean addTld) {
 		String rnd = RandomStringUtils.randomAlphanumeric(12);
@@ -155,8 +164,6 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	public boolean runTestStepSetup() throws ParseException, IOException {
 		boolean success = true;
 
-		success &= areStepRequirementsMet();
-
 		// dont run setup steps for RP2 unless neccessary
 		if (RPType.HONEST.equals(type)
 				|| !Boolean.parseBoolean((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST))
@@ -171,6 +178,8 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 			}
 		}
 		if (RPType.EVIL.equals(type)) {
+			// check if prerequisites are fulfilled and test step can be run
+			success &= areStepRequirementsMet();
 			stepCtx.put(RPContextConstants.RP1_PREPARED_REDIRECT_URI, getHonestRedirectUri());
 			stepCtx.put(RPContextConstants.RP2_PREPARED_REDIRECT_URI, getEvilRedirectUri());
 			stepCtx.put(RPContextConstants.STEP_SETUP_FINISHED, success);
@@ -268,10 +277,17 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	protected abstract CodeChallengeMethod getCodeChallengeMethod();
 
 	@Nullable
-	protected abstract JWT getIdTokenHint();
+	protected abstract ClientAuthenticationMethod getRegistrationClientAuthMethod();
 
 	@Nullable
-	protected abstract ClientAuthenticationMethod getRegistrationClientAuthMethod();
+	protected JWKSet getRegistrationJwkSet() {
+		return null;
+	}
+
+	@Nullable
+	protected URI getRegistrationJwkSetURI() {
+		return null;
+	}
 
 	protected abstract HashSet<ResponseType> getRegistrationResponseTypes();
 
@@ -286,7 +302,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 				&& !Strings.isNullOrEmpty(testOPConfig.getClient2Config())) {
 			isClientConfigProvided = true;
 		}
-		
+
 		if (isClientConfigProvided && Boolean.parseBoolean((String) stepCtx.get(RPContextConstants.IS_RP_LEARNING_STEP))) {
 			return true;
 		}
@@ -299,7 +315,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 			// run registration for current testStep but do not store new clientConfig in suiteCtx
 			return registerClient(type);
 		}
-		
+
 		// default: use clientInfo from suiteCtx (from previous test; user provided config or earlier registration)
 		OIDCClientInformation ci = getStoredClientInfo(type == RPType.HONEST);
 		if (ci != null) {
@@ -333,6 +349,9 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 		ClientAuthenticationMethod tokenEndpointAuthMethod = getRegistrationClientAuthMethod();
 		clientMetadata.setTokenEndpointAuthMethod(tokenEndpointAuthMethod);
+
+		clientMetadata.setJWKSet(getRegistrationJwkSet());
+		clientMetadata.setJWKSetURI(getRegistrationJwkSetURI());
 
 		BearerAccessToken bearerAccessToken = null;
 		String at = getRegistrationAccessToken();
@@ -375,7 +394,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 			// stored info found, either retrieved by registration or already vetted
 			return true;
 		}
-		
+
 		// attempt to parse user provided ClientConfig JSON strings
 		String config = type.equals(RPType.HONEST) ? testOPConfig.getClient1Config() : testOPConfig.getClient2Config();
 		if (Strings.isNullOrEmpty(config)) {
@@ -498,7 +517,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	public boolean discoverOpIfNeeded() throws IOException, ParseException {
 		boolean isLearningStep = Boolean.parseBoolean((String) stepCtx.get(RPContextConstants.IS_RP_LEARNING_STEP));
 		// TODO: add and use startRPType instead of HONEST
-		if(isLearningStep && type == RPType.HONEST) {
+		if (isLearningStep && type == RPType.HONEST) {
 			return discoverRemoteOP();
 		}
 		if (opMetaData != null) {
@@ -559,12 +578,13 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 				return false;
 			}
 		}
-		// TODO: add additional requirement checks as needed
 
-		return true;
+		return isTestStepRunnable();
 	}
 
-
+	protected boolean isTestStepRunnable() {
+		return true;
+	}
 
 	// send a response to dangling browser
 	protected void sendCallbackResponse(HttpServletResponse resp, HttpServletRequest req) throws IOException, ParseException {

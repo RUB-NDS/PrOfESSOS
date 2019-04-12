@@ -93,20 +93,15 @@ public class PkceRP extends DefaultRP {
 		if (at != null) {
 			UserInfoResponse userInfoResponse = requestUserInfo(at);
 			if (userInfoResponse.indicatesSuccess()) {
-				UserInfo ui = userInfoResponse.toSuccessResponse().getUserInfo();
-				boolean match = checkUserInfo(ui, testOPConfig.getUser2Name());
+				TestStepResult result = checkUserInfo(userInfoResponse, null);
 
-				if (match && params.getBool(USER2_IN_USERINFO_FAILS_TEST)) {
+				if (result != null) {
 					browserBlocker.complete(TestStepResult.FAIL);
 					return;
 				}
 			}
 		}
 
-		// TODO: chekcIdToken and checkUserInfo should return TestStepResults and pick targetClaim
-		//  and searchstring from instance variables
-
-//		logger.log("release browser lock");
 		browserBlocker.complete(TestStepResult.PASS);
 		return;
 	}

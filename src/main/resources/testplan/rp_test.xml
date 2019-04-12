@@ -285,7 +285,7 @@
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.SubClaimSpoofingOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.UserInfoIDSpoofingOP</ImplementationClass>
 
 			<Parameter Key="force_token_userclaims_excluded">true</Parameter>
 			<Parameter Key="include_honest_sub_in_userinfo">true</Parameter>
@@ -336,7 +336,7 @@
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.SubClaimSpoofingOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.UserInfoIDSpoofingOP</ImplementationClass>
 
 			<Parameter Key="force_token_userclaims_excluded">true</Parameter>
 			<Parameter Key="include_honest_iss_in_userinfo">true</Parameter>
@@ -385,7 +385,7 @@
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.SubClaimSpoofingOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.UserInfoIDSpoofingOP</ImplementationClass>
 
 			<Parameter Key="force_token_userclaims_excluded">true</Parameter>
 			
@@ -440,7 +440,7 @@
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.SubClaimSpoofingOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.UserInfoIDSpoofingOP</ImplementationClass>
 
 			<Parameter Key="force_token_userclaims_excluded">true</Parameter>
 			
@@ -494,7 +494,7 @@
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.SubClaimSpoofingOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.UserInfoIDSpoofingOP</ImplementationClass>
 
 			<Parameter Key="force_token_userclaims_excluded">true</Parameter>
 			
@@ -550,7 +550,7 @@
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.SubClaimSpoofingOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.UserInfoIDSpoofingOP</ImplementationClass>
 
 			<Parameter Key="force_token_userclaims_excluded">true</Parameter>
 			
@@ -604,7 +604,7 @@
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.SubClaimSpoofingOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.UserInfoIDSpoofingOP</ImplementationClass>
 
 			<Parameter Key="force_token_userclaims_excluded">true</Parameter>
 			<Parameter Key="token_header_add_claims">true</Parameter>
@@ -654,7 +654,7 @@
 	<!--<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>-->
 	<!--</OPConfig-1>-->
 	<!--<OPConfig-2>-->
-	<!--<ImplementationClass>de.rub.nds.oidc.server.op.SubClaimSpoofingOP</ImplementationClass>-->
+	<!--<ImplementationClass>de.rub.nds.oidc.server.op.UserInfoIDSpoofingOPOP</ImplementationClass>-->
 
 	<!--<Parameter Key="token_header_add_claims">true</Parameter>-->
 	<!--<Parameter Key="token_encrypt_payload">true</Parameter>--> <!-- TODO: not implemented -->
