@@ -31,7 +31,9 @@ import de.rub.nds.oidc.server.rp.RPContextConstants;
 import de.rub.nds.oidc.server.rp.RPInstance;
 import de.rub.nds.oidc.server.rp.RPType;
 import de.rub.nds.oidc.test_model.*;
-import de.rub.nds.oidc.utils.*;
+import de.rub.nds.oidc.utils.ImplementationLoadException;
+import de.rub.nds.oidc.utils.ImplementationLoader;
+import de.rub.nds.oidc.utils.UriUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.inject.Inject;
@@ -50,7 +52,6 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- *
  * @author Tobias Wich
  */
 public class TestRunner {
@@ -122,7 +123,7 @@ public class TestRunner {
 	}
 
 	private <T> T runTestFun(TestInstanceRegistry instReg, TestStepResultType result, TestFunction<T> f,
-			T errorResponse)
+							 T errorResponse)
 			throws ImplementationLoadException {
 		BrowserSimulator simulator = null;
 		TestStepType stepDef = result.getStepReference();
@@ -141,7 +142,7 @@ public class TestRunner {
 			});
 
 			// check if the test is authorized by the RP
-			if (! testGranted(logger, testStepCtx)) {
+			if (!testGranted(logger, testStepCtx)) {
 				logger.log("Test is not authorized by Relying Party.");
 				return errorResponse;
 			}
@@ -189,12 +190,12 @@ public class TestRunner {
 	}
 
 	private void testCompleted(TestStepResultType result) {
-		if (result.getResult() != TestStepResult.UNDETERMINED 
+		if (result.getResult() != TestStepResult.UNDETERMINED
 				&& result.getResult() != TestStepResult.NOT_RUN) {
 			testSuiteCtx.put(OPContextConstants.TEST_COMPLETED_IN_SUITE_CTX, true);
 		}
 	}
-	
+
 	public void updateRPConfig(TestRPConfigType rpConfig) {
 		TestRPConfigType local = (TestRPConfigType) getTestObj().getTestConfig();
 
@@ -246,9 +247,9 @@ public class TestRunner {
 				}
 
 				URI wellKnown = UriBuilder.fromUri(targetUrl)
-							.replacePath(".professos")
-							.replaceQuery(null)
-							.build();
+						.replacePath(".professos")
+						.replaceQuery(null)
+						.build();
 
 				logger.log("Obtaining permission to perform test from url '" + wellKnown + "'.");
 				Response grantTokenResp = ClientBuilder.newClient().target(wellKnown)
@@ -262,7 +263,7 @@ public class TestRunner {
 					grantToken = grantToken.trim();
 
 					URI grantTokenUri = UriUtils.normalize(new URI(grantToken));
-					URI referenceUri  = UriUtils.normalize(hostCfg.getControllerUri());
+					URI referenceUri = UriUtils.normalize(hostCfg.getControllerUri());
 
 					return referenceUri.equals(grantTokenUri);
 				} else {
@@ -285,7 +286,7 @@ public class TestRunner {
 	}
 
 
-	private boolean prepareRPTestStep(TestInstanceRegistry instReg, Map<String, Object> testStepCtx, TestStepType stepDef, TestStepLogger logger ) throws ImplementationLoadException {
+	private boolean prepareRPTestStep(TestInstanceRegistry instReg, Map<String, Object> testStepCtx, TestStepType stepDef, TestStepLogger logger) throws ImplementationLoadException {
 		TestRPConfigType testConfig = (TestRPConfigType) getTestObj().getTestConfig();
 		// resolve OP URL
 
@@ -302,7 +303,7 @@ public class TestRunner {
 			String prefix = "enforce-rp-reg-";
 			String regEnforcer = prefix + RandomStringUtils.randomAlphanumeric(8);
 			evilWebfinger = hostCfg.getEvilOPUri().toString() + regEnforcer + "/" + testId;
-			logger.logCodeBlock( evilWebfinger, "Trigger new registration at Evil OP, set discovery URI:");
+			logger.logCodeBlock(evilWebfinger, "Trigger new registration at Evil OP, set discovery URI:");
 			testStepCtx.put(OPContextConstants.REGISTRATION_ENFORCING_PATH_FRAGMENT, regEnforcer);
 		} else {
 			evilWebfinger = testConfig.getEvilWebfingerResourceId();
@@ -335,7 +336,7 @@ public class TestRunner {
 	}
 
 	private boolean prepareOPTestStep(TestInstanceRegistry instReg, Map<String, Object> testStepCtx, TestStepType stepDef,
-								   TestStepLogger logger ) throws ImplementationLoadException, IOException, ParseException {
+									  TestStepLogger logger) throws ImplementationLoadException, IOException, ParseException {
 		// TODO
 		TestOPConfigType remoteOPConfig = (TestOPConfigType) getTestObj().getTestConfig();
 		if (!isMinimalValidOPConfig(remoteOPConfig)) {
