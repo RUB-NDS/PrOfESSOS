@@ -92,6 +92,7 @@ public class TestRunner {
 		result.setResult(runTestFun(instReg, result, (simulator) -> {
 			return simulator.run();
 		}, TestStepResult.UNDETERMINED));
+		testCompleted(result);
 
 		LearnResultType learnResult = new LearnResultType();
 		learnResult.setTestConfig(getTestObj().getTestConfig());
@@ -112,6 +113,7 @@ public class TestRunner {
 		result.setResult(runTestFun(instReg, result, (simulator) -> {
 			return simulator.run();
 		}, TestStepResult.UNDETERMINED));
+		testCompleted(result);
 
 		LearnResultType learnResult = new LearnResultType();
 		learnResult.setTestConfig(getTestObj().getTestConfig());
@@ -186,7 +188,13 @@ public class TestRunner {
 		}
 	}
 
-
+	private void testCompleted(TestStepResultType result) {
+		if (result.getResult() != TestStepResult.UNDETERMINED 
+				&& result.getResult() != TestStepResult.NOT_RUN) {
+			testSuiteCtx.put(OPContextConstants.TEST_COMPLETED_IN_SUITE_CTX, true);
+		}
+	}
+	
 	public void updateRPConfig(TestRPConfigType rpConfig) {
 		TestRPConfigType local = (TestRPConfigType) getTestObj().getTestConfig();
 
@@ -285,8 +293,10 @@ public class TestRunner {
 		honestWebfinger = testConfig.getHonestWebfingerResourceId();
 
 		String evilWebfinger;
-		Boolean enforceRegistration = Boolean.valueOf((String) testStepCtx.get(OPContextConstants.REGISTRATION_NEEDED));
-		if (enforceRegistration) {
+		boolean enforceRegistration = Boolean.parseBoolean((String) testStepCtx.get(OPContextConstants.REGISTRATION_NEEDED));
+		boolean isOPsAreKnownToTargetRP = (boolean) testSuiteCtx.getOrDefault(OPContextConstants.TEST_COMPLETED_IN_SUITE_CTX, false);
+		if (enforceRegistration && isOPsAreKnownToTargetRP) {
+			// unless this is the first test to run in this TestObject context,
 			// add a randomized path fragment so that the Client assumes that 
 			// Evil OP is yet unknown and starts new Discovery/Registration
 			String prefix = "enforce-rp-reg-";
