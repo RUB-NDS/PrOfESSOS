@@ -92,7 +92,11 @@ public class DefaultRP extends AbstractRPImplementation {
 			TokenResponse tokenResponse = redeemAuthCode(successResponse.getAuthorizationCode());
 			if (!tokenResponse.indicatesSuccess()) {
 				// code redemption failed, error messages have been logged already
-				browserBlocker.complete(TestStepResult.PASS);
+				if (Boolean.parseBoolean((String) stepCtx.get(IS_RP_LEARNING_STEP))) {
+					browserBlocker.complete(TestStepResult.UNDETERMINED);
+				} else {
+					browserBlocker.complete(TestStepResult.PASS);
+				}
 				return;
 			}
 
