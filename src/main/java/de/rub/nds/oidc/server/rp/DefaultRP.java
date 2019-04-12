@@ -18,6 +18,7 @@ import com.nimbusds.openid.connect.sdk.*;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.TestStepResult;
+import de.rub.nds.oidc.utils.UnsafeTLSHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -274,6 +275,9 @@ public class DefaultRP extends AbstractRPImplementation {
 				codeGrant);
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
+		httpRequest.setSSLSocketFactory(UnsafeTLSHelper.getTrustAllSocketFactory());
+		httpRequest.setHostnameVerifier(UnsafeTLSHelper.getTrustAllHostnameVerifier());
+		
 		// perform request customization as per TestStepReference
 		tokenRequestApplyClientAuth(httpRequest);
 		tokenRequestApplyPKCEParams(httpRequest);
@@ -348,9 +352,11 @@ public class DefaultRP extends AbstractRPImplementation {
 	protected UserInfoResponse requestUserInfo(AccessToken at) throws IOException, ParseException {
 		BearerAccessToken bat = (BearerAccessToken) at;
 
-		HTTPResponse httpResponse = new UserInfoRequest(opMetaData.getUserInfoEndpointURI(), bat)
-				.toHTTPRequest()
-				.send();
+		HTTPRequest httpRequest = new UserInfoRequest(opMetaData.getUserInfoEndpointURI(), bat).toHTTPRequest();
+		httpRequest.setSSLSocketFactory(UnsafeTLSHelper.getTrustAllSocketFactory());
+		httpRequest.setHostnameVerifier(UnsafeTLSHelper.getTrustAllHostnameVerifier());
+
+		HTTPResponse httpResponse = httpRequest.send();
 		logger.log("UserInfo requested");
 		logger.logHttpResponse(httpResponse, httpResponse.getContent());
 

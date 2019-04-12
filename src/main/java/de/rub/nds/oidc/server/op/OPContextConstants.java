@@ -24,7 +24,8 @@ public class OPContextConstants {
 
 	public static final String REGISTRATION_NEEDED = "dynamic_client_registration_support_needed";
 	public static final String REGISTRATION_ENFORCING_PATH_FRAGMENT = "registration_enforcing_random_path";
-
+	public static final String TEST_COMPLETED_IN_SUITE_CTX = "at-least-one-test-has-been-completed-in-suite";
+	
 	private static final String PFX = "op.";
 
 	public static final String REGISTERED_CLIENT_INFO_HONEST = PFX + "registered-client-info-honest";

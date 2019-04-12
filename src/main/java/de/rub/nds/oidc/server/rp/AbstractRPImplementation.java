@@ -30,6 +30,7 @@ import de.rub.nds.oidc.test_model.RPConfigType;
 import de.rub.nds.oidc.test_model.TestOPConfigType;
 import de.rub.nds.oidc.utils.InstanceParameters;
 import de.rub.nds.oidc.utils.UnsafeOIDCProviderMetadata;
+import de.rub.nds.oidc.utils.UnsafeTLSHelper;
 import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -365,7 +366,11 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 				bearerAccessToken
 		);
 
-		HTTPResponse response = regRequest.toHTTPRequest().send();
+		HTTPRequest regHttpRequest = regRequest.toHTTPRequest();
+		regHttpRequest.setHostnameVerifier(UnsafeTLSHelper.getTrustAllHostnameVerifier());
+		regHttpRequest.setSSLSocketFactory(UnsafeTLSHelper.getTrustAllSocketFactory());
+		HTTPResponse response = regHttpRequest.send();
+
 		logger.log("Registration request prepared");
 		logger.logHttpRequest(regRequest.toHTTPRequest(), regRequest.toHTTPRequest().getQueryAsJSONObject().toString());
 
@@ -546,6 +551,8 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		OIDCProviderConfigurationRequest request = new OIDCProviderConfigurationRequest(issuer);
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
+		httpRequest.setSSLSocketFactory(UnsafeTLSHelper.getTrustAllSocketFactory());
+		httpRequest.setHostnameVerifier(UnsafeTLSHelper.getTrustAllHostnameVerifier());
 		try {
 			HTTPResponse httpResponse = httpRequest.send();
 
