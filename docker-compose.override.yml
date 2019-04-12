@@ -4,8 +4,6 @@ services:
   professos:
     build:
       context: .
-      args:
-        wildflyconfigname: "standalone_w_test.xml"
     environment:
       - OPIV_ALLOW_CUSTOM_TEST_ID=true
       - OPIV_TARGET_GRANT_NOT_NEEDED=true

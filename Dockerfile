@@ -11,11 +11,6 @@ RUN apt-get update && apt-get install -y curl vim openjdk-8-jdk unzip chromium-b
 
 ###
 # setup wildfly as per https://github.com/jboss-dockerfiles/wildfly/blob/master/Dockerfile
-#
-# Create a user and group used to launch processes
-# The user ID 1000 is the default for the first "regular" user on Fedora/RHEL,
-# so there is a high chance that this ID will be equal to the current user
-# making it easier to use volumes (no permission issues)
 RUN groupadd -r jboss -g 1000 && useradd -u 1000 -r -g jboss -m -d /opt/jboss -s /sbin/nologin -c "JBoss user" jboss && \
     chmod 755 /opt/jboss
 
@@ -45,9 +40,6 @@ ENV LAUNCH_JBOSS_IN_BACKGROUND true
 
 # copy the .war file into wildfly's deployment folder
 COPY $PROFESSOS_WAR /opt/jboss/wildfly/standalone/deployments/professos.war
-
-# add wildfly config  (to serve or not to serve the redirect page) 
-#COPY ./docker/wildfly/professos/standalone.xml /opt/jboss/wildfly/standalone/configuration/standalone.xml
 
 # disable for debugging as root
 USER jboss
