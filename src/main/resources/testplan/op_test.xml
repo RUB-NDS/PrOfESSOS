@@ -98,8 +98,6 @@
 		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
 			<Parameter Key="code-redemption-fails-test">true</Parameter>
-			<Parameter Key="tokenreq-clientauth-exclude-client-id">true</Parameter>
-			<Parameter Key="tokenreq-clientauth-exclude-client-secret">true</Parameter>
 		</RPConfig-2>
 	</TestStep>
 
@@ -140,6 +138,8 @@
 		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
 			<Parameter Key="code-redemption-fails-test">true</Parameter>
+			<Parameter Key="tokenreq-clientauth-exclude-client-id">true</Parameter>
+			<Parameter Key="tokenreq-clientauth-exclude-client-secret">true</Parameter>
 		</RPConfig-2>
 	</TestStep>	
 
@@ -1123,7 +1123,7 @@
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
 			<!-- TODO: not yet implemented but default registered auth method -->
-			<Parameter Key="register-clientauth-method-client_secret_basic">true</Parameter> 
+			<!--<Parameter Key="register-clientauth-method-client_secret_basic">true</Parameter> -->
 
 			<Parameter Key="tokenreq-force-client-auth-post">true</Parameter>
 			<Parameter Key="code-redemption-fails-test">true</Parameter>
@@ -1159,7 +1159,9 @@
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
-			<Parameter Key="enforce-client-registration">true</Parameter>
+			<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
+			<Parameter Key="client-profile-name">profile-client-auth-post</Parameter>
+
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
@@ -1201,7 +1203,8 @@
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
-			<Parameter Key="enforce-client-registration">true</Parameter>
+			<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
+			<Parameter Key="client-profile-name">profile-client-auth-post</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
@@ -1244,7 +1247,8 @@
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
-			<Parameter Key="enforce-client-registration">true</Parameter>
+			<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
+			<Parameter Key="client-profile-name">profile-client-auth-post</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
@@ -1288,7 +1292,8 @@
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
-			<Parameter Key="enforce-client-registration">true</Parameter>
+			<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
+			<Parameter Key="client-profile-name">profile-client-auth-post</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
@@ -1358,7 +1363,8 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
-			<Parameter Key="enforce-client-registration">true</Parameter>
+			<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
+			<Parameter Key="client-profile-name">profile-client-auth-client_secret_jwt</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
@@ -1401,7 +1407,9 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
-			<Parameter Key="enforce-client-registration">true</Parameter>
+			<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
+			<Parameter Key="client-profile-name">profile-client-auth-client_secret_jwt</Parameter>
+
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
@@ -1446,7 +1454,9 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
-			<Parameter Key="enforce-client-registration">true</Parameter>
+			<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
+			<Parameter Key="client-profile-name">profile-client-auth-client_secret_jwt</Parameter>
+
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
@@ -1491,7 +1501,9 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
-			<Parameter Key="enforce-client-registration">true</Parameter>
+			<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
+			<Parameter Key="client-profile-name">profile-client-auth-client_secret_jwt</Parameter>
+
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
@@ -1536,7 +1548,8 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
-			<Parameter Key="enforce-client-registration">true</Parameter>
+			<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
+			<Parameter Key="client-profile-name">profile-client-auth-client_secret_jwt</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
@@ -1561,7 +1574,7 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 	<!--just testing that it works....]]></Description>-->
 	<!--<TestParameters>-->
 	<!--<Parameter Key="is_single_rp_test">true</Parameter>-->
-	<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
+	<!--<Parameter Key="client-profile-name">profile-client-auth-client_secret_jwt</Parameter>-->
 	<!--</TestParameters>-->
 	<!--<BrowserSimulator>-->
 	<!--<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>-->
@@ -1586,7 +1599,7 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		<h3>Message Flow Downgrade to Implicit</h3>
 		PrOfESSOS tests if the OP can be downgraded to using less secure grant types that have not been registered.
 
-		<h4>Prerequisites<h4>
+		<h4>Prerequisites</h4>
 		The OP supports, and test clients can use, the code flow.
 
 		<h4>Execution</h4>
@@ -1632,7 +1645,7 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		<h3>Message Flow Confusion - Response Mode</h3>
 		PrOfESSOS tests if the OP can be made to use less secure response mode that is not allowed for the requested flow.
 
-		<h4>Prerequisites<h4>
+		<h4>Prerequisites</h4>
 		The OP supports, and test clients can use or register, the implicit flow.
 
 		<h4>Execution</h4>
@@ -1650,8 +1663,7 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
-			<!-- only needed if the default registration should be change -->
-			<Parameter Key="enforce-client-registration">true</Parameter>
+			<Parameter Key="client-profile-name">profile-client-implicit-flow</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
@@ -1697,8 +1709,7 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
-			<!-- only needed if the default registration should be change -->
-			<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
+
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>

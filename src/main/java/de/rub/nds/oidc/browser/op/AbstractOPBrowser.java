@@ -126,8 +126,6 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 		stepCtx.put(RPContextConstants.CURRENT_USER_PASSWORD, userPass);
 		initRPLocks();
 
-		// load configured values
-
 		// start authentication
 		String authnReq = getAuthnReqString(rpType);
 		logger.logCodeBlock("Authentication Request URL:", authnReq);
@@ -145,7 +143,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 			waitForDocumentReadyAndJsReady(() -> {
 				driver.executeScript(submitScript);
 				// capture state where the text is entered
-				//			logScreenshot();
+//				logScreenshot();
 				logger.log("Login Credentials entered");
 				return null;
 			});
@@ -156,7 +154,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 				driver.executeScript(getFormSubmitDelayScript());
 				logger.log("Running Consent-Script to authorize the client");
 
-				waitForPageLoad(() -> {
+				waitForDocumentReadyAndJsReady(() -> {
 					driver.executeScript(consentScript);
 //					logScreenshot();
 					return null;
@@ -185,7 +183,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 		blockRP.complete(null);
 	}
 
-	protected TestStepResult waitForRPResult(@Nonnull int timeout) throws InterruptedException {
+	protected TestStepResult waitForRPResult(@Nonnull long timeout) throws InterruptedException {
 		try {
 			// wait for TestStepResult from RP
 			return blockAndResult.get(timeout, TimeUnit.SECONDS);
@@ -200,8 +198,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 
 	protected TestStepResult waitForRPResult() throws InterruptedException {
 		// set default timeout to 10 seconds
-		int timeout = 10;
-		return waitForRPResult(timeout);
+		return waitForRPResult(MEDIUM_WAIT_TIMEOUT);
 	}
 
 	protected boolean consentRequired(String browserUrl) {

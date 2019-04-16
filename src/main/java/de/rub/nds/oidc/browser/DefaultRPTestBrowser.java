@@ -133,7 +133,7 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 		String notRunnableMsg = (String) stepCtx.get(OPContextConstants.TEST_RUN_NOT_FINISHED);
 		if (!Strings.isNullOrEmpty(notRunnableMsg)) {
 			logger.log("TestStep could not be executed, reason: " + notRunnableMsg);
-			return TestStepResult.NOT_RUN;
+			return TestStepResult.UNDETERMINED;
 		}
 		
 		return null;

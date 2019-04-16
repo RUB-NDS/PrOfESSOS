@@ -24,7 +24,10 @@ import com.nimbusds.openid.connect.sdk.Prompt;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderConfigurationRequest;
 import com.nimbusds.openid.connect.sdk.rp.*;
 import de.rub.nds.oidc.log.TestStepLogger;
+import de.rub.nds.oidc.server.InvalidConfigurationException;
 import de.rub.nds.oidc.server.OPIVConfig;
+import de.rub.nds.oidc.server.TestNotApplicableException;
+import de.rub.nds.oidc.server.TestStepParameterConstants;
 import de.rub.nds.oidc.test_model.ParameterType;
 import de.rub.nds.oidc.test_model.RPConfigType;
 import de.rub.nds.oidc.test_model.TestOPConfigType;
@@ -35,17 +38,13 @@ import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.annotation.Nullable;
-import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URI;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 
@@ -103,6 +102,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	public void setContext(Map<String, Object> suiteCtx, Map<String, Object> stepCtx) {
 		this.suiteCtx = suiteCtx;
 		this.stepCtx = stepCtx;
+		restoreOpMetaDataFromSuiteCtx();
 	}
 
 	@Override
@@ -114,7 +114,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	public void setTestOPConfig(TestOPConfigType cfg) {
 		this.testOPConfig = cfg;
 	}
-	
+
 
 	protected URI getRedirectUri() {
 		return type == RPType.HONEST ? getHonestRedirectUri() : getEvilRedirectUri();
@@ -145,6 +145,13 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		return type.toString().equals(startRP);
 	}
 
+	private void restoreOpMetaDataFromSuiteCtx() {
+		Object storedOpMetaData = suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION);
+		if (storedOpMetaData != null) {
+			this.opMetaData = (UnsafeOIDCProviderMetadata) storedOpMetaData;
+		}
+	}
+
 	protected URI manipulateURI(URI uri, boolean addSubdomain, boolean addPath, boolean addTld) {
 		String rnd = RandomStringUtils.randomAlphanumeric(12);
 		rnd = rnd.toLowerCase();
@@ -171,27 +178,39 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	}
 
 	@Override
-	public boolean runTestStepSetup() throws ParseException, IOException {
-		// TODO refactoring
-		// dont run setup steps for RP2 unless neccessary
+	public void runTestStepSetup() throws ParseException, IOException, InvalidConfigurationException, TestNotApplicableException {
 		boolean currentIsStartRp = isStartRP();
-		boolean success = true;
-		if (currentIsStartRp || !Boolean.parseBoolean((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST))) {
-			success &= discoverOpIfNeeded();
-			success &= registerClientIfNeeded();
-			success &= isValidClientConfig();
-			if (success) {
-				prepareAuthnReq();
-			}
+
+		// dont run setup steps for RP2 unless neccessary
+		if (currentIsStartRp) {
+			validateProvidedOpConfig(testOPConfig);
 		}
+		if (currentIsStartRp || !Boolean.parseBoolean((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST))) {
+			discoverOpIfNeeded();
+			registerClientIfNeeded();
+			prepareAuthnReq();
+		}
+
 		if (!currentIsStartRp) {
 			// check if prerequisites are fulfilled and test step can be run
-			success &= areStepRequirementsMet();
 			stepCtx.put(RPContextConstants.RP1_PREPARED_REDIRECT_URI, getHonestRedirectUri());
 			stepCtx.put(RPContextConstants.RP2_PREPARED_REDIRECT_URI, getEvilRedirectUri());
-			stepCtx.put(RPContextConstants.STEP_SETUP_FINISHED, success);
+			// let the browser know that we are ready to go
+			stepCtx.put(RPContextConstants.STEP_SETUP_FINISHED, true);
 		}
-		return success;
+	}
+
+	private void validateProvidedOpConfig(TestOPConfigType cfg) throws InvalidConfigurationException {
+		boolean areMinRequiredFieldsSet = true;
+		areMinRequiredFieldsSet &= !Strings.isNullOrEmpty(cfg.getUser1Name());
+		areMinRequiredFieldsSet &= !Strings.isNullOrEmpty(cfg.getUser2Name());
+		areMinRequiredFieldsSet &= !Strings.isNullOrEmpty(cfg.getUser1Pass());
+		areMinRequiredFieldsSet &= !Strings.isNullOrEmpty(cfg.getUser2Pass());
+		areMinRequiredFieldsSet &= !(Strings.isNullOrEmpty(cfg.getUrlOPTarget()) && Strings.isNullOrEmpty(cfg.getOPMetadata()));
+
+		if (!areMinRequiredFieldsSet) {
+			throw new InvalidConfigurationException("Missing required OPMetadata configuration parameters");
+		}
 	}
 
 	@Override
@@ -201,22 +220,32 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		ClientID clientID = getAuthReqClientID();
 		URI redirectURI = getAuthReqRedirectUri();
 
-		AuthenticationRequest.Builder ab = new AuthenticationRequest.Builder(
-				rt,
-				scope,
-				clientID,
-				redirectURI
-		);
-		ab.state(getAuthReqState());
-		ab.nonce(getAuthReqNonce());
-		ab.responseMode(getAuthReqResponseMode());
-		ab.prompt(getAuthReqPrompt());
-		ab.claims(getAuthReqClaims());
-		ab.endpointURI(opMetaData.getAuthorizationEndpointURI());
+		URI authReqUriTmpl;
+		if (scope.contains("openid")) {
+			// OIDC
+			AuthenticationRequest.Builder ab = new AuthenticationRequest.Builder(rt, scope, clientID, redirectURI);
+			ab.prompt(getAuthReqPrompt());
+			ab.claims(getAuthReqClaims());
+			ab.nonce(getAuthReqNonce());
+			ab.state(getAuthReqState());
+			ab.responseMode(getAuthReqResponseMode());
+			ab.endpointURI(opMetaData.getAuthorizationEndpointURI());
+			authReqUriTmpl = ab.build().toURI();
+		} else {
+			// OAUTH 
+			AuthorizationRequest.Builder ab = new AuthorizationRequest.Builder(rt, clientID);
+			ab.redirectionURI(redirectURI);
+			ab.state(getAuthReqState());
+			ab.responseMode(getAuthReqResponseMode());
+			ab.endpointURI(opMetaData.getAuthorizationEndpointURI());
+			ab.state(getAuthReqState());
+			ab.responseMode(getAuthReqResponseMode());
+			ab.endpointURI(opMetaData.getAuthorizationEndpointURI());
+			authReqUriTmpl = ab.build().toURI();
+		}
 
-		AuthenticationRequest authnReq = ab.build();
-		
-		URI authnReqUri = applyPkceParamstoAuthReqUri(authnReq.toURI());
+
+		URI authnReqUri = applyPkceParamstoAuthReqUri(authReqUriTmpl);
 		authnReqUri = applyIdTokenHintToAuthReqUri(authnReqUri);
 
 		// make prepared request available for the browser
@@ -302,46 +331,42 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	protected abstract HashSet<GrantType> getRegistrationGrantTypes();
 
 
-	private boolean registerClientIfNeeded() throws IOException, ParseException {
-		boolean isRegistrationSupported = opMetaData != null && opMetaData.getRegistrationEndpointURI() != null;
-
-		boolean isClientConfigProvided = false;
-		if (!Strings.isNullOrEmpty(testOPConfig.getClient1Config())
-				&& !Strings.isNullOrEmpty(testOPConfig.getClient2Config())) {
-			isClientConfigProvided = true;
-		}
-
-		if (isClientConfigProvided && Boolean.parseBoolean((String) stepCtx.get(RPContextConstants.IS_RP_LEARNING_STEP))) {
-			return true;
-		}
+	private void registerClientIfNeeded() throws IOException, ParseException, InvalidConfigurationException {
+		// make sure OpMetadata is loaded
+		restoreOpMetaDataFromSuiteCtx();
 
 		if (Boolean.parseBoolean((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))) {
-			if (!isRegistrationSupported) {
-				logger.log("TestStep requires dynamic registration, which is not supported acc. to configuration.");
-				return false;
-			}
 			// run registration for current testStep but do not store new clientConfig in suiteCtx
-			return registerClient(type);
+			registerClient(type);
+			return;
 		}
 
-		// default: use clientInfo from suiteCtx (from previous test; user provided config or earlier registration)
-		OIDCClientInformation ci = getStoredClientInfo(type == RPType.HONEST);
-		if (ci != null) {
-			setClientInfo(ci);
-			return true;
-		}
-
-		// otherwise, run dynamic registration
-		if (registerClient(type)) {
-			// store registration response in suiteCtx
+		// default: use clientInfo from suiteCtx (from previous test, user provided config, or earlier registration)
+		try {
+			loadClientConfigIfNeeded();
+			// check if test step is applicable to loaded client configuration
+			boolean isRunnable = isTestStepRunnableForConfig(clientInfo);
+			if (!isRunnable) {
+				// otherwise, try to run dynamic registration for current test step requirements
+				registerClient(type);
+				storeClientInfo();
+			}
+		} catch (InvalidConfigurationException ex) {
+			// user provided config empty or invalid
+			registerClient(type);
+			// store valid clientInfo in suiteCtx
 			storeClientInfo();
-			return true;
 		}
-		return false;
 	}
 
 
-	private boolean registerClient(RPType rpType) throws ParseException, IOException {
+	private void registerClient(RPType rpType) throws ParseException, IOException, InvalidConfigurationException {
+		boolean isRegistrationSupported = opMetaData.getRegistrationEndpointURI() != null;
+		if (!isRegistrationSupported) {
+			logger.log("No RegistrationEndpoint found in OP metadata");
+			throw new InvalidConfigurationException("Client Registration required but not supported.");
+		}
+
 		String client = getClientName();
 		logger.log("Starting client registration for " + client);
 
@@ -387,7 +412,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		if (!regResponse.indicatesSuccess()) {
 			logger.log("Dynamic Client Registration failed");
 			logger.logHttpResponse(response, response.getContent());
-			return false;
+			throw new InvalidConfigurationException("Client Registration attempt failed");
 		}
 
 		OIDCClientInformationResponse successResponse = (OIDCClientInformationResponse) regResponse;
@@ -396,34 +421,24 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		setClientInfo(clientInfo);
 		logger.log("Successfully registered client");
 		logger.logHttpResponse(response, response.getContent());
-
-		return true;
 	}
 
-
-	private boolean isValidClientConfig() {
-
+	private void loadClientConfigIfNeeded() throws InvalidConfigurationException {
 		if (getClientInfo() != null) {
-			// stored info found, either retrieved by registration or already vetted
-			return true;
+			// instance clientInfo already initialized
+			return;
 		}
 
-		// attempt to parse user provided ClientConfig JSON strings
-		String config = type.equals(RPType.HONEST) ? testOPConfig.getClient1Config() : testOPConfig.getClient2Config();
-		if (Strings.isNullOrEmpty(config)) {
-			// no client configuration provided
-			return false;
-		}
-		try {
-			JSONObject jsonConfig = JSONObjectUtils.parse(config);
-			OIDCClientInformation clientInfo = OIDCClientInformation.parse(jsonConfig);
-			setClientInfo(clientInfo);
+		OIDCClientInformation ci;
+		ci = getStoredClientInfo(type);
+		if (ci == null) {
+			ci = getUserProvidedClientInfo();
+			setClientInfo(ci);
 			storeClientInfo();
-			return true;
-		} catch (com.nimbusds.oauth2.sdk.ParseException e) {
-			logger.log("Failed to parse provided client metadata", e);
-			return false;
+			return;
 		}
+
+		setClientInfo(ci);
 	}
 
 	protected OIDCClientInformation getClientInfo() {
@@ -435,21 +450,68 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	}
 
 	private void storeClientInfo() {
+		String clientProfileName = (String) stepCtx.get(TestStepParameterConstants.CLIENT_PROFILE_NAME);
+		Map<String, Object> storageTarget = suiteCtx;
+
+		if (!Strings.isNullOrEmpty(clientProfileName)) {
+			HashMap<String, Object> store = (HashMap<String, Object>) suiteCtx.get(clientProfileName);
+			if (store == null) {
+				storageTarget = new HashMap<>();
+			} else {
+				storageTarget = store;
+			}
+		}
+
 		if (type.equals(RPType.HONEST)) {
-			suiteCtx.put(RPContextConstants.HONEST_CLIENT_CLIENTINFO, clientInfo);
+			storageTarget.put(RPContextConstants.HONEST_CLIENT_CLIENTINFO, clientInfo);
 		} else {
-			suiteCtx.put(RPContextConstants.EVIL_CLIENT_CLIENTINFO, clientInfo);
+			storageTarget.put(RPContextConstants.EVIL_CLIENT_CLIENTINFO, clientInfo);
+		}
+
+		// store in suite context
+		if (!Strings.isNullOrEmpty(clientProfileName)) {
+			suiteCtx.put(clientProfileName, storageTarget);
 		}
 	}
 
-	private OIDCClientInformation getStoredClientInfo(boolean ofHonestClient) {
+	@Nullable
+	private OIDCClientInformation getStoredClientInfo(RPType type) {
 		OIDCClientInformation ci;
-		if (ofHonestClient) {
-			ci = (OIDCClientInformation) suiteCtx.get(RPContextConstants.HONEST_CLIENT_CLIENTINFO);
+		String clientProfileName = (String) stepCtx.get(TestStepParameterConstants.CLIENT_PROFILE_NAME);
+		Map<String, Object> lookupContext = suiteCtx;
+
+		if (!Strings.isNullOrEmpty(clientProfileName)) {
+			HashMap<String, Object> store = (HashMap<String, Object>) suiteCtx.get(clientProfileName);
+			if (store != null) {
+				lookupContext = store;
+			}
+		}
+
+		if (type.equals(RPType.HONEST)) {
+			ci = (OIDCClientInformation) lookupContext.get(RPContextConstants.HONEST_CLIENT_CLIENTINFO);
 		} else {
-			ci = (OIDCClientInformation) suiteCtx.get(RPContextConstants.EVIL_CLIENT_CLIENTINFO);
+			ci = (OIDCClientInformation) lookupContext.get(RPContextConstants.EVIL_CLIENT_CLIENTINFO);
 		}
 		return ci;
+	}
+
+	private OIDCClientInformation getUserProvidedClientInfo() throws InvalidConfigurationException {
+		// attempt to parse user provided ClientConfig JSON strings
+		String config = type.equals(RPType.HONEST) ? testOPConfig.getClient1Config() : testOPConfig.getClient2Config();
+
+		if (Strings.isNullOrEmpty(config)) {
+			// no client configuration provided
+			throw new InvalidConfigurationException("No Client Configuration provided.");
+		}
+		try {
+			JSONObject jsonConfig = JSONObjectUtils.parse(config);
+			OIDCClientInformation ci = OIDCClientInformation.parse(jsonConfig);
+			return ci;
+		} catch (com.nimbusds.oauth2.sdk.ParseException e) {
+			logger.logCodeBlock("Failed to parse provided client metadata:", config);
+			logger.logCodeBlock("Exception was: ", e.toString());
+			throw new InvalidConfigurationException("Invalid Client Configuration provided");
+		}
 	}
 
 	protected URI getClientUri() {
@@ -492,19 +554,19 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	}
 
 	protected ClientID getHonestClientID() {
-		return getStoredClientInfo(true).getID();
+		return getStoredClientInfo(RPType.HONEST).getID();
 	}
 
 	protected ClientID getEvilClientID() {
-		return getStoredClientInfo(false).getID();
+		return getStoredClientInfo(RPType.EVIL).getID();
 	}
 
 	protected Secret getHonesClientSecret() {
-		return getStoredClientInfo(true).getSecret();
+		return getStoredClientInfo(RPType.HONEST).getSecret();
 	}
 
 	protected Secret getEvilClientSecret() {
-		return getStoredClientInfo(false).getSecret();
+		return getStoredClientInfo(RPType.EVIL).getSecret();
 	}
 
 	protected Secret getClientSecret() {
@@ -534,26 +596,43 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		return registrationToken;
 	}
 
-	public boolean discoverOpIfNeeded() throws IOException, ParseException {
-		boolean isLearningStep = Boolean.parseBoolean((String) stepCtx.get(RPContextConstants.IS_RP_LEARNING_STEP));
-		// TODO: add and use startRPType instead of HONEST
-		if (isLearningStep && type == RPType.HONEST) {
-			return discoverRemoteOP();
-		}
+	public void discoverOpIfNeeded() throws IOException, ParseException, InvalidConfigurationException {
 		if (opMetaData != null) {
-			return true;
+			// OP configuration already retrieved earlier (other RP setup or former TestStep)
+			return;
 		}
-		if (suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION) != null) {
-			opMetaData = (UnsafeOIDCProviderMetadata) suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION);
-			return true;
+		if (!isStartRP()) {
+			// only run discovery once
+			return;
 		}
-		if (!Strings.isNullOrEmpty(testOPConfig.getOPMetadata())) {
-			logger.log("Parsing OP Metadata from provided JSON string");
-			opMetaData = UnsafeOIDCProviderMetadata.parse(testOPConfig.getOPMetadata());
-			suiteCtx.put(RPContextConstants.DISCOVERED_OP_CONFIGURATION, opMetaData);
-			return true;
+
+		boolean configValuesNotEmpty = !Strings.isNullOrEmpty(testOPConfig.getOPMetadata());
+		boolean discoverySuccess;
+		discoverySuccess = discoverRemoteOP();
+		if (configValuesNotEmpty) {
+			if (discoverySuccess) {
+				// merge values provided in test config (response type, scopes, grants, that shall be used )
+				// into discovery response.
+				logger.log("Merging provided OPMetadata values with discovered OPConfiguration");
+
+				JSONObject configMd = JSONObjectUtils.parse(testOPConfig.getOPMetadata());
+				JSONObject discoMd = opMetaData.toJSONObject();
+				configMd.forEach(discoMd::replace);
+
+				opMetaData = UnsafeOIDCProviderMetadata.parse(configMd);
+			} else {
+				// discovery failed, use provided config
+				logger.log("Parsing OP Metadata from provided JSON string");
+				opMetaData = UnsafeOIDCProviderMetadata.parse(testOPConfig.getOPMetadata());
+			}
+
+		} else {
+			if (!discoverySuccess) {
+				throw new InvalidConfigurationException("Discovery failed and no valid OPMetadata configuration provided.");
+			}
 		}
-		return false;
+		// store in suite context for retrieval in following test steps
+		suiteCtx.put(RPContextConstants.DISCOVERED_OP_CONFIGURATION, opMetaData);
 	}
 
 	private boolean discoverRemoteOP() throws IOException, ParseException {
@@ -579,9 +658,9 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 			logger.log("OP Configuration received");
 			logger.logHttpResponse(httpResponse, httpResponse.getContent());
 
-			UnsafeOIDCProviderMetadata opMetadata = UnsafeOIDCProviderMetadata.parse(httpResponse.getContentAsJSONObject());
-			opMetaData = opMetadata;
-			suiteCtx.put(RPContextConstants.DISCOVERED_OP_CONFIGURATION, opMetadata);
+			UnsafeOIDCProviderMetadata mdResponse = UnsafeOIDCProviderMetadata.parse(httpResponse.getContentAsJSONObject());
+			opMetaData = mdResponse;
+			suiteCtx.put(RPContextConstants.DISCOVERED_OP_CONFIGURATION, mdResponse);
 			return true;
 		} catch (ConnectException e) {
 			logger.log("Connection exception", e);
@@ -589,23 +668,10 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		}
 	}
 
-	private boolean areStepRequirementsMet() {
-		// check if RP Parameters provided in TestPlan contradict with user provided configuration
-		if (Boolean.parseBoolean((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))) {
-			if (opMetaData == null) {
-				opMetaData = (UnsafeOIDCProviderMetadata) suiteCtx.get(RPContextConstants.DISCOVERED_OP_CONFIGURATION);
-			}
-			if (opMetaData == null || opMetaData.getRegistrationEndpointURI() == null) {
-				logger.log("TestStep requires dynamic registration but no registration endpoint was found");
-				return false;
-			}
-		}
-
-		return isTestStepRunnable();
-	}
-
-	protected boolean isTestStepRunnable() {
-		return true;
+	protected boolean isTestStepRunnableForConfig(OIDCClientInformation ci) {
+		// TODO: add further checks or override in subclasses as necessary
+		boolean check = RPConfigHelper.testRunnableForConfig(ci, params, stepCtx);
+		return check;
 	}
 
 	// send a response to dangling browser

@@ -79,15 +79,18 @@ public class TestStepLogger {
 		log(e);
 	}
 
-	public void log(String text, Throwable ex) {
+	public void log(Throwable ex) {
+		log(null, ex);
+	}
+	
+	public void log(@Nullable String text, Throwable ex) {
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 
-		pw.println(text);
 		ex.printStackTrace(pw);
 		String fullText = sw.toString();
 
-		log(fullText);
+		logCodeBlock(text, fullText);
 	}
 
 	public void log(byte[] screenshot, String mimeType) {

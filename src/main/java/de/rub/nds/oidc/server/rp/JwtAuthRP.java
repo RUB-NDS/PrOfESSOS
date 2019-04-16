@@ -23,24 +23,6 @@ import static de.rub.nds.oidc.server.rp.RPParameterConstants.*;
 public class JwtAuthRP extends DefaultRP {
 
 	@Override
-	protected boolean isTestStepRunnable() {
-		boolean jwt_method_supported = false;
-		if (params.getBool(REGISTER_CLIENTAUTH_JWT)) {
-			jwt_method_supported = opMetaData.getTokenEndpointAuthMethods()
-					.contains(ClientAuthenticationMethod.CLIENT_SECRET_JWT);
-			logger.log("OP metadata indicates support of <code>client_secret_jwt</code> for client " +
-					"authentication: " + jwt_method_supported);
-		}
-		if (params.getBool(REGISTER_CLIENTAUTH_PK_JWT)) {
-			jwt_method_supported = opMetaData.getTokenEndpointAuthMethods()
-					.contains(ClientAuthenticationMethod.PRIVATE_KEY_JWT);
-			logger.log("OP metadata indicates support of <code>private_key_jwt</code> for client " +
-					"authentication: " + jwt_method_supported);
-		}
-		return jwt_method_supported;
-	}
-
-	@Override
 	protected URI getRegistrationJwkSetURI() {
 		if (params.getBool(REGISTER_CLIENTAUTH_PK_JWT)) {
 			return type == RPType.HONEST ? getHonestJwkSetUri() : getEvilJwkSetUri();

@@ -58,6 +58,7 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
@@ -165,7 +166,7 @@ public class DefaultOP extends AbstractOPImplementation {
 				info = new OIDCClientInformation(id, new Date(), clientMd, secret);
 
 				// replace some of the values with our own
-				info.getOIDCMetadata().setScope(Scope.parse("openid"));
+				info.getOIDCMetadata().setScope(Scope.parse(Arrays.asList("openid", "name","email", "preferred_username")));
 
 				if (type == OPType.HONEST) {
 					suiteCtx.put(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST, info);
@@ -223,7 +224,7 @@ public class DefaultOP extends AbstractOPImplementation {
 			ResponseMode responseMode = authReq.getResponseMode();
 
 			try {
-				checkTestStepPrerequisites(authReq);
+				checkRpTestStepPreconditions(authReq);
 
 				AuthorizationCode code = null;
 				CodeHash cHash = null;
@@ -296,8 +297,7 @@ public class DefaultOP extends AbstractOPImplementation {
 				ServletUtils.applyHTTPResponse(httpResp, resp);
 
 				resp.flushBuffer();
-				logger.logCodeBlock("Authentication Request processing resulted in:", String.format("%s(%s).",
-						ex.getClass().getName(), ex.getMessage()));
+				logger.logCodeBlock("Authentication Request processing resulted in:", ex.toString());
 				logger.log("Returning Authorization Error Response.");
 				logger.logHttpResponse(resp, httpResp.getContent());
 			}
