@@ -22,7 +22,7 @@ A few environment variables are read by PrOfESSOS and can be used for configurat
 |---|---|
 | OPIV_ALLOW_CUSTOM_TEST_ID  | If set to `true`, the API endpoint `/create-test-object` accepts a POST parameter `test_id` that can be used to specify the testId PrOfESSOS uses for the test object to be created. This especially useful when testing providers that do not support dynamic registration, as the testId is part of the `redirect_uri`  |   
 | OPIV_TARGET_GRANT_NOT_NEEDED  | Quickswitch to disable the check for a `.professos` file at the test target's root path. The file is otherwise required to contain the URL of PrOfESSOS to make sure the test target permitted the test run. This check coul also be disabled in the testplans (`rp_testplan.xml`,`op_testplan.xml`) |
-
+| TRUST_ALL_TLS | Disable certificate verification for backchannel communication. For example, if PrOfESSOS' OP-Verifier runs against an OP that serves an untrusted or invalid certificate, this environment variable must be set to `true` to enable direct connections, e.g., to the Discovery or Token Endpoint |
 
 ### Integration Tests
 
