@@ -1,15 +1,12 @@
 package de.rub.nds.oidc.browser;
 
-import com.google.common.base.Strings;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import de.rub.nds.oidc.server.op.OPContextConstants;
 import de.rub.nds.oidc.test_model.TestStepResult;
 import de.rub.nds.oidc.utils.UnsafeJSONObject;
 import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.tuple.Pair;
-import org.openqa.selenium.By;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -23,7 +20,7 @@ public class IDSpoofingRPBrowser extends DefaultRPTestBrowser {
 	protected TestStepResult checkConditionOnFinalPage() {
 		Object userInfoJson = stepCtx.get(OPContextConstants.STORED_USERINFO_RESPONSE_EVIL);
 		if (!(userInfoJson instanceof UnsafeJSONObject)) {
-			logger.logCodeBlock(userInfoJson.toString(), "Failed to check final condition, unexpected content:");
+			logger.logCodeBlock("Failed to check final condition, unexpected content:", userInfoJson.toString());
 			return null;
 		}
 		
@@ -58,8 +55,8 @@ public class IDSpoofingRPBrowser extends DefaultRPTestBrowser {
 					}
 				}
 				if (!usedClaims.isEmpty()) {
-					logger.logCodeBlock(String.join(", ", usedClaims),
-							"Detected use of invalid UserInfo claim(s):");
+					logger.logCodeBlock("Detected use of invalid UserInfo claim(s):", String.join(", ", usedClaims)
+					);
 					return TestStepResult.FAIL;
 				}
 			}

@@ -16,6 +16,7 @@
 
 package de.rub.nds.oidc.browser;
 
+import com.google.common.base.Strings;
 import de.rub.nds.oidc.server.op.OPContextConstants;
 import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.test_model.TestStepResult;
@@ -129,6 +130,12 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 
 	@Nullable
 	protected TestStepResult checkConditionAfterLogin() {
+		String notRunnableMsg = (String) stepCtx.get(OPContextConstants.TEST_RUN_NOT_FINISHED);
+		if (!Strings.isNullOrEmpty(notRunnableMsg)) {
+			logger.log("TestStep could not be executed, reason: " + notRunnableMsg);
+			return TestStepResult.NOT_RUN;
+		}
+		
 		return null;
 	}
 

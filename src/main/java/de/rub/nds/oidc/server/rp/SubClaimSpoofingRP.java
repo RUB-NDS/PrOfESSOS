@@ -82,7 +82,7 @@ public class SubClaimSpoofingRP extends DefaultRP {
 			}
 			return TestStepResult.PASS;
 		} catch (ParseException e) {
-			logger.logCodeBlock(idToken.getParsedString(), "Invalid ID Token received:");
+			logger.logCodeBlock("Invalid ID Token received:", idToken.getParsedString());
 			logger.log("Exception was", e);
 			return TestStepResult.UNDETERMINED;
 		}

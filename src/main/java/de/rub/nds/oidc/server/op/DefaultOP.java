@@ -112,6 +112,7 @@ public class DefaultOP extends AbstractOPImplementation {
 			logger.log("Returning default provider config.");
 			logger.logHttpResponse(resp, mdStr);
 
+			stepCtx.put(OPContextConstants.DISCOVERY_REQUESTED_AT_OP_TYPE, type);
 		} catch (IOException | ParseException ex) {
 			logger.log("Failed to process default provider config.", ex);
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -222,7 +223,7 @@ public class DefaultOP extends AbstractOPImplementation {
 			ResponseMode responseMode = authReq.getResponseMode();
 
 			try {
-				checkTestStepConditions(authReq);
+				checkTestStepPrerequisites(authReq);
 
 				AuthorizationCode code = null;
 				CodeHash cHash = null;
@@ -295,7 +296,7 @@ public class DefaultOP extends AbstractOPImplementation {
 				ServletUtils.applyHTTPResponse(httpResp, resp);
 
 				resp.flushBuffer();
-				logger.log(String.format("Authentication Request processing resulted in: %s(%s).",
+				logger.logCodeBlock("Authentication Request processing resulted in:", String.format("%s(%s).",
 						ex.getClass().getName(), ex.getMessage()));
 				logger.log("Returning Authorization Error Response.");
 				logger.logHttpResponse(resp, httpResp.getContent());

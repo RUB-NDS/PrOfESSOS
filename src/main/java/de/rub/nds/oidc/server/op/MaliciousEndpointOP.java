@@ -17,12 +17,7 @@
 package de.rub.nds.oidc.server.op;
 
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.oauth2.sdk.AuthorizationCode;
-import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
-import com.nimbusds.oauth2.sdk.AuthorizationGrant;
-import com.nimbusds.oauth2.sdk.GrantType;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
@@ -30,15 +25,16 @@ import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
+import de.rub.nds.oidc.server.TestNotApplicableException;
 import de.rub.nds.oidc.test_model.TestStepResult;
 import de.rub.nds.oidc.utils.Misc;
+
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.CompletableFuture;
-import javax.servlet.http.HttpServletResponse;
 
 /**
- *
  * @author Tobias Wich
  */
 public class MaliciousEndpointOP extends DefaultOP {
@@ -111,5 +107,4 @@ public class MaliciousEndpointOP extends DefaultOP {
 
 		return super.userInfoRequestInt(userReq, resp);
 	}
-
 }

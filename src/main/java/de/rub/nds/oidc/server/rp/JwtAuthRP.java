@@ -68,7 +68,7 @@ public class JwtAuthRP extends DefaultRP {
 			String clientAssert = ((ClientSecretJWT) clientAuth).getClientAssertion().serialize();
 
 			SignedJWT orig = (SignedJWT) JWTParser.parse(clientAssert);
-//			logger.logCodeBlock(orig.serialize(), "original client_assertion JWT:");
+//			logger.logCodeBlock("original client_assertion JWT:", orig.serialize());
 
 			String none = null;
 			if (params.getBool(TOKENREQ_CLIENTSECRET_JWT_NONE_ALG)) {
@@ -112,7 +112,7 @@ public class JwtAuthRP extends DefaultRP {
 			String newQuery = sb.toString();
 
 			req.setQuery(newQuery);
-//			logger.logCodeBlock(newJwt.serialize(), "manipulated client_assertion parameter:");
+//			logger.logCodeBlock("manipulated client_assertion parameter:", newJwt.serialize());
 
 		} catch (JOSEException | java.text.ParseException | UnsupportedEncodingException e) {
 			logger.log("Error generating client_secret_jwt", e);

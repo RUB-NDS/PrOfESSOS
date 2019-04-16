@@ -130,7 +130,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 
 		// start authentication
 		String authnReq = getAuthnReqString(rpType);
-		logger.logCodeBlock(authnReq, "Authentication Request URL:");
+		logger.logCodeBlock("Authentication Request URL:", authnReq);
 		driver.get(authnReq);
 
 		// delay form submissions to allow capturing screenshots
@@ -180,7 +180,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 		// store URL to make sure RP can access URI fragments (implicit/hybrid)
 		finalUrl = driver.getCurrentUrl();
 		stepCtx.put(RPContextConstants.LAST_BROWSER_URL, finalUrl);
-		logger.logCodeBlock(finalUrl, "Final URL as seen in Browser:");
+		logger.logCodeBlock("Final URL as seen in Browser:", finalUrl);
 		// confirm submission of redirect uri
 		blockRP.complete(null);
 	}

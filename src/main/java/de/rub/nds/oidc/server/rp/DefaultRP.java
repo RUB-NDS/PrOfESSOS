@@ -18,11 +18,9 @@ import com.nimbusds.openid.connect.sdk.*;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.TestStepResult;
-import de.rub.nds.oidc.utils.UnsafeTLSHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -246,7 +244,7 @@ public class DefaultRP extends AbstractRPImplementation {
 				sb.append(k + ": " + v + ", ");
 			});
 			sb.setLength(sb.length() - 2);
-			logger.logCodeBlock(sb.toString(), "Authentication Success Response received:");
+			logger.logCodeBlock("Authentication Success Response received:", sb.toString());
 			return authnResp;
 		}
 
@@ -258,8 +256,8 @@ public class DefaultRP extends AbstractRPImplementation {
 		logger.logHttpRequest(httpRequest, httpRequest.getQuery());
 
 		ErrorObject error = authnResp.toErrorResponse().getErrorObject();
-		logger.logCodeBlock(error.getDescription(), "Error received: ");
-		logger.logCodeBlock(error.toJSONObject().toString(), null);
+		logger.logCodeBlock("Error received: ", error.getDescription());
+		logger.logCodeBlock(error.toJSONObject().toString());
 
 		return authnResp;
 	}

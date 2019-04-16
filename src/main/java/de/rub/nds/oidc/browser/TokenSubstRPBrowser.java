@@ -19,10 +19,6 @@ public class TokenSubstRPBrowser extends DefaultRPTestBrowser {
 		OPType tokenReqReceived = (OPType) stepCtx.getOrDefault(OPContextConstants.TOKEN_REQ_RECEIVED_AT_OP_TYPE, null);
 		OPType userInfoRequests = (OPType) stepCtx.getOrDefault(OPContextConstants.USERINFO_REQ_RECEIVED_AT_OP_TYPE, null);
 
-		if ((boolean) stepCtx.getOrDefault(OPContextConstants.TEST_RUN_NOT_FINISHED, false)) {
-			return TestStepResult.NOT_RUN;
-		}
-
 		TestStepResult localResult = TestStepResult.PASS;
 		if (tokenReqReceived != null && tokenReqFails) {
 			// TODO: check flow, only fail when hybrid

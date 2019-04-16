@@ -45,6 +45,7 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.server.TestNotApplicableException;
+import de.rub.nds.oidc.server.TestStepParameterConstants;
 import de.rub.nds.oidc.test_model.OPConfigType;
 import de.rub.nds.oidc.test_model.ParameterType;
 import de.rub.nds.oidc.utils.InstanceParameters;
@@ -54,6 +55,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.Null;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
@@ -584,17 +586,14 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		}
 	}
 
-	protected void checkTestStepConditions(AuthenticationRequest authnReq) throws TestNotApplicableException {
-		String missingRTs = checkResponseType(authnReq.getResponseType());
-		if (!Strings.isNullOrEmpty(missingRTs)) {
-			logger.log(String.format("Test not applicable for requested response type. Expected response_type to contain \"%s\"",
-							missingRTs));
-			stepCtx.put(OPContextConstants.TEST_RUN_NOT_FINISHED, true);
-			throw new TestNotApplicableException("Requested response_type not Supported");
+	protected void checkTestStepPrerequisites(@Nullable AuthenticationRequest authnReq) throws TestNotApplicableException {
+		checkStepPreconditionDiscovery();
+		if (authnReq != null) {
+			checkStepPreconditionResponseTypes(authnReq.getResponseType());
 		}
 	}
 
-	private String checkResponseType(ResponseType respType) {
+	protected void checkStepPreconditionResponseTypes(ResponseType respType)  throws TestNotApplicableException {
 		boolean codeRequired = Boolean.parseBoolean((String) stepCtx.get(RESPONSE_TYPE_CONDITION_CODE));
 		boolean tokenRequired = Boolean.parseBoolean((String) stepCtx.get(RESPONSE_TYPE_CONDITION_TOKEN));
 		boolean idTokenRequired = Boolean.parseBoolean((String) stepCtx.get(RESPONSE_TYPE_CONDITION_IDTOKEN));
@@ -610,7 +609,24 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 			sb.append("token ");
 		}
 
-		return sb.toString().trim();
+		String missingRTs = sb.toString().trim();
+		if (!Strings.isNullOrEmpty(missingRTs)) {
+			String msg = String.format("Test not applicable for requested response type. Expected response_type to " +
+					"contain \"%s\"", missingRTs);
+			logger.log("Test precondition not fulfilled, test aborted.");
+			stepCtx.put(OPContextConstants.TEST_RUN_NOT_FINISHED, msg);
+			throw new TestNotApplicableException("Requested response_type not Supported");
+		}
+	}
+	
+	protected void checkStepPreconditionDiscovery() throws TestNotApplicableException {
+		boolean discoRequired = Boolean.parseBoolean((String) stepCtx.get(DISCOVERY_REQUEST_REQUIRED));
+		OPType discoReceivedAt = (OPType) stepCtx.get(OPContextConstants.DISCOVERY_REQUESTED_AT_OP_TYPE);
+		if (discoRequired && discoReceivedAt == null) {
+			logger.log("TestStep prerequisites not fulfilled: No discovery request was received but is required " +
+					"before the first Authentication Request.");
+			throw new TestNotApplicableException("Discovery Support required to run this test.");
+		}
 	}
 
 }

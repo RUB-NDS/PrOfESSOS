@@ -42,7 +42,8 @@ public class OPContextConstants {
 
 	public static final String TOKEN_REQ_RECEIVED_AT_OP_TYPE = PFX + "token-request-received-at-op-type";
 	public static final String USERINFO_REQ_RECEIVED_AT_OP_TYPE = PFX + "userinfo-request-received-at-op-type";
-
+	public static final String DISCOVERY_REQUESTED_AT_OP_TYPE = PFX + "discover-request-received-at-op-type";
+	
 	public static final String TOKEN_INFORMATIONLEAK_FUTURE = PFX + "token-information-leak-future";
 	public static final String USERINFO_INFORMATIONLEAK_FUTURE = PFX + "userinfo-information-leak-future";
 

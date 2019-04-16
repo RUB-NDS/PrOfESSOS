@@ -9,8 +9,13 @@ public class IssuerConfusionRPBrowser extends DefaultRPTestBrowser {
 
 	@Override
 	protected TestStepResult checkConditionAfterLogin() {
+		// check if discovery was requested
+		TestStepResult tr = super.checkConditionAfterLogin();
+		if (tr != null) {
+			return tr;
+		}
+		
 		OPType tokenRequestReceivedAt = (OPType) stepCtx.get(OPContextConstants.TOKEN_REQ_RECEIVED_AT_OP_TYPE);
-
 		if (OPType.HONEST.equals(tokenRequestReceivedAt)) {
 			logger.log("TokenRequest received at HonestOP, although not specified in malicious Discovery response");
 			logger.log("This may indicate a violation of \"https://openid.net/specs/openid-connect-discovery-1_0.html\", Section 3, and/or Section 4.3");

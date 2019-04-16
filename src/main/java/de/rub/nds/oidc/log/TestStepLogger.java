@@ -99,7 +99,11 @@ public class TestStepLogger {
 		log(e);
 	}
 
-	public void logCodeBlock(@Nonnull String content, @Nullable String description) {
+	public void logCodeBlock(String content) {
+		logCodeBlock(null, content);
+	}
+
+	public void logCodeBlock(@Nullable String description, @Nonnull String content) {
 		CodeBlockEntryType entry = new CodeBlockEntryType();
 		if (!Strings.isNullOrEmpty(description)) {
 			entry.setDescription(description);

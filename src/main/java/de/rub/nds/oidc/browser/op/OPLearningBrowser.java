@@ -1,15 +1,10 @@
 package de.rub.nds.oidc.browser.op;
 
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import de.rub.nds.oidc.server.rp.RPContextConstants;
 import de.rub.nds.oidc.server.rp.RPType;
 import de.rub.nds.oidc.test_model.TestStepResult;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.net.URI;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -31,7 +26,7 @@ public class OPLearningBrowser extends MultiRpMultiUserAuthRunner {
 		URI evilRedirect = (URI) stepCtx.get(RPContextConstants.RP2_PREPARED_REDIRECT_URI);
 
 		// run login script
-		logger.logCodeBlock(authnReq, "Authentication Request, opening browser with URL:");
+		logger.logCodeBlock("Authentication Request, opening browser with URL:", authnReq);
 		driver.get(authnReq);
 		// delay form submissions to allow for taking screenshots
 		// using selenium (after executeScript() returned)
@@ -41,7 +36,7 @@ public class OPLearningBrowser extends MultiRpMultiUserAuthRunner {
 		// prepare scripts for login and consent page
 		evalScriptTemplates();
 		try {
-			logger.logCodeBlock(submitScript, "Using Login script:");
+			logger.logCodeBlock("Using Login script:", submitScript);
 
 			waitForDocumentReadyAndJsReady(() -> {
 				driver.executeScript(submitScript);
@@ -65,7 +60,7 @@ public class OPLearningBrowser extends MultiRpMultiUserAuthRunner {
 		} else {
 			try {
 				driver.executeScript(getFormSubmitDelayScript());
-				logger.logCodeBlock(consentScript, "Using Consent script:");
+				logger.logCodeBlock("Using Consent script:", consentScript);
 
 				waitForPageLoad(() -> {
 					driver.executeScript(consentScript);

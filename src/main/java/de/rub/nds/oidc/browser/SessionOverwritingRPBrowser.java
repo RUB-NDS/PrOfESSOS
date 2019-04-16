@@ -3,14 +3,9 @@ package de.rub.nds.oidc.browser;
 import de.rub.nds.oidc.server.op.OPContextConstants;
 import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.test_model.TestStepResult;
-import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -36,7 +31,7 @@ public class SessionOverwritingRPBrowser extends DefaultRPTestBrowser {
 
 			// open clients login page
 			String startUrl = rpConfig.getUrlClientTarget();
-			logger.logCodeBlock(startUrl, "Opening browser with URL :");
+			logger.logCodeBlock("Opening browser with URL :", startUrl);
 
 			waitForPageLoad(() -> {
 				driver.get(startUrl);
@@ -97,17 +92,17 @@ public class SessionOverwritingRPBrowser extends DefaultRPTestBrowser {
 			TestStepResult result = blockAndResult.get(15, TimeUnit.SECONDS);
 			logger.log("Authentication result:");
 			logScreenshot();
-			logger.logCodeBlock(driver.getCurrentUrl(), "Final URL as seen in Browser: ");
+			logger.logCodeBlock("Final URL as seen in Browser: ", driver.getCurrentUrl());
 			return result;
 		} catch (TimeoutException ex) {
 			logger.log("Timeout while waiting for token request, assuming test passed.");
 			logScreenshot();
-			logger.logCodeBlock(driver.getCurrentUrl(), "Final URL as seen in Browser: ");
+			logger.logCodeBlock("Final URL as seen in Browser: ", driver.getCurrentUrl());
 			return TestStepResult.PASS;
 		} catch (ExecutionException  ex) {
 			logger.log("Waiting for Honest OP or test result gave an error.", ex);
 			logScreenshot();
-			logger.logCodeBlock(driver.getCurrentUrl(), "Final URL as seen in Browser: ");
+			logger.logCodeBlock("Final URL as seen in Browser: ", driver.getCurrentUrl());
 			return TestStepResult.UNDETERMINED;
 		} catch (InterruptedException ex) {
 			throw new RuntimeException("Test interrupted.", ex);

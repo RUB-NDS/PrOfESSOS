@@ -216,7 +216,7 @@ public class RumRP extends DefaultRP {
 		String scheme = benign.getScheme() + "://";
 		uriResult = benign.toString().replaceFirst(scheme, "");
 		uriResult = scheme + userInfoPart + uriResult;
-		logger.logCodeBlock(uriResult, "Using Redirect URI");
+		logger.logCodeBlock("Using Redirect URI", uriResult);
 
 		return uriResult;
 

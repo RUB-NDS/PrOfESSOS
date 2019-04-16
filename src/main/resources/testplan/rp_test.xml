@@ -1820,7 +1820,7 @@
 
 			<h4>Execution.</h4>
 			PrOfESSOS issues an ID Token containing a HS256 signature created using a key that is 
-			contained encoded octet string in the token's JWK member.
+			contained in the token's JWK member as encoded octet string.
 
 			<h4>Result Evaluation.</h4>
 			The attack is successful if the ID Token is accepted by the client.
@@ -1830,7 +1830,7 @@
 		]]>
 		</Description>
 		<TestParameters>
-			<Parameter Key="discovery_support_needed">true</Parameter>
+			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<BrowserSimulator>

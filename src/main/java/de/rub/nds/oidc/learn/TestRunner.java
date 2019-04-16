@@ -303,7 +303,7 @@ public class TestRunner {
 			String prefix = "enforce-rp-reg-";
 			String regEnforcer = prefix + RandomStringUtils.randomAlphanumeric(8);
 			evilWebfinger = hostCfg.getEvilOPUri().toString() + regEnforcer + "/" + testId;
-			logger.logCodeBlock(evilWebfinger, "Trigger new registration at Evil OP, set discovery URI:");
+			logger.logCodeBlock("Trigger new registration at Evil OP, set discovery URI:", evilWebfinger);
 			testStepCtx.put(OPContextConstants.REGISTRATION_ENFORCING_PATH_FRAGMENT, regEnforcer);
 		} else {
 			evilWebfinger = testConfig.getEvilWebfingerResourceId();
