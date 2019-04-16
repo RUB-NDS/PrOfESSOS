@@ -28,6 +28,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBElement;
+import java.util.ArrayList;
 
 /**
  * @author Tobias Wich
@@ -79,14 +80,18 @@ public class Learner {
 		if (testId == null || !testObjs.isAllowCustomTestIds()) {
 			testId = valueGenerator.generateTestId();
 		}
-		// bind each testId to a new session and delete references to stale
+
+		// bind each testId to a session and delete references to stale
 		// testObjects on session invalidation (default: 60min inactive, set in web.xml)
-		if (req.getSession(false) != null) {
-			// invalidate old session to delete references to testObjects
-			req.getSession().invalidate();
-		}
 		HttpSession session = req.getSession(true);
-		session.setAttribute("testId", testId);
+
+		@SuppressWarnings("unchecked")
+		ArrayList<String> sessionTestIDs = (ArrayList) session.getAttribute("testIDs");
+		if (sessionTestIDs == null) {
+			sessionTestIDs = new ArrayList<>();
+		}
+		sessionTestIDs.add(testId);
+		session.setAttribute("testIDs", sessionTestIDs);
 
 		TestRunner runner;
 		if (role.equals("rp"))
