@@ -9,6 +9,7 @@ import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretJWT;
+import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import de.rub.nds.oidc.server.op.UnsafeJWT;
 import net.minidev.json.JSONObject;
@@ -52,9 +53,18 @@ public class JwtAuthRP extends DefaultRP {
 			// remove Authorization header, if any
 			req.setHeader("Authorization", null);
 
-			// prepare a dummy client_assertion query parameter
+			// Prepare a dummy "client_assertion" query parameter
+			Secret assertionSecret;
+			if (clientInfo.getSecret().getValueBytes().length < 32) {
+				assertionSecret = new Secret();
+				// we should leave a message about this:
+				logger.log("Generated a new client Secret as dummy key for the client_assert HMAC generation");
+			} else {
+				assertionSecret = clientInfo.getSecret();
+			}
+
 			ClientAuthentication clientAuth = new ClientSecretJWT(clientInfo.getID(), opMetaData.getTokenEndpointURI(),
-					JWSAlgorithm.HS384, clientInfo.getSecret());
+					JWSAlgorithm.HS256, assertionSecret);
 			String clientAssert = ((ClientSecretJWT) clientAuth).getClientAssertion().serialize();
 
 			SignedJWT orig = (SignedJWT) JWTParser.parse(clientAssert);
@@ -93,8 +103,12 @@ public class JwtAuthRP extends DefaultRP {
 			// add the clientAssertion to the TokenRequest query
 			StringBuilder sb = new StringBuilder();
 			sb.append(req.getQuery());
+			sb.append("&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer");
 			sb.append("&client_assertion=");
 			sb.append(URLEncoder.encode(newJwt.serialize(), "utf-8"));
+			// some faulty OPs require additional client_id param
+			sb.append("&client_id=");
+			sb.append(getClientID().getValue());
 			String newQuery = sb.toString();
 
 			req.setQuery(newQuery);

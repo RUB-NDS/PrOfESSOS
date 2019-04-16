@@ -14,55 +14,18 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class OPLearningBrowser extends AbstractOPBrowser {
-
-
-	@Override
-	public final TestStepResult run() throws InterruptedException {
-		logger.log("OPLearningBrowser started");
-		if (!(boolean) stepCtx.get(RPContextConstants.STEP_SETUP_FINISHED)) {
-			logger.log("Test-setup indicates configuration error");
-			return TestStepResult.UNDETERMINED;
-		}
-		Pair<String,String> user1 = new ImmutablePair<>(opConfig.getUser1Name(), opConfig.getUser1Pass());
-		Pair<String,String> user2 = new ImmutablePair<>(opConfig.getUser2Name(), opConfig.getUser2Pass());
-		List<Pair> users = Arrays.asList(user1, user2);
-
-		for (RPType type : RPType.values()) {
-			for (Pair entry : users) {
-				userName = (String) entry.getKey();
-				userPass = (String) entry.getValue();
-
-				TestStepResult result = runUserAuth(type);
-				if (result != TestStepResult.PASS) {
-					logger.log(String.format("Authentication of User %s with password %s failed", userName, userPass));
-					return result;
-				}
-				// reload browser to clear sessions
-				loadDriver(true);
-			}
-		}
-
-		return TestStepResult.PASS;
-	}
+public class OPLearningBrowser extends MultiRpMultiUserAuthRunner {
 
 	@Override
 	protected TestStepResult runUserAuth(RPType rpType) throws InterruptedException {
-//		TestStepResult result = TestStepResult.NOT_RUN;
-		logger.log("run userAuth");
-
 		// store user credentials to make them accessible to RP
 		stepCtx.put(RPContextConstants.CURRENT_USER_USERNAME, userName);
 		stepCtx.put(RPContextConstants.CURRENT_USER_PASSWORD, userPass);
-
 		// prepare locks and share with RP
-		CompletableFuture<?> blockRP = new CompletableFuture();
-		stepCtx.put(RPContextConstants.BLOCK_RP_FOR_BROWSER_FUTURE, blockRP);
-		CompletableFuture<TestStepResult> blockAndResult = new CompletableFuture<>();
-		stepCtx.put(RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT, blockAndResult);
+		initRPLocks();
 
+		logger.log(String.format("Start user authentication for %s with username: %s", getClientName(rpType), userName));
 		// fetch prepared authentication request and start authentication
-//		AuthenticationRequest authnReq = getAuthnReq(rpType);
 		String authnReq = getAuthnReqString(rpType);
 		URI honestRedirect = (URI) stepCtx.get(RPContextConstants.RP1_PREPARED_REDIRECT_URI);
 		URI evilRedirect = (URI) stepCtx.get(RPContextConstants.RP2_PREPARED_REDIRECT_URI);
@@ -117,18 +80,9 @@ public class OPLearningBrowser extends AbstractOPBrowser {
 				return TestStepResult.UNDETERMINED;
 			}
 		}
-
-		String finalUrl = driver.getCurrentUrl();
-		stepCtx.put(RPContextConstants.LAST_BROWSER_URL, finalUrl);
-		// confirm submission of redirect uri
-		blockRP.complete(null);
-
-		// wait until RP finished processing callback
-
-		// take a screenshot again to show the finished site
-		logger.log("Last URL seen in Browser: " + finalUrl);
+		
+		confirmBrowserFinished();
 		logScreenshot();
-
 
 		try {
 			return blockAndResult.get(10, TimeUnit.SECONDS);

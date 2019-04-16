@@ -16,24 +16,12 @@
 
 package de.rub.nds.oidc.server.op;
 
-import com.google.common.base.Strings;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.JWT;
-import com.nimbusds.oauth2.sdk.AuthorizationCode;
-import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
-import com.nimbusds.oauth2.sdk.AuthorizationGrant;
-import com.nimbusds.oauth2.sdk.ErrorObject;
-import com.nimbusds.oauth2.sdk.GrantType;
-import com.nimbusds.oauth2.sdk.OAuth2Error;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.ResponseMode;
-import com.nimbusds.oauth2.sdk.ResponseType;
-import com.nimbusds.oauth2.sdk.Scope;
-import com.nimbusds.oauth2.sdk.TokenErrorResponse;
-import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.client.ClientRegistrationErrorResponse;
@@ -45,15 +33,7 @@ import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.BearerTokenError;
-import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
-import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
-import com.nimbusds.openid.connect.sdk.Nonce;
-import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoRequest;
-import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
+import com.nimbusds.openid.connect.sdk.*;
 import com.nimbusds.openid.connect.sdk.claims.AccessTokenHash;
 import com.nimbusds.openid.connect.sdk.claims.CodeHash;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
@@ -64,6 +44,15 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientRegistrationRequest;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import de.rub.nds.oidc.server.RequestPath;
+import de.rub.nds.oidc.server.TestNotApplicableException;
+import net.minidev.json.JSONObject;
+import org.apache.commons.text.StringEscapeUtils;
+
+import javax.annotation.Nullable;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
@@ -71,16 +60,8 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
-import javax.annotation.Nullable;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import net.minidev.json.JSONObject;
-import org.apache.commons.text.StringEscapeUtils;
 
 /**
- *
  * @author Tobias Wich
  */
 public class DefaultOP extends AbstractOPImplementation {
@@ -97,8 +78,8 @@ public class DefaultOP extends AbstractOPImplementation {
 			JsonObject result = Json.createObjectBuilder()
 					.add("subject", resource)
 					.add("links", Json.createArrayBuilder().add(Json.createObjectBuilder()
-					.add("rel", "http://openid.net/specs/connect/1.0/issuer")
-					.add("href", href)))
+							.add("rel", "http://openid.net/specs/connect/1.0/issuer")
+							.add("href", href)))
 					.build();
 			StringWriter sw = new StringWriter();
 			Json.createWriter(sw).writeObject(result);
@@ -121,15 +102,15 @@ public class DefaultOP extends AbstractOPImplementation {
 		logger.logHttpRequest(req, null);
 		try {
 
-				OIDCProviderMetadata md = getDefaultOPMetadata();
-				String mdStr = md.toJSONObject().toString();
+			OIDCProviderMetadata md = getDefaultOPMetadata();
+			String mdStr = md.toJSONObject().toString();
 
-				resp.setContentType("application/json");
-				resp.getWriter().write(mdStr);
+			resp.setContentType("application/json");
+			resp.getWriter().write(mdStr);
 
-				resp.flushBuffer();
-				logger.log("Returning default provider config.");
-				logger.logHttpResponse(resp, mdStr);
+			resp.flushBuffer();
+			logger.log("Returning default provider config.");
+			logger.logHttpResponse(resp, mdStr);
 
 		} catch (IOException | ParseException ex) {
 			logger.log("Failed to process default provider config.", ex);
@@ -241,6 +222,8 @@ public class DefaultOP extends AbstractOPImplementation {
 			ResponseMode responseMode = authReq.getResponseMode();
 
 			try {
+				checkTestStepConditions(authReq);
+
 				AuthorizationCode code = null;
 				CodeHash cHash = null;
 				if (responseType.contains("code")) {
@@ -305,13 +288,15 @@ public class DefaultOP extends AbstractOPImplementation {
 				resp.flushBuffer();
 				logger.log("Returning default Authorization Response.");
 				logger.logHttpResponse(resp, httpRes.getContent());
-			} catch (GeneralSecurityException | JOSEException ex) {
+			} catch (GeneralSecurityException | JOSEException | TestNotApplicableException ex) {
 				ErrorObject errorCode = OAuth2Error.SERVER_ERROR;
 				AuthenticationErrorResponse error = new AuthenticationErrorResponse(redirectUri, errorCode, state, ResponseMode.QUERY);
 				HTTPResponse httpResp = error.toHTTPResponse();
 				ServletUtils.applyHTTPResponse(httpResp, resp);
 
 				resp.flushBuffer();
+				logger.log(String.format("Authentication Request processing resulted in: %s(%s).",
+						ex.getClass().getName(), ex.getMessage()));
 				logger.log("Returning Authorization Error Response.");
 				logger.logHttpResponse(resp, httpResp.getContent());
 			}
@@ -386,7 +371,7 @@ public class DefaultOP extends AbstractOPImplementation {
 			HTTPRequest httpReq = ServletUtils.createHTTPRequest(req);
 			UserInfoRequest userReq = UserInfoRequest.parse(httpReq);
 			logger.logHttpRequest(req, httpReq.getQuery());
-			
+
 			UserInfoSuccessResponse uiResp = userInfoRequestInt(userReq, resp);
 			if (uiResp != null) {
 				sendResponse("User Info", uiResp, resp);
@@ -413,18 +398,21 @@ public class DefaultOP extends AbstractOPImplementation {
 		//AccessTokenHash atHash = AccessTokenHash.compute(at, JWSAlgorithm.RS256);
 
 		UserInfo ui = getUserInfo();
-
 		UserInfoSuccessResponse uiResp = new UserInfoSuccessResponse(ui);
+
+		// save request target
+		stepCtx.put(OPContextConstants.USERINFO_REQ_RECEIVED_AT_OP_TYPE, type);
+
 		return uiResp;
 	}
 
 	@Override
 	public void untrustedKeyRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-			logger.log("Unexpected untrustedKeyRequest received");
-			HTTPRequest httpReq = ServletUtils.createHTTPRequest(req);
-			logger.logHttpRequest(req, httpReq.getQuery());
+		logger.log("Unexpected untrustedKeyRequest received");
+		HTTPRequest httpReq = ServletUtils.createHTTPRequest(req);
+		logger.logHttpRequest(req, httpReq.getQuery());
 
-			resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED);
+		resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED);
 	}
 
 }

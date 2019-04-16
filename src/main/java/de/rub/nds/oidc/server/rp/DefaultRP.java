@@ -22,6 +22,7 @@ import de.rub.nds.oidc.utils.UnsafeTLSHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -41,7 +42,6 @@ import static de.rub.nds.oidc.server.rp.RPContextConstants.*;
 import static de.rub.nds.oidc.server.rp.RPParameterConstants.*;
 
 public class DefaultRP extends AbstractRPImplementation {
-
 
 	@Override
 	public void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException {
@@ -87,7 +87,7 @@ public class DefaultRP extends AbstractRPImplementation {
 		AccessToken at = null;
 		JWT idToken = null;
 		AuthenticationSuccessResponse successResponse = authnResp.toSuccessResponse();
-		if (successResponse.impliedResponseType().impliesCodeFlow() && !params.getBool(FORCE_NO_REDEEM_AUTH_CODE)) {
+		if (successResponse.getAuthorizationCode() != null && !params.getBool(FORCE_NO_REDEEM_AUTH_CODE)) {
 			// attempt code redemption
 			TokenResponse tokenResponse = redeemAuthCode(successResponse.getAuthorizationCode());
 			if (!tokenResponse.indicatesSuccess()) {
@@ -100,7 +100,7 @@ public class DefaultRP extends AbstractRPImplementation {
 				return;
 			}
 
-			if (params.getBool(SUCCESSFUL_CODE_REDEMPTION_FAILS_TEST)) {
+			if (params.getBool(TOKEN_RECEIVAL_FAILS_TEST)) {
 				logger.log("AuthorizationCode successfully redeemed, assuming test failed.");
 				browserBlocker.complete(TestStepResult.FAIL);
 				return;
@@ -279,9 +279,9 @@ public class DefaultRP extends AbstractRPImplementation {
 				codeGrant);
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
-		httpRequest.setSSLSocketFactory(UnsafeTLSHelper.getTrustAllSocketFactory());
-		httpRequest.setHostnameVerifier(UnsafeTLSHelper.getTrustAllHostnameVerifier());
-		
+		httpRequest.setSSLSocketFactory(tlsHelper.getTrustAllSocketFactory());
+		httpRequest.setHostnameVerifier(tlsHelper.getTrustAllHostnameVerifier());
+
 		// perform request customization as per TestStepReference
 		tokenRequestApplyClientAuth(httpRequest);
 		tokenRequestApplyPKCEParams(httpRequest);
@@ -308,6 +308,9 @@ public class DefaultRP extends AbstractRPImplementation {
 	protected void tokenRequestApplyClientAuth(HTTPRequest req) {
 		// remove temporary Authorization header
 		req.setHeader("Authorization", null);
+		if (params.getBool(TOKENREQ_FORCE_NO_CLIENT_AUTH)) {
+			return;
+		}
 
 		try {
 			String encodedID = URLEncoder.encode(getClientID().getValue(), "UTF-8");
@@ -316,17 +319,22 @@ public class DefaultRP extends AbstractRPImplementation {
 			StringBuilder sb = new StringBuilder();
 
 			// client_secret_post
-			if (params.getBool(RPParameterConstants.TOKENREQ_FORCE_CLIENTAUTH_POST)) {
+			if (params.getBool(TOKENREQ_FORCE_CLIENTAUTH_POST)) {
 				String encodedQuery = req.getQuery();
 				sb.append(encodedQuery);
-				if (!params.getBool(RPParameterConstants.TOKENREQ_CLIENTAUTH_EMPTY_ID)) {
+				if (!params.getBool(TOKENREQ_CLIENTAUTH_EXCL_ID)) {
 					sb.append("&client_id=");
-					sb.append(encodedID);
+					if (!params.getBool(TOKENREQ_CLIENTAUTH_EMPTY_ID)) {
+						sb.append(encodedID);
+					}
 				}
-				if (!params.getBool(RPParameterConstants.TOKENREQ_CLIENTAUTH_EMPTY_SECRET)) {
+				if (!params.getBool(TOKENREQ_CLIENTAUTH_EXCL_SECRET)) {
 					sb.append("&client_secret=");
-					sb.append(encodedSecret);
+					if (!params.getBool(TOKENREQ_CLIENTAUTH_EMPTY_SECRET)) {
+						sb.append(encodedSecret);
+					}
 				}
+
 				req.setQuery(sb.toString());
 				return;
 			}
@@ -334,17 +342,22 @@ public class DefaultRP extends AbstractRPImplementation {
 			// client_secret_basic
 			sb.append("Basic ");
 			StringBuilder credentials = new StringBuilder();
-			if (!params.getBool(RPParameterConstants.TOKENREQ_CLIENTAUTH_EMPTY_ID)) {
+			if (!params.getBool(TOKENREQ_CLIENTAUTH_EMPTY_ID)) {
 				credentials.append(getClientID().getValue());
 			}
-			credentials.append(":");
-			if (!params.getBool(RPParameterConstants.TOKENREQ_CLIENTAUTH_EMPTY_SECRET)) {
+			if (!params.getBool(TOKENREQ_CLIENTAUTH_EXCL_SECRET)) {
+				credentials.append(":");
+			}
+			if (!params.getBool(TOKENREQ_CLIENTAUTH_EMPTY_SECRET) && !params.getBool(TOKENREQ_CLIENTAUTH_EXCL_SECRET)) {
 				credentials.append(getClientSecret().getValue());
 			}
-
 			String b64Creds = Base64.getEncoder().encodeToString(credentials.toString().getBytes(Charset.forName("UTF-8")));
-			sb.append(b64Creds);
 
+			if (params.getBool(TOKENREQ_CLIENTAUTH_EXCL_ID) && params.getBool(TOKENREQ_CLIENTAUTH_EXCL_SECRET)) {
+				b64Creds = "";
+			}
+
+			sb.append(b64Creds);
 			req.setHeader("Authorization", sb.toString());
 		} catch (UnsupportedEncodingException e) {
 			// utf-8 should always be supported
@@ -357,8 +370,8 @@ public class DefaultRP extends AbstractRPImplementation {
 		BearerAccessToken bat = (BearerAccessToken) at;
 
 		HTTPRequest httpRequest = new UserInfoRequest(opMetaData.getUserInfoEndpointURI(), bat).toHTTPRequest();
-		httpRequest.setSSLSocketFactory(UnsafeTLSHelper.getTrustAllSocketFactory());
-		httpRequest.setHostnameVerifier(UnsafeTLSHelper.getTrustAllHostnameVerifier());
+		httpRequest.setSSLSocketFactory(tlsHelper.getTrustAllSocketFactory());
+		httpRequest.setHostnameVerifier(tlsHelper.getTrustAllHostnameVerifier());
 
 		HTTPResponse httpResponse = httpRequest.send();
 		logger.log("UserInfo requested");
@@ -385,9 +398,9 @@ public class DefaultRP extends AbstractRPImplementation {
 	protected URI getAuthReqRedirectUri() {
 		URI redirURI = params.getBool(AUTHNREQ_FORCE_EVIL_REDIRURI) ? getEvilRedirectUri() : getRedirectUri();
 
-		boolean subdom = params.getBool(RPParameterConstants.AUTHNREQ_ADD_SUBDOMAIN_REDIRURI);
-		boolean path = params.getBool(RPParameterConstants.AUTHNREQ_ADD_PATHSUFFIX_REDIRURI);
-		boolean tld = params.getBool(RPParameterConstants.AUTHNREQ_ADD_INVALID_TLD);
+		boolean subdom = params.getBool(AUTHNREQ_ADD_SUBDOMAIN_REDIRURI);
+		boolean path = params.getBool(AUTHNREQ_ADD_PATHSUFFIX_REDIRURI);
+		boolean tld = params.getBool(AUTHNREQ_ADD_INVALID_TLD);
 		if (subdom || path || tld) {
 			return manipulateURI(redirURI, subdom, path, tld);
 		}
@@ -408,6 +421,9 @@ public class DefaultRP extends AbstractRPImplementation {
 	protected URI getTokenReqRedirectUri() {
 		if (params.getBool(TOKENREQ_FORCE_EVIL_REDIRURI)) {
 			return getEvilRedirectUri();
+		}
+		if (params.getBool(TOKENREQ_FORCE_HONEST_REDIRURI)) {
+			return getHonestRedirectUri();
 		}
 		if (params.getBool(TOKENREQ_REDIRURI_EXCLUDED)) {
 			return null;
@@ -449,9 +465,15 @@ public class DefaultRP extends AbstractRPImplementation {
 	}
 
 	protected Scope getAuthReqScope() {
-		Scope scopes = new Scope(
+		Scope scopes;
+		if (params.getBool(AUTHNREQ_ADD_INVALID_SCOPE)) {
+			scopes = new Scope("openid", "and some","invalid","scopes","please!");
+		} else {
+		scopes = new Scope(
 				OIDCScopeValue.OPENID,
 				OIDCScopeValue.PROFILE);
+		}
+		
 		return scopes;
 	}
 
@@ -540,13 +562,13 @@ public class DefaultRP extends AbstractRPImplementation {
 	@Override
 	protected HashSet<GrantType> getRegistrationGrantTypes() {
 		HashSet<GrantType> grantTypes = new HashSet<>();
-		if (params.getBool(RPParameterConstants.REGISTER_GRANT_TYPE_AUTHCODE)) {
+		if (params.getBool(REGISTER_GRANT_TYPE_AUTHCODE)) {
 			grantTypes.add(new GrantType("authorization_code"));
 		}
-		if (params.getBool(RPParameterConstants.REGISTER_GRANT_TYPE_IMPLICIT)) {
+		if (params.getBool(REGISTER_GRANT_TYPE_IMPLICIT)) {
 			grantTypes.add(new GrantType("implicit"));
 		}
-		if (params.getBool(RPParameterConstants.REGISTER_GRANT_TYPE_REFRESH)) {
+		if (params.getBool(REGISTER_GRANT_TYPE_REFRESH)) {
 			grantTypes.add(new GrantType("refresh_token"));
 		}
 		if (grantTypes.isEmpty()) {

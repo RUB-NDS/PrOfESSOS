@@ -30,11 +30,7 @@ public class OPCodeReuseBrowser extends AbstractOPBrowser {
 			RPType type = isSingleRP ? RPType.HONEST : (i == 1) ? RPType.EVIL : RPType.HONEST;
 
 			result = runUserAuth(type);
-			//TODO why should we ever want to break out here?
-//			if (result != TestStepResult.PASS && i == 1) {
-//				logger.log(String.format("Authentication of User %s with password %s failed", userName, userPass));
-//				return result;
-//			}
+
 			// reload browser to clear sessions
 			loadDriver(true);
 		}

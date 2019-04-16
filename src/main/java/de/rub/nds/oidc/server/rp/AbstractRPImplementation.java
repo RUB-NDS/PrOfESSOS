@@ -35,6 +35,7 @@ import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.UriBuilder;
@@ -62,7 +63,11 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	protected TestOPConfigType testOPConfig;
 	protected OIDCClientInformation clientInfo;
 	protected UnsafeOIDCProviderMetadata opMetaData;
+	protected UnsafeTLSHelper tlsHelper;
 
+	public AbstractRPImplementation() {
+		this.tlsHelper = new UnsafeTLSHelper();
+	}
 
 	@Override
 	public void setRPConfig(RPConfigType cfg) {
@@ -109,6 +114,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	public void setTestOPConfig(TestOPConfigType cfg) {
 		this.testOPConfig = cfg;
 	}
+	
 
 	protected URI getRedirectUri() {
 		return type == RPType.HONEST ? getHonestRedirectUri() : getEvilRedirectUri();
@@ -134,6 +140,10 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		return UriBuilder.fromUri(opivCfg.getHonestRPUri()).path(testId).path(JWKS_PATH).build();
 	}
 
+	protected boolean isStartRP() {
+		String startRP = (String) stepCtx.getOrDefault(RPContextConstants.START_RP_TYPE, "HONEST");
+		return type.toString().equals(startRP);
+	}
 
 	protected URI manipulateURI(URI uri, boolean addSubdomain, boolean addPath, boolean addTld) {
 		String rnd = RandomStringUtils.randomAlphanumeric(12);
@@ -145,7 +155,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 			newHost = rnd + "." + newHost;
 		}
 		if (addTld) {
-			newHost = newHost + ".invalid";
+			newHost = newHost + "." + RPContextConstants.INVALID_TLD;
 		}
 		ub.host(newHost);
 
@@ -160,17 +170,13 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		return result;
 	}
 
-
 	@Override
 	public boolean runTestStepSetup() throws ParseException, IOException {
-		boolean success = true;
-
+		// TODO refactoring
 		// dont run setup steps for RP2 unless neccessary
-		if (RPType.HONEST.equals(type)
-				|| !Boolean.parseBoolean((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST))
-				|| Boolean.parseBoolean((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))
-				|| Boolean.parseBoolean((String) stepCtx.get(RPContextConstants.IS_RP_LEARNING_STEP))) {
-
+		boolean currentIsStartRp = isStartRP();
+		boolean success = true;
+		if (currentIsStartRp || !Boolean.parseBoolean((String) stepCtx.get(RPParameterConstants.IS_SINGLE_RP_TEST))) {
 			success &= discoverOpIfNeeded();
 			success &= registerClientIfNeeded();
 			success &= isValidClientConfig();
@@ -178,7 +184,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 				prepareAuthnReq();
 			}
 		}
-		if (RPType.EVIL.equals(type)) {
+		if (!currentIsStartRp) {
 			// check if prerequisites are fulfilled and test step can be run
 			success &= areStepRequirementsMet();
 			stepCtx.put(RPContextConstants.RP1_PREPARED_REDIRECT_URI, getHonestRedirectUri());
@@ -209,6 +215,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		ab.endpointURI(opMetaData.getAuthorizationEndpointURI());
 
 		AuthenticationRequest authnReq = ab.build();
+		
 		URI authnReqUri = applyPkceParamstoAuthReqUri(authnReq.toURI());
 		authnReqUri = applyIdTokenHintToAuthReqUri(authnReqUri);
 
@@ -335,7 +342,8 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 
 
 	private boolean registerClient(RPType rpType) throws ParseException, IOException {
-		logger.log("Starting client registration");
+		String client = getClientName();
+		logger.log("Starting client registration for " + client);
 
 		OIDCClientMetadata clientMetadata = new OIDCClientMetadata();
 
@@ -367,8 +375,8 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		);
 
 		HTTPRequest regHttpRequest = regRequest.toHTTPRequest();
-		regHttpRequest.setHostnameVerifier(UnsafeTLSHelper.getTrustAllHostnameVerifier());
-		regHttpRequest.setSSLSocketFactory(UnsafeTLSHelper.getTrustAllSocketFactory());
+		regHttpRequest.setHostnameVerifier(tlsHelper.getTrustAllHostnameVerifier());
+		regHttpRequest.setSSLSocketFactory(tlsHelper.getTrustAllSocketFactory());
 		HTTPResponse response = regHttpRequest.send();
 
 		logger.log("Registration request prepared");
@@ -455,11 +463,11 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	}
 
 	protected String getHonestClientName() {
-		return "Honest Client";
+		return "PrOfESSOS Honest Test-Client";
 	}
 
 	protected String getEvilClientName() {
-		return "Evil Client";
+		return "PrOfESSOS Evil Test-Client";
 	}
 
 	protected String getClientName() {
@@ -472,6 +480,9 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		}
 		if (params.getBool(RPParameterConstants.FORCE_EVIL_CLIENT_ID)) {
 			return getEvilClientID();
+		}
+		if (params.getBool(RPParameterConstants.FORCE_HONEST_CLIENT_ID)) {
+			return getHonestClientID();
 		}
 		if (Boolean.parseBoolean((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))) {
 			// TODO: could cause conflicts as registration is enforced per testStep, not per RP
@@ -500,9 +511,13 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		if (params.getBool(RPParameterConstants.FORCE_EVIL_CLIENT_SECRET)) {
 			return getEvilClientSecret();
 		}
+		if (params.getBool(RPParameterConstants.FORCE_HONEST_CLIENT_SECRET)) {
+			return getHonesClientSecret();
+		}
 		if (params.getBool(RPParameterConstants.FORCE_RANDOM_CLIENT_SECRET)) {
 			return new Secret(32);
 		}
+
 		if (Boolean.parseBoolean((String) stepCtx.get(RPParameterConstants.FORCE_CLIENT_REGISTRATION))) {
 			// TODO: conflict, if two RPs are registered?
 			return clientInfo.getSecret();
@@ -551,8 +566,8 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		OIDCProviderConfigurationRequest request = new OIDCProviderConfigurationRequest(issuer);
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
-		httpRequest.setSSLSocketFactory(UnsafeTLSHelper.getTrustAllSocketFactory());
-		httpRequest.setHostnameVerifier(UnsafeTLSHelper.getTrustAllHostnameVerifier());
+		httpRequest.setSSLSocketFactory(tlsHelper.getTrustAllSocketFactory());
+		httpRequest.setHostnameVerifier(tlsHelper.getTrustAllHostnameVerifier());
 		try {
 			HTTPResponse httpResponse = httpRequest.send();
 
