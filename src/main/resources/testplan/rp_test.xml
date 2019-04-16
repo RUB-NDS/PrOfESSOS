@@ -2593,6 +2593,7 @@
 		<TestParameters>
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+			<Parameter Key="step-condition-scope-openid-not-needed">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
@@ -2636,6 +2637,7 @@
 		<TestParameters>
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+			<Parameter Key="step-condition-scope-openid-not-needed">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.InvalidStateRPTestBrowser</ImplementationClass>
@@ -2674,6 +2676,7 @@
 		<TestParameters>
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+			<Parameter Key="step-condition-scope-openid-not-needed">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
@@ -2842,8 +2845,8 @@
 		</Description>
 		<TestParameters>
 			<Parameter Key="discovery_support_needed">false</Parameter>
-			<Parameter Key="response-type-condition-contain-token">true</Parameter>
-			<Parameter Key="response-type-condition-contain-idtoken">true</Parameter>
+			<Parameter Key="step-condition-response-type-contains-token">true</Parameter>
+			<Parameter Key="step-condition-response-type-contains-idtoken">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.TokenSubstRPBrowser</ImplementationClass>
@@ -2890,8 +2893,8 @@
 		</Description>
 		<TestParameters>
 			<Parameter Key="discovery_support_needed">false</Parameter>
-			<Parameter Key="response-type-condition-contain-code">true</Parameter>
-			<Parameter Key="response-type-condition-contain-idtoken">true</Parameter>
+			<Parameter Key="step-condition-response-type-contains-code">true</Parameter>
+			<Parameter Key="step-condition-response-type-contains-idtoken">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.TokenSubstRPBrowser</ImplementationClass>
