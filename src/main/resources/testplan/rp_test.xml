@@ -18,7 +18,7 @@
 		</OPConfig-2>
 	</LearningStep>
 
-	<TestStep Name="ID Spoofing 1 - ID Token (sub)">
+	<TestStep Name="ID Spoofing 1 - ID Token (sub)" DisplayGroup="ID Spoofing">
 		<Description><![CDATA[
 			<h3>ID Spoofing Attack</h3>
 			In this test we use the Attacker OP and create an ID Token containing the identity (<code>sub</code>) of the victim,
@@ -61,7 +61,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ID Spoofing 2 - ID Token (sub+iss)">
+	<TestStep Name="ID Spoofing 2 - ID Token (sub+iss)" DisplayGroup="ID Spoofing">
 		<Description><![CDATA[
 			<h3>ID Spoofing Attack</h3>
 			In this test we use the Attacker OP and create an ID Token containing the identity 
@@ -107,7 +107,7 @@
 	</TestStep>
 
 
-	<TestStep Name="ID Spoofing 3 - ID Token (name+username+email)">
+	<TestStep Name="ID Spoofing 3 - ID Token (name+username+email)" DisplayGroup="ID Spoofing">
 		<Description><![CDATA[
 			<h3>ID Spoofing Attack</h3>
 			In this test we use the Attacker OP and create an ID  client accepts an ID Token containing the identity 
@@ -155,7 +155,7 @@
 	</TestStep>
 
 
-	<TestStep Name="ID Spoofing 4 - ID Token (sub, no iss)">
+	<TestStep Name="ID Spoofing 4 - ID Token (sub, no iss)" DisplayGroup="ID Spoofing">
 		<Description><![CDATA[
 			<h3>ID Spoofing Attack</h3>
 			In this test we use the Attacker OP to create an (invalid) ID Token containing the <code>sub</code> of the victim and
@@ -202,7 +202,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ID Spoofing 5 - ID Token (sub, empty iss)">
+	<TestStep Name="ID Spoofing 5 - ID Token (sub, empty iss)" DisplayGroup="ID Spoofing">
 		<Description><![CDATA[
 			<h3>ID Spoofing Attack</h3>
 			In this test we use the Attacker OP to create an (invalid) ID Token containing the <code>sub</code> of the 
@@ -250,7 +250,7 @@
 
 
 
-	<TestStep Name="ID Spoofing 6 - UserInfo (sub+iss)">
+	<TestStep Name="ID Spoofing 6 - UserInfo (sub+iss)" DisplayGroup="ID Spoofing">
 		<Description><![CDATA[
 			<h3>ID Spoofing</h3>
 			PrOfESSOS tests the validation of the <code>sub</code> parameter on the client by returning a maliciously crafted 
@@ -297,7 +297,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ID Spoofing 7 - UserInfo (name+username+email)">
+	<TestStep Name="ID Spoofing 7 - UserInfo (name+username+email)" DisplayGroup="ID Spoofing">
 		<Description><![CDATA[
 			<h3>ID Spoofing</h3>
 			<p>PrOfESSOS tests the validation of the <code>sub</code> parameter on the client by returning a maliciously crafted 
@@ -348,7 +348,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ID Spoofing 8 - UserInfo (multiple sub)">
+	<TestStep Name="ID Spoofing 8 - UserInfo (multiple sub)" DisplayGroup="ID Spoofing">
 		<Description><![CDATA[
 			<h3>ID Spoofing</h3>
 			<p>PrOfESSOS tests the validation of the <code>sub</code> claim on the client by returning a maliciously crafted 
@@ -401,7 +401,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ID Spoofing 9 - UserInfo (multiple sub)">
+	<TestStep Name="ID Spoofing 9 - UserInfo (multiple sub)" DisplayGroup="ID Spoofing">
 		<Description><![CDATA[
 			<h3>ID Spoofing</h3>
 			<p>PrOfESSOS tests the validation of the <code>sub</code> claim on the client by returning a maliciously crafted 
@@ -457,7 +457,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ID Spoofing 10 - UserInfo (sub array)">
+	<TestStep Name="ID Spoofing 10 - UserInfo (sub array)" DisplayGroup="ID Spoofing">
 		<Description><![CDATA[
 			<h3>ID Spoofing</h3>
 			<p>PrOfESSOS tests the validation of the <code>sub</code> claim on the client by returning a maliciously crafted 
@@ -512,7 +512,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ID Spoofing 11 - UserInfo (sub array)">
+	<TestStep Name="ID Spoofing 11 - UserInfo (sub array)" DisplayGroup="ID Spoofing">
 		<Description><![CDATA[
 			<h3>ID Spoofing</h3>
 			<p>PrOfESSOS tests the validation of the <code>sub</code> claim on the client by returning a maliciously crafted 
@@ -569,7 +569,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ID Spoofing 12 - ID Token Header">
+	<TestStep Name="ID Spoofing 12 - ID Token Header" DisplayGroup="ID Spoofing">
 		<Description><![CDATA[
 			<h3>Sub Claim Spoofing (ID Token Header)</h3>
 			PrOfESSOS tests the validation of the <code>sub</code> claim on the client by returning a maliciously crafted 
@@ -659,7 +659,7 @@
 	<!--<ImplementationClass>de.rub.nds.oidc.server.op.UserInfoIDSpoofingOPOP</ImplementationClass>-->
 
 	<!--<Parameter Key="token_header_add_claims">true</Parameter>-->
-	<!--<Parameter Key="token_encrypt_payload">true</Parameter>--> <!-- TODO: not implemented -->
+	<!--<Parameter Key="token_encrypt_payload">true</Parameter>--> <!-- TODO: not yet implemented -->
 	<!--<Parameter Key="force_token_header_honest_iss">true</Parameter>-->
 	<!--<Parameter Key="force_token_header_honest_sub">true</Parameter>-->
 	<!--<Parameter Key="force_token_header_honest_email">true</Parameter>-->
@@ -706,7 +706,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 1 - jwk Spoofing">
+	<TestStep Name="Key Confusion 1 - jwk Spoofing" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -744,7 +744,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 1.1 - JWK Spoofing (jwk: URI)">
+	<TestStep Name="Key Confusion 1.1 - JWK Spoofing (jwk: URI)" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -782,7 +782,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 2 - jku Spoofing">
+	<TestStep Name="Key Confusion 2 - jku Spoofing" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -820,7 +820,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 2.1 - jku returns [untrusted, trusted]">
+	<TestStep Name="Key Confusion 2.1 - jku returns [untrusted, trusted]" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -861,7 +861,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 2.2 - jku returns [trusted, untrusted]">
+	<TestStep Name="Key Confusion 2.2 - jku returns [trusted, untrusted]" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -901,7 +901,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 2.3 - jwk contains spoofed jku">
+	<TestStep Name="Key Confusion 2.3 - jwk contains spoofed jku" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -940,7 +940,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 2.4 - jwk contains spoofed x5u">
+	<TestStep Name="Key Confusion 2.4 - jwk contains spoofed x5u" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 		   <h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -980,7 +980,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 2.5 - jwk contains spoofed x5c">
+	<TestStep Name="Key Confusion 2.5 - jwk contains spoofed x5c" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
                        <h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1019,7 +1019,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 3 - x5u Spoofing">
+	<TestStep Name="Key Confusion 3 - x5u Spoofing" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1060,7 +1060,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 4 - x5c Spoofing">
+	<TestStep Name="Key Confusion 4 - x5c Spoofing" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1099,7 +1099,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 4.1 - x5c: [trusted, untrusted]">
+	<TestStep Name="Key Confusion 4.1 - x5c: [trusted, untrusted]" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1138,7 +1138,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 4.2 - x5c: [untrusted, trusted]">
+	<TestStep Name="Key Confusion 4.2 - x5c: [untrusted, trusted]" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1179,7 +1179,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 5 - kid Spoofing (kid: URI)">
+	<TestStep Name="Key Confusion 5 - kid Spoofing (kid: URI)" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1219,7 +1219,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 5.1 - kid Spoofing (kid: jwk)">
+	<TestStep Name="Key Confusion 5.1 - kid Spoofing (kid: jwk)" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1258,7 +1258,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 6 - Session Overwriting">
+	<TestStep Name="Key Confusion 6 - Session Overwriting" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1305,7 +1305,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 7.1 - MAC from PKCS1 RSA Key 1">
+	<TestStep Name="Key Confusion 7.1 - MAC from PKCS1 RSA Key 1" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1342,7 +1342,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 7.2 - MAC from PKCS1 RSA Key 2">
+	<TestStep Name="Key Confusion 7.2 - MAC from PKCS1 RSA Key 2" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1379,7 +1379,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 7.3 - MAC from PKCS1 RSA Key 3">
+	<TestStep Name="Key Confusion 7.3 - MAC from PKCS1 RSA Key 3" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1415,7 +1415,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 7.4 - MAC from PKCS1 RSA Key 4">
+	<TestStep Name="Key Confusion 7.4 - MAC from PKCS1 RSA Key 4" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1451,7 +1451,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 7.5 - MAC from PKCS1 RSA Key 5">
+	<TestStep Name="Key Confusion 7.5 - MAC from PKCS1 RSA Key 5" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1487,7 +1487,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 7.6 - MAC from PKCS1 RSA Key 6">
+	<TestStep Name="Key Confusion 7.6 - MAC from PKCS1 RSA Key 6" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1523,7 +1523,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 7.7 - MAC from PKCS1 RSA Key 7">
+	<TestStep Name="Key Confusion 7.7 - MAC from PKCS1 RSA Key 7" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1559,7 +1559,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 7.8 - MAC from PKCS1 RSA Key 8">
+	<TestStep Name="Key Confusion 7.8 - MAC from PKCS1 RSA Key 8" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1595,7 +1595,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 7.9 - MAC from PKCS1 RSA Key 9">
+	<TestStep Name="Key Confusion 7.9 - MAC from PKCS1 RSA Key 9" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1631,7 +1631,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 7.10 - MAC from PKCS8 RSA Key 1">
+	<TestStep Name="Key Confusion 7.10 - MAC from PKCS8 RSA Key 1" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1667,7 +1667,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 7.11 - MAC from PKCS8 RSA Key 2">
+	<TestStep Name="Key Confusion 7.11 - MAC from PKCS8 RSA Key 2" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 
@@ -1702,7 +1702,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 7.12 - MAC from PKCS8 RSA Key 3">
+	<TestStep Name="Key Confusion 7.12 - MAC from PKCS8 RSA Key 3" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1738,7 +1738,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 7.13 - MAC from PKCS8 RSA Key 4">
+	<TestStep Name="Key Confusion 7.13 - MAC from PKCS8 RSA Key 4" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1774,7 +1774,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 7.14 - MAC from PKCS8 RSA Key 5">
+	<TestStep Name="Key Confusion 7.14 - MAC from PKCS8 RSA Key 5" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1811,7 +1811,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 8 - Spoofed MAC Key">
+	<TestStep Name="Key Confusion 8 - Spoofed MAC Key" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 
@@ -1850,7 +1850,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 9 - MAC using public Exponent">
+	<TestStep Name="Key Confusion 9 - MAC using public Exponent" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1887,7 +1887,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 10 - MAC using RSA Modulus">
+	<TestStep Name="Key Confusion 10 - MAC using RSA Modulus" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1924,7 +1924,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 11 - MAC using kty JWK field">
+	<TestStep Name="Key Confusion 11 - MAC using kty JWK field" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1961,7 +1961,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 12 - MAC using alg JWK field">
+	<TestStep Name="Key Confusion 12 - MAC using alg JWK field" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
@@ -1998,7 +1998,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Key Confusion 13 - MAC using JWK JSONString">
+	<TestStep Name="Key Confusion 13 - MAC using JWK JSONString" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
 			<h3>Key Confusion</h3>
 			PrOfESSOS tests the validation of the ID Token on the client.
@@ -2128,7 +2128,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Replay Attack 1">
+	<TestStep Name="Replay Attack 1" DisplayGroup="Replay Attacks">
 		<Description><![CDATA[
 			<h3>Replay Attack</h3>
 
@@ -2162,7 +2162,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Replay Attack 2">
+	<TestStep Name="Replay Attack 2" DisplayGroup="Replay Attacks">
 		<Description><![CDATA[
 			<h3>Replay Attack</h3>
 
@@ -2198,7 +2198,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Replay Attack 3">
+	<TestStep Name="Replay Attack 3" DisplayGroup="Replay Attacks">
 		<Description><![CDATA[
 			<h3>Replay Attack</h3>
 
@@ -2233,7 +2233,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Replay Attack 4">
+	<TestStep Name="Replay Attack 4" DisplayGroup="Replay Attacks">
 		<Description><![CDATA[
 			<h3>Replay Attack</h3>
 
@@ -2268,7 +2268,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Replay Attack 5">
+	<TestStep Name="Replay Attack 5" DisplayGroup="Replay Attacks">
 		<Description><![CDATA[
 			<h3>Replay Attack</h3>
 
@@ -2303,7 +2303,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Replay Attack 6">
+	<TestStep Name="Replay Attack 6" DisplayGroup="Replay Attacks">
 		<Description><![CDATA[
 			<h3>Replay Attack</h3>
 
@@ -2339,9 +2339,9 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Session Overwriting">
+	<TestStep Name="Session Overwriting 1" DisplayGroup="Session Overwriting">
 		<Description><![CDATA[
-			<h3>Session Overwriting</h3>
+			<h3>Session Overwriting 1</h3>
 
 			<h4>Prerequisites.</h4>
 			The target client supports the implicit flow or the code flow.
@@ -2379,9 +2379,9 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Session Overwriting B">
+	<TestStep Name="Session Overwriting 2" DisplayGroup="Session Overwriting">
 		<Description><![CDATA[
-			<h3>Session Overwriting B</h3>
+			<h3>Session Overwriting 2</h3>
 
 			<h4>Prerequisites.</h4>
 			The target client supports the implicit flow or the code flow.
@@ -2427,7 +2427,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Signature Manipulation 1">
+	<TestStep Name="Signature Manipulation 1" DisplayGroup="Signature Manipulation">
 		<Description><![CDATA[
 			<h3>Signature Manipulation</h3>
 
@@ -2462,7 +2462,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Signature Manipulation 2">
+	<TestStep Name="Signature Manipulation 2" DisplayGroup="Signature Manipulation">
 		<Description><![CDATA[
 			<h3>Signature Manipulation</h3>
 
@@ -2498,7 +2498,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Signature Manipulation 3">
+	<TestStep Name="Signature Manipulation 3" DisplayGroup="Signature Manipulation">
 		<Description><![CDATA[
 			<h3>Signature Manipulation</h3>
 
@@ -2533,7 +2533,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-		<TestStep Name="Signature Manipulation 4">
+		<TestStep Name="Signature Manipulation 4" DisplayGroup="Signature Manipulation">
 		<Description><![CDATA[
 			<h3>Signature Manipulation</h3>
 
@@ -2568,7 +2568,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="CSRF 1">
+	<TestStep Name="CSRF 1" DisplayGroup="CSRF">
 		<Description><![CDATA[
 			<h3>CSRF Protection via the <code>state</code> parameter</h3>
 			PrOfESSOS tests the validation of the <code>state</code> parameter on the client.
@@ -2609,7 +2609,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="CSRF 2">
+	<TestStep Name="CSRF 2" DisplayGroup="CSRF">
 		<Description><![CDATA[
 			<h3>CSRF Protection via the <code>state</code> parameter</h3>
 			PrOfESSOS tests the validation of the <code>state</code> parameter on the client.
@@ -2653,7 +2653,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="CSRF 3">
+	<TestStep Name="CSRF 3" DisplayGroup="CSRF">
 		<Description><![CDATA[
 			<h3>CSRF Protection via the <code>state</code> parameter</h3>
 			PrOfESSOS tests the validation of the <code>state</code> parameter on the client.
@@ -2692,7 +2692,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="TRC 1">
+	<TestStep Name="TRC 1" DisplayGroup="Token Recipient Confusion">
 		<Description><![CDATA[
 			<h3>Token Recipient Confusion Attack</h3>
 			PrOfESSOS tests the validation of the <code>aud</code> (audience) parameter on the client by issuing maliciously crafted ID Tokens.
@@ -2730,7 +2730,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="TRC 2">
+	<TestStep Name="TRC 2" DisplayGroup="Token Recipient Confusion">
 		<Description><![CDATA[
 			<h3>Token Recipient Confusion Attack</h3>
 			PrOfESSOS tests the validation of the "audience" parameter on the client by issuing maliciously crafted ID Tokens.
@@ -2768,7 +2768,7 @@
 	</TestStep>
 
 
-	<TestStep Name="TRC 3">
+	<TestStep Name="TRC 3" DisplayGroup="Token Recipient Confusion">
 		<Description><![CDATA[
 			<h3>Token Recipient Confusion Attack</h3>
 			PrOfESSOS tests the validation of the "audience" parameter on the client by issuing maliciously crafted ID Tokens.
@@ -2807,7 +2807,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Token Substitution - AccessToken">
+	<TestStep Name="Token Substitution - AccessToken" DisplayGroup="Token Substitution">
 		<Description><![CDATA[
 			<h3>Token Substitution Attack</h3>
 			A client using an implicit grant may be subject to a Token Substitution Attack.
@@ -2863,7 +2863,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Token Substitution - Authorization Code">
+	<TestStep Name="Token Substitution - Authorization Code" DisplayGroup="Token Substitution">
 		<Description><![CDATA[
 			<h3>Token Substitution Attack</h3>
 			A client using an implicit grant may be subject to a Token Substitution Attack.

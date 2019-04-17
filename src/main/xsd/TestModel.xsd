@@ -235,6 +235,7 @@ limitations under the License.
 			</choice>
 		</sequence>
 		<attribute name="Name" type="normalizedString" use="required" />
+		<attribute name="DisplayGroup" type="normalizedString" />
 	</complexType>
 
 	<complexType name="BrowserSimulatorType">

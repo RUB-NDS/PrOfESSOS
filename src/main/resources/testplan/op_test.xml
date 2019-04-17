@@ -21,7 +21,7 @@
 		</RPConfig-2>
 	</LearningStep>
 
-	<TestStep Name="Authorization Code Reuse (Same Client)">
+	<TestStep Name="Authorization Code Reuse (Same Client)" DisplayGroup="Code Reuse">
 		<Description>
 			<![CDATA[
 			<h3>Authorization Code Reuse</h4>
@@ -61,7 +61,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Authorization Code Reuse (Other Client)">
+	<TestStep Name="Authorization Code Reuse (Other Client)" DisplayGroup="Code Reuse">
 		<Description>
 			<![CDATA[
 			<h3>Authorization Code Reuse</h3>
@@ -101,7 +101,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Authorization Code Reuse (Exclude Client Credentials)">
+	<TestStep Name="Authorization Code Reuse (Exclude Client Credentials)" DisplayGroup="Code Reuse">
 		<Description>
 			<![CDATA[
 			<h3>Authorization Code Reuse</h3>
@@ -143,7 +143,7 @@
 		</RPConfig-2>
 	</TestStep>	
 
-	<TestStep Name="Redirect URI Validation (AR) - Other Client">
+	<TestStep Name="Redirect URI Validation (AR) - Other Client" DisplayGroup="Redirect URI Validation">
 		<Description>
 			<![CDATA[
 			<h3>Redirect URI Validation</h3>
@@ -189,7 +189,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Validation (AR) - Subdomain">
+	<TestStep Name="Redirect URI Validation (AR) - Subdomain" DisplayGroup="Redirect URI Validation">
 		<Description>
 		<![CDATA[
 			<h3>Redirect URI Validation</h3>
@@ -230,7 +230,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Validation (AR) - Path">
+	<TestStep Name="Redirect URI Validation (AR) - Path" DisplayGroup="Redirect URI Validation">
 		<Description><![CDATA[
 			<h3>Redirect URI Validation</h3>
 			PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
@@ -272,7 +272,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Validation (AR) - Append TLD">
+	<TestStep Name="Redirect URI Validation (AR) - Append TLD" DisplayGroup="Redirect URI Validation">
 		<Description><![CDATA[
 			<h3>Redirect URI Validation</h3>
 			PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
@@ -318,7 +318,7 @@
 
 
 
-	<TestStep Name="Redirect URI Validation (AR) - URI-Userinfo A">
+	<TestStep Name="Redirect URI Validation (AR) - URI-Userinfo A" DisplayGroup="Redirect URI Validation">
 		<Description><![CDATA[
 		<h3>Redirect URI Validation</h3>
 		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
@@ -368,7 +368,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Validation (AR) - URI-Userinfo B">
+	<TestStep Name="Redirect URI Validation (AR) - URI-Userinfo B" DisplayGroup="Redirect URI Validation">
 		<Description><![CDATA[
 		<h3>Redirect URI Validation</h3>
 		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
@@ -418,7 +418,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Validation (AR) - URI-Userinfo C">
+	<TestStep Name="Redirect URI Validation (AR) - URI-Userinfo C" DisplayGroup="Redirect URI Validation">
 		<Description><![CDATA[
 		<h3>Redirect URI Validation</h3>
 		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
@@ -467,7 +467,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Validation (AR) - URI-Userinfo D">
+	<TestStep Name="Redirect URI Validation (AR) - URI-Userinfo D" DisplayGroup="Redirect URI Validation">
 		<Description><![CDATA[
 		<h3>Redirect URI Validation</h3>
 		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
@@ -520,7 +520,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Validation (AR) - Parameter Pollution A">
+	<TestStep Name="Redirect URI Validation (AR) - Parameter Pollution A" DisplayGroup="Redirect URI Validation">
 		<Description><![CDATA[
 		<h3>Redirect URI Validation</h3>
 		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
@@ -571,7 +571,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Validation (AR) - Parameter Pollution B">
+	<TestStep Name="Redirect URI Validation (AR) - Parameter Pollution B" DisplayGroup="Redirect URI Validation">
 		<Description><![CDATA[
 		<h3>Redirect URI Validation</h3>
 		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
@@ -622,7 +622,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Validation (TR) - Exclude Redirect URI">
+	<TestStep Name="Redirect URI Validation (TR) - Exclude Redirect URI" DisplayGroup="Redirect URI Validation">
 		<Description><![CDATA[
 		<h3>Redirect URI Validation - Token Request</h3>
 		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Token Request 
@@ -661,7 +661,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Validation (TR) - Other Client">
+	<TestStep Name="Redirect URI Validation (TR) - Other Client" DisplayGroup="Redirect URI Validation">
 		<Description><![CDATA[
 		<h3>Redirect URI Validation - Token Request</h3>
 		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Token Request 
@@ -702,7 +702,7 @@
 	</TestStep>
 
 
-	<TestStep Name="Redirect URI Validation (TR) - Path">
+	<TestStep Name="Redirect URI Validation (TR) - Path" DisplayGroup="Redirect URI Validation">
 		<Description><![CDATA[
 		<h3>Redirect URI Validation - Token Request</h3>
 		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Token Request 
@@ -743,7 +743,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Validation (TR) - Subdomain">
+	<TestStep Name="Redirect URI Validation (TR) - Subdomain" DisplayGroup="Redirect URI Validation">
 		<Description><![CDATA[
 		<h3>Redirect URI Validation - Token Request</h3>
 		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Token Request 
@@ -784,7 +784,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Validation (TR) - Append TLD">
+	<TestStep Name="Redirect URI Validation (TR) - Append TLD" DisplayGroup="Redirect URI Validation">
 		<Description><![CDATA[
 		<h3>Redirect URI Validation - Token Request</h3>
 		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Token Request 
@@ -827,7 +827,7 @@
 
 	<!--TODO: Redirect URI Validation (TR): userinfo parts and parameter pollution(?) => compliance checks, low-prio,-->
 
-	<TestStep Name="Open Redirector on the OP - Invalid Scope">
+	<TestStep Name="Open Redirector on the OP - Invalid Scope" DisplayGroup="Open Redirect">
 		<Description><![CDATA[
 		<h3>Open Redirector</h3>
 		The <a href="https://tools.ietf.org/html/rfc6749#section-4.2.2.1" target="_blank">OAUTH 2.0 specification, Section 4.2.2.1,</a> defines an Error Response in for the Authorization Request, that is forwarded to the client using HTTP redirects to the URI provided in the <code>redirect_uri</code> parameter <q>if the resource owner denies the access request or if the request fails for reasons other than a missing or invalid redirection URI.</q>
@@ -871,7 +871,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Authorization Code Substitution">
+	<TestStep Name="Authorization Code Substitution" DisplayGroup="Code Substitution">
 		<Description><![CDATA[
 		<h3>Authorization Code Substitution</h4>
 		PrOfESSOS simulates a Code Substitution attack aimed at what is commonly referred to as <em>OAUTH Authentication<em>.
@@ -917,7 +917,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Authorization Code Substitution - Excluded Client Credentials">
+	<TestStep Name="Authorization Code Substitution - Excluded Client Credentials" DisplayGroup="Code Substitution">
 		<Description><![CDATA[
 		<h3>Authorization Code Substitution</h4>
 		PrOfESSOS simulates a Code Substitution attack aimed at what is commonly referred to as <em>OAUTH Authentication<em>.
@@ -965,7 +965,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Client Authentication - Basic Auth, Random Secret">
+	<TestStep Name="Client Authentication - Basic Auth, Random Secret" DisplayGroup="Client Authentication">
 		<Description><![CDATA[
 		<h3>Client Authentication Validation</h4>
 		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
@@ -1005,7 +1005,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Client Authentication - Basic Auth, Exclude Secret">
+	<TestStep Name="Client Authentication - Basic Auth, Exclude Secret" DisplayGroup="Client Authentication">
 		<Description><![CDATA[
 		<h3>Client Authentication Validation</h4>
 		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
@@ -1046,7 +1046,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Client Authentication - Basic Auth, Exclude ID, Exclude Secret">
+	<TestStep Name="Client Authentication - Basic Auth, Exclude ID, Exclude Secret" DisplayGroup="Client Authentication">
 		<Description><![CDATA[
 		<h3>Client Authentication Validation</h4>
 		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
@@ -1091,7 +1091,7 @@
 	</TestStep>
 
 
-	<TestStep Name="Client Authentication - Authentication Method Confusion (POST)">
+	<TestStep Name="Client Authentication - Authentication Method Confusion (POST)" DisplayGroup="Client Authentication">
 		<Description><![CDATA[
 		<h3>Client Authentication Validation</h4>
 		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
@@ -1122,9 +1122,6 @@
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
-			<!-- TODO: not yet implemented but default registered auth method -->
-			<!--<Parameter Key="register-clientauth-method-client_secret_basic">true</Parameter> -->
-
 			<Parameter Key="tokenreq-force-client-auth-post">true</Parameter>
 			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-1>
@@ -1136,7 +1133,7 @@
 	</TestStep>	
 
 
-	<TestStep Name="Client Authentication - Authentication Method Confusion (Basic)">
+	<TestStep Name="Client Authentication - Authentication Method Confusion (Basic)" DisplayGroup="Client Authentication">
 		<Description><![CDATA[
 		<h3>Client Authentication Validation</h4>
 		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
@@ -1180,7 +1177,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Client Authentication - Random Secret (POST)">
+	<TestStep Name="Client Authentication - Random Secret (POST)" DisplayGroup="Client Authentication">
 		<Description><![CDATA[
 		<h3>Client Authentication Validation</h4>
 		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
@@ -1224,7 +1221,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Client Authentication - Empty Secret (POST)">
+	<TestStep Name="Client Authentication - Empty Secret (POST)" DisplayGroup="Client Authentication">
 		<Description><![CDATA[
 		<h3>Client Authentication Validation</h4>
 		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
@@ -1268,7 +1265,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Client Authentication - Exclude Secret (POST)">
+	<TestStep Name="Client Authentication - Exclude Secret (POST)" DisplayGroup="Client Authentication">
 		<Description><![CDATA[
 		<h3>Client Authentication Validation</h4>
 		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
@@ -1314,7 +1311,7 @@
 	</TestStep>
 
 	<!--TODO: remove, as this is the effectively the same as Code Substitution w/o credentials -->
-	<TestStep Name="Client Authentication - Exclude Credentials">
+	<TestStep Name="Client Authentication - Exclude Credentials" DisplayGroup="Client Authentication">
 		<Description><![CDATA[
 		PrOfESSOS attempts to redeem an Authorization Code without including a <code>client_id</code>, <code>client_secret</code>,
 		 or any other form of client authentication.
@@ -1339,7 +1336,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Client Authentication - Client-Secret-JWT, Invalid Signature">
+	<TestStep Name="Client Authentication - Client-Secret-JWT, Invalid Signature" DisplayGroup="Client Authentication">
 		<Description><![CDATA[
 		<h3>Client Authentication Validation</h4>
 		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
@@ -1383,7 +1380,7 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Client Authentication - Client-Secret-JWT, 'none' Algorithm 1">
+	<TestStep Name="Client Authentication - Client-Secret-JWT, 'none' Algorithm 1" DisplayGroup="Client Authentication">
 		<Description><![CDATA[
 		<h3>Client Authentication Validation</h4>
 		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
@@ -1430,7 +1427,7 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 	</TestStep>
 
 
-	<TestStep Name="Client Authentication - Client-Secret-JWT, 'none' Algorithm 2">
+	<TestStep Name="Client Authentication - Client-Secret-JWT, 'none' Algorithm 2" DisplayGroup="Client Authentication">
 		<Description><![CDATA[
 		<h3>Client Authentication Validation</h4>
 		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
@@ -1476,7 +1473,7 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Client Authentication - Client-Secret-JWT, 'nONe' Algorithm 1">
+	<TestStep Name="Client Authentication - Client-Secret-JWT, 'nONe' Algorithm 1" DisplayGroup="Client Authentication">
 		<Description><![CDATA[
 		<h3>Client Authentication Validation</h4>
 		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
@@ -1523,7 +1520,7 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Client Authentication - Client-Secret-JWT, 'nONe' Algorithm 2">
+	<TestStep Name="Client Authentication - Client-Secret-JWT, 'nONe' Algorithm 2" DisplayGroup="Client Authentication">
 		<Description><![CDATA[
 		<h3>Client Authentication Validation</h4>
 		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
@@ -1594,7 +1591,7 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		MAC key, similar to KeyConfusion in RP-Verifier -->
 
 
-	<TestStep Name="Message Flow Confusion - Response Type">
+	<TestStep Name="Message Flow Confusion - Response Type" DisplayGroup="Flow Confusion">
 		<Description><![CDATA[
 		<h3>Message Flow Downgrade to Implicit</h3>
 		PrOfESSOS tests if the OP can be downgraded to using less secure grant types that have not been registered.
@@ -1640,7 +1637,7 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 	</TestStep>
 
 
-	<TestStep Name="Message Flow Confusion - Response Mode">
+	<TestStep Name="Message Flow Confusion - Response Mode" DisplayGroup="Flow Confusion">
 		<Description><![CDATA[
 		<h3>Message Flow Confusion - Response Mode</h3>
 		PrOfESSOS tests if the OP can be made to use less secure response mode that is not allowed for the requested flow.
@@ -1685,7 +1682,7 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 	</TestStep>
 
 
-	<TestStep Name="PKCE 1 - TR: Invalid Verifier">
+	<TestStep Name="PKCE 1 - TR: Invalid Verifier" DisplayGroup="PKCE Validation">
 		<Description><![CDATA[
 		<h3>PKCE Validation</h3>
 		PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>.
@@ -1727,7 +1724,7 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="PKCE 2 - TR: Exclude Verifier">
+	<TestStep Name="PKCE 2 - TR: Exclude Verifier" DisplayGroup="PKCE Validation">
 		<Description><![CDATA[
 		<h3>PKCE Validation</h3>
 		PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>.
@@ -1770,7 +1767,7 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="PKCE 3 - AR: Exclude Challenge">
+	<TestStep Name="PKCE 3 - AR: Exclude Challenge" DisplayGroup="PKCE Validation">
 		<Description><![CDATA[
 		<h3>PKCE Validation</h3>
 		PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>.
@@ -1812,7 +1809,7 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="PKCE 4 - Downgrade to Plain">
+	<TestStep Name="PKCE 4 - Downgrade to Plain" DisplayGroup="PKCE Validation">
 		<Description>
 			<![CDATA[
 		<h3>PKCE Validation</h3>
@@ -1855,7 +1852,7 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="PKCE 5 - Verifier Confusion">
+	<TestStep Name="PKCE 5 - Verifier Confusion" DisplayGroup="PKCE Validation">
 		<Description><![CDATA[
 				<h3>PKCE Validation</h3>
 		PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>.
@@ -1920,7 +1917,7 @@ invalid signature is submitted as value of the <code>client_assertion</code> par
 		<!--</RPConfig-2>-->
 	<!--</TestStep>-->
 
-	<TestStep Name="Sub Claim Spoofing 1 (sub_victim)">
+	<TestStep Name="Sub Claim Spoofing 1 (sub_victim)" DisplayGroup="Sub Claim Spoofing">
 		<Description><![CDATA[
 		<h3>Sub Claim Spoofing</h3>	
 		PrOfESSOS tests the validation of the Authentication Request at the OP by embedding a <code>claims</code> request 
@@ -1956,7 +1953,7 @@ parameter in the Authentication Request.
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Sub Claim Spoofing 2 (sub array)">
+	<TestStep Name="Sub Claim Spoofing 2 (sub array)" DisplayGroup="Sub Claim Spoofing">
 		<Description><![CDATA[
 		<h3>Sub Claim Spoofing</h3>
 		PrOfESSOS tests the validation of the Authentication Request at the OP by embedding a <code>claims</code> request 
@@ -1993,7 +1990,7 @@ parameter in the Authentication Request.
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Sub Claim Spoofing 3 (sub array, sub1 first)">
+	<TestStep Name="Sub Claim Spoofing 3 (sub array, sub1 first)" DisplayGroup="Sub Claim Spoofing">
 		<Description><![CDATA[
 		<h3>Sub Claim Spoofing</h3>
 		PrOfESSOS tests the validation of the Authentication Request at the OP by embedding a <code>claims</code> request 
@@ -2030,7 +2027,7 @@ parameter in the Authentication Request.
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Sub Claim Spoofing 4 (sub array, sub2 first)">
+	<TestStep Name="Sub Claim Spoofing 4 (sub array, sub2 first)" DisplayGroup="Sub Claim Spoofing">
 		<Description><![CDATA[
 		<h3>Sub Claim Spoofing</h3>
 		PrOfESSOS tests the validation of the Authentication Request at the OP by embedding a <code>claims</code> request 
@@ -2067,7 +2064,7 @@ parameter in the Authentication Request.
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Sub Claim Spoofing 5 (id_token_hint)">
+	<TestStep Name="Sub Claim Spoofing 5 (id_token_hint)" DisplayGroup="Sub Claim Spoofing">
 		<Description><![CDATA[
 		<h3>Sub Claim Spoofing</h3>
 		PrOfESSOS tests the validation of the Authentication Request at the OP by embedding a <code>claims</code> request 
