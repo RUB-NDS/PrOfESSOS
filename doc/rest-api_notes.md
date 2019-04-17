@@ -1,6 +1,6 @@
-# Notes regarding usage of REST API
+## Notes and examples regarding usage of REST API
 
-## Create a TestObject
+### Create a TestObject
 
 First, a new TestObject needs to be initialized. To this end, the `create-test-object` endpoint is used:
 
@@ -52,19 +52,19 @@ _Note:_ The configuration for OP tests may include the optional members `Client1
 ## Read Config for TestID
 
 ```
-curl -vv -H "Content-Type: application/json" http://localhost:8080/api/rp/{testId}/config  
+curl -vv http://localhost:8080/api/rp/{testId}/config  
 ```
  
 ## Start a single Test
 
 ```
-curl -vv -X POST -H "Content-Type: application/json" http://localhost:8080/api/rp/{testId}/test/ID%20Spoofing%201
+curl -vv -X POST http://localhost:8080/api/rp/{testId}/test/ID%20Spoofing%201
 ```
 This requires that a valid config has been set beforehand using the `/set-config` or `/learn` endpoints.
 
 
 ## Export TestObject 
-Includes Testresults, if run. Set the Accept header to be set to JSON or XML to retrieve the report in the respective format.
+Includes Testresults, if run. Set the `Accept` header to JSON or XML to retrieve the report in the respective format.
 
 ```
 curl -vv -H "Accept: application/json" http://localhost:8080/api/rp/{testId}/export

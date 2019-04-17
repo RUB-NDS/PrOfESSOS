@@ -4,7 +4,7 @@ public class RPContextConstants {
 
 	public static final String CURRENT_USER_USERNAME = "current_user_username";
 	public static final String CURRENT_USER_PASSWORD = "current_user_password";
-
+	public static final String START_RP_TYPE = "start-rp-type";  // "EVIL" or "HONEST" 
 	private static final String PFX = "rp.";
 
 	public static final String IS_RP_LEARNING_STEP = PFX + "is_learning_teststep";
@@ -38,5 +38,6 @@ public class RPContextConstants {
 
 	public static final String MANIPULATED_REDIRECT_URI = PFX + "stored-manipulated-redirect-uri";
 	public static final String REDIRECT_URI_MANIPULATOR = PFX + "stored-uri-manipulator-string";
+	public static final String INVALID_TLD = "invalid";
 
 }

@@ -25,6 +25,7 @@ public class OPContextConstants {
 	public static final String REGISTRATION_NEEDED = "dynamic_client_registration_support_needed";
 	public static final String REGISTRATION_ENFORCING_PATH_FRAGMENT = "registration_enforcing_random_path";
 	public static final String TEST_COMPLETED_IN_SUITE_CTX = "at-least-one-test-has-been-completed-in-suite";
+	public static final String TEST_RUN_NOT_FINISHED = "test-not-run-or-step-requirements-not-met";
 	
 	private static final String PFX = "op.";
 
@@ -40,7 +41,9 @@ public class OPContextConstants {
 	public static final String AUTH_REQ_NONCE = PFX + "auth-reg-nonce";
 
 	public static final String TOKEN_REQ_RECEIVED_AT_OP_TYPE = PFX + "token-request-received-at-op-type";
-
+	public static final String USERINFO_REQ_RECEIVED_AT_OP_TYPE = PFX + "userinfo-request-received-at-op-type";
+	public static final String DISCOVERY_REQUESTED_AT_OP_TYPE = PFX + "discover-request-received-at-op-type";
+	
 	public static final String TOKEN_INFORMATIONLEAK_FUTURE = PFX + "token-information-leak-future";
 	public static final String USERINFO_INFORMATIONLEAK_FUTURE = PFX + "userinfo-information-leak-future";
 

@@ -6,12 +6,10 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
-import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.TestStepResult;
-import org.apache.http.client.utils.URIBuilder;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
@@ -20,8 +18,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-
-import static de.rub.nds.oidc.server.rp.RPParameterConstants.USER2_IN_USERINFO_FAILS_TEST;
 
 public class CodeReuseRP extends DefaultRP {
 
@@ -73,7 +69,7 @@ public class CodeReuseRP extends DefaultRP {
 				return;
 			}
 			// code has been accepted by OP
-			if (params.getBool(RPParameterConstants.SUCCESSFUL_CODE_REDEMPTION_FAILS_TEST)) {
+			if (params.getBool(RPParameterConstants.TOKEN_RECEIVAL_FAILS_TEST)) {
 				browserBlocker.complete(TestStepResult.FAIL);
 				return;
 			}

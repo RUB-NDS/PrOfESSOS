@@ -5,15 +5,15 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import de.rub.nds.oidc.browser.BrowserSimulator;
-import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.server.rp.RPContextConstants;
 import de.rub.nds.oidc.server.rp.RPParameterConstants;
 import de.rub.nds.oidc.server.rp.RPType;
 import de.rub.nds.oidc.test_model.TestStepResult;
 import org.apache.commons.io.IOUtils;
 
-import javax.ws.rs.core.UriBuilder;
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
@@ -28,6 +28,18 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 	protected String consentScript;
 	protected String userName;
 	protected String userPass;
+	protected String finalUrl;
+	protected CompletableFuture<TestStepResult> blockAndResult;
+	protected CompletableFuture<?> blockRP;
+
+	protected void initRPLocks() {
+		// prepare locks and share with RP
+		blockRP = new CompletableFuture();
+		stepCtx.put(RPContextConstants.BLOCK_RP_FOR_BROWSER_FUTURE, blockRP);
+
+		blockAndResult = new CompletableFuture<TestStepResult>();
+		stepCtx.put(RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT, blockAndResult);
+	}
 
 	protected void evalScriptTemplates() {
 		String templateString;
@@ -75,37 +87,50 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 	protected String getAuthnReqString(RPType rpType) {
 		Object authnReq;
 		authnReq = RPType.HONEST.equals(rpType)
-					? stepCtx.get(RPContextConstants.RP1_PREPARED_AUTHNREQ)
-					: stepCtx.get(RPContextConstants.RP2_PREPARED_AUTHNREQ);
+				? stepCtx.get(RPContextConstants.RP1_PREPARED_AUTHNREQ)
+				: stepCtx.get(RPContextConstants.RP2_PREPARED_AUTHNREQ);
 		if (authnReq instanceof String) {
 			return (String) authnReq;
 		} else if (authnReq instanceof URI) {
-			return ((URI) authnReq).toString();
+			return authnReq.toString();
 		} else {
 			throw new ClassCastException("Stored Authentication Request object is neither String nor URI");
 		}
 	}
 
+	protected RPType getStartRpType() {
+		String starter = (String) stepCtx.getOrDefault(RPContextConstants.START_RP_TYPE, "HONEST");
+		RPType startType = starter.equals(RPType.HONEST.toString()) ? RPType.HONEST : RPType.EVIL;
+		return startType;
+	}
+
+	protected String getClientName(RPType type) {
+		OIDCClientInformation ci;
+		if (type.equals(RPType.HONEST)) {
+			ci = (OIDCClientInformation) suiteCtx.get(RPContextConstants.HONEST_CLIENT_CLIENTINFO);
+		} else {
+			ci = (OIDCClientInformation) suiteCtx.get(RPContextConstants.EVIL_CLIENT_CLIENTINFO);
+		}
+		String name = ci.getMetadata().getName();
+		if (name == null) {
+			name = "Unknown Client Name";
+		}
+		return name;
+	}
 
 	protected TestStepResult runUserAuth(RPType rpType) throws InterruptedException {
+		logger.log(String.format("Start user authentication for %s with username: %s", getClientName(rpType), userName));
 
 		// store user credentials to make them accessible to RP
 		stepCtx.put(RPContextConstants.CURRENT_USER_USERNAME, userName);
 		stepCtx.put(RPContextConstants.CURRENT_USER_PASSWORD, userPass);
-
-		// prepare locks and share with RP
-		CompletableFuture<?> blockRP = new CompletableFuture();
-		stepCtx.put(RPContextConstants.BLOCK_RP_FOR_BROWSER_FUTURE, blockRP);
-		CompletableFuture<TestStepResult> blockAndResult = new CompletableFuture<>();
-		stepCtx.put(RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT, blockAndResult);
+		initRPLocks();
 
 		// load configured values
-		String authnReq = getAuthnReqString(rpType);
-		URI honestRedirect = (URI) stepCtx.get(RPContextConstants.RP1_PREPARED_REDIRECT_URI);
-		URI evilRedirect = (URI) stepCtx.get(RPContextConstants.RP2_PREPARED_REDIRECT_URI);
 
 		// start authentication
-		logger.logCodeBlock(authnReq, "Authentication Request URL:");
+		String authnReq = getAuthnReqString(rpType);
+		logger.logCodeBlock("Authentication Request URL:", authnReq);
 		driver.get(authnReq);
 
 		// delay form submissions to allow capturing screenshots
@@ -127,9 +152,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 
 			// do not run consentScript if we have already been redirected back to RP
 			String location = driver.getCurrentUrl();
-			if (location.startsWith(honestRedirect.toString()) || location.startsWith(evilRedirect.toString())) {
-				logger.log("No consent page encountered in browser");
-			} else {
+			if (consentRequired(location)) {
 				driver.executeScript(getFormSubmitDelayScript());
 				logger.log("Running Consent-Script to authorize the client");
 
@@ -147,30 +170,48 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 			if (params.getBool(RPParameterConstants.SCRIPT_EXEC_EXCEPTION_FAILS_TEST)) {
 				return TestStepResult.FAIL;
 			}
-
 		}
 
-		String finalUrl = driver.getCurrentUrl();
+		confirmBrowserFinished();
+		return waitForRPResult();
+	}
+
+	protected void confirmBrowserFinished() {
+		// store URL to make sure RP can access URI fragments (implicit/hybrid)
+		finalUrl = driver.getCurrentUrl();
 		stepCtx.put(RPContextConstants.LAST_BROWSER_URL, finalUrl);
-		logger.logCodeBlock(finalUrl, "Final URL as seen in Browser:");
+		logger.logCodeBlock("Final URL as seen in Browser:", finalUrl);
 		// confirm submission of redirect uri
 		blockRP.complete(null);
+	}
 
+	protected TestStepResult waitForRPResult(@Nonnull int timeout) throws InterruptedException {
 		try {
-			return blockAndResult.get(10, TimeUnit.SECONDS);
+			// wait for TestStepResult from RP
+			return blockAndResult.get(timeout, TimeUnit.SECONDS);
 		} catch (ExecutionException | TimeoutException e) {
-			// check for manipulated subdomain in Browser URI
-			// TODO: add seleniumProxy (BrowserMob) and intercept DNS/HTTP for manipulated URIs?
-			URI manipulatedUri = (URI) stepCtx.get(RPContextConstants.MANIPULATED_REDIRECT_URI);
-			if (manipulatedUri != null && finalUrl.startsWith(manipulatedUri.toString())) {
-				logger.log("Redirect to manipulated redirect_uri detected, assuming test failed.");
-				return TestStepResult.FAIL;
-			}
 
 			logger.log("Browser Timeout while waiting for RP");
 //			logScreenshot();
 			logger.log("Authentication failed, assuming test passed.");
 			return TestStepResult.PASS;
 		}
+	}
+
+	protected TestStepResult waitForRPResult() throws InterruptedException {
+		// set default timeout to 10 seconds
+		int timeout = 10;
+		return waitForRPResult(timeout);
+	}
+
+	protected boolean consentRequired(String browserUrl) {
+		URI honestRedirect = (URI) stepCtx.get(RPContextConstants.RP1_PREPARED_REDIRECT_URI);
+		URI evilRedirect = (URI) stepCtx.get(RPContextConstants.RP2_PREPARED_REDIRECT_URI);
+
+		if (browserUrl.startsWith(honestRedirect.toString()) || browserUrl.startsWith(evilRedirect.toString())) {
+			logger.log("No consent page encountered in browser");
+			return false;
+		}
+		return true;
 	}
 }

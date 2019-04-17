@@ -17,6 +17,8 @@ public class SubClaimSpoofingRP extends DefaultRP {
 
 	@Override
 	protected ClaimsRequest getAuthReqClaims() {
+		// template evaluation is performed in browser, as RP does not necessarily know
+		// the sub values when generating the AuthnReq
 		final String user1sub = "§placeholder_user1_sub§";
 		final String user2sub = "§placeholder_user2_sub§";
 
@@ -33,8 +35,7 @@ public class SubClaimSpoofingRP extends DefaultRP {
 		if (params.getBool(AUTHNREQ_CLAIMSREQ_ARRAY_SUB2_SUB1)) {
 			claims.addIDTokenClaim("sub", ClaimRequirement.ESSENTIAL, null, Arrays.asList(user2sub, user1sub));
 		}
-
-
+		
 		return claims;
 	}
 
@@ -54,6 +55,8 @@ public class SubClaimSpoofingRP extends DefaultRP {
 		try {
 			String idtSub = idToken.getJWTClaimsSet().getSubject();
 			String user1Sub = (String) stepCtx.get(RPContextConstants.STORED_USER1_SUB_VAL);
+			boolean claimsSupported = opMetaData.supportsClaimsParam();
+
 			if (Strings.isNullOrEmpty(user1Sub)) {
 				logger.log("Reference value for sub claim not found.");
 				return TestStepResult.UNDETERMINED;
@@ -63,12 +66,13 @@ public class SubClaimSpoofingRP extends DefaultRP {
 				return TestStepResult.FAIL;
 			}
 
-			logger.log(String.format("User1 sub (%s) not found in ID Token, token contained sub: %s .", user1Sub, idtSub));
+			logger.log(String.format("User1 sub (%s) not found in ID Token, token contained sub: %s." +
+					"%nClaims request parameter supported by OP: %s", user1Sub, idtSub, claimsSupported));
 
 			if (params.getBool(AUTHNREQ_CLAIMSREQ_ARRAY_SUB1_SUB2) || params.getBool(AUTHNREQ_CLAIMSREQ_ARRAY_SUB2_SUB1)) {
 				return TestStepResult.PASS;
 			}
-			if (opMetaData.supportsClaimsParam() || params.getBool(AUTHNREQ_IDTOKEN_HINT_USER1)) {
+			if (claimsSupported || params.getBool(AUTHNREQ_IDTOKEN_HINT_USER1)) {
 				// spec violation
 				logger.log("As per Step 4 of " +
 						"<a href=\"https://openid.net/specs/openid-connect-core-1_0.html#AuthRequestValidation\" target=\"_blank\">https://openid.net/specs/openid-connect-core-1_0.html#AuthRequestValidation</a> " +
@@ -78,7 +82,7 @@ public class SubClaimSpoofingRP extends DefaultRP {
 			}
 			return TestStepResult.PASS;
 		} catch (ParseException e) {
-			logger.logCodeBlock(idToken.getParsedString(), "Invalid ID Token received:");
+			logger.logCodeBlock("Invalid ID Token received:", idToken.getParsedString());
 			logger.log("Exception was", e);
 			return TestStepResult.UNDETERMINED;
 		}

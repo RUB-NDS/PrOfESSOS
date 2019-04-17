@@ -7,8 +7,10 @@ import de.rub.nds.oidc.server.rp.RPType;
 import de.rub.nds.oidc.test_model.TestStepResult;
 import org.apache.http.client.utils.URIBuilder;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.text.ParseException;
 import java.util.HashMap;
 
@@ -37,21 +39,24 @@ public class SubClaimSpoofingOPBrowser extends AbstractOPBrowser {
 			ctx.put("placeholder_user1_idtoken", idtString);
 
 			String query = te.eval(ctx, authnReqUri.getQuery());
-			URI arWithClaims = new URIBuilder(authnReqUri).setCustomQuery(query).build();
+			URI arWithClaims = new URIBuilder(authnReqUri)
+					.setCustomQuery(
+							URLDecoder.decode(query, "utf-8")  // setCustomQuery() applies URL encoding
+					).build();
 			stepCtx.put(RP1_PREPARED_AUTHNREQ, arWithClaims);
 			userName = opConfig.getUser2Name();
 			userPass = opConfig.getUser2Pass();
 
 			TestStepResult res = runUserAuth(RPType.HONEST);
 			return res;
-		} catch (URISyntaxException e) {
+		} catch (URISyntaxException | UnsupportedEncodingException e) {
 			throw new InterruptedException("URI encoding of Authentication Request failed.");
 		}
 	}
 
 
 	private String getUserSubject(boolean isUser1) throws InterruptedException {
-		// check if old idToken is already in suiteCtx
+		// use sub from  old idToken, if there is already one stored in suiteCtx
 		JWT usertoken = (JWT) suiteCtx.get(isUser1 ? STORED_USER1_IDTOKEN : STORED_USER2_IDTOKEN);
 		if (usertoken != null) {
 			try {

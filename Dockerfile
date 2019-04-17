@@ -1,9 +1,10 @@
-FROM ubuntu:bionic
+FROM ubuntu:18.04
 
+ENV CHROMEDRIVER_VERSION=2.46
 # install chromedriver, chromium
 USER root
 RUN apt-get update && apt-get install -y curl vim openjdk-8-jdk unzip chromium-browser \ 
- && curl -L -O https://chromedriver.storage.googleapis.com/2.45/chromedriver_linux64.zip \
+ && curl -L -O https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip \
  && mkdir -p /opt/bin/ \
  && unzip chromedriver_linux64.zip -d /opt/bin/ \
  && rm -f chromedriver_linux64.zip \
@@ -32,11 +33,6 @@ RUN cd $HOME \
 
 # Ensure signals are forwarded to the JVM process correctly for graceful shutdown
 ENV LAUNCH_JBOSS_IN_BACKGROUND true
-
-###
-# enable debugging
-# ENV JAVA_OPTS='-Xms64m -Xmx512m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=org.jboss.byteman -Djava.awt.headless=true -agentlib:jdwp=transport=dt_socket,address=0.0.0.0:8787,server=y,suspend=n'
-# NOTE: simply add --debug as option to standalone.sh
 
 # copy the .war file into wildfly's deployment folder
 COPY $PROFESSOS_WAR /opt/jboss/wildfly/standalone/deployments/professos.war

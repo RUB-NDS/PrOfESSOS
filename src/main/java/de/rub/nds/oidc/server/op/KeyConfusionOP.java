@@ -1,6 +1,5 @@
 package de.rub.nds.oidc.server.op;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -38,7 +37,6 @@ import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.PublicKey;
@@ -76,7 +74,7 @@ public class KeyConfusionOP extends DefaultOP {
 
 		// TODO: add default case to make sure signedJwt is never null
 		Base64 header = new Base64(signedJwt.serialize().split("\\.")[0]);
-		logger.logCodeBlock(header.decodeToString(), "Generated id_token header:");
+		logger.logCodeBlock("Generated id_token header:", header.decodeToString());
 //        logger.log("generated id_token body:\n" + signedJwt.getPayload().toString());
 
 		return signedJwt;
@@ -109,7 +107,6 @@ public class KeyConfusionOP extends DefaultOP {
 				logger.log("Authentication requested at Evil OP.");
 				HTTPRequest reqMsg = ServletUtils.createHTTPRequest(req);
 				logger.logHttpRequest(req, reqMsg.getQuery());
-//                AuthenticationRequest authReq = AuthenticationRequest.parse(reqMsg);
 
 				// release browser
 				CompletableFuture<?> browserBlocker = (CompletableFuture<?>) stepCtx.get(OPContextConstants.BLOCK_BROWSER_FUTURE);
@@ -153,9 +150,10 @@ public class KeyConfusionOP extends DefaultOP {
 		logger.logHttpResponse(resp, untrustedKeyResponseString);
 	}
 
-	/** Make sure the required ID Token signing algorithms are included in the discovery response. This is only
-	 *  effective if discovery is used or registration is enforced (using the TestParameter
-	 *  "dynamic_client_registration_support_needed")
+	/**
+	 * Make sure the required ID Token signing algorithms are included in the discovery response. This is only
+	 * effective if discovery is used or registration is enforced (using the TestParameter
+	 * "dynamic_client_registration_support_needed")
 	 */
 	@Override
 	public void providerConfiguration(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -486,7 +484,7 @@ public class KeyConfusionOP extends DefaultOP {
 		if (macKey.length < 32) {
 			if (params.getBool(LEFTPAD_SHORT_HMAC_KEYS)) {
 				byte[] paddedKey = new byte[32];
-				System.arraycopy(macKey, 0, paddedKey, 32-macKey.length, macKey.length);
+				System.arraycopy(macKey, 0, paddedKey, 32 - macKey.length, macKey.length);
 				macKey = paddedKey;
 			} else {
 				// apply HMAC manually due to short key
@@ -498,9 +496,9 @@ public class KeyConfusionOP extends DefaultOP {
 				String parts = part1 + "." + part2;
 				try {
 					byte[] mac = KeyConfusionHelper.generateMac("HmacSHA256", macKey, parts.getBytes());
-	//				logger.log("parts used: " + parts);
-	//				logger.log("mac computed: " + Base64URL.encode(mac).toString());
-	//				logger.log("mac bytes: " + Arrays.toString(mac));
+//					logger.log("parts used: " + parts);
+//					logger.log("mac computed: " + Base64URL.encode(mac).toString());
+//					logger.log("mac bytes: " + Arrays.toString(mac));
 					return new SignedJWT(Base64URL.encode(header.toString()), Base64URL.encode(claims.toString()), Base64URL.encode(mac));
 				} catch (java.text.ParseException e) {
 					logger.log("Mac generation failed");
@@ -523,7 +521,7 @@ public class KeyConfusionOP extends DefaultOP {
 	private SignedJWT sessionOverwritingKeyConfusion(JWTClaimsSet claims) throws GeneralSecurityException {
 		// replace client ID (use same ID for evil and honest
 		OIDCClientInformation cinfo = getRegisteredClientInfo(); //(OIDCClientInformation) stepCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL);
-		logger.logCodeBlock(cinfo.toString(), "Generating HS256 using client_secret from stored ClientInfo:");
+		logger.logCodeBlock("Generating HS256 using client_secret from stored ClientInfo:", cinfo.toString());
 
 		JWSHeader.Builder hb = new JWSHeader.Builder(JWSAlgorithm.HS256).type(JOSEObjectType.JWT);
 		JWSHeader header = hb.build();

@@ -21,17 +21,33 @@
 		</RPConfig-2>
 	</LearningStep>
 
-	<TestStep Name="Authorization Code Reuse 1">
+	<TestStep Name="Authorization Code Reuse (Same Client)">
 		<Description>
 			<![CDATA[
+			<h3>Authorization Code Reuse</h4>
+			PrOfESSOS validates the one-time use property of the Authorization Code, which is important if a code is exposed 
+			to untrusted parties. This may occur for a number of reasons such as through the Browser History, exposed server 
+			or request logs, or open redirectors.
+
+			<h4>Prerequisites</h4>
+			The OP supports the <code>authorization_code_grant</code> and PrOfESSOS test clients can make use of the code flow.
+
+			<h4>Execution</h4>
 			PrOfESSOS attempts to redeem an Authorization Code that has already been used by the same client.
+
+			<h4>Result Evaluation</h4>
+			The attack ist considered successful if a valid Token Response is returned.
+
+			<h4>Countermeasures</h4>			
+			<a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthResponseValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.2.7</a> requires the Authorization Response in the code flow to be validated according to 
+			<a href="https://tools.ietf.org/html/rfc6749#section-4.1" target="_blank">RFC6749, Section 4.1</a>, which states: <q>If an authorization code is used more than once, the authorization server MUST deny the request and SHOULD revoke (when possible) all tokens previously issued based on that authorization code.</q>
 			]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPCodeReuseBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpMultiUserAuthRunner</ImplementationClass>
 		</BrowserSimulator>
 
 		<RPConfig-1>
@@ -45,18 +61,76 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Authorization Code Reuse 2">
+	<TestStep Name="Authorization Code Reuse (Other Client)">
 		<Description>
 			<![CDATA[
+			<h3>Authorization Code Reuse</h3>
+			PrOfESSOS validates the one-time use property of the Authorization Code, which is important if a code is exposed 
+			to untrusted parties. This may occur for a number of reasons such as through the Browser History, exposed server 
+			or request logs, or open redirectors.
+
+			<h4>Prerequisites</h4>
+			The OP supports the <code>authorization_code_grant</code> and PrOfESSOS test clients can make use of the code flow.
+
+			<h4>Execution</h4>
 			PrOfESSOS attempts to redeem an Authorization Code that was issued to and has already been used by a
 			different client - Honest RP.
+
+			<h4>Result Evaluation</h4>
+			The attack ist considered successful if a valid Token Response is returned.
+
+			<h4>Countermeasures</h4>			
+			<a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthResponseValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.2.7</a> requires the Authorization Response in the code flow to be validated according to 
+			<a href="https://tools.ietf.org/html/rfc6749#section-4.1" target="_blank">RFC6749, Section 4.1</a>, which states: <q>If an authorization code is used more than once, the authorization server MUST deny the request and SHOULD revoke (when possible) all tokens previously issued based on that authorization code.</q>
 			]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">false</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPCodeReuseBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.MultiRpSingleUserAuthRunner</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+			<Parameter Key="force-no-redeem-auth-code">false</Parameter>
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+			<Parameter Key="tokenreq-clientauth-exclude-client-id">true</Parameter>
+			<Parameter Key="tokenreq-clientauth-exclude-client-secret">true</Parameter>
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Authorization Code Reuse (Exclude Client Credentials)">
+		<Description>
+			<![CDATA[
+			<h3>Authorization Code Reuse</h3>
+			PrOfESSOS validates the one-time use property of the Authorization Code, which is important if a code is exposed 
+			to untrusted parties. This may occur for a number of reasons such as through the Browser History, exposed server 
+			or request logs, or open redirectors.
+
+			<h4>Prerequisites</h4>
+			The OP supports the <code>authorization_code_grant</code> and PrOfESSOS test clients can make use of the code flow.
+
+			<h4>Execution</h4>
+			PrOfESSOS attempts to redeem an Authorization Code that was issued to and has already been used by a
+			different client - Honest RP.
+
+			<h4>Result Evaluation</h4>
+			The attack ist considered successful if a valid Token Response is returned.
+
+			<h4>Countermeasures</h4>			
+			<a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthResponseValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.2.7</a> requires the Authorization Response in the code flow to be validated according to 
+			<a href="https://tools.ietf.org/html/rfc6749#section-4.1" target="_blank">RFC6749, Section 4.1</a>, which states: <q>If an authorization code is used more than once, the authorization server MUST deny the request and SHOULD revoke (when possible) all tokens previously issued based on that authorization code.</q>
+			]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.MultiRpSingleUserAuthRunner</ImplementationClass>
 		</BrowserSimulator>
 
 		<RPConfig-1>
@@ -67,17 +141,35 @@
 			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
 			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-2>
-	</TestStep>
+	</TestStep>	
 
-	<TestStep Name="Redirect URI Manipulation 1">
+	<TestStep Name="Redirect URI Validation (AR) - Other Client">
 		<Description>
 			<![CDATA[
-			PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter. To this end, an Authentication Request
-			containing the <code>redirect_uri</code> value of another client is send to the OP
+			<h3>Redirect URI Validation</h3>
+			PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
+			by including a <code>redirect_uri</code> value that is not registered for the submitted <code>client_id</code>. 
+			If an authorization code is returned to the malicious redirect URI, an Authorization Code Injection attack 
+			is simulated to test whether the code can be successfully exchanged for an Access or ID Token.
+
+			<h4>Execution</h4>
+			PrOfESSOS submits a redirect URI registered with a different client and, in case an Authorization Code is returned,
+			 attempts to redeem the code at the OP's token endpoint.
+
+			 <h4>Prerequisites</h4>
+			 The OP supports the <code>authorization_code_grant</code> and PrOfESSOS clients are allowed to use the code flow.
+
+			 <h4>Result Evaluation</h4>
+			 The attack is considered successful if an Authorization Code is returned to a redirect URI that has not been
+			 registered with the OP for the client used.
+
+			 <h4>Countermeasures</h4>
+			 <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest" target="_blank">OpenID Connect Core 1.0, Section 3.1.2.1</a> 
+			 requires that the <code>redirect_uri</code> submitted in an Authentication Request <q>MUST exactly match one of the Redirection URI values for the Client pre-registered at the OpenID Provider, with the matching performed as described in Section 6.2.1 of [RFC3986] (Simple String Comparison).</q> For OAUTH, similar recommendations are proposed in the <a href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-12#section-4.1.3">OAUTH 2.0 Security Best Current Practice (Draft), Section 4.1.3</a>.
 			]]>
 		</Description>
 		<TestParameters>
-			<Parameter Key="is_single_rp_test">true</Parameter>
+			<Parameter Key="is_single_rp_test">false</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
@@ -85,19 +177,40 @@
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-
 			<Parameter Key="authnreq-force-evil-redirect-uri">true</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+			<!-- to prove code injection after receivng code in Evil RP, simulate Honest RP: -->
+			<Parameter Key="tokenreq-force-honest-redirect-uri">true</Parameter>
+			<Parameter Key="force_honest_client_id">true</Parameter>
+			<Parameter Key="force_honest_client_secret">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Manipulation 2">
+	<TestStep Name="Redirect URI Validation (AR) - Subdomain">
 		<Description>
 		<![CDATA[
-			PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP. To this end, a random subdomain
-		 is prepended to the <code>redirect_uri</code> contained in the Authentication Request.</Description>
+			<h3>Redirect URI Validation</h3>
+			PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
+			by including a <code>redirect_uri</code> value that is not registered for the submitted <code>client_id</code>. 
+			If an authorization code is returned to the malicious redirect URI, an Authorization Code Injection attack 
+			is simulated to test whether the code can be successfully exchanged for an Access or ID Token.
+
+			<h4>Execution</h4>
+			PrOfESSOS prepends a random subdomain to the <code>redirect_uri</code> contained in the Authentication Request and, in case an Authorization Code is returned, attempts to redeem the code at the OP's token endpoint.
+
+			 <h4>Prerequisites</h4>
+			 The OP supports the <code>authorization_code_grant</code> and PrOfESSOS clients are allowed to use the code flow.
+
+			 <h4>Result Evaluation</h4>
+			 The attack is considered successful if an Authorization Code is returned to a redirect URI that has not been
+			 registered with the OP for the client used.
+
+			 <h4>Countermeasures</h4>
+			 <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest" target="_blank">OpenID Connect Core 1.0, Section 3.1.2.1</a> 
+			 requires that the <code>redirect_uri</code> submitted in an Authentication Request <q>MUST exactly match one of the Redirection URI values for the Client pre-registered at the OpenID Provider, with the matching performed as described in Section 6.2.1 of [RFC3986] (Simple String Comparison).</q> For OAUTH, similar recommendations are proposed in the <a href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-12#section-4.1.3">OAUTH 2.0 Security Best Current Practice (Draft), Section 4.1.3</a>.
 		]]>
 		</Description>
 		<TestParameters>
@@ -109,18 +222,36 @@
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-
 			<Parameter Key="authnreq-random-subdomain-in-redirect-uri">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Manipulation 3">
+	<TestStep Name="Redirect URI Validation (AR) - Path">
 		<Description><![CDATA[
-		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP. To this end, a random path
-			fragment is appended to the <code>redirect_uri</code> contained in the Authentication Request.
+			<h3>Redirect URI Validation</h3>
+			PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
+			by including a <code>redirect_uri</code> value that is not registered for the submitted <code>client_id</code>. 
+			If an authorization code is returned to the malicious redirect URI, an Authorization Code Injection attack 
+			is simulated to test whether the code can be successfully exchanged for an Access or ID Token.
+
+			<h4>Execution</h4>
+			A random path fragment is appended to the <code>redirect_uri</code> contained in the Authentication Request 
+			and, in case an Authorization Code is returned, an attempt to redeem the code at the OP's token endpoint is performed.
+
+			 <h4>Prerequisites</h4>
+			 The OP supports the <code>authorization_code_grant</code> and PrOfESSOS clients are allowed to use the code flow.
+
+			 <h4>Result Evaluation</h4>
+			 The attack is considered successful if an Authorization Code is returned to a redirect URI that has not been
+			 registered with the OP for the client used.
+
+			 <h4>Countermeasures</h4>
+			 <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest" target="_blank">OpenID Connect Core 1.0, Section 3.1.2.1</a> 
+			 requires that the <code>redirect_uri</code> submitted in an Authentication Request <q>MUST exactly match one of the Redirection URI values for the Client pre-registered at the OpenID Provider, with the matching performed as described in Section 6.2.1 of [RFC3986] (Simple String Comparison).</q> For OAUTH, similar recommendations are proposed in the <a href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-12#section-4.1.3">OAUTH 2.0 Security Best Current Practice (Draft), Section 4.1.3</a>.
 		]]>
 		</Description>
 		<TestParameters>
@@ -134,17 +265,36 @@
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
 
 			<Parameter Key="authnreq-random-path-suffix-in-redirect-uri">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Manipulation 3.2 TLD">
+	<TestStep Name="Redirect URI Validation (AR) - Append TLD">
 		<Description><![CDATA[
-		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP. To this end, the host part
-		of the URI is extended by appending an invalid top level domain to the <code>redirect_uri</code> contained in 
-		the Authentication Request.
+			<h3>Redirect URI Validation</h3>
+			PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
+			by including a <code>redirect_uri</code> value that is not registered for the submitted <code>client_id</code>. 
+			If an authorization code is returned to the malicious redirect URI, an Authorization Code Injection attack 
+			is simulated to test whether the code can be successfully exchanged for an Access or ID Token.
+
+			<h4>Execution</h4>
+			The host part of the URI is extended by appending an invalid top level domain to the <code>redirect_uri</code> contained in 
+			the Authentication Request.	In case an Authorization Code is returned, an attempt to redeem the code at the OP's 
+			token endpoint is performed.
+
+			 <h4>Prerequisites</h4>
+			 The OP supports the <code>authorization_code_grant</code> and PrOfESSOS clients are allowed to use the code flow.
+
+			 <h4>Result Evaluation</h4>
+			 The attack is considered successful if an Authorization Code is returned to a redirect URI that has not been
+			 registered with the OP for the client used.
+
+			 <h4>Countermeasures</h4>
+			 <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest" target="_blank">OpenID Connect Core 1.0, Section 3.1.2.1</a> 
+			 requires that the <code>redirect_uri</code> submitted in an Authentication Request <q>MUST exactly match one of the Redirection URI values for the Client pre-registered at the OpenID Provider, with the matching performed as described in Section 6.2.1 of [RFC3986] (Simple String Comparison).</q> For OAUTH, similar recommendations are proposed in the <a href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-12#section-4.1.3">OAUTH 2.0 Security Best Current Practice (Draft), Section 4.1.3</a>.
 		]]>
 		</Description>
 		<TestParameters>
@@ -158,6 +308,8 @@
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
 
 			<Parameter Key="authnreq-invalid-top-level-domain-in-redirect-uri">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+
 		</RPConfig-1>
 		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
@@ -166,17 +318,34 @@
 
 
 
-	<TestStep Name="Redirect URI Manipulation 4">
+	<TestStep Name="Redirect URI Validation (AR) - URI-Userinfo A">
 		<Description><![CDATA[
-		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP. In this test,
-		 the benign <code>redirect_uri</code> is embedded into the <code>userinfo</code> part of the
+		<h3>Redirect URI Validation</h3>
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
+		by including a <code>redirect_uri</code> value that is not registered for the submitted <code>client_id</code>. 
+		If an authorization code is returned to the malicious redirect URI, an Authorization Code Injection attack 
+		is simulated to test whether the code can be successfully exchanged for an Access or ID Token.
+
+		<h4>Execution</h4>
+		In this test, the benign <code>redirect_uri</code> is embedded into the <code>userinfo</code> part of the
 		 Authentication Request URL, while the URL's actual authority section points to an attacker controlled
 		 endpoint. As an example, such an URL might look like the URL shown below:
 		 <pre><code>http://http://honest-rp.com:pass@attacker.com</code></pre>
+
+		 <h4>Prerequisites</h4>
+		 The OP supports the <code>authorization_code_grant</code> and PrOfESSOS clients are allowed to use the code flow.
+
+		 <h4>Result Evaluation</h4>
+		 The attack is considered successful if an Authorization Code is returned to a redirect URI that has not been
+		 registered with the OP for the client used.
+
+		 <h4>Countermeasures</h4>
+		 <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest" target="_blank">OpenID Connect Core 1.0, Section 3.1.2.1</a> 
+		 requires that the <code>redirect_uri</code> submitted in an Authentication Request <q>MUST exactly match one of the Redirection URI values for the Client pre-registered at the OpenID Provider, with the matching performed as described in Section 6.2.1 of [RFC3986] (Simple String Comparison).</q> For OAUTH, similar recommendations are proposed in the <a href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-12#section-4.1.3">OAUTH 2.0 Security Best Current Practice (Draft), Section 4.1.3</a>.
 		]]>
 		</Description>
 		<TestParameters>
-			<Parameter Key="is_single_rp_test">true</Parameter>
+			<Parameter Key="is_single_rp_test">false</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
@@ -186,23 +355,47 @@
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
 
 			<Parameter Key="authnreq-honesturl-in-userpart-of-redirect-uri">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+
 		</RPConfig-1>
 		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+			<!-- to prove code injection after receivng code in Evil RP, simulate Honest RP: -->
+			<Parameter Key="tokenreq-force-honest-redirect-uri">true</Parameter>
+			<Parameter Key="force_honest_client_id">true</Parameter>
+			<Parameter Key="force_honest_client_secret">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Manipulation 5">
+	<TestStep Name="Redirect URI Validation (AR) - URI-Userinfo B">
 		<Description><![CDATA[
-		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP. In this test,
-		 the benign <code>redirect_uri</code> is URL encoded and embedded into the <code>userinfo</code> part of the
+		<h3>Redirect URI Validation</h3>
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
+		by including a <code>redirect_uri</code> value that is not registered for the submitted <code>client_id</code>. 
+		If an authorization code is returned to the malicious redirect URI, an Authorization Code Injection attack 
+		is simulated to test whether the code can be successfully exchanged for an Access or ID Token.
+
+		<h4>Execution</h4>
+		In this test, the benign <code>redirect_uri</code> is URL encoded and embedded into the <code>userinfo</code> part of the
 		 Authentication Request URL, while the URL's actual authority section points to an attacker controlled
 		 endpoint. As an example, such an URL might look like the URL shown below:
 		 <pre><code>http://http%3A%2F%2Fhonest-rp.com:pass@attacker.com</code></pre>
+
+		 <h4>Prerequisites</h4>
+		 The OP supports the <code>authorization_code_grant</code> and PrOfESSOS clients are allowed to use the code flow.
+
+		 <h4>Result Evaluation</h4>
+		 The attack is considered successful if an Authorization Code is returned to a redirect URI that has not been
+		 registered with the OP for the client used.
+
+		 <h4>Countermeasures</h4>
+		 <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest" target="_blank">OpenID Connect Core 1.0, Section 3.1.2.1</a> 
+		 requires that the <code>redirect_uri</code> submitted in an Authentication Request <q>MUST exactly match one of the Redirection URI values for the Client pre-registered at the OpenID Provider, with the matching performed as described in Section 6.2.1 of [RFC3986] (Simple String Comparison).</q> For OAUTH, similar recommendations are proposed in the <a href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-12#section-4.1.3">OAUTH 2.0 Security Best Current Practice (Draft), Section 4.1.3</a>.
 		]]>
 		</Description>
 		<TestParameters>
-			<Parameter Key="is_single_rp_test">true</Parameter>
+			<Parameter Key="is_single_rp_test">false</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
@@ -212,24 +405,46 @@
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
 			<Parameter Key="authnreq-honesturl-in-userpart-of-redirect-uri">true</Parameter>
 			<Parameter Key="authnreq-userinfo-url-encode">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+
 		</RPConfig-1>
 		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+			<!-- to prove code injection after receivng code in Evil RP, simulate Honest RP: -->
+			<Parameter Key="tokenreq-force-honest-redirect-uri">true</Parameter>
+			<Parameter Key="force_honest_client_id">true</Parameter>
+			<Parameter Key="force_honest_client_secret">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Manipulation 6">
+	<TestStep Name="Redirect URI Validation (AR) - URI-Userinfo C">
 		<Description><![CDATA[
-		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP. In this test,
-		 the URI scheme (e.g., <code>https://</code>) is stripped from the benign <code>redirect_uri</code> before
-		 it is embedded into the <code>userinfo</code> part of the
-		 Authentication Request URL. The Authentication Request URL's actual authority section points to an attacker
-		 controlled endpoint. As an example, such an URL might look like the URL shown below:
-		 <pre><code>http://honest-rp.com:pass@attacker.com</code></pre>
+		<h3>Redirect URI Validation</h3>
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
+		by including a <code>redirect_uri</code> value that is not registered for the submitted <code>client_id</code>. 
+		If an authorization code is returned to the malicious redirect URI, an Authorization Code Injection attack 
+		is simulated to test whether the code can be successfully exchanged for an Access or ID Token.
+
+		<h4>Execution</h4>
+		In this test, the URI scheme (e.g., <code>https://</code>) is stripped from the benign <code>redirect_uri</code> before
+		 it is embedded into the <code>userinfo</code> part of the Authentication Request URL. The Authentication Request URL's actual authority section points to an attacker controlled endpoint. As an example, such an URL might look like the URL shown below:
+		 <pre><code>http://honest-rp.com:pass@attacker.com</code></pre>		 
+
+		 <h4>Prerequisites</h4>
+		 The OP supports the <code>authorization_code_grant</code> and PrOfESSOS clients are allowed to use the code flow.
+
+		 <h4>Result Evaluation</h4>
+		 The attack is considered successful if an Authorization Code is returned to a redirect URI that has not been
+		 registered with the OP for the client used.
+
+		 <h4>Countermeasures</h4>
+		 <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest" target="_blank">OpenID Connect Core 1.0, Section 3.1.2.1</a> 
+		 requires that the <code>redirect_uri</code> submitted in an Authentication Request <q>MUST exactly match one of the Redirection URI values for the Client pre-registered at the OpenID Provider, with the matching performed as described in Section 6.2.1 of [RFC3986] (Simple String Comparison).</q> For OAUTH, similar recommendations are proposed in the <a href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-12#section-4.1.3">OAUTH 2.0 Security Best Current Practice (Draft), Section 4.1.3</a>.
 		]]>
 		</Description>
 		<TestParameters>
-			<Parameter Key="is_single_rp_test">true</Parameter>
+			<Parameter Key="is_single_rp_test">false</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
@@ -239,25 +454,49 @@
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
 			<Parameter Key="authnreq-honesturl-in-userpart-of-redirect-uri">true</Parameter>
 			<Parameter Key="authnreq-userinfo-scheme-excluded">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
 
 		</RPConfig-1>
 		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+			<!-- to prove code injection after receivng code in Evil RP, simulate Honest RP: -->
+			<Parameter Key="tokenreq-force-honest-redirect-uri">true</Parameter>
+			<Parameter Key="force_honest_client_id">true</Parameter>
+			<Parameter Key="force_honest_client_secret">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Manipulation 7">
+	<TestStep Name="Redirect URI Validation (AR) - URI-Userinfo D">
 		<Description><![CDATA[
-		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP. In this test,
-		 the URI scheme (e.g., <code>https://</code>) is stripped from the benign <code>redirect_uri</code> before
-		 it is URL encoded and embedded into the <code>userinfo</code> part of the
-		 Authentication Request URL. The Authentication Request URL's actual authority section points to an attacker
-		 controlled endpoint. As an example, such an URL might look like the URL shown below:
-		 <pre><code>http://honest-rp.com%3A8080:pass@attacker.com</code></pre>
+		<h3>Redirect URI Validation</h3>
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
+		by including a <code>redirect_uri</code> value that is not registered for the submitted <code>client_id</code>. 
+		If an authorization code is returned to the malicious redirect URI, an Authorization Code Injection attack 
+		is simulated to test whether the code can be successfully exchanged for an Access or ID Token.
+
+		<h4>Execution</h4>
+		In this test, the URI scheme (e.g., <code>https://</code>) is stripped from the benign <code>redirect_uri</code> before
+		 it is URL encoded and embedded into the <code>userinfo</code> part of the  Authentication Request URL. The 
+		 Authentication Request URL's actual authority section points to an attacker controlled endpoint. As an example, 
+		 such an URL might look like the URL shown below:
+		 <pre><code>http://honest-rp.com%3A8080:pass@attacker.com</code></pre>	
+
+		 <h4>Prerequisites</h4>
+		 The OP supports the <code>authorization_code_grant</code> and PrOfESSOS clients are allowed to use the code flow.
+
+		 <h4>Result Evaluation</h4>
+		 The attack is considered successful if an Authorization Code is returned to a redirect URI that has not been
+		 registered with the OP for the client used.
+
+		 <h4>Countermeasures</h4>
+		 <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest" target="_blank">OpenID Connect Core 1.0, Section 3.1.2.1</a> 
+		 requires that the <code>redirect_uri</code> submitted in an Authentication Request <q>MUST exactly match one of the Redirection URI values for the Client pre-registered at the OpenID Provider, with the matching performed as described in Section 6.2.1 of [RFC3986] (Simple String Comparison).</q> For OAUTH, similar recommendations are proposed in the <a href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-12#section-4.1.3">OAUTH 2.0 Security Best Current Practice (Draft), Section 4.1.3</a>.
+
 		]]>
 		</Description>
 		<TestParameters>
-			<Parameter Key="is_single_rp_test">true</Parameter>
+			<Parameter Key="is_single_rp_test">false</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
@@ -268,15 +507,28 @@
 			<Parameter Key="authnreq-honesturl-in-userpart-of-redirect-uri">true</Parameter>
 			<Parameter Key="authnreq-userinfo-scheme-excluded">true</Parameter>
 			<Parameter Key="authnreq-userinfo-url-encoded">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
 
 		</RPConfig-1>
 		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+			<!-- to prove code injection after receivng code in Evil RP, simulate Honest RP: -->
+			<Parameter Key="tokenreq-force-honest-redirect-uri">true</Parameter>
+			<Parameter Key="force_honest_client_id">true</Parameter>
+			<Parameter Key="force_honest_client_secret">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Manipulation 8">
+	<TestStep Name="Redirect URI Validation (AR) - Parameter Pollution A">
 		<Description><![CDATA[
+		<h3>Redirect URI Validation</h3>
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
+		by including a <code>redirect_uri</code> value that is not registered for the submitted <code>client_id</code>. 
+		If an authorization code is returned to the malicious redirect URI, an Authorization Code Injection attack 
+		is simulated to test whether the code can be successfully exchanged for an Access or ID Token.
+
+		<h4>Execution</h4>
 		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP, probing for a <em>HTTP
 		Parameter Pollution</em> weakness. The Authentication Request contains two <code>redirect_uri</code>
 		parameters, the first one pointing towards the correct Redirect URI of the benign RP while the second
@@ -284,10 +536,21 @@
 		mechanisms are employed during processing of the Authentication Request, the validation logic might choose and
 		successfully validate the benign Redirecet URI while the actual response generating logic makes use of the
 		malicious endpoint.
+
+		 <h4>Prerequisites</h4>
+		 The OP supports the <code>authorization_code_grant</code> and PrOfESSOS clients are allowed to use the code flow.
+
+		 <h4>Result Evaluation</h4>
+		 The attack is considered successful if an Authorization Code is returned to a redirect URI that has not been
+		 registered with the OP for the client used.
+
+		 <h4>Countermeasures</h4>
+		 <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest" target="_blank">OpenID Connect Core 1.0, Section 3.1.2.1</a> 
+		 requires that the <code>redirect_uri</code> submitted in an Authentication Request <q>MUST exactly match one of the Redirection URI values for the Client pre-registered at the OpenID Provider, with the matching performed as described in Section 6.2.1 of [RFC3986] (Simple String Comparison).</q> For OAUTH, similar recommendations are proposed in the <a href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-12#section-4.1.3">OAUTH 2.0 Security Best Current Practice (Draft), Section 4.1.3</a>.
 		]]>
 		</Description>
 		<TestParameters>
-			<Parameter Key="is_single_rp_test">true</Parameter>
+			<Parameter Key="is_single_rp_test">false</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
@@ -300,11 +563,23 @@
 		</RPConfig-1>
 		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+			<!-- to prove code injection after receivng code in Evil RP, simulate Honest RP: -->
+			<Parameter Key="tokenreq-force-honest-redirect-uri">true</Parameter>
+			<Parameter Key="force_honest_client_id">true</Parameter>
+			<Parameter Key="force_honest_client_secret">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Redirect URI Manipulation 9">
+	<TestStep Name="Redirect URI Validation (AR) - Parameter Pollution B">
 		<Description><![CDATA[
+		<h3>Redirect URI Validation</h3>
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Authentication Request 
+		by including a <code>redirect_uri</code> value that is not registered for the submitted <code>client_id</code>. 
+		If an authorization code is returned to the malicious redirect URI, an Authorization Code Injection attack 
+		is simulated to test whether the code can be successfully exchanged for an Access or ID Token.
+
+		<h4>Execution</h4>
 		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter at the OP, probing for a <em>HTTP
 		Parameter Pollution</em> weakness. The Authentication Request contains two <code>redirect_uri</code>
 		parameters, the first one pointing towards an attacker controlled endpoint while the second
@@ -312,10 +587,21 @@
 		mechanisms are employed during processing of the Authentication Request, the validation logic might choose and
 		successfully validate the benign Redirecet URI while the actual response generating logic makes use of the
 		malicious endpoint.
+
+		 <h4>Prerequisites</h4>
+		 The OP supports the <code>authorization_code_grant</code> and PrOfESSOS clients are allowed to use the code flow.
+
+		 <h4>Result Evaluation</h4>
+		 The attack is considered successful if an Authorization Code is returned to a redirect URI that has not been
+		 registered with the OP for the client used.
+
+		 <h4>Countermeasures</h4>
+		 <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest" target="_blank">OpenID Connect Core 1.0, Section 3.1.2.1</a> 
+		 requires that the <code>redirect_uri</code> submitted in an Authentication Request <q>MUST exactly match one of the Redirection URI values for the Client pre-registered at the OpenID Provider, with the matching performed as described in Section 6.2.1 of [RFC3986] (Simple String Comparison).</q> For OAUTH, similar recommendations are proposed in the <a href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-12#section-4.1.3">OAUTH 2.0 Security Best Current Practice (Draft), Section 4.1.3</a>.
 		]]>
 		</Description>
 		<TestParameters>
-			<Parameter Key="is_single_rp_test">true</Parameter>
+			<Parameter Key="is_single_rp_test">false</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
@@ -328,15 +614,32 @@
 		</RPConfig-1>
 		<RPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+			<!-- to prove code injection after receivng code in Evil RP, simulate Honest RP: -->
+			<Parameter Key="tokenreq-force-honest-redirect-uri">true</Parameter>
+			<Parameter Key="force_honest_client_id">true</Parameter>
+			<Parameter Key="force_honest_client_secret">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-2>
 	</TestStep>
 
-
-
-	<TestStep Name="Code Hijack 1">
+	<TestStep Name="Redirect URI Validation (TR) - Exclude Redirect URI">
 		<Description><![CDATA[
-		PrOfESSOS issues a Token Request containing no <code>redirect_uri</code> parameter, even though one was present
-			in the Authentication Request.
+		<h3>Redirect URI Validation - Token Request</h3>
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Token Request 
+		by including a <code>redirect_uri</code> value that differs from the redirect URI included in the prior Authentication Request.
+
+		<h4>Execution</h4>
+		PrOfESSOS issues a Token Request containing no <code>redirect_uri</code> parameter, even though one was present 
+		in the Authentication Request.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code> and PrOfESSOS clients are allowed to use the code flow.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned from the token endpoint.
+
+		<h4>Countermeasures</h4>
+		<cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.2</a></cite> requires the OP to <q>Ensure that the <code>redirect_uri</code> parameter value is identical to the <code>redirect_uri</code> parameter value that was included in the initial Authorization Request. If the <code>redirect_uri</code> parameter value is not present when there is only one registered <code>redirect_uri</code> value, the Authorization Server MAY return an error (since the Client should have included the parameter) or MAY proceed without an error (since OAuth 2.0 permits the parameter to be omitted in this case).</q>
 		]]>
 		</Description>
 		<TestParameters>
@@ -348,7 +651,6 @@
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
-			<!---->
 			<Parameter Key="tokenreq-exclude-redirect-uri">true</Parameter>
 			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-1>
@@ -359,14 +661,28 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Code Hijack 2">
+	<TestStep Name="Redirect URI Validation (TR) - Other Client">
 		<Description><![CDATA[
-		PrOfESSOS issues a token request containing a redirect_uri value that is registered with another
-			client.
+		<h3>Redirect URI Validation - Token Request</h3>
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Token Request 
+		by including a <code>redirect_uri</code> value that differs from the redirect URI included in the prior Authentication Request.
+
+		<h4>Execution</h4>
+		PrOfESSOS issues a token request containing a <code>redirect_uri</code> value that is registered with another
+		client.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code> and PrOfESSOS clients are allowed to use the code flow.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned from the token endpoint.
+
+		<h4>Countermeasures</h4>
+		<cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.2</a></cite> requires the OP to <q>Ensure that the <code>redirect_uri</code> parameter value is identical to the <code>redirect_uri</code> parameter value that was included in the initial Authorization Request. If the <code>redirect_uri</code> parameter value is not present when there is only one registered <code>redirect_uri</code> value, the Authorization Server MAY return an error (since the Client should have included the parameter) or MAY proceed without an error (since OAuth 2.0 permits the parameter to be omitted in this case).</q>
 		]]>
 		</Description>
 		<TestParameters>
-			<Parameter Key="is_single_rp_test">false</Parameter>
+			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
@@ -386,15 +702,29 @@
 	</TestStep>
 
 
-	<TestStep Name="Code Hijack 3">
+	<TestStep Name="Redirect URI Validation (TR) - Path">
 		<Description><![CDATA[
-		PrOfESSOS issues a Token Request containing a <code>redirect_uri</code> value that does not match the
-			one presented in the Authentication Request and is not registered for the client to which the code
-			has been issued. A random path element is appended to the <code>redirect_uri</code>.
+		<h3>Redirect URI Validation - Token Request</h3>
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Token Request 
+		by including a <code>redirect_uri</code> value that differs from the redirect URI included in the prior Authentication Request.
+
+		<h4>Execution</h4>
+		PrOfESSOS issues a Token Request containing a <code>redirect_uri</code> value that does not match the one 
+		presented in the Authentication Request and is not registered for the client to which the code 
+		has been issued. A random path element is appended to the <code>redirect_uri</code>.		 	 
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code> and PrOfESSOS clients are allowed to use the code flow.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned from the token endpoint.
+
+		<h4>Countermeasures</h4>
+		<cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.2</a></cite> requires the OP to <q>Ensure that the <code>redirect_uri</code> parameter value is identical to the <code>redirect_uri</code> parameter value that was included in the initial Authorization Request. If the <code>redirect_uri</code> parameter value is not present when there is only one registered <code>redirect_uri</code> value, the Authorization Server MAY return an error (since the Client should have included the parameter) or MAY proceed without an error (since OAuth 2.0 permits the parameter to be omitted in this case).</q>
 		]]>
 		</Description>
 		<TestParameters>
-			<Parameter Key="is_single_rp_test">false</Parameter>
+			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
@@ -413,15 +743,29 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Code Hijack 4">
+	<TestStep Name="Redirect URI Validation (TR) - Subdomain">
 		<Description><![CDATA[
-		PrOfESSOS issues a token request containing a <code>redirect_uri</code> value that does not match the
-			one presented in the Authentication Request and is not registered for the client to which the code
-			has been issued. A random subdomain is prepended to the <code>redirect_uri</code>.
+		<h3>Redirect URI Validation - Token Request</h3>
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Token Request 
+		by including a <code>redirect_uri</code> value that differs from the redirect URI included in the prior Authentication Request.
+
+		<h4>Execution</h4>
+		PrOfESSOS issues a token request containing a <code>redirect_uri</code> value that does not match the 
+		one presented in the Authentication Request and is not registered for the client to which the code 
+		has been issued. A random subdomain is prepended to the <code>redirect_uri</code>.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code> and PrOfESSOS clients are allowed to use the code flow.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned from the token endpoint.
+
+		<h4>Countermeasures</h4>
+		<cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.2</a></cite> requires the OP to <q>Ensure that the <code>redirect_uri</code> parameter value is identical to the <code>redirect_uri</code> parameter value that was included in the initial Authorization Request. If the <code>redirect_uri</code> parameter value is not present when there is only one registered <code>redirect_uri</code> value, the Authorization Server MAY return an error (since the Client should have included the parameter) or MAY proceed without an error (since OAuth 2.0 permits the parameter to be omitted in this case).</q>
 		]]>
 		</Description>
 		<TestParameters>
-			<Parameter Key="is_single_rp_test">false</Parameter>
+			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
@@ -440,15 +784,29 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Code Hijack 4.2 TLD">
+	<TestStep Name="Redirect URI Validation (TR) - Append TLD">
 		<Description><![CDATA[
-		PrOfESSOS issues a token request containing a <code>redirect_uri</code> value that does not match the
-			one presented in the Authentication Request and is not registered for the client to which the code
-			has been issued. An invalid top level domain part is appended to the host part of the <code>redirect_uri</code>.
+		<h3>Redirect URI Validation - Token Request</h3>
+		PrOfESSOS tests the validation of the <code>redirect_uri</code> parameter within the Token Request 
+		by including a <code>redirect_uri</code> value that differs from the redirect URI included in the prior Authentication Request.
+
+		<h4>Execution</h4>
+		PrOfESSOS issues a token request containing a <code>redirect_uri</code> value that does not match the 
+		one presented in the Authentication Request and is not registered for the client to which the code 
+		has been issued. An invalid top level domain part is appended to the host part of the <code>redirect_uri</code>.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code> and PrOfESSOS clients are allowed to use the code flow.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned from the token endpoint.
+
+		<h4>Countermeasures</h4>
+		<cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.2</a></cite> requires the OP to <q>Ensure that the <code>redirect_uri</code> parameter value is identical to the <code>redirect_uri</code> parameter value that was included in the initial Authorization Request. If the <code>redirect_uri</code> parameter value is not present when there is only one registered <code>redirect_uri</code> value, the Authorization Server MAY return an error (since the Client should have included the parameter) or MAY proceed without an error (since OAuth 2.0 permits the parameter to be omitted in this case).</q>
 		]]>
 		</Description>
 		<TestParameters>
-			<Parameter Key="is_single_rp_test">false</Parameter>
+			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
@@ -466,19 +824,86 @@
 
 		</RPConfig-2>
 	</TestStep>
-	
 
-	<TestStep Name="Code Hijack 5">
+	<!--TODO: Redirect URI Validation (TR): userinfo parts and parameter pollution(?) => compliance checks, low-prio,-->
+
+	<TestStep Name="Open Redirector on the OP - Invalid Scope">
 		<Description><![CDATA[
-		PrOfESSOS attempts to redeem an Authorization Code that was issued to a different client and has
-			not yet been used in a Token Request
+		<h3>Open Redirector</h3>
+		The <a href="https://tools.ietf.org/html/rfc6749#section-4.2.2.1" target="_blank">OAUTH 2.0 specification, Section 4.2.2.1,</a> defines an Error Response in for the Authorization Request, that is forwarded to the client using HTTP redirects to the URI provided in the <code>redirect_uri</code> parameter <q>if the resource owner denies the access request or if the request fails for reasons other than a missing or invalid redirection URI.</q>
+		This may result in an Open Redirect Vulnerability at the OP, if arbitrary URIs can be registered for new clients.
+		Besides abusing the open redirector for phishing attacks, this can be particularly problematic if the OP
+		supports Dynamic Client Registration, applies pattern matching for redirect URIs and an RP is hosted in the 
+		same domain as the vulnerable OP (cf. <a href="https://tools.ietf.org/html/draft-ietf-oauth-closing-redirectors-00#page-4" target="_blank">Closing Open Redirectors, Section 2.2</a>).
+
+		<h4>Execution</h4>
+		PrOfESSOS issues a token request containing invalid scope values. 
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if the Error Response is returned to the client without end user interaction.
+
+		<h4>Mitigation</h4>
+		The RFC draft <a href="https://tools.ietf.org/html/draft-ietf-oauth-closing-redirectors-00" target="_blank">OAuth 2.0 Security: Closing Open Redirectors in OAuth</a> recommends to either respond with an HTTP 400 (Bad Request) status code error instead of 
+		returning the to the client's redirect URI or to make sure that potential referer headers are cleared, e.g., 
+		using intermediate redirects, Referer Policy or an appropriate Content Security Policy. 
+
+		Because OpenID Connect mandates exact string matching of the redirect URI, compliant implementations should 
+		not be vulnerable to the attack described in Section 2.2 of the RFC draft. However, the implicit trust of users
+		into the Identity Provider makes this an attractive target for abuse, for example, in phishing attacks. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+			<Parameter Key="start-rp-type">EVIL</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+		</RPConfig-1>
+		<RPConfig-2>
+			<!--not used in this test-->
+			<ImplementationClass>de.rub.nds.oidc.server.rp.RumRP</ImplementationClass>
+			<Parameter Key="authnreq-add-invalid-scope">true</Parameter>
+
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Authorization Code Substitution">
+		<Description><![CDATA[
+		<h3>Authorization Code Substitution</h4>
+		PrOfESSOS simulates a Code Substitution attack aimed at what is commonly referred to as <em>OAUTH Authentication<em>.
+		In this scenario, an attacker controlled malicious app receives a valid Authorization Code issued by a benign 
+		Identity Provider as result of a victim's authentication. Next, the attacker starts a login process within the 
+		target application, which uses the same benign Identity Provider, and, in the Authorization Response, substitutes
+		the Authorization Code with the code that was leaked to the attacker by the malicious app.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code> and PrOfESSOS test clients can make use of the code flow.
+
+		<h4>Execution</h4>
+		PrOfESSOS attempts to redeem an Authorization Code that was issued to a different client and has not yet 
+		been used in a Token Request.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned from the token endpoint.
+
+		<h4>Countermeasures</h4>
+		<a href="https://tools.ietf.org/html/rfc6819#section-4.4.1.13" target="_blank">OAuth 2.0 Threat Model and Security Considerations</a> 
+		requires clients to always include their <code>client_id</code> in Token Requests and Authorization Servers to 
+		validate that the presented code was indeed issued to the client.
+		<a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequest" target="_blank">OpenID Connect, Section 3.1.3.1f</a>
+		mandates that confidential clients MUST authenticate and that the OP MUST authenticate the client if possible and
+		<q>Ensure the Authorization Code was issued to the authenticated Client.</q>
 		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">false</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPCodeReuseBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.MultiRpSingleUserAuthRunner</ImplementationClass>
 		</BrowserSimulator>
 
 		<RPConfig-1>
@@ -492,18 +917,80 @@
 		</RPConfig-2>
 	</TestStep>
 
-
-	<TestStep Name="Code Hijack 6">
+	<TestStep Name="Authorization Code Substitution - Excluded Client Credentials">
 		<Description><![CDATA[
-		PrOfESSOS attempts to redeem an authorization code using Basic Authentication with a randomly
-			generated value as <code>client_secret</code>.
+		<h3>Authorization Code Substitution</h4>
+		PrOfESSOS simulates a Code Substitution attack aimed at what is commonly referred to as <em>OAUTH Authentication<em>.
+		In this scenario, an attacker controlled malicious app receives a valid Authorization Code issued by a benign 
+		Identity Provider as result of a victim's authentication. Next, the attacker starts a login process within the 
+		target application, which uses the same benign Identity Provider, and, in the Authorization Response, substitutes
+		the Authorization Code with the code that was leaked to the attacker by the malicious app.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code> and PrOfESSOS test clients can make use of the code flow.
+
+		<h4>Execution</h4>
+		PrOfESSOS attempts to redeem an Authorization Code that was issued to a different client and has not yet 
+		been used in a Token Request. The request to the Token Endpoint is made without client authentication, neither 
+		the <code>client_id</code> nor any form of client credentials are submitted.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned from the token endpoint.
+
+		<h4>Countermeasures</h4>
+		<a href="https://tools.ietf.org/html/rfc6819#section-4.4.1.13" target="_blank">OAuth 2.0 Threat Model and Security Considerations</a> 
+		requires clients to always include their <code>client_id</code> in Token Requests and Authorization Servers to 
+		validate that the presented code was indeed issued to the client.
+		<a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequest" target="_blank">OpenID Connect, Section 3.1.3.1f</a>
+		mandates that confidential clients MUST authenticate and that the OP MUST authenticate the client if possible and
+		<q>Ensure the Authorization Code was issued to the authenticated Client.</q>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.MultiRpSingleUserAuthRunner</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+			<Parameter Key="force-no-redeem-auth-code">true</Parameter>
+
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+			<Parameter Key="tokenreq-force-no-client-auth">true</Parameter>
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Client Authentication - Basic Auth, Random Secret">
+		<Description><![CDATA[
+		<h3>Client Authentication Validation</h4>
+		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code> and PrOfESSOS test clients can make use of the code flow.
+
+		<h4>Execution</h4>
+		PrOfESSOS attempts to redeem an authorization code using Basic Authentication with a randomly generated 
+		value as <code>client_secret</code>.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned.
+
+		<h4>Mitigation</h4>
+		According to <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.1,</a> the OP MUST <q>Authenticate the Client if it was issued 
+		Client Credentials or if it uses another Client Authentication method, per Section 9.</q>
+		Implementations must take special care not to introduce vulnerabilities in this important validation step.
 		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
 		</BrowserSimulator>
 
 		<RPConfig-1>
@@ -518,18 +1005,33 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Code Hijack 7">
+	<TestStep Name="Client Authentication - Basic Auth, Exclude Secret">
 		<Description><![CDATA[
+		<h3>Client Authentication Validation</h4>
+		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code> and PrOfESSOS test clients can make use of the code flow.
+
+		<h4>Execution</h4>
 		PrOfESSOS attempts to redeem an authorization code using Basic Authentication with an empty string as
-			<code>client_secret</code>. That is, the Authorization Header's value is made up as
-			<code>Base64("client_id:")</code>
+		<code>client_secret</code>. That is, the Authorization Header's value is made up as
+		<pre><code>Authorization: Basic Base64("ClientID:")</code><pre>
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned.
+
+		<h4>Mitigation</h4>
+		According to <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.1,</a> the OP MUST <q>Authenticate the Client if it was issued 
+		Client Credentials or if it uses another Client Authentication method, per Section 9.</q>
+		Implementations must take special care not to introduce vulnerabilities in this important validation step.
 		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
 		</BrowserSimulator>
 
 		<RPConfig-1>
@@ -544,23 +1046,129 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Code Hijack 8">
+	<TestStep Name="Client Authentication - Basic Auth, Exclude ID, Exclude Secret">
 		<Description><![CDATA[
-		PrOfESSOS attempts to redeem an authorization code including its client credentials as body
-			parameters in the POST request even though only the (default) authentication method
-			<code>"token_endpoint_auth_method": "client_secret_basic"</code> has been registered.
+		<h3>Client Authentication Validation</h4>
+		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code> and PrOfESSOS test clients can make use of the code flow.
+
+		<h4>Execution</h4>
+		PrOfESSOS attempts to redeem an authorization code using Basic Authentication with an empty string as
+			<code>client_secret</code>. That is, the Authorization Header looks like
+			<pre><code>Authorization: Basic <code><pre>
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned.
+
+		<h4>Mitigation</h4>
+		According to <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.1,</a> the OP MUST <q>Authenticate the Client if it was issued 
+		Client Credentials or if it uses another Client Authentication method, per Section 9.</q>
+		Implementations must take special care not to introduce vulnerabilities in this important validation step.
+
 		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
 		</BrowserSimulator>
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
+			<Parameter Key="tokenreq-clientauth-exclude-client-id">true</Parameter>
+			<Parameter Key="tokenreq-clientauth-exclude-client-secret">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+
+	<TestStep Name="Client Authentication - Authentication Method Confusion (POST)">
+		<Description><![CDATA[
+		<h3>Client Authentication Validation</h4>
+		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code> and PrOfESSOS test clients can make use of the code flow.
+
+		<h4>Execution</h4>	
+		PrOfESSOS attempts to redeem an Authorization Code including its client credentials as body parameters in the 
+		POST request even though only the (default) authentication method <code>"token_endpoint_auth_method": "client_secret_basic"</code> 
+		had been registered for the client.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned.
+
+		<h4>Mitigation</h4>
+		According to <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.1,</a> the OP MUST <q>Authenticate the Client if it was issued 
+		Client Credentials or if it uses another Client Authentication method, per Section 9.</q>
+		Implementations must take special care not to introduce vulnerabilities in this important validation step.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
+			<!-- TODO: not yet implemented but default registered auth method -->
+			<Parameter Key="register-clientauth-method-client_secret_basic">true</Parameter> 
+
 			<Parameter Key="tokenreq-force-client-auth-post">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>	
+
+
+	<TestStep Name="Client Authentication - Authentication Method Confusion (Basic)">
+		<Description><![CDATA[
+		<h3>Client Authentication Validation</h4>
+		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code> and PrOfESSOS test clients can make use of the code flow.
+
+		<h4>Execution</h4>	
+		PrOfESSOS registers a client with <code>"token_endpoint_auth_method": "client_secret_post"</code>. In the Token
+		 Request, HTTP Basic Authentication is used, as if <code>client_secret_basic</code> had been registered.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned.
+
+		<h4>Mitigation</h4>
+		According to <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.1,</a> the OP MUST <q>Authenticate the Client if it was issued 
+		Client Credentials or if it uses another Client Authentication method, per Section 9.</q>
+		Implementations must take special care not to introduce vulnerabilities in this important validation step.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+			<Parameter Key="enforce-client-registration">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
+			<Parameter Key="register-clientauth-method-client_secret_post">true</Parameter>
+			<!--<Parameter Key="tokenreq-force-client-auth-post">true</Parameter>-->
 			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
@@ -570,17 +1178,33 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Code Hijack 9">
+	<TestStep Name="Client Authentication - Random Secret (POST)">
 		<Description><![CDATA[
-			PrOfESSOS attempts to redeem an authorization code using <code>"token_endpoint_auth_method": "client_secret_post"</code>
-			as authentication method with a random value for the <code>client_secret</code> parameter.
-		]]></Description>
+		<h3>Client Authentication Validation</h4>
+		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code> and PrOfESSOS test clients can make use of the code flow.
+
+		<h4>Execution</h4>	
+		PrOfESSOS attempts to redeem an authorization code using <code>"token_endpoint_auth_method": "client_secret_post"</code>
+		as authentication method with a random value for the <code>client_secret</code> parameter.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned.
+
+		<h4>Mitigation</h4>
+		According to <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.1,</a> the OP MUST <q>Authenticate the Client if it was issued 
+		Client Credentials or if it uses another Client Authentication method, per Section 9.</q>
+		Implementations must take special care not to introduce vulnerabilities in this important validation step.
+		]]>
+		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
 			<Parameter Key="enforce-client-registration">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
 		</BrowserSimulator>
 
 		<RPConfig-1>
@@ -597,10 +1221,25 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Code Hijack 10">
+	<TestStep Name="Client Authentication - Empty Secret (POST)">
 		<Description><![CDATA[
+		<h3>Client Authentication Validation</h4>
+		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code> and PrOfESSOS test clients can make use of the code flow.
+
+		<h4>Execution</h4>	
 		PrOfESSOS attempts to redeem an authorization code using <code>client_secret_post</code> authentication method in
-		the Token Request without including the <code>client_secret</code> parameter.
+		the Token Request, adding the <code>client_secret</code> parameter without any value, i.e., <code>&client_secret=&client_id=ClientID</code>
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned.
+
+		<h4>Mitigation</h4>
+		According to <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.1,</a> the OP MUST <q>Authenticate the Client if it was issued 
+		Client Credentials or if it uses another Client Authentication method, per Section 9.</q>
+		Implementations must take special care not to introduce vulnerabilities in this important validation step.
 		]]>
 		</Description>
 		<TestParameters>
@@ -608,12 +1247,13 @@
 			<Parameter Key="enforce-client-registration">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
 		</BrowserSimulator>
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
 			<Parameter Key="register-clientauth-method-client_secret_post">true</Parameter>
+			<Parameter Key="tokenreq-force-client-auth-post">true</Parameter>
 			<Parameter Key="tokenreq-clientauth-empty-client-secret">true</Parameter>
 			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-1>
@@ -624,10 +1264,344 @@
 		</RPConfig-2>
 	</TestStep>
 
+	<TestStep Name="Client Authentication - Exclude Secret (POST)">
+		<Description><![CDATA[
+		<h3>Client Authentication Validation</h4>
+		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code> and PrOfESSOS test clients can make use of the code flow.
+
+		<h4>Execution</h4>	
+		PrOfESSOS attempts to redeem an authorization code using <code>client_secret_post</code> authentication method in
+		the Token Request without including the <code>client_secret</code> parameter.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned.
+
+		<h4>Mitigation</h4>
+		According to <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.1,</a> the OP MUST <q>Authenticate the Client if it was issued 
+		Client Credentials or if it uses another Client Authentication method, per Section 9.</q>
+		Implementations must take special care not to introduce vulnerabilities in this important validation step.
+
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+			<Parameter Key="enforce-client-registration">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
+			<Parameter Key="register-clientauth-method-client_secret_post">true</Parameter>
+			<Parameter Key="tokenreq-force-client-auth-post">true</Parameter>
+			<Parameter Key="tokenreq-clientauth-exclude-client-secret">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+	<!--TODO: remove, as this is the effectively the same as Code Substitution w/o credentials -->
+	<TestStep Name="Client Authentication - Exclude Credentials">
+		<Description><![CDATA[
+		PrOfESSOS attempts to redeem an Authorization Code without including a <code>client_id</code>, <code>client_secret</code>,
+		 or any other form of client authentication.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
+			<Parameter Key="tokenreq-force-no-client-auth">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Client Authentication - Client-Secret-JWT, Invalid Signature">
+		<Description><![CDATA[
+		<h3>Client Authentication Validation</h4>
+		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code>, the Token Endpoint Authentication Method <code>client_secret_jwt</code>,
+		 and PrOfESSOS test clients can make use of the code flow. 
+
+		<h4>Execution</h4>	
+		PrOfESSOS tests the validation of the <code>client_secret_jwt</code>. In this test, a JWT including an
+invalid signature is submitted as value of the <code>client_assertion</code> parameter in the Token Request.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned.
+
+		<h4>Mitigation</h4>
+		According to <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.1,</a> the OP MUST <q>Authenticate the Client if it was issued 
+		Client Credentials or if it uses another Client Authentication method, per Section 9.</q>
+		Implementations must take special care not to introduce vulnerabilities in this important validation step.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+			<Parameter Key="enforce-client-registration">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.JwtAuthRP</ImplementationClass>
+			<Parameter Key="register-clientauth-method-client_secret_jwt">true</Parameter>
+			<Parameter Key="tokenreq-client-jwt-invalid-sig">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Client Authentication - Client-Secret-JWT, 'none' Algorithm 1">
+		<Description><![CDATA[
+		<h3>Client Authentication Validation</h4>
+		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code>, the Token Endpoint Authentication Method <code>client_secret_jwt</code>,
+		 and PrOfESSOS test clients can make use of the code flow. 
+
+		<h4>Execution</h4>	
+		PrOfESSOS tests the validation of the <code>client_secret_jwt</code>. In this test, the JWT header contains the 
+		Algorithm identifier <code>"alg": "none"</code> and an (invalid) signature part.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned.
+
+		<h4>Mitigation</h4>
+		According to <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.1,</a> the OP MUST <q>Authenticate the Client if it was issued 
+		Client Credentials or if it uses another Client Authentication method, per Section 9.</q>
+		Implementations must take special care not to introduce vulnerabilities in this important validation step.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+			<Parameter Key="enforce-client-registration">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.JwtAuthRP</ImplementationClass>
+			<Parameter Key="register-clientauth-method-client_secret_jwt">true</Parameter>
+			<Parameter Key="tokenreq-client-jwt-none-alg">true</Parameter>
+			<Parameter Key="tokenreq-client-jwt-invalid-sig">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+
+	<TestStep Name="Client Authentication - Client-Secret-JWT, 'none' Algorithm 2">
+		<Description><![CDATA[
+		<h3>Client Authentication Validation</h4>
+		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code>, the Token Endpoint Authentication Method <code>client_secret_jwt</code>,
+		 and the PrOfESSOS test clients can make use of the code flow. 
+
+		<h4>Execution</h4>	
+		PrOfESSOS tests the validation of the <code>client_secret_jwt</code>. In this test, the JWT header contains the 
+		Algorithm identifier <code>"alg": "none"</code> and no signature.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned.
+
+		<h4>Mitigation</h4>
+		According to <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.1,</a> the OP MUST <q>Authenticate the Client if it was issued 
+		Client Credentials or if it uses another Client Authentication method, per Section 9.</q>
+		Implementations must take special care not to introduce vulnerabilities in this important validation step.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+			<Parameter Key="enforce-client-registration">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.JwtAuthRP</ImplementationClass>
+			<Parameter Key="register-clientauth-method-client_secret_jwt">true</Parameter>
+			<Parameter Key="tokenreq-client-jwt-none-alg">true</Parameter>
+			<Parameter Key="tokenreq-client-jwt-exclude-sig">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Client Authentication - Client-Secret-JWT, 'nONe' Algorithm 1">
+		<Description><![CDATA[
+		<h3>Client Authentication Validation</h4>
+		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code>, the Token Endpoint Authentication Method <code>client_secret_jwt</code>,
+		 and PrOfESSOS test clients can make use of the code flow. 
+
+		<h4>Execution</h4>	
+		PrOfESSOS tests the validation of the <code>client_secret_jwt</code>. In this test, the JWT header contains a 
+		mixed-case spelling of the Algorithm identifier <em>none</em>: <code>"alg": "nONe"</code> to circumvent naive 
+		 blacklist. An (invalid) signature part is appended to the JWT.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned.
+
+		<h4>Mitigation</h4>
+		According to <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.1,</a> the OP MUST <q>Authenticate the Client if it was issued 
+		Client Credentials or if it uses another Client Authentication method, per Section 9.</q>
+		Implementations must take special care not to introduce vulnerabilities in this important validation step.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+			<Parameter Key="enforce-client-registration">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.JwtAuthRP</ImplementationClass>
+			<Parameter Key="register-clientauth-method-client_secret_jwt">true</Parameter>
+			<Parameter Key="tokenreq-client-jwt-none-alg-mixedcase">true</Parameter>
+			<Parameter Key="tokenreq-client-jwt-invalid-sig">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Client Authentication - Client-Secret-JWT, 'nONe' Algorithm 2">
+		<Description><![CDATA[
+		<h3>Client Authentication Validation</h4>
+		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code>, the Token Endpoint Authentication Method <code>client_secret_jwt</code>,
+		 and PrOfESSOS test clients can make use of the code flow. 
+
+		<h4>Execution</h4>	
+		PrOfESSOS tests the validation of the <code>client_secret_jwt</code>. In this test, the JWT header contains a 
+		mixed-case spelling of the Algorithm identifier <em>none</em>: <code>"alg": "nONe"</code> to circumvent naive 
+		 blacklist. The JWT does not include a signature part.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned.
+
+		<h4>Mitigation</h4>
+		According to <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.1,</a> the OP MUST <q>Authenticate the Client if it was issued 
+		Client Credentials or if it uses another Client Authentication method, per Section 9.</q>
+		Implementations must take special care not to introduce vulnerabilities in this important validation step.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+			<Parameter Key="enforce-client-registration">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.JwtAuthRP</ImplementationClass>
+			<Parameter Key="register-clientauth-method-client_secret_jwt">true</Parameter>
+			<Parameter Key="tokenreq-client-jwt-none-alg-mixedcase">true</Parameter>
+			<Parameter Key="tokenreq-client-jwt-exclude-sig">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+	<!--<TestStep Name="Positive Test for client_secret_jwt authentications">-->
+	<!--<Description><![CDATA[-->
+	<!--just testing that it works....]]></Description>-->
+	<!--<TestParameters>-->
+	<!--<Parameter Key="is_single_rp_test">true</Parameter>-->
+	<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
+	<!--</TestParameters>-->
+	<!--<BrowserSimulator>-->
+	<!--<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>-->
+	<!--</BrowserSimulator>-->
+
+	<!--<RPConfig-1>-->
+	<!--<ImplementationClass>de.rub.nds.oidc.server.rp.JwtAuthRP</ImplementationClass>-->
+	<!--<Parameter Key="register-clientauth-method-client_secret_jwt">true</Parameter>-->
+
+	<!--</RPConfig-1>-->
+	<!--<RPConfig-2>-->
+	<!--<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>-->
+	<!--</RPConfig-2>-->
+	<!--</TestStep>-->
+
+	<!-- TODO FUTURE WORK: announce public JWKS and client_secret_jwk in registration; use HMAC w/ public RSA-Key as 
+		MAC key, similar to KeyConfusion in RP-Verifier -->
+
+
 	<TestStep Name="Message Flow Confusion - Response Type">
 		<Description><![CDATA[
-		PrOfESSOS registers a Client with <code>grant_type=authorization_code</code>. In the Authentication Request, an
+		<h3>Message Flow Downgrade to Implicit</h3>
+		PrOfESSOS tests if the OP can be downgraded to using less secure grant types that have not been registered.
+
+		<h4>Prerequisites<h4>
+		The OP supports, and test clients can use, the code flow.
+
+		<h4>Execution</h4>
+		The PrOfESSOS client is registered with <code>grant_type=authorization_code</code>. In the Authentication Request, an
 		Implicit Flow is requested by using the parameter <code>response_type=token id_token</code>.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful, if the Authorization Response contains at least one Token (ID Token, Access Token) 
+		in the URI Fragment.
+
+		<h4>Mitigation</h4>
+		Only grant types that have been assigned to the client during registration should return a valid Authorization Response.
+		We recommend that OPs prevent clients from registering multiple flows with different security properties. The same
+		client instance should not be able to register both <code>authorization_code</code> and <code>implicit</code>. Furthermore,
+		<a href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-12#section-3.1.2" target-"_blank">draft-ietf-oauth-security-topics-12, Section 3.1.2,</a> recommends that <q>clients SHOULD NOT use the implicit grant [...], unless the issued access tokens are sender-constrained and access token injection in the authorization response is prevented.</q>
 		]]>
 		</Description>
 		<TestParameters>
@@ -636,7 +1610,7 @@
 			<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
 		</BrowserSimulator>
 
 		<RPConfig-1>
@@ -655,10 +1629,24 @@
 
 	<TestStep Name="Message Flow Confusion - Response Mode">
 		<Description><![CDATA[
-		 PrOfESSOS requests an <code>id_token</code> using the Implicit Flow and sets the <code>response_mode</code>
-		 parameter to <code>query</code>. As per <em>OAuth 2.0 Multiple Response Type Encoding Practices</em>, the OP must
-		 not include tokens in the URL query parameters.
-			]]>
+		<h3>Message Flow Confusion - Response Mode</h3>
+		PrOfESSOS tests if the OP can be made to use less secure response mode that is not allowed for the requested flow.
+
+		<h4>Prerequisites<h4>
+		The OP supports, and test clients can use or register, the implicit flow.
+
+		<h4>Execution</h4>
+		PrOfESSOS requests an <code>id_token</code> using the implicit flow and sets the <code>response_mode</code>
+		parameter to <code>query</code>.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful, if the Authorization Response contains at least one Token (ID Token, Access Token) 
+		in the query string of the URI (not in the fragment).
+
+		<h4>Mitigation</h4>
+		As per <a href="https://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#Combinations" target="_blank">OAuth 2.0 Multiple Response Type Encoding Practices, Section 5</a>, the OP must not 
+		include Access Tokens or ID Tokens in the URL query parameters.		
+		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
@@ -666,7 +1654,7 @@
 			<Parameter Key="enforce-client-registration">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
 		</BrowserSimulator>
 
 		<RPConfig-1>
@@ -687,8 +1675,24 @@
 
 	<TestStep Name="PKCE 1 - TR: Invalid Verifier">
 		<Description><![CDATA[
-		PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>. An invalid <code>code_verifier</code> is submitted
-			to the OP in the Token Request.
+		<h3>PKCE Validation</h3>
+		PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>.
+
+		<h4>Prerequisites</h4>
+		The OP supports the code flow and PKCE.
+
+		<h4>Execution</h4>		
+		A <code>code_challenge</code> is included in the Authentication Request. In the following Token Request, an 
+		invalid <code>code_verifier</code> value is submitted to the OP.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token is returned in the Token Response.
+
+		<h4>Mitigation</h4>
+		The PKCE challenge and verifier must be properly validated by the OP according to <a href="https://tools.ietf.org/html/rfc7636" target="_blank">RFC 7636</a>. Also note that the <a href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-12#section-3.1.1" target-"_blank">draft-ietf-oauth-security-topics-12, Section 3.1.1,</a> states that <q>Clients utilizing the authorization grant type MUST use PKCE
+   [RFC7636] [...] Note: although PKCE so far was recommended as a mechanism to protect
+   native apps, this advice applies to all kinds of OAuth clients,
+   including web applications.</q>
 		]]>
 		</Description>
 		<TestParameters>
@@ -697,7 +1701,7 @@
 			<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
 		</BrowserSimulator>
 
 		<RPConfig-1>
@@ -714,8 +1718,24 @@
 
 	<TestStep Name="PKCE 2 - TR: Exclude Verifier">
 		<Description><![CDATA[
-		 PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>. A <code>code_challenge</code> is included in the
-			Authentication Request but the following Token Request does not include a <code>code_verifier</code>.
+		<h3>PKCE Validation</h3>
+		PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>.
+
+		<h4>Prerequisites</h4>
+		The OP supports the code flow and PKCE.
+
+		<h4>Execution</h4>		
+		A <code>code_challenge</code> is included in the Authentication Request but the following Token Request does 
+		not include a <code>code_verifier</code>.		
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token is returned in the Token Response.
+
+		<h4>Mitigation</h4>
+		The PKCE challenge and verifier must be properly validated by the OP according to <a href="https://tools.ietf.org/html/rfc7636" target="_blank">RFC 7636</a>. Also note that the <a href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-12#section-3.1.1" target-"_blank">draft-ietf-oauth-security-topics-12, Section 3.1.1,</a> states that <q>Clients utilizing the authorization grant type MUST use PKCE
+   [RFC7636] [...] Note: although PKCE so far was recommended as a mechanism to protect
+   native apps, this advice applies to all kinds of OAuth clients,
+   including web applications.</q>
 		]]>
 		</Description>
 		<TestParameters>
@@ -724,7 +1744,7 @@
 			<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
 		</BrowserSimulator>
 
 		<RPConfig-1>
@@ -734,16 +1754,31 @@
 			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRP</ImplementationClass>
 			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
 		</RPConfig-2>
 	</TestStep>
 
 	<TestStep Name="PKCE 3 - AR: Exclude Challenge">
 		<Description><![CDATA[
-			PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>. A <code>code_verifier</code> is included in the
-			Token Request even though the Authentication Request did not include a <code>code_challenge</code>.
-			]]>
+		<h3>PKCE Validation</h3>
+		PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>.
+
+		<h4>Prerequisites</h4>
+		The OP supports the code flow and PKCE.
+
+		<h4>Execution</h4>		
+		A <code>code_verifier</code> is included in the Token Request even though the Authentication Request did not include a <code>code_challenge</code>.		
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token is returned in the Token Response.
+
+		<h4>Mitigation</h4>
+		The PKCE challenge and verifier must be properly validated by the OP according to <a href="https://tools.ietf.org/html/rfc7636" target="_blank">RFC 7636</a>. Also note that the <a href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-12#section-3.1.1" target-"_blank">draft-ietf-oauth-security-topics-12, Section 3.1.1,</a> states that <q>Clients utilizing the authorization grant type MUST use PKCE
+   [RFC7636] [...] Note: although PKCE so far was recommended as a mechanism to protect
+   native apps, this advice applies to all kinds of OAuth clients,
+   including web applications.</q>
+		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
@@ -751,7 +1786,7 @@
 			<!--<Parameter Key="enforce-client-registration">true</Parameter>-->
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
 		</BrowserSimulator>
 
 		<RPConfig-1>
@@ -761,7 +1796,7 @@
 			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-1>
 		<RPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRP</ImplementationClass>
 			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
 		</RPConfig-2>
 	</TestStep>
@@ -769,18 +1804,31 @@
 	<TestStep Name="PKCE 4 - Downgrade to Plain">
 		<Description>
 			<![CDATA[
-			PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>. A <code>code_challenge_method=S256</code> 
-			parameter is included in the Authentication Request, indicating that 'SHA-256' is used to compute the code 
-			challenge. In the following Token Request, PrOfESSOS submits the original value of the 
-			<code>code_challenge</code> as <code>code_verifier</code>, as if using <code>code_challenge_method=plain</code>.
-			 In addition, an (invalid) parameter <code>code_challenge_method=plain</code> is added to the Token Request.
+		<h3>PKCE Validation</h3>
+		PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>.
+
+		<h4>Prerequisites</h4>
+		The OP supports the code flow and PKCE.
+
+		<h4>Execution</h4>
+		A <code>code_challenge_method=S256</code> parameter is included in the Authentication Request, indicating that 'SHA-256' is used to compute the code challenge. In the following Token Request, PrOfESSOS submits the original value of the <code>code_challenge</code> as <code>code_verifier</code>, as if using <code>code_challenge_method=plain</code>. In addition, an (invalid) parameter <code>code_challenge_method=plain</code> is added to the Token Request.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token is returned in the Token Response.
+
+		<h4>Mitigation</h4>
+		The PKCE challenge and verifier must be properly validated by the OP according to <a href="https://tools.ietf.org/html/rfc7636" target="_blank">RFC 7636</a>. We further recommend OPs to not support the <code>code_challenge_method=plain</code>. 
+		Note, that the <a href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-12#section-3.1.1" target-"_blank">draft-ietf-oauth-security-topics-12, Section 3.1.1,</a> states that <q>Clients utilizing the authorization grant type MUST use PKCE
+   [RFC7636] [...] Note: although PKCE so far was recommended as a mechanism to protect
+   native apps, this advice applies to all kinds of OAuth clients,
+   including web applications.</q>
 			]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
 		</BrowserSimulator>
 
 		<RPConfig-1>
@@ -798,15 +1846,31 @@
 
 	<TestStep Name="PKCE 5 - Verifier Confusion">
 		<Description><![CDATA[
-			PrOfESSOS tests if the PKCE <code>code_verifier</code> is bound to the Authorization Code. Here,
-			PrOfESSOS submits an unused <code>code_verifier</code> that was issued for a different Authorization Code.
+				<h3>PKCE Validation</h3>
+		PrOfESSOS tests the validation of the PKCE <code>code_verifier</code>.
+
+		<h4>Prerequisites</h4>
+		The OP supports the code flow and PKCE.
+
+		<h4>Execution</h4>
+		PrOfESSOS tests if the PKCE <code>code_verifier</code> is bound to the Authorization Code. In this check, PrOfESSOS submits an unused <code>code_verifier</code> that was issued for a different Authorization Code.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token is returned in the Token Response.
+
+		<h4>Mitigation</h4>
+		The PKCE challenge and verifier must be properly validated by the OP according to <a href="https://tools.ietf.org/html/rfc7636" target="_blank">RFC 7636</a>. We further recommend OPs to not support the <code>code_challenge_method=plain</code>. 
+		Note, that the <a href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-12#section-3.1.1" target-"_blank">draft-ietf-oauth-security-topics-12, Section 3.1.1,</a> states that <q>Clients utilizing the authorization grant type MUST use PKCE
+   [RFC7636] [...] Note: although PKCE so far was recommended as a mechanism to protect
+   native apps, this advice applies to all kinds of OAuth clients,
+   including web applications.</q>
 		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPCodeReuseBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpMultiUserAuthRunner</ImplementationClass>
 		</BrowserSimulator>
 
 		<RPConfig-1>
@@ -822,30 +1886,7 @@
 		</RPConfig-2>
 	</TestStep>
 
-	<!--<TestStep Name="PKCE 4 positive test using DefaultRP ">-->
-		<!--<Description>PKCE positive test-->
-		<!--</Description>-->
-		<!--<TestParameters>-->
-			<!--<Parameter Key="is_single_rp_test">true</Parameter>-->
-		<!--</TestParameters>-->
-		<!--<BrowserSimulator>-->
-			<!--<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>-->
-		<!--</BrowserSimulator>-->
-
-		<!--<RPConfig-1>-->
-			<!--<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>-->
-			<!--&lt;!&ndash;<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRP</ImplementationClass>&ndash;&gt;-->
-			<!--&lt;!&ndash;<Parameter Key="force-no-redeem-auth-code">true</Parameter>&ndash;&gt;-->
-			<!--&lt;!&ndash;<Parameter Key="tokenreq-pkce-from-other-session">true</Parameter>&ndash;&gt;-->
-			<!--<Parameter Key="authnreq-pkce-method-s256">true</Parameter>-->
-		<!--</RPConfig-1>-->
-		<!--<RPConfig-2>-->
-			<!--<ImplementationClass>de.rub.nds.oidc.server.rp.PkceRP</ImplementationClass>-->
-			<!--&lt;!&ndash;<Parameter Key="force-use-stored-auth-code">true</Parameter>&ndash;&gt;-->
-		<!--</RPConfig-2>-->
-	<!--</TestStep>-->
-
-	<!--<TestStep Name="PKCE positive test using PkceRP">-->
+	<!--<TestStep Name="PKCE positive Test">-->
 		<!--<Description>PKCE positive test-->
 		<!--</Description>-->
 		<!--<TestParameters>-->
@@ -870,9 +1911,22 @@
 
 	<TestStep Name="Sub Claim Spoofing 1 (sub_victim)">
 		<Description><![CDATA[
-PrOfESSOS tests the validation of the Authentication Request at the OP. To this end, a claimsrequest is 
-embedded in the Authentication Requests that contains the <code>sub</code> claim value of the victim. 
-]]>
+		<h3>Sub Claim Spoofing</h3>	
+		PrOfESSOS tests the validation of the Authentication Request at the OP by embedding a <code>claims</code> request 
+parameter in the Authentication Request.
+
+ 		<h4>Prerequisites</h4>
+ 		The OP supports OpenID Connect in the code flow or an implicit grant.
+
+ 		<h4>Execution</h4>
+		The requested ID Token claim contains the <code>sub</code> value of the victim and is marked as <em>essential</em>.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful, if the returned ID Token contains the <code>sub</code> value of the victim.
+
+		<h4>Mitigation</h4>
+		As per Step 4 of <a href=\"https://openid.net/specs/openid-connect-core-1_0.html#AuthRequestValidation\" target=\"_blank\">https://openid.net/specs/openid-connect-core-1_0.html#AuthRequestValidation</a> the OP must not reply with an ID Token for a different user if <code>id_token_hint</code> or <code>claims</code> request parameters are used with values not matching the authenticated user.
+		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
@@ -893,9 +1947,22 @@ embedded in the Authentication Requests that contains the <code>sub</code> claim
 
 	<TestStep Name="Sub Claim Spoofing 2 (sub array)">
 		<Description><![CDATA[
-PrOfESSOS tests the validation of the Authentication Request at the OP. To this end, a claimsrequest is 
-embedded in the Authentication Requests that contains the <code>sub</code> claim value of the victim in the 
-claimsrequest's <code>values</code> array.]]>
+		<h3>Sub Claim Spoofing</h3>
+		PrOfESSOS tests the validation of the Authentication Request at the OP by embedding a <code>claims</code> request 
+parameter in the Authentication Request.
+
+ 		<h4>Prerequisites</h4>
+ 		The OP supports OpenID Connect in the code flow or an implicit grant.
+
+ 		<h4>Execution</h4>
+		PrOfESSOS tests the validation of the Authentication Request at the OP. To this end, a claimsrequest is embedded in the Authentication Requests that contains the <code>sub</code> claim value of the victim in the claimsrequest's <code>values</code> array.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful, if the returned ID Token contains the <code>sub</code> value of the victim.
+
+		<h4>Mitigation</h4>
+		As per Step 4 of <a href=\"https://openid.net/specs/openid-connect-core-1_0.html#AuthRequestValidation\" target=\"_blank\">https://openid.net/specs/openid-connect-core-1_0.html#AuthRequestValidation</a> the OP must not reply with an ID Token for a different user if <code>id_token_hint</code> or <code>claims</code> request parameters are used with values not matching the authenticated user.
+		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
@@ -917,9 +1984,23 @@ claimsrequest's <code>values</code> array.]]>
 
 	<TestStep Name="Sub Claim Spoofing 3 (sub array, sub1 first)">
 		<Description><![CDATA[
-		PrOfESSOS tests the validation of the Authentication Request at the OP. To this end, a claimsrequest is 
-embedded in the Authentication Requests that contains the <code>sub</code> claim values of the victim and the 
-attacker in the claimsrequest's <code>values</code> array.]]></Description>
+		<h3>Sub Claim Spoofing</h3>
+		PrOfESSOS tests the validation of the Authentication Request at the OP by embedding a <code>claims</code> request 
+parameter in the Authentication Request.
+
+ 		<h4>Prerequisites</h4>
+ 		The OP supports OpenID Connect in the code flow or an implicit grant.
+
+ 		<h4>Execution</h4>
+		PrOfESSOS tests the validation of the Authentication Request at the OP. To this end, a claimsrequest is embedded in the Authentication Requests that contains the <code>sub</code> claim values of the victim and the attacker in the claimsrequest's <code>values</code> array.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful, if the returned ID Token contains the <code>sub</code> value of the victim.
+
+		<h4>Mitigation</h4>
+		As per Step 4 of <a href=\"https://openid.net/specs/openid-connect-core-1_0.html#AuthRequestValidation\" target=\"_blank\">https://openid.net/specs/openid-connect-core-1_0.html#AuthRequestValidation</a> the OP must not reply with an ID Token for a different user if <code>id_token_hint</code> or <code>claims</code> request parameters are used with values not matching the authenticated user.
+		]]>
+		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
@@ -940,9 +2021,23 @@ attacker in the claimsrequest's <code>values</code> array.]]></Description>
 
 	<TestStep Name="Sub Claim Spoofing 4 (sub array, sub2 first)">
 		<Description><![CDATA[
-		PrOfESSOS tests the validation of the Authentication Request at the OP. To this end, a claimsrequest is 
-embedded in the Authentication Requests that contains the <code>sub</code> claim values of the attacker and the victim 
-in the claimsrequest's <code>values</code> array.]]></Description>
+		<h3>Sub Claim Spoofing</h3>
+		PrOfESSOS tests the validation of the Authentication Request at the OP by embedding a <code>claims</code> request 
+parameter in the Authentication Request.
+
+ 		<h4>Prerequisites</h4>
+ 		The OP supports OpenID Connect in the code flow or an implicit grant.
+
+ 		<h4>Execution</h4>
+		PrOfESSOS tests the validation of the Authentication Request at the OP. To this end, a claimsrequest is embedded in the Authentication Requests that contains the <code>sub</code> claim values of the attacker and the victim in the claimsrequest's <code>values</code> array.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful, if the returned ID Token contains the <code>sub</code> value of the victim.
+
+		<h4>Mitigation</h4>
+		As per Step 4 of <a href=\"https://openid.net/specs/openid-connect-core-1_0.html#AuthRequestValidation\" target=\"_blank\">https://openid.net/specs/openid-connect-core-1_0.html#AuthRequestValidation</a> the OP must not reply with an ID Token for a different user if <code>id_token_hint</code> or <code>claims</code> request parameters are used with values not matching the authenticated user.	
+		]]>
+		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
@@ -963,9 +2058,23 @@ in the claimsrequest's <code>values</code> array.]]></Description>
 
 	<TestStep Name="Sub Claim Spoofing 5 (id_token_hint)">
 		<Description><![CDATA[
-		PrOfESSOS tests the validation of the Authentication Request at the OP. To this end, an <code>id_token_hint</code> 
-		 is embedded in the attacker's Authentication Requests that contains a valid ID Token of the victim. The attack is successful, 
-		 if the OP issues a new ID Token containing the victims identity.]]></Description>
+		<h3>Sub Claim Spoofing</h3>
+		PrOfESSOS tests the validation of the Authentication Request at the OP by embedding a <code>claims</code> request 
+parameter in the Authentication Request.
+
+ 		<h4>Prerequisites</h4>
+ 		The OP supports OpenID Connect in the code flow or an implicit grant.
+
+ 		<h4>Execution</h4>
+		PrOfESSOS tests the validation of the Authentication Request at the OP. To this end, an <code>id_token_hint</code> is embedded in the attacker's Authentication Requests that contains a valid ID Token of the victim. The attack is successful, if the OP issues a new ID Token containing the victims identity.
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful, if the returned ID Token contains the <code>sub</code> value of the victim.
+
+		<h4>Mitigation</h4>
+		As per Step 4 of <a href=\"https://openid.net/specs/openid-connect-core-1_0.html#AuthRequestValidation\" target=\"_blank\">https://openid.net/specs/openid-connect-core-1_0.html#AuthRequestValidation</a> the OP must not reply with an ID Token for a different user if <code>id_token_hint</code> or <code>claims</code> request parameters are used with values not matching the authenticated user.	
+		]]>
+		</Description>
 		<TestParameters>
 			<Parameter Key="is_single_rp_test">true</Parameter>
 		</TestParameters>
@@ -984,133 +2093,5 @@ in the claimsrequest's <code>values</code> array.]]></Description>
 		</RPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Client Impersonation - CS JWT, invalid signature">
-		<Description><![CDATA[
-		PrOfESSOS tests the validation of the <code>client_secret_jwt</code>. In this test, a JWT including an
-invalid signature is submitted as value of the <code>client_assertion</code> parameter in the Token Reuest.]]></Description>
-		<TestParameters>
-			<Parameter Key="is_single_rp_test">true</Parameter>
-			<Parameter Key="enforce-client-registration">true</Parameter>
-		</TestParameters>
-		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
-		</BrowserSimulator>
 
-		<RPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.rp.JwtAuthRP</ImplementationClass>
-			<Parameter Key="register-clientauth-method-client_secret_jwt">true</Parameter>
-			<Parameter Key="tokenreq-client-jwt-invalid-sig">true</Parameter>
-			<Parameter Key="code-redemption-fails-test">true</Parameter>
-
-		</RPConfig-1>
-		<RPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.rp.SubClaimSpoofingRP</ImplementationClass>
-			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
-		</RPConfig-2>
-	</TestStep>
-
-	<TestStep Name="Client Impersonation - CS JWT, 'none' algorithm 1">
-		<Description><![CDATA[
-		PrOfESSOS tests the validation of the <code>client_secret_jwt</code>. In this test, a JWT including an
-invalid signature is submitted as value of the <code>client_assertion</code> parameter in the Token Reuest.]]></Description>
-		<TestParameters>
-			<Parameter Key="is_single_rp_test">true</Parameter>
-			<Parameter Key="enforce-client-registration">true</Parameter>
-		</TestParameters>
-		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
-		</BrowserSimulator>
-
-		<RPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.rp.JwtAuthRP</ImplementationClass>
-			<Parameter Key="register-clientauth-method-client_secret_jwt">true</Parameter>
-			<Parameter Key="tokenreq-client-jwt-none-alg">true</Parameter>
-			<Parameter Key="tokenreq-client-jwt-invalid-sig">true</Parameter>
-			<Parameter Key="code-redemption-fails-test">true</Parameter>
-
-		</RPConfig-1>
-		<RPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.rp.SubClaimSpoofingRP</ImplementationClass>
-			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
-		</RPConfig-2>
-	</TestStep>
-
-	<TestStep Name="Client Impersonation - CS JWT, 'none' algorithm 2">
-		<Description><![CDATA[
-		PrOfESSOS tests the validation of the <code>client_secret_jwt</code>. In this test, a JWT including an
-invalid signature is submitted as value of the <code>client_assertion</code> parameter in the Token Reuest.]]></Description>
-		<TestParameters>
-			<Parameter Key="is_single_rp_test">true</Parameter>
-			<Parameter Key="enforce-client-registration">true</Parameter>
-		</TestParameters>
-		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
-		</BrowserSimulator>
-
-		<RPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.rp.JwtAuthRP</ImplementationClass>
-			<Parameter Key="register-clientauth-method-client_secret_jwt">true</Parameter>
-			<Parameter Key="tokenreq-client-jwt-none-alg">true</Parameter>
-			<Parameter Key="tokenreq-client-jwt-exclude-sig">true</Parameter>
-			<Parameter Key="code-redemption-fails-test">true</Parameter>
-
-		</RPConfig-1>
-		<RPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.rp.SubClaimSpoofingRP</ImplementationClass>
-			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
-		</RPConfig-2>
-	</TestStep>
-
-	<TestStep Name="Client Impersonation - CS JWT, 'nONe' algorithm 1">
-		<Description><![CDATA[
-		PrOfESSOS tests the validation of the <code>client_secret_jwt</code>. In this test, a JWT including an
-invalid signature is submitted as value of the <code>client_assertion</code> parameter in the Token Reuest.]]></Description>
-		<TestParameters>
-			<Parameter Key="is_single_rp_test">true</Parameter>
-			<Parameter Key="enforce-client-registration">true</Parameter>
-		</TestParameters>
-		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
-		</BrowserSimulator>
-
-		<RPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.rp.JwtAuthRP</ImplementationClass>
-			<Parameter Key="register-clientauth-method-client_secret_jwt">true</Parameter>
-			<Parameter Key="tokenreq-client-jwt-none-alg-mixedcase">true</Parameter>
-			<Parameter Key="tokenreq-client-jwt-invalid-sig">true</Parameter>
-			<Parameter Key="code-redemption-fails-test">true</Parameter>
-
-		</RPConfig-1>
-		<RPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.rp.SubClaimSpoofingRP</ImplementationClass>
-			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
-		</RPConfig-2>
-	</TestStep>
-	
-	<TestStep Name="Client Impersonation - CS JWT, 'nONe' algorithm 2">
-		<Description><![CDATA[
-		PrOfESSOS tests the validation of the <code>client_secret_jwt</code>. In this test, a JWT including an
-invalid signature is submitted as value of the <code>client_assertion</code> parameter in the Token Reuest.]]></Description>
-		<TestParameters>
-			<Parameter Key="is_single_rp_test">true</Parameter>
-			<Parameter Key="enforce-client-registration">true</Parameter>
-		</TestParameters>
-		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.op.OPRumBrowser</ImplementationClass>
-		</BrowserSimulator>
-
-		<RPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.rp.JwtAuthRP</ImplementationClass>
-			<Parameter Key="register-clientauth-method-client_secret_jwt">true</Parameter>
-			<Parameter Key="tokenreq-client-jwt-none-alg-mixedcase">true</Parameter>
-			<Parameter Key="tokenreq-client-jwt-exclude-sig">true</Parameter>
-			<Parameter Key="code-redemption-fails-test">true</Parameter>
-
-		</RPConfig-1>
-		<RPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.rp.SubClaimSpoofingRP</ImplementationClass>
-			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
-		</RPConfig-2>
-	</TestStep>
-	
 </TestPlan>

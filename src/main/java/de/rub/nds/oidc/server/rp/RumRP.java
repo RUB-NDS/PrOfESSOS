@@ -1,15 +1,9 @@
 package de.rub.nds.oidc.server.rp;
 
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.ResponseType;
-import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.TokenResponse;
-import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
-import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
-import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.TestStepResult;
 
@@ -23,7 +17,6 @@ import java.net.URLEncoder;
 import java.util.concurrent.CompletableFuture;
 
 import static de.rub.nds.oidc.server.rp.RPParameterConstants.*;
-import static de.rub.nds.oidc.server.rp.RPParameterConstants.AUTHNREQ_FORCE_EVIL_REDIRURI;
 
 public class RumRP extends DefaultRP {
 
@@ -32,23 +25,21 @@ public class RumRP extends DefaultRP {
 	public void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException {
 
 		CompletableFuture<TestStepResult> browserBlocker = (CompletableFuture<TestStepResult>) stepCtx.get(RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT);
-
 		AuthenticationResponse response = processCallback(req, resp, path);
-
 		String manipulator = (String) stepCtx.get(RPContextConstants.REDIRECT_URI_MANIPULATOR);
+		TestStepResult result = TestStepResult.UNDETERMINED;  // OP should not redirect the enduser to an unregistered redirect_uri
 
-		// callback received with error response
 		if (!response.indicatesSuccess()) {
+			// callback received with error response
 			if (type.equals(RPType.EVIL)) {
-				logger.log("Authentication ErrorResponse received in Evil Client");
-				logger.log("This may indicate an open redirector that could be chained to leak AuthCodes - please check manually.");
+				if (manipulator != null) {
+					logger.log("Authentication ErrorResponse sent to manipulated redirect_uri.");
+					// TODO: if oidc => fail, if oauth => undetermined ?
+					browserBlocker.complete(TestStepResult.FAIL);
+					return;
+				}
+				logger.log("Authentication ErrorResponse received at redirect_uri registered with Evil Client");
 				browserBlocker.complete(TestStepResult.UNDETERMINED);
-				return;
-			}
-			if (manipulator != null && req.getRequestURL().toString().contains(manipulator)) {
-				logger.log("Authentication ErrorResponse sent to manipulated redirect_uri.");
-				// TODO: if oidc => fail, if oauth => undetermined
-				browserBlocker.complete(TestStepResult.FAIL);
 				return;
 			}
 
@@ -59,46 +50,55 @@ public class RumRP extends DefaultRP {
 		}
 
 		// callback received with successful authentication response incl. code/token
-		if (type.equals(RPType.EVIL)) {
-			// received auth code in evil client
-			logger.log("Authentication SuccessResponse received in Evil Client");
-			logger.logHttpRequest(req, null);
-			browserBlocker.complete(TestStepResult.FAIL);
-			return;
-		}
-
-		logger.log("Authentication SuccessResponse received in Honest Client");
+		String client = type.equals(RPType.HONEST) ? "Honest Client" : "Evil Client";
+		logger.log("Authentication SuccessResponse received in " + client);
 		logger.logHttpRequest(req, null);
+		if (params.getBool(AUTHNREQ_RU_PP_EVIL_FIRST) || params.getBool(AUTHNREQ_RU_PP_HONEST_FIRST)) {
+			// valid redirect_uri was part of AuthnReq. PASS, unless we recognize that 
+			// the request was made to a manipulated uri later on
 
-
-		if (manipulator != null && req.getRequestURL().toString().contains(manipulator)) {
-			logger.log("Authentication Response sent to manipulated redirect_uri.");
-			logger.log("Authorization Server does not perform exact string matching on redirect_uri.");
-			// TODO: only fail for OIDC as OAUTH does not require exact matching afaik
-			browserBlocker.complete(TestStepResult.FAIL);
-			return;
+			result = isStartRP() ? TestStepResult.PASS : TestStepResult.FAIL;
 		}
 
+		if (manipulator != null || params.getBool(AUTHNREQ_HONEST_USERPART_REDIRURI)) {
+			// OP redirected to a manipulated (possibly) invalid URI. To allow further processing,
+			// the browser re-submitted the request to the original (un-tampered) callback url
+			logger.log("Authentication Response submitted to manipulated redirect_uri, Authorization Server does " +
+					"not perform exact string matching on redirect_uri.");
+			result = TestStepResult.FAIL;
+			// TODO: only fail for OIDC as OAUTH does not require exact matching (?)
+		}
 
-		// in codeHijacking tests, try to redeem the code
+		// try to redeem the code
 		AuthenticationSuccessResponse successResponse = response.toSuccessResponse();
-		if (successResponse.impliedResponseType().impliesCodeFlow()) {
-			// attempt code redemption
+		if (successResponse.getAuthorizationCode() != null) {
+			// try to redeem authorization code
 			TokenResponse tokenResponse = redeemAuthCode(successResponse.getAuthorizationCode());
 			if (!tokenResponse.indicatesSuccess()) {
-				// code redemption failed, error messages have been logged already
-				browserBlocker.complete(TestStepResult.PASS);
-				return;
+				// Code redemption failed, e.g., because OP detected manipulated redirect_uri in Token Request
+				// Error messages have been logged already
+				result = result.equals(TestStepResult.UNDETERMINED) ? TestStepResult.PASS : result;
+			} else {
+				if (params.getBool(TOKEN_RECEIVAL_FAILS_TEST)) {
+					logger.log("AuthorizationCode successfully redeemed, assuming test failed.");
+					browserBlocker.complete(TestStepResult.FAIL);
+					return;
+				}
 			}
-
-			if (params.getBool(SUCCESSFUL_CODE_REDEMPTION_FAILS_TEST)) {
-				logger.log("AuthorizationCode successfully redeemed, assuming test failed.");
-				browserBlocker.complete(TestStepResult.FAIL);
-				return;
-			}
-
-			browserBlocker.complete(TestStepResult.PASS);
 		}
+		// also fail if token received in implicit flow
+		if (params.getBool(TOKEN_RECEIVAL_FAILS_TEST) || manipulator != null) {
+			if (successResponse.getIDToken() != null) {
+				result = TestStepResult.FAIL;
+				logger.log("ID Token received at manipulated redirect_uri");
+			}
+			if (successResponse.getAccessToken() != null) {
+				result = TestStepResult.FAIL;
+				logger.log("Access Token received at manipulated redirect_uri");
+			}
+		}
+
+		browserBlocker.complete(result);
 	}
 
 
@@ -130,7 +130,7 @@ public class RumRP extends DefaultRP {
 				String[] tmp = redirectUri.split("&redirect_uri=");
 				encoded = URLEncoder.encode(tmp[0], "utf-8")
 						+ "&redirect_uri="
-						+ URLEncoder.encode(tmp[1], "utf-8") ;
+						+ URLEncoder.encode(tmp[1], "utf-8");
 			} else {
 				encoded = URLEncoder.encode(redirectUri, "utf-8");
 			}
@@ -197,10 +197,10 @@ public class RumRP extends DefaultRP {
 		boolean urlEncodeUserInfo = params.getBool(USERINFOPART_URL_ENCODE);
 
 		String userInfoPart = malicious.toString();
-		if(!includeScheme) {
+		if (!includeScheme) {
 			userInfoPart = userInfoPart.replaceFirst(malicious.getScheme() + "://", "");
 		}
-		if(urlEncodeUserInfo) {
+		if (urlEncodeUserInfo) {
 			try {
 				// applies only to the username part
 				userInfoPart = URLEncoder.encode(userInfoPart, "utf-8");
@@ -216,7 +216,7 @@ public class RumRP extends DefaultRP {
 		String scheme = benign.getScheme() + "://";
 		uriResult = benign.toString().replaceFirst(scheme, "");
 		uriResult = scheme + userInfoPart + uriResult;
-		logger.logCodeBlock(uriResult, "Using Redirect URI");
+		logger.logCodeBlock("Using Redirect URI", uriResult);
 
 		return uriResult;
 

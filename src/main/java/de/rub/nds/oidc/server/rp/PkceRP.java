@@ -13,20 +13,17 @@ import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
-import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.TestStepResult;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
 
 import static de.rub.nds.oidc.server.rp.RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT;
-import static de.rub.nds.oidc.server.rp.RPContextConstants.BLOCK_RP_FOR_BROWSER_FUTURE;
 import static de.rub.nds.oidc.server.rp.RPParameterConstants.*;
 
 public class PkceRP extends DefaultRP {
@@ -62,7 +59,7 @@ public class PkceRP extends DefaultRP {
 				return;
 			}
 
-			if (params.getBool(SUCCESSFUL_CODE_REDEMPTION_FAILS_TEST)) {
+			if (params.getBool(TOKEN_RECEIVAL_FAILS_TEST)) {
 				logger.log("AuthorizationCode successfully redeemed, assuming test failed.");
 				browserBlocker.complete(TestStepResult.FAIL);
 				return;
@@ -107,7 +104,6 @@ public class PkceRP extends DefaultRP {
 	}
 
 
-
 	@Override
 	protected void tokenRequestApplyPKCEParams(HTTPRequest req) {
 
@@ -126,7 +122,7 @@ public class PkceRP extends DefaultRP {
 		StringBuilder sb = new StringBuilder();
 		sb.append(encodedQuery);
 
-		if (params.getBool(TOKENREQ_ADD_PKCE_METHOD_PLAIN)){
+		if (params.getBool(TOKENREQ_ADD_PKCE_METHOD_PLAIN)) {
 			// attempt "downgrade", use code_challenge from AuthnReq 
 			// as code verifier in tokenreq and additionally
 			// add 'plain' as code_challenge_method (not a valid param as per RFC7636)
@@ -139,12 +135,12 @@ public class PkceRP extends DefaultRP {
 			return;
 		}
 
-		if (params.getBool(TOKENREQ_PKCE_INVALID)){
+		if (params.getBool(TOKENREQ_PKCE_INVALID)) {
 			sb.append("&code_verifier=");
 			// change last char
 			// only certain ASCII chars are allowed; to keep it simple, use A or B
 			String last = verifier.getValue().endsWith("A") ? "B" : "A";
-			sb.append(verifier.getValue().substring(0, verifier.getValue().length()-1) + last);
+			sb.append(verifier.getValue().substring(0, verifier.getValue().length() - 1) + last);
 		} else {
 			sb.append("&code_verifier=");
 			sb.append(verifier.getValue());

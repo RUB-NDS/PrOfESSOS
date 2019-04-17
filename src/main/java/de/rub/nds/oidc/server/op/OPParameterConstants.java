@@ -31,6 +31,8 @@ public class OPParameterConstants {
 	public static final String USE_EVIL_NEEDLE = "use_evil_needle";
 
 	public static final String FORCE_SUCCESS_URL_FAILS = "force_success_url_fails";
+	public static final String FORCE_USERINFO_REQUEST_FAILS = "force_userinfo_requested_fails";
+	public static final String FORCE_TOKEN_REQUEST_FAILS = "force_token_requested_fails";
 
 	public static final String FORCE_HONEST_DISCOVERY_ISS         = "force_honest_discovery_iss";
 	public static final String FORCE_HONEST_DISCOVERY_REG_EP      = "force_honest_discovery_registrationEP";
@@ -72,6 +74,9 @@ public class OPParameterConstants {
 	public static final String FORCE_TOKEN_SIG_NONE      = "force_idtoken_header_alg_none";
 	public static final String FORCE_TOKEN_SIG_NONE_MIXEDCASE = "force_idtoken_header_alg_none2";
 
+	public static final String FORCE_TOKEN_AT_HASH_INVALID = "force_idtoken_at_hash_invalid";
+	public static final String FORCE_TOKEN_CODE_HASH_INVALID = "force_idtoken_code_hash_invalid";
+	
 	public static final String FORCE_TOKEN_AUD_EXCL      = "force_idtoken_aud_excluded";
 	public static final String FORCE_TOKEN_AUD_INVALID   = "force_idtoken_aud_invalidValue";
 	public static final String FORCE_TOKEN_HONEST_AUD    = "force_idtoken_honest_aud";
@@ -134,12 +139,5 @@ public class OPParameterConstants {
 	// KC6 with Session Overwriting
 	public static final String FORCE_IDTOKEN_SIGNING_ALG_HS256 = "force_idtoken_signing_alg_hs256";
 	public static final String FORCE_REGISTER_HONEST_CLIENTID = "force_register_honest_client_id";
-
-	// end KeyConfusion
-
-
-
-
-
-
+	
 }

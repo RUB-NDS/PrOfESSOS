@@ -20,7 +20,6 @@ import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.claims.AccessTokenHash;
 import com.nimbusds.openid.connect.sdk.claims.CodeHash;
 import de.rub.nds.oidc.server.RequestPath;
-import de.rub.nds.oidc.server.rp.RPContextConstants;
 import de.rub.nds.oidc.utils.UnsafeJSONObject;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -31,7 +30,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
 import java.util.Map;
 
 import static de.rub.nds.oidc.server.op.OPParameterConstants.INCLUDE_SIGNING_CERT;
@@ -157,7 +155,7 @@ public class UserInfoIDSpoofingOP extends DefaultOP {
 		}
 
 
-		logger.logCodeBlock(jsonHeader.toJSONString(), "Generated JWT Header:");
+		logger.logCodeBlock("Generated JWT Header:", jsonHeader.toJSONString());
 		
 		JWSHeader.Builder headerBuilder = new JWSHeader.Builder(JWSAlgorithm.RS256)
 				.type(JOSEObjectType.JWT);

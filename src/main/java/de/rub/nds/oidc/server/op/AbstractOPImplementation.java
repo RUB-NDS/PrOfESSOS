@@ -17,11 +17,7 @@
 package de.rub.nds.oidc.server.op;
 
 import com.google.common.base.Strings;
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JOSEObjectType;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -29,13 +25,7 @@ import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.oauth2.sdk.ErrorResponse;
-import com.nimbusds.oauth2.sdk.GrantType;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.Response;
-import com.nimbusds.oauth2.sdk.ResponseMode;
-import com.nimbusds.oauth2.sdk.ResponseType;
-import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
@@ -43,6 +33,7 @@ import com.nimbusds.oauth2.sdk.http.ServletUtils;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.Display;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.SubjectType;
@@ -53,11 +44,19 @@ import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
-import static de.rub.nds.oidc.server.op.OPParameterConstants.*;
+import de.rub.nds.oidc.server.TestNotApplicableException;
+import de.rub.nds.oidc.server.TestStepParameterConstants;
 import de.rub.nds.oidc.test_model.OPConfigType;
 import de.rub.nds.oidc.test_model.ParameterType;
 import de.rub.nds.oidc.utils.InstanceParameters;
 import de.rub.nds.oidc.utils.SaveFunction;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.mail.internet.InternetAddress;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.Null;
+import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.security.GeneralSecurityException;
@@ -68,17 +67,17 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.Period;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.mail.internet.InternetAddress;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.UriBuilder;
+
+import static de.rub.nds.oidc.server.TestStepParameterConstants.*;
+import static de.rub.nds.oidc.server.op.OPParameterConstants.*;
 
 /**
- *
  * @author Tobias Wich
  */
 public abstract class AbstractOPImplementation implements OPImplementation {
@@ -160,7 +159,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 
 	protected Issuer getEvilIssuer() {
 		return new Issuer(UriBuilder.fromUri(opivCfg.getEvilOPUri())
-				.path((String) stepCtx.getOrDefault(OPContextConstants.REGISTRATION_ENFORCING_PATH_FRAGMENT,""))
+				.path((String) stepCtx.getOrDefault(OPContextConstants.REGISTRATION_ENFORCING_PATH_FRAGMENT, ""))
 				.path(testId).build());
 	}
 
@@ -182,7 +181,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		if (params.getBool(FORCE_TOKEN_ISS_EMPTY)) {
 			return "";
 		}
-		
+
 		Issuer issuer;
 		if (params.getBool(FORCE_HONEST_TOKEN_ISS)) {
 			issuer = getHonestIssuer();
@@ -326,7 +325,6 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-
 	protected InternetAddress getHonestEmail() {
 		InternetAddress mail = new InternetAddress();
 		mail.setAddress("user@honest.com");
@@ -360,7 +358,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return ci;
 	}
 
-	protected  OIDCClientInformation getRegisteredClientInfo() {
+	protected OIDCClientInformation getRegisteredClientInfo() {
 		OIDCClientInformation ci = supplyHonestOrEvil(this::getHonestRegisteredClientInfo, this::getEvilRegisteredClientInfo);
 		return ci;
 	}
@@ -448,7 +446,6 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-
 	protected UserInfo getUserInfo() {
 		UserInfo ui = new UserInfo(getTokenSubject());
 		ui.setName(getTokenName());
@@ -469,7 +466,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 	protected JWTClaimsSet getIdTokenClaims(@Nonnull ClientID clientId, @Nullable Nonce nonce,
-			@Nullable AccessTokenHash atHash, @Nullable CodeHash cHash) throws ParseException {
+											@Nullable AccessTokenHash atHash, @Nullable CodeHash cHash) throws ParseException {
 		UserInfo ui = getUserInfo();
 		if (params.getBool(FORCE_TOKEN_USERCLAIMS_EXCL)) {
 			// reset all user claims except "sub"
@@ -489,10 +486,12 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 			cb.claim("nonce", nonce.getValue());
 		}
 		if (atHash != null) {
-			cb.claim("at_hash", atHash.getValue());
+			String tokenHash = params.getBool(FORCE_TOKEN_AT_HASH_INVALID) ? "invalid_at_hash" : atHash.getValue();
+			cb.claim("at_hash", tokenHash);
 		}
 		if (cHash != null) {
-			cb.claim("c_hash", cHash.getValue());
+			String codeHash = params.getBool(FORCE_TOKEN_CODE_HASH_INVALID) ? "invalid_code_hash" : cHash.getValue();
+			cb.claim("c_hash", codeHash);
 		}
 
 		JWTClaimsSet claims = cb.build();
@@ -500,7 +499,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 	protected JWT getIdToken(@Nonnull ClientID clientId, @Nullable Nonce nonce, @Nullable AccessTokenHash atHash,
-			@Nullable CodeHash cHash) throws GeneralSecurityException, JOSEException, ParseException {
+							 @Nullable CodeHash cHash) throws GeneralSecurityException, JOSEException, ParseException {
 		JWTClaimsSet claims = getIdTokenClaims(clientId, nonce, atHash, cHash);
 
 		// HMAC with client secret
@@ -553,9 +552,9 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		}).collect(Collectors.toList());
 
 		RSAKey.Builder kb = new RSAKey.Builder(pubKey)
-			.privateKey(privKey)
-			.x509CertChain(chain)
-			.algorithm(JWSAlgorithm.RS256);
+				.privateKey(privKey)
+				.x509CertChain(chain)
+				.algorithm(JWSAlgorithm.RS256);
 
 		String keyID = (String) stepCtx.getOrDefault(OPContextConstants.SIGNING_JWK_KEYID, "");
 		if (!Strings.isNullOrEmpty(keyID)) {
@@ -584,6 +583,49 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 			evilSaveFunc.save(value);
 		} else {
 			throw new IllegalStateException("OP is neither honest nor evil.");
+		}
+	}
+
+	protected void checkTestStepPrerequisites(@Nullable AuthenticationRequest authnReq) throws TestNotApplicableException {
+		checkStepPreconditionDiscovery();
+		if (authnReq != null) {
+			checkStepPreconditionResponseTypes(authnReq.getResponseType());
+		}
+	}
+
+	protected void checkStepPreconditionResponseTypes(ResponseType respType)  throws TestNotApplicableException {
+		boolean codeRequired = Boolean.parseBoolean((String) stepCtx.get(RESPONSE_TYPE_CONDITION_CODE));
+		boolean tokenRequired = Boolean.parseBoolean((String) stepCtx.get(RESPONSE_TYPE_CONDITION_TOKEN));
+		boolean idTokenRequired = Boolean.parseBoolean((String) stepCtx.get(RESPONSE_TYPE_CONDITION_IDTOKEN));
+
+		StringBuilder sb = new StringBuilder();
+		if (codeRequired && !respType.contains("code")) {
+			sb.append("code ");
+		}
+		if (idTokenRequired && !respType.contains("id_token")) {
+			sb.append("id_token ");
+		}
+		if (tokenRequired && !respType.contains("token")) {
+			sb.append("token ");
+		}
+
+		String missingRTs = sb.toString().trim();
+		if (!Strings.isNullOrEmpty(missingRTs)) {
+			String msg = String.format("Test not applicable for requested response type. Expected response_type to " +
+					"contain \"%s\"", missingRTs);
+			logger.log("Test precondition not fulfilled, test aborted.");
+			stepCtx.put(OPContextConstants.TEST_RUN_NOT_FINISHED, msg);
+			throw new TestNotApplicableException("Requested response_type not Supported");
+		}
+	}
+	
+	protected void checkStepPreconditionDiscovery() throws TestNotApplicableException {
+		boolean discoRequired = Boolean.parseBoolean((String) stepCtx.get(DISCOVERY_REQUEST_REQUIRED));
+		OPType discoReceivedAt = (OPType) stepCtx.get(OPContextConstants.DISCOVERY_REQUESTED_AT_OP_TYPE);
+		if (discoRequired && discoReceivedAt == null) {
+			logger.log("TestStep prerequisites not fulfilled: No discovery request was received but is required " +
+					"before the first Authentication Request.");
+			throw new TestNotApplicableException("Discovery Support required to run this test.");
 		}
 	}
 
