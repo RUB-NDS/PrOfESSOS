@@ -51,8 +51,10 @@ public abstract class BrowserSimulator {
 
 	protected RemoteWebDriver driver;
 
-	protected long NORMAL_WAIT_TIMEOUT = 15;
-	protected long SEARCH_WAIT_TIMEOUT = 1;
+	protected final long NORMAL_WAIT_TIMEOUT = 15;
+	protected final long MEDIUM_WAIT_TIMEOUT = 10;
+	protected final long SHORT_WAIT_TIMEOUT = 5;
+	protected final long SEARCH_WAIT_TIMEOUT = 1;
 
 	protected TestRPConfigType rpConfig;
 	protected TestOPConfigType opConfig;
@@ -79,7 +81,7 @@ public abstract class BrowserSimulator {
 		}
 		driver = getDriverInstance();
 		jsWaiter = new JsWaiter();
-		jsWaiter.setJsWaitDriver(driver);
+		jsWaiter.setJsWaitDriver(driver, MEDIUM_WAIT_TIMEOUT);
 	}
 
 	protected RemoteWebDriver getDriverInstance() {
@@ -152,7 +154,7 @@ public abstract class BrowserSimulator {
 
 	public void setJsWaiter(JsWaiter waiter) {
 		this.jsWaiter = waiter;
-		jsWaiter.setJsWaitDriver(driver);
+		jsWaiter.setJsWaitDriver(driver, MEDIUM_WAIT_TIMEOUT);
 	}
 
 	protected HashMap<String, Object> createRPContext() {
@@ -205,7 +207,7 @@ public abstract class BrowserSimulator {
 	}
 
 	protected final <T> T waitForPageLoad(Func<T> func) {
-		return waitForPageLoad(func, 15);
+		return waitForPageLoad(func, MEDIUM_WAIT_TIMEOUT);
 	}
 
 	protected final <T> T waitForDocumentReadyAndJsReady(Func<T> func) {
@@ -224,7 +226,7 @@ public abstract class BrowserSimulator {
 	}
 
 	protected void waitForDocumentReady() {
-		WebDriverWait wait = new WebDriverWait(driver, 15);
+		WebDriverWait wait = new WebDriverWait(driver, MEDIUM_WAIT_TIMEOUT);
 		wait.until((WebDriver d) -> driver.executeScript("return document.readyState").equals("complete"));
 	}
 
@@ -242,7 +244,7 @@ public abstract class BrowserSimulator {
 			driver.manage().timeouts().implicitlyWait(SEARCH_WAIT_TIMEOUT, TimeUnit.SECONDS);
 			return fun.call();
 		} finally {
-			driver.manage().timeouts().implicitlyWait(NORMAL_WAIT_TIMEOUT, TimeUnit.SECONDS);
+			driver.manage().timeouts().implicitlyWait(MEDIUM_WAIT_TIMEOUT, TimeUnit.SECONDS);
 		}
 	}
 

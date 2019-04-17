@@ -45,7 +45,6 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.server.TestNotApplicableException;
-import de.rub.nds.oidc.server.TestStepParameterConstants;
 import de.rub.nds.oidc.test_model.OPConfigType;
 import de.rub.nds.oidc.test_model.ParameterType;
 import de.rub.nds.oidc.utils.InstanceParameters;
@@ -55,7 +54,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.Null;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
@@ -422,9 +420,9 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		md.setRegistrationEndpointURI(registrationEndpt);
 
 		// , ResponseType.parse("id_token"), ResponseType.parse("token id_token"));
-		Scope scopes = new Scope("openid");
+		Scope scopes = new Scope("openid", "name", "preferred_username", "email");
 		List<ResponseType> responseTypes = Arrays.asList(ResponseType.parse("code"), ResponseType.parse("id_token"),
-				ResponseType.parse("token id_token"));
+				ResponseType.parse("token id_token"), ResponseType.parse("code id_token token"));
 		List<ResponseMode> responseModes = Arrays.asList(ResponseMode.QUERY, ResponseMode.FRAGMENT, ResponseMode.FORM_POST);
 		List<GrantType> grantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.IMPLICIT);
 		md.setScopes(scopes);
@@ -586,14 +584,15 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		}
 	}
 
-	protected void checkTestStepPrerequisites(@Nullable AuthenticationRequest authnReq) throws TestNotApplicableException {
-		checkStepPreconditionDiscovery();
+	protected void checkRpTestStepPreconditions(@Nullable AuthenticationRequest authnReq) throws TestNotApplicableException {
+		checkDiscoveryPrecondition();
 		if (authnReq != null) {
-			checkStepPreconditionResponseTypes(authnReq.getResponseType());
+			checkResponseTypePrecondition(authnReq.getResponseType());
+			checkScopePrecondition(authnReq.getScope());
 		}
 	}
 
-	protected void checkStepPreconditionResponseTypes(ResponseType respType)  throws TestNotApplicableException {
+	protected void checkResponseTypePrecondition(ResponseType respType)  throws TestNotApplicableException {
 		boolean codeRequired = Boolean.parseBoolean((String) stepCtx.get(RESPONSE_TYPE_CONDITION_CODE));
 		boolean tokenRequired = Boolean.parseBoolean((String) stepCtx.get(RESPONSE_TYPE_CONDITION_TOKEN));
 		boolean idTokenRequired = Boolean.parseBoolean((String) stepCtx.get(RESPONSE_TYPE_CONDITION_IDTOKEN));
@@ -618,8 +617,8 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 			throw new TestNotApplicableException("Requested response_type not Supported");
 		}
 	}
-	
-	protected void checkStepPreconditionDiscovery() throws TestNotApplicableException {
+
+	protected void checkDiscoveryPrecondition() throws TestNotApplicableException {
 		boolean discoRequired = Boolean.parseBoolean((String) stepCtx.get(DISCOVERY_REQUEST_REQUIRED));
 		OPType discoReceivedAt = (OPType) stepCtx.get(OPContextConstants.DISCOVERY_REQUESTED_AT_OP_TYPE);
 		if (discoRequired && discoReceivedAt == null) {
@@ -629,4 +628,13 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		}
 	}
 
+	protected void checkScopePrecondition(Scope scope) throws TestNotApplicableException {
+		boolean openIDRequired = !Boolean.parseBoolean((String) stepCtx.get(SCOPE_CONDITION_OPENID_NOT_NEEDED));
+		if (openIDRequired && !scope.contains("openid")) {
+			logger.log("TestStep prerequisites not fulfilled: Scope 'openid' not requested by client but ID Token validation" +
+					"required for test execution and evaluation.");
+			throw new TestNotApplicableException("OpenID Connect requires 'scope' to contain 'openid'.");
+		}
+
+	}
 }

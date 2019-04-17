@@ -18,8 +18,10 @@ package de.rub.nds.oidc.server.rp;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import de.rub.nds.oidc.log.TestStepLogger;
+import de.rub.nds.oidc.server.InvalidConfigurationException;
 import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.server.RequestPath;
+import de.rub.nds.oidc.server.TestNotApplicableException;
 import de.rub.nds.oidc.test_model.ParameterType;
 import de.rub.nds.oidc.test_model.RPConfigType;
 import de.rub.nds.oidc.test_model.TestOPConfigType;
@@ -56,7 +58,7 @@ public interface RPImplementation {
 
 	void setTestOPConfig(TestOPConfigType cfg);
 
-	boolean runTestStepSetup() throws ParseException, IOException;
+	void runTestStepSetup() throws ParseException, IOException, InvalidConfigurationException, TestNotApplicableException;
 
 	void prepareAuthnReq();
 

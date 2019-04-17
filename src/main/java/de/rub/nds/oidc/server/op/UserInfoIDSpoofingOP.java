@@ -148,7 +148,7 @@ public class UserInfoIDSpoofingOP extends DefaultOP {
 			jsonHeader.put("sub", getHonestSubject());
 		}
 		if (params.getBool(OPParameterConstants.FORCE_TOKENHEADER_HONEST_EMAIL)) {
-			jsonHeader.put("email", getHonestEmail()); // TODO: check spelling of claim
+			jsonHeader.put("email", getHonestEmail());
 		}
 		if (params.getBool(INCLUDE_SIGNING_CERT)) {
 			jsonHeader.put("jwk", key.toPublicJWK());

@@ -16,13 +16,10 @@
 
 package de.rub.nds.oidc.learn;
 
-import com.google.common.base.Strings;
 import com.nimbusds.oauth2.sdk.ParseException;
 import de.rub.nds.oidc.browser.BrowserSimulator;
 import de.rub.nds.oidc.log.TestStepLogger;
-import de.rub.nds.oidc.server.OPIVConfig;
-import de.rub.nds.oidc.server.ServerInstance;
-import de.rub.nds.oidc.server.TestInstanceRegistry;
+import de.rub.nds.oidc.server.*;
 import de.rub.nds.oidc.server.op.OPContextConstants;
 import de.rub.nds.oidc.server.op.OPInstance;
 import de.rub.nds.oidc.server.op.OPParameterConstants;
@@ -147,18 +144,7 @@ public class TestRunner {
 				return errorResponse;
 			}
 
-			boolean setupFinished = false;
-			if (isRPTest()) {
-				// RP-Verifier specific config
-				setupFinished = prepareRPTestStep(instReg, testStepCtx, stepDef, logger);
-			} else if (isOPTest()) {
-				// OP-Verifier specific config
-				setupFinished = prepareOPTestStep(instReg, testStepCtx, stepDef, logger);
-			}
-			if (!setupFinished) {
-				logger.log("Test step preparation failed.");
-				return errorResponse;
-			}
+			prepareTestStep(instReg, testStepCtx, stepDef, logger);
 
 			String browserClass = stepDef.getBrowserSimulator().getImplementationClass();
 			simulator = ImplementationLoader.loadClassInstance(browserClass, BrowserSimulator.class);
@@ -170,6 +156,10 @@ public class TestRunner {
 
 			// run actual test
 			return f.apply(simulator);
+		} catch (InvalidConfigurationException | TestNotApplicableException ex) {
+			logger.logCodeBlock("Test step preparation failed with:", ex.toString());
+//			logger.log(ex);
+			return errorResponse;
 		} catch (Exception ex) {
 			logger.log("Error in simulated browser.", ex);
 			return errorResponse;
@@ -285,8 +275,17 @@ public class TestRunner {
 		return testObj.getTestConfig().getType().equals(TestOPConfigType.class.getName());
 	}
 
+	private void prepareTestStep(TestInstanceRegistry instReg, Map<String, Object> testStepCtx, TestStepType stepDef, TestStepLogger logger) throws ImplementationLoadException, InvalidConfigurationException, TestNotApplicableException, IOException, ParseException {
+		if (isRPTest()) {
+			// RP-Verifier specific config
+			prepareRPTestStep(instReg, testStepCtx, stepDef, logger);
+		} else if (isOPTest()) {
+			// OP-Verifier specific config
+			prepareOPTestStep(instReg, testStepCtx, stepDef, logger);
+		}
+	}
 
-	private boolean prepareRPTestStep(TestInstanceRegistry instReg, Map<String, Object> testStepCtx, TestStepType stepDef, TestStepLogger logger) throws ImplementationLoadException {
+	private void prepareRPTestStep(TestInstanceRegistry instReg, Map<String, Object> testStepCtx, TestStepType stepDef, TestStepLogger logger) throws ImplementationLoadException, InvalidConfigurationException {
 		TestRPConfigType testConfig = (TestRPConfigType) getTestObj().getTestConfig();
 		// resolve OP URL
 
@@ -324,7 +323,7 @@ public class TestRunner {
 			testStepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, evilWebfinger);
 		} else {
 			logger.log("Invalid Browser parameter in test specification.");
-			return false;
+			throw new InvalidConfigurationException("Invalid Browser Parameter in TestPlan");
 		}
 
 		OPInstance op1Inst = new OPInstance(stepDef.getOPConfig1(), logger, testSuiteCtx, testStepCtx, OPType.HONEST);
@@ -332,17 +331,11 @@ public class TestRunner {
 
 		OPInstance op2Inst = new OPInstance(stepDef.getOPConfig2(), logger, testSuiteCtx, testStepCtx, OPType.EVIL);
 		instReg.addOP2(testId, new ServerInstance<>(op2Inst, logger));
-		return true;
 	}
 
-	private boolean prepareOPTestStep(TestInstanceRegistry instReg, Map<String, Object> testStepCtx, TestStepType stepDef,
-									  TestStepLogger logger) throws ImplementationLoadException, IOException, ParseException {
-		// TODO
+	private void prepareOPTestStep(TestInstanceRegistry instReg, Map<String, Object> testStepCtx, TestStepType stepDef,
+								   TestStepLogger logger) throws ImplementationLoadException, IOException, ParseException, InvalidConfigurationException, TestNotApplicableException {
 		TestOPConfigType remoteOPConfig = (TestOPConfigType) getTestObj().getTestConfig();
-		if (!isMinimalValidOPConfig(remoteOPConfig)) {
-			logger.log("Incomplete configuration provided");
-			return false;
-		}
 
 		testStepCtx.put(RPContextConstants.TARGET_OP_URL, remoteOPConfig.getUrlOPTarget());
 		RPInstance rp1Inst = new RPInstance(stepDef.getRPConfig1(), logger, testSuiteCtx, testStepCtx, remoteOPConfig, RPType.HONEST, hostCfg);
@@ -351,20 +344,7 @@ public class TestRunner {
 		RPInstance rp2Inst = new RPInstance(stepDef.getRPConfig2(), logger, testSuiteCtx, testStepCtx, remoteOPConfig, RPType.EVIL, hostCfg);
 		instReg.addRP2(testId, new ServerInstance<>(rp2Inst, logger));
 
-		boolean isRunnable;
-		isRunnable = rp1Inst.getImpl().runTestStepSetup();
-		isRunnable &= rp2Inst.getImpl().runTestStepSetup();
-		return isRunnable;
-	}
-
-	private boolean isMinimalValidOPConfig(TestOPConfigType cfg) {
-		boolean areMinRequiredFieldsSet = true;
-		areMinRequiredFieldsSet &= !Strings.isNullOrEmpty(cfg.getUser1Name());
-		areMinRequiredFieldsSet &= !Strings.isNullOrEmpty(cfg.getUser2Name());
-		areMinRequiredFieldsSet &= !Strings.isNullOrEmpty(cfg.getUser1Pass());
-		areMinRequiredFieldsSet &= !Strings.isNullOrEmpty(cfg.getUser2Pass());
-		areMinRequiredFieldsSet &= !(Strings.isNullOrEmpty(cfg.getUrlOPTarget()) && Strings.isNullOrEmpty(cfg.getOPMetadata()));
-
-		return areMinRequiredFieldsSet;
+		rp1Inst.getImpl().runTestStepSetup();
+		rp2Inst.getImpl().runTestStepSetup();
 	}
 }

@@ -27,9 +27,9 @@ public class JsWaiter {
 	}
 
 	// set the driver 
-	public void setJsWaitDriver(RemoteWebDriver driver) {
+	public void setJsWaitDriver(RemoteWebDriver driver, long timeout) {
 		this.jsWaitDriver = driver;
-		this.jsWait = new WebDriverWait(jsWaitDriver, 10);
+		this.jsWait = new WebDriverWait(jsWaitDriver, timeout);
 		this.jsExec = jsWaitDriver;
 	}
 
@@ -42,8 +42,10 @@ public class JsWaiter {
 
 	private void waitForJQueryLoad() {
 		try {
-			ExpectedCondition<Boolean> jQueryLoad = driver -> ((Long) ((JavascriptExecutor) jsWaitDriver)
-					.executeScript("return jQuery.active") == 0);
+//			ExpectedCondition<Boolean> jQueryLoad = driver -> ((Long) ((JavascriptExecutor) jsWaitDriver)
+//					.executeScript("return jQuery.active") == 0);
+			ExpectedCondition<Boolean> jQueryLoad = driver -> (((String) ((JavascriptExecutor) jsWaitDriver)
+					.executeScript("return window.jQuery && window.jQuery.active == 0")).equals("true"));
 
 			boolean jqueryReady = (Boolean) jsExec.executeScript("return jQuery.active==0");
 

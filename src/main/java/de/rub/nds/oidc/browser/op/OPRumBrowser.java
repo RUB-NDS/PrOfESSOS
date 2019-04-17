@@ -20,7 +20,7 @@ public class OPRumBrowser extends SingleRpSingleUserAuthRunner {
 
 		try {
 			// wait for TestStepResult from RP
-			return blockAndResult.get(6, TimeUnit.SECONDS);
+			return blockAndResult.get(SHORT_WAIT_TIMEOUT, TimeUnit.SECONDS);
 		} catch (TimeoutException e) {
 			if (checkUrlOnTimeout) {
 				// most likely the request to the manipulated redirect_uri failed (invalid subdomain, TLD, or userinfo part)

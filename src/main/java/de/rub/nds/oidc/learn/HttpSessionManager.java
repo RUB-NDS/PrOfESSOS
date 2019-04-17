@@ -5,6 +5,7 @@ import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
+import java.util.ArrayList;
 
 @WebListener
 public class HttpSessionManager implements HttpSessionListener {
@@ -23,11 +24,12 @@ public class HttpSessionManager implements HttpSessionListener {
 
 	@Override
 	public void sessionDestroyed(HttpSessionEvent se) {
-		removeEntryFromRegistry(se.getSession());
+		removeEntriesFromRegistry(se.getSession());
 	}
 
-	private void removeEntryFromRegistry(HttpSession session) {
-		String testId = (String) session.getAttribute("testId");
-		registry.deleteTestObject(testId);
+	private void removeEntriesFromRegistry(HttpSession session) {
+		@SuppressWarnings("unchecked")
+		ArrayList<String> testIDs = (ArrayList) session.getAttribute("testIDs");
+		testIDs.forEach(id -> registry.deleteTestObject(id));
 	}
 }
