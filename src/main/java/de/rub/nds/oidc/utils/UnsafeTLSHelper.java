@@ -13,7 +13,7 @@ public class UnsafeTLSHelper {
 	private SSLContext sslContext;
 	
 	public UnsafeTLSHelper() {
-		this.trustAll = Boolean.parseBoolean(System.getenv("TRUST_ALL_TLS"));
+		this.trustAll = Boolean.parseBoolean(System.getenv("OPIV_TRUST_ALL_TLS"));
 		initialiseContext();
 	} 
 	

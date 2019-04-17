@@ -7,7 +7,10 @@ services:
     environment:
       - OPIV_ALLOW_CUSTOM_TEST_ID=true
       - OPIV_TARGET_GRANT_NOT_NEEDED=true
-      - TRUST_ALL_TLS=true
+      - OPIV_TRUST_ALL_TLS=true
+      - VIRTUAL_HOST=*.honest-sso.de,*.attack-sso.de,*.sso-security.de,sso-security.de
+      - CERT_NAME=professos
+      - VIRTUAL_PORT=8080
     volumes:
       # on unix, overwriting volume-mounted files is not possible because file's 
       # inode changes (thus, the bind-mount in the container will not reflect the changes).
