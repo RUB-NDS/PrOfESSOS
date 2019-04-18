@@ -37,6 +37,10 @@ ENV LAUNCH_JBOSS_IN_BACKGROUND true
 # copy the .war file into wildfly's deployment folder
 COPY $PROFESSOS_WAR /opt/jboss/wildfly/standalone/deployments/professos.war
 
+# add wildfly config (enables proxy-address-forwarding in default http listener; required when Wildfly runs
+# behind a TLS terminating reverse proxy)
+COPY ./docker/wildfly/professos/standalone.xml /opt/jboss/wildfly/standalone/configuration/standalone.xml
+
 # disable for debugging as root
 USER jboss
 
