@@ -167,26 +167,29 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.jvnet.jaxb2.maven2</groupId>
-				<artifactId>maven-jaxb2-plugin</artifactId>
-				<version>0.13.1</version>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-xjc-plugin</artifactId>
+				<version>3.3.0</version>
 				<executions>
-					<!-- rest -->
 					<execution>
+						<id>xjc</id>
+						<phase>generate-sources</phase>
 						<goals>
-							<goal>generate</goal>
+							<goal>xsdtojava</goal>
 						</goals>
 						<configuration>
-							<schemaDirectory>src/main/xsd</schemaDirectory>
-							<!--<bindingFiles>-->
-							<!--<bindingFile>${wsdl.source}/serialization.xjc</bindingFile>-->
-							<!--</bindingFiles>-->
-							<specVersion>2.2</specVersion>
-							<packageLevelAnnotations>false</packageLevelAnnotations>
+							<sourceRoot>${basedir}/target/generated-sources/cxf-xjb</sourceRoot>
+							<xsdOptions>
+								<xsdOption>
+									<xsd>src/main/xsd/TestModel.xsd</xsd>
+									<bindingFile>src/main/xsd/serialization.xjb</bindingFile>
+								</xsdOption>
+							</xsdOptions>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
