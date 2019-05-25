@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2016 Ruhr-Universität Bochum.
+ * Copyright 2016-2019 Ruhr-Universität Bochum.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,24 @@
 
 package de.rub.nds.oidc.server;
 
+import com.typesafe.config.Config;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.util.Properties;
-import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.core.UriBuilder;
+
 
 /**
  *
  * @author Tobias Wich
  */
-@ApplicationScoped
 public class OPIVConfig {
+
 	private final URI CONTROLLER_URI;
 	private final URI HONEST_OP_URL;
 	private final URI EVIL_OP_URL;
@@ -39,30 +41,53 @@ public class OPIVConfig {
 	private final URI EVIL_RP_URL;
 
 	// TODO: read from config
-	private final String honestSigAlias = "opiv honest token signer";
-	private final String evilSigAlias = "opiv evil token signer";
-	private final String untrustedAlias = "opiv untrusted token signer";
-	private final String keystorePass = "pass";
+	private String honestSigAlias = "opiv honest token signer";
+	private String evilSigAlias = "opiv evil token signer";
+	private String untrustedAlias = "opiv untrusted token signer";
+	private String keystorePass = "pass";
 	private final KeyStore keyStore;
 
 	private final boolean allowCustomTestIDs;
 	private final boolean allowTestWithoutRemotePermission;
 
-	public OPIVConfig() throws IOException, URISyntaxException, GeneralSecurityException {
-		InputStream hostsFile = OPIVConfig.class.getResourceAsStream("/servernames.properties");
-		Properties p = new Properties();
-		p.load(hostsFile);
+	public OPIVConfig(Config endpointCfg) throws IOException, URISyntaxException, GeneralSecurityException {
+		CONTROLLER_URI = new URI(endpointCfg.getString("controller"));
+		HONEST_OP_URL = new URI(endpointCfg.getString("honest-op"));
+		EVIL_OP_URL = new URI(endpointCfg.getString("evil-op"));
+		HONEST_RP_URL = new URI(endpointCfg.getString("honest-rp"));
+		EVIL_RP_URL = new URI(endpointCfg.getString("evil-rp"));
 
-		CONTROLLER_URI = new URI(p.getProperty("controller"));
-		HONEST_OP_URL = new URI(p.getProperty("honest-op"));
-		EVIL_OP_URL = new URI(p.getProperty("evil-op"));
-		HONEST_RP_URL = new URI(p.getProperty("honest-rp"));
-		EVIL_RP_URL = new URI(p.getProperty("evil-rp"));
+		InputStream ksStream = null;
+		// TODO: load keystore from file if specified
+		if (endpointCfg.hasPath("keystore-file")) {
+			String ksFileStr = endpointCfg.getString("keystore-file");
+			// correct path if it is absolute or relative to config file
+			File ksFile = new File(ksFileStr);
+			if (! ksFile.isAbsolute()) {
+				String basePath = endpointCfg.getValue("keystore-file").origin().filename();
+				ksFile = new File(basePath, ksFileStr);
+			}
 
-		InputStream keystoreFile = OPIVConfig.class.getResourceAsStream("/keystore.jks");
-		keyStore = KeyStore.getInstance("JKS");
-		keyStore.load(keystoreFile, keystorePass.toCharArray());
+			// only load if file is readable
+			if (ksFile.isFile() && ksFile.canRead()) {
+				ksStream = new FileInputStream(ksFile);
+				// load alias and so on
+				honestSigAlias = endpointCfg.getString("honest-sig-alias");
+				evilSigAlias = endpointCfg.getString("evil-sig-alias");
+				untrustedAlias = endpointCfg.getString("untrusted-alias");
+				keystorePass = endpointCfg.getString("keystore-pass");
+			}
+		}
 
+		// fallback to integrated keystore
+		if (ksStream == null) {
+			ksStream = OPIVConfig.class.getResourceAsStream("/keystore.jks");
+		}
+
+		this.keyStore = KeyStore.getInstance("JKS");
+		this.keyStore.load(ksStream, keystorePass.toCharArray());
+
+		// use config file to set these parameters
 		String acceptTestIds = System.getenv("OPIV_ALLOW_CUSTOM_TEST_ID");
 		allowCustomTestIDs = Boolean.valueOf(acceptTestIds) ;
 

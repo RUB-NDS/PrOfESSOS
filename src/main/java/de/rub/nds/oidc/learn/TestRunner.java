@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2016 Ruhr-Universität Bochum.
+ * Copyright 2016-2019 Ruhr-Universität Bochum.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package de.rub.nds.oidc.learn;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import de.rub.nds.oidc.server.ProfConfig;
 import de.rub.nds.oidc.browser.BrowserSimulator;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.*;
@@ -48,13 +49,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+
 /**
  * @author Tobias Wich
  */
 public class TestRunner {
 
+	private final ProfConfig profCfg;
 	private final String testId;
-	private final OPIVConfig hostCfg;
 	private final TestObjectType testObj;
 	private final TestPlanType testPlan;
 	private final TemplateEngine te;
@@ -62,9 +64,9 @@ public class TestRunner {
 	private final Map<String, Object> testSuiteCtx;
 
 	@Inject
-	public TestRunner(OPIVConfig hostCfg, TestObjectType testObj, TestPlanType testPlan, TemplateEngine te) {
+	public TestRunner(ProfConfig profCfg, TestObjectType testObj, TestPlanType testPlan, TemplateEngine te) {
+		this.profCfg = profCfg;
 		this.testId = testObj.getTestId();
-		this.hostCfg = hostCfg;
 		this.testObj = testObj;
 		this.testPlan = testPlan;
 		this.te = te;
@@ -148,7 +150,8 @@ public class TestRunner {
 
 			String browserClass = stepDef.getBrowserSimulator().getImplementationClass();
 			simulator = ImplementationLoader.loadClassInstance(browserClass, BrowserSimulator.class);
-			simulator.setConfig(getTestObj().getTestConfig());
+			simulator.init(profCfg.getSeleniumCfg());
+			simulator.setTestConfig(getTestObj().getTestConfig());
 			simulator.setTemplateEngine(te);
 			simulator.setLogger(logger);
 			simulator.setContext(testSuiteCtx, testStepCtx);
@@ -218,7 +221,7 @@ public class TestRunner {
 
 
 	private boolean testGranted(TestStepLogger logger, Map<String, Object> testStepCtx) {
-		if (hostCfg.isGrantNotNeededOverride() || Boolean.parseBoolean((String) testStepCtx.get("grant_not_needed"))) {
+		if (profCfg.getEndpointCfg().isGrantNotNeededOverride() || Boolean.parseBoolean((String) testStepCtx.get("grant_not_needed"))) {
 			logger.log("Permission to perform test on remote server not evaluated.");
 			return true;
 		} else {
@@ -253,7 +256,7 @@ public class TestRunner {
 					grantToken = grantToken.trim();
 
 					URI grantTokenUri = UriUtils.normalize(new URI(grantToken));
-					URI referenceUri = UriUtils.normalize(hostCfg.getControllerUri());
+					URI referenceUri = UriUtils.normalize(profCfg.getEndpointCfg().getControllerUri());
 
 					return referenceUri.equals(grantTokenUri);
 				} else {
@@ -301,7 +304,7 @@ public class TestRunner {
 			// Evil OP is yet unknown and starts new Discovery/Registration
 			String prefix = "enforce-rp-reg-";
 			String regEnforcer = prefix + RandomStringUtils.randomAlphanumeric(8);
-			evilWebfinger = hostCfg.getEvilOPUri().toString() + regEnforcer + "/" + testId;
+			evilWebfinger = profCfg.getEndpointCfg().getEvilOPUri().toString() + regEnforcer + "/" + testId;
 			logger.logCodeBlock("Trigger new registration at Evil OP, set discovery URI:", evilWebfinger);
 			testStepCtx.put(OPContextConstants.REGISTRATION_ENFORCING_PATH_FRAGMENT, regEnforcer);
 		} else {
@@ -338,10 +341,10 @@ public class TestRunner {
 		TestOPConfigType remoteOPConfig = (TestOPConfigType) getTestObj().getTestConfig();
 
 		testStepCtx.put(RPContextConstants.TARGET_OP_URL, remoteOPConfig.getUrlOPTarget());
-		RPInstance rp1Inst = new RPInstance(stepDef.getRPConfig1(), logger, testSuiteCtx, testStepCtx, remoteOPConfig, RPType.HONEST, hostCfg);
+		RPInstance rp1Inst = new RPInstance(stepDef.getRPConfig1(), logger, testSuiteCtx, testStepCtx, remoteOPConfig, RPType.HONEST, profCfg.getEndpointCfg());
 		instReg.addRP1(testId, new ServerInstance<>(rp1Inst, logger));
 
-		RPInstance rp2Inst = new RPInstance(stepDef.getRPConfig2(), logger, testSuiteCtx, testStepCtx, remoteOPConfig, RPType.EVIL, hostCfg);
+		RPInstance rp2Inst = new RPInstance(stepDef.getRPConfig2(), logger, testSuiteCtx, testStepCtx, remoteOPConfig, RPType.EVIL, profCfg.getEndpointCfg());
 		instReg.addRP2(testId, new ServerInstance<>(rp2Inst, logger));
 
 		rp1Inst.getImpl().runTestStepSetup();

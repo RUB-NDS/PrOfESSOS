@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2016 Ruhr-Universität Bochum.
+ * Copyright 2016-2019 Ruhr-Universität Bochum.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package de.rub.nds.oidc.learn;
 
 import de.rub.nds.oidc.TestPlanList;
-import de.rub.nds.oidc.server.OPIVConfig;
+import de.rub.nds.oidc.server.ProfConfig;
 import de.rub.nds.oidc.test_model.*;
 
 import javax.annotation.Nonnull;
@@ -34,7 +34,7 @@ public class TestRunnerRegistry {
 
 	private final Map<String, TestRunner> testObjects;
 
-	private OPIVConfig hosts;
+	private ProfConfig cfg;
 	private TestPlanList planList;
 	private TemplateEngine te;
 
@@ -43,8 +43,8 @@ public class TestRunnerRegistry {
 	}
 
 	@Inject
-	public void setHosts(OPIVConfig hosts) {
-		this.hosts = hosts;
+	public void setConfig(ProfConfig cfg) {
+		this.cfg = cfg;
 	}
 
 	@Inject
@@ -64,7 +64,7 @@ public class TestRunnerRegistry {
 		TestObjectType to = createTestObject(testId, plan);
 
 		// set both in a testobject instance and save it
-		TestRunner toi = new TestRunner(hosts, to, plan, te);
+		TestRunner toi = new TestRunner(cfg, to, plan, te);
 		testObjects.put(testId, toi);
 
 		return toi;
@@ -77,7 +77,7 @@ public class TestRunnerRegistry {
 		TestObjectType to = createTestObject(testId, plan);
 
 		// set both in a testobject instance and save it
-		TestRunner toi = new TestRunner(hosts, to, plan, te);
+		TestRunner toi = new TestRunner(cfg, to, plan, te);
 		testObjects.put(testId, toi);
 
 		return toi;
@@ -131,22 +131,22 @@ public class TestRunnerRegistry {
 	}
 
 	public boolean isAllowCustomTestIds() {
-		return hosts.isAllowCustomTestIDs();
+		return cfg.getEndpointCfg().isAllowCustomTestIDs();
 	} 
 
 	private TestRPConfigType createTestRPConfig(String testId) {
 		TestRPConfigType testCfg = new TestRPConfigType();
 		testCfg.setType(TestRPConfigType.class.getName());
-		testCfg.setHonestWebfingerResourceId(hosts.getHonestOPUri() + testId);
-		testCfg.setEvilWebfingerResourceId(hosts.getEvilOPUri() + testId);
+		testCfg.setHonestWebfingerResourceId(cfg.getEndpointCfg().getHonestOPUri() + testId);
+		testCfg.setEvilWebfingerResourceId(cfg.getEndpointCfg().getEvilOPUri() + testId);
 		return testCfg;
 	}
 
 	private TestOPConfigType createTestOPConfig(String testId) {
 		TestOPConfigType testCfg = new TestOPConfigType();
 		testCfg.setType(TestOPConfigType.class.getName());
-		testCfg.setHonestRpResourceId(hosts.getHonestRPUri() + testId);
-		testCfg.setEvilRpResourceId(hosts.getEvilRPUri() + testId);
+		testCfg.setHonestRpResourceId(cfg.getEndpointCfg().getHonestRPUri() + testId);
+		testCfg.setEvilRpResourceId(cfg.getEndpointCfg().getEvilRPUri() + testId);
 		return testCfg;
 	}
 }

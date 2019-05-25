@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2016 Ruhr-Universität Bochum.
+ * Copyright 2016-2019 Ruhr-Universität Bochum.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package de.rub.nds.oidc.browser;
 
+import com.typesafe.config.Config;
 import de.rub.nds.oidc.learn.TemplateEngine;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.op.OPParameterConstants;
@@ -36,11 +37,9 @@ import org.openqa.selenium.support.ui.Sleeper;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 
@@ -48,6 +47,8 @@ import java.util.concurrent.TimeUnit;
  * @author Tobias Wich
  */
 public abstract class BrowserSimulator {
+
+	protected Config seleniumCfg;
 
 	protected RemoteWebDriver driver;
 
@@ -70,7 +71,8 @@ public abstract class BrowserSimulator {
 	private JsWaiter jsWaiter;
 
 
-	public BrowserSimulator() {
+	public void init(Config seleniumCfg) {
+		this.seleniumCfg = seleniumCfg;
 		loadDriver(false);
 		loadFormSubmissionDelayScript();
 	}
@@ -88,23 +90,14 @@ public abstract class BrowserSimulator {
 		ChromeOptions chromeOptions = new ChromeOptions();
 
 		// load chromedriver config
-		try {
-			InputStream chromeConfig = BrowserSimulator.class.getResourceAsStream("/chromedriver.properties");
-			Properties p = new Properties();
-			p.load(chromeConfig);
-
-			System.setProperty("webdriver.chrome.driver", p.getProperty("chromedriver_path"));
-			if (p.containsKey("chromedriver_logfile")) {
-				System.setProperty("webdriver.chrome.logfile", p.getProperty("chromedriver_logfile"));
-				System.setProperty("webdriver.chrome.verboseLogging", "true");
-			}
-			if (p.containsKey("chrome_browser_path")) {
-				// do not search for chrome in OS $PATH
-				chromeOptions.setBinary(p.getProperty("chrome_browser_path"));
-			}
-		} catch (IOException e) {
-			// try default installation path
-			System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver");
+		System.setProperty("webdriver.chrome.driver", seleniumCfg.getString("chromedriver_path"));
+		if (seleniumCfg.hasPath("chromedriver_logfile")) {
+			System.setProperty("webdriver.chrome.logfile", seleniumCfg.getString("chromedriver_logfile"));
+			System.setProperty("webdriver.chrome.verboseLogging", "true");
+		}
+		if (seleniumCfg.hasPath("chrome_browser_path")) {
+			// do not search for chrome in OS $PATH
+			chromeOptions.setBinary(seleniumCfg.getString("chrome_browser_path"));
 		}
 
 		chromeOptions.addArguments("headless", "no-sandbox", "disable-gpu", "window-size=1024x768",
@@ -119,7 +112,7 @@ public abstract class BrowserSimulator {
 		return d;
 	}
 
-	public void setConfig(TestConfigType config) {
+	public void setTestConfig(TestConfigType config) {
 		if (config.getType().equals(TestRPConfigType.class.getName())) {
 			setRpConfig((TestRPConfigType) config);
 		} else if (config.getType().equals(TestOPConfigType.class.getName())) {
