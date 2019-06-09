@@ -50,8 +50,8 @@ public class RequestDispatcher extends HttpServlet {
 	}
 
 	@Inject
-	public void setOPIVConfig(OPIVConfig opivCfg) {
-		this.opivCfg = opivCfg;
+	public void setConfig(ProfConfig opivCfg) {
+		this.opivCfg = opivCfg.getEndpointCfg();
 	}
 
 

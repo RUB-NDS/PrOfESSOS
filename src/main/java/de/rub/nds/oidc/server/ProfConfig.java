@@ -33,9 +33,9 @@ public class ProfConfig {
 	private final Config seleniumCfg;
 
 	public ProfConfig(Config rawCfg) throws IOException, URISyntaxException, GeneralSecurityException {
-		this.profCfg = rawCfg.atPath("professos");
-		this.endpointCfg = new OPIVConfig(profCfg.atPath("endpoint"));
-		this.seleniumCfg = profCfg.atPath("selenium");
+		this.profCfg = rawCfg.getConfig("professos");
+		this.endpointCfg = new OPIVConfig(profCfg.getConfig("endpoints"));
+		this.seleniumCfg = profCfg.getConfig("selenium");
 	}
 
 	public Config getSeleniumCfg() {

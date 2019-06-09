@@ -20,11 +20,8 @@ import de.rub.nds.oidc.server.TestInstanceRegistry;
 import de.rub.nds.oidc.test_model.*;
 import de.rub.nds.oidc.utils.ImplementationLoadException;
 import de.rub.nds.oidc.utils.ValueGenerator;
-
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBElement;
 
@@ -73,8 +70,7 @@ public class Learner {
 	@Path("/{role: rp|op}/create-test-object")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes("application/x-www-form-urlencoded")
-	public TestObjectType createTestObject(@PathParam("role") String role, @FormParam("test_id") String testId,
-										   @Context HttpServletRequest req) {
+	public TestObjectType createTestObject(@PathParam("role") String role, @FormParam("test_id") String testId) {
 
 		if (testId == null || !testObjs.isAllowCustomTestIds()) {
 			testId = valueGenerator.generateTestId();
