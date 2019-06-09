@@ -28,12 +28,14 @@ import java.security.GeneralSecurityException;
  */
 public class ProfConfig {
 
+	private final Config profCfg;
 	private final OPIVConfig endpointCfg;
 	private final Config seleniumCfg;
 
 	public ProfConfig(Config rawCfg) throws IOException, URISyntaxException, GeneralSecurityException {
-		this.endpointCfg = new OPIVConfig(rawCfg.atPath("professos.endpoint"));
-		this.seleniumCfg = rawCfg.atPath("professos.selenium");
+		this.profCfg = rawCfg.atPath("professos");
+		this.endpointCfg = new OPIVConfig(profCfg.atPath("endpoint"));
+		this.seleniumCfg = profCfg.atPath("selenium");
 	}
 
 	public Config getSeleniumCfg() {
@@ -42,6 +44,10 @@ public class ProfConfig {
 
 	public OPIVConfig getEndpointCfg() {
 		return endpointCfg;
+	}
+
+	public int getSessionLifetime() {
+		return profCfg.getInt("session-lifetime");
 	}
 
 }

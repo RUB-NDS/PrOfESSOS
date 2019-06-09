@@ -16,6 +16,8 @@
 
 package de.rub.nds.oidc.learn;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import de.rub.nds.oidc.TestPlanList;
 import de.rub.nds.oidc.server.ProfConfig;
 import de.rub.nds.oidc.test_model.*;
@@ -23,8 +25,9 @@ import de.rub.nds.oidc.test_model.*;
 import javax.annotation.Nonnull;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.PostConstruct;
+
 
 /**
  * @author Tobias Wich
@@ -32,15 +35,21 @@ import java.util.Map;
 @ApplicationScoped
 public class TestRunnerRegistry {
 
-	private final Map<String, TestRunner> testObjects;
+	private Cache<String, TestRunner> testObjects;
 
 	private ProfConfig cfg;
 	private TestPlanList planList;
 	private TemplateEngine te;
 
-	public TestRunnerRegistry() {
-		this.testObjects = new HashMap<>();
+	@PostConstruct
+	void init() {
+		int maxAge = cfg.getSessionLifetime();
+		TimeUnit maxAgeUnit = TimeUnit.MINUTES;
+		testObjects = CacheBuilder.newBuilder()
+				.expireAfterAccess(maxAge, maxAgeUnit)
+				.build();
 	}
+
 
 	@Inject
 	public void setConfig(ProfConfig cfg) {
@@ -60,19 +69,16 @@ public class TestRunnerRegistry {
 	public TestRunner createRPTestObject(String testId) {
 		// load plan
 		TestPlanType plan = planList.getRPTestPlan();
-		// create test object
-		TestObjectType to = createTestObject(testId, plan);
-
-		// set both in a testobject instance and save it
-		TestRunner toi = new TestRunner(cfg, to, plan, te);
-		testObjects.put(testId, toi);
-
-		return toi;
+		return registerTestObject(testId, plan);
 	}
 
 	public TestRunner createOPTestObject(String testId) {
 		// load plan
 		TestPlanType plan = planList.getOPTestPlan();
+		return registerTestObject(testId, plan);
+	}
+
+	private TestRunner registerTestObject(String testId, TestPlanType plan) {
 		// create test object
 		TestObjectType to = createTestObject(testId, plan);
 
@@ -118,7 +124,7 @@ public class TestRunnerRegistry {
 
 	@Nonnull
 	public TestRunner getTestObject(@Nonnull String testId) throws NoSuchTestObject {
-		TestRunner inst = testObjects.get(testId);
+		TestRunner inst = testObjects.getIfPresent(testId);
 		if (inst == null) {
 			throw new NoSuchTestObject("Failed to retrieve TestObject for testId " + testId + ".");
 		} else {
@@ -127,7 +133,7 @@ public class TestRunnerRegistry {
 	}
 
 	protected void deleteTestObject(@Nonnull String testId) {
-		testObjects.remove(testId);
+		testObjects.invalidate(testId);
 	}
 
 	public boolean isAllowCustomTestIds() {

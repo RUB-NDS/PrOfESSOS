@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2016 Ruhr-Universität Bochum.
+ * Copyright 2016-2019 Ruhr-Universität Bochum.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,11 @@ import de.rub.nds.oidc.utils.ValueGenerator;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBElement;
-import java.util.ArrayList;
+
 
 /**
  * @author Tobias Wich
@@ -81,18 +80,6 @@ public class Learner {
 			testId = valueGenerator.generateTestId();
 		}
 
-		// bind each testId to a session and delete references to stale
-		// testObjects on session invalidation (default: 60min inactive, set in web.xml)
-		HttpSession session = req.getSession(true);
-
-		@SuppressWarnings("unchecked")
-		ArrayList<String> sessionTestIDs = (ArrayList) session.getAttribute("testIDs");
-		if (sessionTestIDs == null) {
-			sessionTestIDs = new ArrayList<>();
-		}
-		sessionTestIDs.add(testId);
-		session.setAttribute("testIDs", sessionTestIDs);
-
 		TestRunner runner;
 		if (role.equals("rp"))
 			runner = testObjs.createRPTestObject(testId);
@@ -100,6 +87,15 @@ public class Learner {
 			runner = testObjs.createOPTestObject(testId);
 
 		return runner.getTestObj();
+	}
+
+	@POST
+	@Path("/delete-test-object")
+	@Consumes("application/x-www-form-urlencoded")
+	public void deleteTestObject(@FormParam("test_id") String testId) {
+		if (testId != null) {
+			testObjs.deleteTestObject(testId);
+		}
 	}
 
 	@POST
