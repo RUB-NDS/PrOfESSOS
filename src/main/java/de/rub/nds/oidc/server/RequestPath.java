@@ -117,7 +117,7 @@ public class RequestPath {
 
 	public URI getDispatchUriAndTestId() {
 		return UriBuilder.fromUri(originalRequestUri)
-				.replacePath("/dispatch/" + getTestId())
+				.replacePath("/" + getTestId())
 				.replaceQuery(null)
 				.build();
 	}

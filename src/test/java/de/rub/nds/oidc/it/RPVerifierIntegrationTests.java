@@ -1,6 +1,5 @@
 package de.rub.nds.oidc.it;
 
-import de.rub.nds.oidc.it.IntegrationTests;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.parsing.Parser;
@@ -73,8 +72,8 @@ public class RPVerifierIntegrationTests extends IntegrationTests {
 		testConfig.put("InputFieldName", "identifier");
 		testConfig.put("SeleniumScript", "var opUrl = document.querySelector(\"input[name='identifier']\");\nopUrl.value = \"§browser-input-op_url§\";\nopUrl.form.submit();\n");
 		testConfig.put("FinalValidUrl", "http://www.honestsp.de:8080/simple-web-app/");
-		testConfig.put("HonestUserNeedle", "{sub=honest-op-test-subject, iss=http://idp.oidc.honest-sso.de:8080/dispatch/" + testId + "}");
-		testConfig.put("EvilUserNeedle", "{sub=evil-op-test-subject, iss=http://idp.oidc.attack-sso.de:8080/dispatch/" + testId + "}");
+		testConfig.put("HonestUserNeedle", "{sub=honest-op-test-subject, iss=http://idp.oidc.honest-sso.de:8080/" + testId + "}");
+		testConfig.put("EvilUserNeedle", "{sub=evil-op-test-subject, iss=http://idp.oidc.attack-sso.de:8080/" + testId + "}");
 		testConfig.put("ProfileUrl", "http://www.honestsp.de:8080/simple-web-app/user");
 
 		String jsonConfig = new JSONObject(testConfig).toJSONString();

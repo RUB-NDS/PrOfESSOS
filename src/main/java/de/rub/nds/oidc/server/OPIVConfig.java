@@ -100,7 +100,7 @@ public class OPIVConfig {
 	}
 
 	public URI getHonestOPUri() {
-		return UriBuilder.fromUri(HONEST_OP_URL).path("/dispatch/").build();
+		return UriBuilder.fromUri(HONEST_OP_URL).path("/").build();
 	}
 
 	public String getHonestOPScheme() {
@@ -114,7 +114,7 @@ public class OPIVConfig {
 	}
 
 	public URI getEvilOPUri() {
-		return UriBuilder.fromUri(EVIL_OP_URL).path("/dispatch/").build();
+		return UriBuilder.fromUri(EVIL_OP_URL).path("/").build();
 	}
 
 	public String getEvilOPScheme() {
@@ -128,7 +128,7 @@ public class OPIVConfig {
 	}
 
 	public URI getHonestRPUri() {
-		return UriBuilder.fromUri(HONEST_RP_URL).path("/dispatch/").build();
+		return UriBuilder.fromUri(HONEST_RP_URL).path("/").build();
 	}
 
 	public String getHonestRPScheme() {
@@ -142,7 +142,7 @@ public class OPIVConfig {
 	}
 
 	public URI getEvilRPUri() {
-		return UriBuilder.fromUri(EVIL_RP_URL).path("/dispatch/").build();
+		return UriBuilder.fromUri(EVIL_RP_URL).path("/").build();
 	}
 	public String getEvilRPScheme() {
 		return EVIL_RP_URL.getScheme();

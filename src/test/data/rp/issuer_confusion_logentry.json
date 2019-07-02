@@ -1,5 +1,5 @@
 [{"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Obtaining permission to perform test from url 'http:\/\/www.honestsp.de:8080\/.professos'.","Date":"${json-unit.any-number}"},
-{"HttpRequest":null,"CodeBlock":{"Description":"Trigger new registration at Evil OP, set discovery URI:","Content":"${json-unit.regex}http:\\/\\/idp\\.oidc\\.attack-sso\\.de:8080\\/dispatch\\/enforce-rp-reg-.*"},"Screenshot":null,"HttpResponse":null,"Text":null,"Date":"${json-unit.any-number}"},
+{"HttpRequest":null,"CodeBlock":{"Description":"Trigger new registration at Evil OP, set discovery URI:","Content":"${json-unit.regex}http:\\/\\/idp\\.oidc\\.attack-sso\\.de:8080\\\/enforce-rp-reg-.*"},"Screenshot":null,"HttpResponse":null,"Text":null,"Date":"${json-unit.any-number}"},
 {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Opening browser with URL 'http:\/\/www.honestsp.de:8080\/simple-web-app\/login'.","Date":"${json-unit.any-number}"},
 {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Webfinger identity entered into the login form.","Date":"${json-unit.any-number}"},
 {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"HTML element found in Browser.","Date":"${json-unit.any-number}"},
