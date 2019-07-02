@@ -25,6 +25,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.util.Optional;
 import javax.ws.rs.core.UriBuilder;
 
 
@@ -39,6 +40,9 @@ public class OPIVConfig {
 	private final URI EVIL_OP_URL;
 	private final URI HONEST_RP_URL;
 	private final URI EVIL_RP_URL;
+
+	private final Optional<URI> TEST_RP_URL;
+	private final Optional<URI> TEST_OP_URL;
 
 	// TODO: read from config
 	private String honestSigAlias = "opiv honest token signer";
@@ -56,6 +60,17 @@ public class OPIVConfig {
 		EVIL_OP_URL = new URI(endpointCfg.getString("evil-op"));
 		HONEST_RP_URL = new URI(endpointCfg.getString("honest-rp"));
 		EVIL_RP_URL = new URI(endpointCfg.getString("evil-rp"));
+
+		if (endpointCfg.hasPath("test-rp")) {
+			TEST_RP_URL = Optional.of(new URI(endpointCfg.getString("test-rp")));
+		} else {
+			TEST_RP_URL = Optional.empty();
+		}
+		if (endpointCfg.hasPath("test-op")) {
+			TEST_OP_URL = Optional.of(new URI(endpointCfg.getString("test-op")));
+		} else {
+			TEST_OP_URL = Optional.empty();
+		}
 
 		InputStream ksStream = null;
 		// TODO: load keystore from file if specified
@@ -152,6 +167,14 @@ public class OPIVConfig {
 		String host = EVIL_RP_URL.getHost();
 		int port = EVIL_OP_URL.getPort();
 		return host + (port == -1 ? "" : ":" + port);
+	}
+
+	public Optional<URI> getTestOPUri() {
+		return TEST_OP_URL;
+	}
+
+	public Optional<URI> getTestRPUri() {
+		return TEST_RP_URL;
 	}
 
 	public boolean isAllowCustomTestIDs() {

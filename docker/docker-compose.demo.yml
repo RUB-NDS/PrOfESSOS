@@ -1,0 +1,57 @@
+version: '3.6'
+
+services:
+  prof-apache:
+    # volumes:
+    #   - type: bind
+    #     source: ./config/cloudflare.conf
+    #     target: /data/cloudflare.conf
+    #     read_only: true
+    networks:
+      profnet:
+        aliases:
+          - honestop.example.org
+          - honestrp.example.org
+          - evilop.example.org
+          - evilrp.example.org
+          - testop.example.org
+          - testrp.example.org
+    build:
+      args:
+        CONTROLLER_HOST: example.org
+        HONEST_OP_HOST: honestop.example.org
+        EVIL_OP_HOST: evilop.example.org
+        HONEST_RP_HOST: honestrp.example.org
+        EVIL_RP_HOST: evilrp.example.org
+        TEST_RP_HOST: testrp.example.org
+        TEST_OP_HOST: testop.example.org
+        USE_LETSENCRYPT: "false"
+        WEBMASTER_MAIL: admin@example.org
+        STAGING: "true"
+
+  prof:
+    build:
+      args:
+        CONTROLLER_HOST: example.org
+        HONEST_OP_HOST: honestop.example.org
+        EVIL_OP_HOST: evilop.example.org
+        HONEST_RP_HOST: honestrp.example.org
+        EVIL_RP_HOST: evilrp.example.org
+        TEST_RP_HOST: testrp.example.org
+        TEST_OP_HOST: testop.example.org
+
+  test-rp:
+    build:
+      args:
+        CONTROLLER_URL: https://example.org
+        TEST_RP_HOST: testrp.example.org
+
+  test-op:
+    build:
+      args:
+        ISSUER: testop.example.org
+        CONTROLLER_URL: https://example.org
+        TEST_OP_HOST: testop.example.org
+
+networks:
+  profnet:

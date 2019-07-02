@@ -1,1 +1,0 @@
-http://openid.sso-security.de:8080

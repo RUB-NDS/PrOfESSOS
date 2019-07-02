@@ -1,9 +1,0 @@
-version: '3.5'
-
-services:
-  professos:
-    image: professos:latest
-  relying_party:
-    image: relying_party:latest
-  identity_provider:
-    image: identity_provider:latest
