@@ -1,3 +1,11 @@
+<%--
+    Document   : op-verifier
+    Created on : 01.07.2019, 17:41:50
+    Author     : Tobias Wich
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+
 <!DOCTYPE html>
 <!--
 Copyright 2016 Ruhr-Universität Bochum.
@@ -100,7 +108,7 @@ limitations under the License.
 	<h2>About PrOfESSOS</h2>
 	<p>PrOfESSOS (Practical Offensive Evaluation of Single Sign-On Services) is an open source tool for
 		fully automated Evaluation-as-a-Service of OpenID Connect clients and Identity Providers. The tool has been developed
-		for the research paper <em>SoK: Single Sign-On Security – An Evaluation of OpenID Connect</em>,
+		for the research paper <em>SoK: Single Sign-On Security â An Evaluation of OpenID Connect</em>,
 		<a href="http://www.ieee-security.org/TC/EuroSP2017/">EuroS&P 2017</a>.
 	</p>
 	<p>The source code of PrOfESSOS can be found at GitHub.<br>

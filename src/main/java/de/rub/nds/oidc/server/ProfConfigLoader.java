@@ -47,7 +47,7 @@ public class ProfConfigLoader {
 	}
 
 	@Produces
-	ProfConfig getProfConfig() {
+	public ProfConfig getProfConfig() {
 		return cfg;
 	}
 

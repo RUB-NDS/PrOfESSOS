@@ -1,3 +1,15 @@
+<%-- 
+    Document   : rp-verifier
+    Created on : 01.07.2019, 17:41:50
+    Author     : Tobias Wich
+--%>
+
+<%@page import="de.rub.nds.oidc.server.OPIVConfig"%>
+<%@page import="de.rub.nds.oidc.server.ProfConfig"%>
+<%@page import="javax.inject.Inject"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+
+
 <!DOCTYPE html>
 <!--
 Copyright 2016 Ruhr-Universität Bochum.

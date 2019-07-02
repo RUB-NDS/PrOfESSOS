@@ -1,3 +1,29 @@
+<%--
+    Document   : verify-controller
+    Created on : 01.07.2019, 17:41:50
+    Author     : Tobias Wich
+--%>
+
+<%@page import="java.security.GeneralSecurityException"%>
+<%@page import="java.net.URISyntaxException"%>
+<%@page import="java.io.IOException"%>
+<%@page import="de.rub.nds.oidc.server.ProfConfigLoader"%>
+<%@page import="de.rub.nds.oidc.server.ProfConfig"%>
+<%@page import="javax.inject.Inject"%>
+<%@page contentType="application/javascript" pageEncoding="UTF-8"%>
+
+<%!
+    static ProfConfig profCfg = loadConfig();
+
+	static ProfConfig loadConfig() {
+		try {
+			return new ProfConfigLoader().getProfConfig();
+		} catch (IOException | URISyntaxException | GeneralSecurityException ex) {
+			throw new RuntimeException("Failed to load prof config.", ex);
+		}
+	}
+%>
+
 /*
  * Copyright 2016 Ruhr-Universität Bochum.
  *
@@ -51,21 +77,29 @@ var OPIV = (function(module) {
 		return typeof testId !== 'undefined';
 	}
 
+	function hasTestRP() {
+		return <%= profCfg.getEndpointCfg().getTestRPUri().isPresent() %>;
+	}
+
+	function hasTestOP() {
+		return <%= profCfg.getEndpointCfg().getTestOPUri().isPresent() %>;
+	}
+
 	module.loadDemo = function() {
 		if (isInitialized()) {
-			if (testConfig["Type"] === RP_CONFIG_TYPE) {
-				testConfig.UrlClientTarget = "http://www.honestsp.de:8080/simple-web-app/login";
+			if (hasTestRP() && testConfig["Type"] === RP_CONFIG_TYPE) {
+				testConfig.UrlClientTarget = "<%= profCfg.getEndpointCfg().getTestRPUri().get() %>/login";
 				testConfig.InputFieldName = null;
 				testConfig.SeleniumScript = null;
-				testConfig.FinalValidUrl = "http://www.honestsp.de:8080/simple-web-app/";
+				testConfig.FinalValidUrl = "<%= profCfg.getEndpointCfg().getTestRPUri().get() %>";
 				testConfig.HonestUserNeedle = "{sub=honest-op-test-subject, iss=" + testConfig.HonestWebfingerResourceId + "}";
 				testConfig.EvilUserNeedle = "{sub=evil-op-test-subject, iss=" + testConfig.EvilWebfingerResourceId + "}";
-				testConfig.ProfileUrl = "http://www.honestsp.de:8080/simple-web-app/user";
+				testConfig.ProfileUrl = "<%= profCfg.getEndpointCfg().getTestRPUri().get() %>/user";
 
 				writeRPConfigGUI(testConfig);
 			}
-			if (testConfig["Type"] === OP_CONFIG_TYPE) {
-				testConfig.UrlOPTarget = "http://honestidp.de:8080/openid-connect-server-webapp";
+			if (hasTestOP() && testConfig["Type"] === OP_CONFIG_TYPE) {
+				testConfig.UrlOPTarget = "<%= profCfg.getEndpointCfg().getTestOPUri().get() %>";
 				testConfig.User1Name = "user1";
 				testConfig.User1Pass = "user1pass";
 				testConfig.User2Name = "user2";
@@ -461,7 +495,7 @@ var OPIV = (function(module) {
 		textContainer.innerHTML = text.replace(/\n/g, "<br>");
 		return textContainer;
 	}
-	
+
 	function createCodeBlockLogEntry(listing) {
 		var container = document.createElement("div");
 
@@ -813,3 +847,4 @@ var OPIV = (function(module) {
 	return module;
 
 })(OPIV || {});
+
