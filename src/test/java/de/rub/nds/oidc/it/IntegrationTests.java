@@ -50,7 +50,7 @@ public class IntegrationTests {
 		String configs = FileUtils.readFileToString(new File(configFile), "utf-8");
 		JSONArray configArray = (JSONArray) new JSONParser(JSONParser.MODE_JSON_SIMPLE).parse(configs);
 
-		Set<Object[]> testData = new LinkedHashSet<Object[]>();
+		Set<Object[]> testData = new LinkedHashSet<>();
 		for (Object jo : configArray) {
 			String name = (String) ((JSONObject) jo).get("StepName");
 			String filename = (String) ((JSONObject) jo).get("LogEntryFile");
@@ -66,13 +66,15 @@ public class IntegrationTests {
 	@BeforeGroups(groups = {"docker", "docker-rp", "docker-op"})
 	public void startDockerServices() {
 		// code that will be invoked when this test is instantiated
-		docker = new DockerComposeContainer(new File("./docker-compose.override.yml"))
-				.withExposedService("professos", 8080,
+		docker = new DockerComposeContainer(new File("./docker/docker-compose.yml"), new File("./docker/docker-compose.it.yml"))
+				.withExposedService("prof-apache", 80,
+						Wait.forHttp("/").forStatusCode(200))
+				.withExposedService("prof", 8080,
 						Wait.forHttp("/rp-verifier.html").forStatusCode(200))
-				.withExposedService("relying_party", 8080,
+				.withExposedService("test-rp", 8080,
 						Wait.forHttp("/simple-web-app/login").forStatusCode(200))
-				.withExposedService("identity_provider", 8080,
-						Wait.forHttp("/openid-connect-server-webapp").forStatusCode(200));
+				.withExposedService("test-op", 8080,
+						Wait.forHttp("/oidc-server").forStatusCode(200));
 		// TODO: add regexes, the attempts below didn't match...
 //				.waitingFor("professos", Wait.forLogMessage("^.*Deployed \"professos.war\" (runtime-name : \"professos.war\")$", 45))
 //				.waitingFor("relying_party", Wait.forLogMessage("^.*Registered web context: '/simple-web-app' for server 'default-server'$", 45))
@@ -81,8 +83,8 @@ public class IntegrationTests {
 		docker.withLocalCompose(true).withPull(false).start();
 
 		// store service address as exposed to host
-		professosHost = docker.getServiceHost("professos", 8080);
-		professosPort = docker.getServicePort("professos", 8080);
+		professosHost = docker.getServiceHost("prof", 8080);
+		professosPort = docker.getServicePort("prof", 8080);
 	}
 
 // Calling stop() is not necessary according to Tescontainers documentation

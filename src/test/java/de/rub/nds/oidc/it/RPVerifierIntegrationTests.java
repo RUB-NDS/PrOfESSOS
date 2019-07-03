@@ -1,5 +1,6 @@
 package de.rub.nds.oidc.it;
 
+import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.parsing.Parser;
@@ -22,6 +23,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import static io.restassured.RestAssured.*;
+import io.restassured.config.LogConfig;
+import java.io.FileWriter;
+import java.io.PrintStream;
+import org.testcontainers.shaded.org.apache.commons.io.output.WriterOutputStream;
 
 public class RPVerifierIntegrationTests extends IntegrationTests {
 	private HashMap<String, Object> rpConfig;
@@ -34,7 +39,7 @@ public class RPVerifierIntegrationTests extends IntegrationTests {
 
 
 	@Test(groups = {"rp-it", "docker-rp", "docker"})
-	public void setUp() {
+	public void setUp() throws IOException {
 		// check if testcontainers are used to manage docker services
 		RequestSpecBuilder specB = new RequestSpecBuilder();
 		if (docker != null && professosHost != null && professosPort != 0) {
@@ -68,13 +73,15 @@ public class RPVerifierIntegrationTests extends IntegrationTests {
 		String testId = (String) testObjectMap.get("TestId");
 
 		// set configuration to default values of demo SP
-		testConfig.put("UrlClientTarget", "http://www.honestsp.de:8080/simple-web-app/login");
+		testConfig.put("UrlClientTarget", "https://testrp.org/simple-web-app/login");
 		testConfig.put("InputFieldName", "identifier");
-		testConfig.put("SeleniumScript", "var opUrl = document.querySelector(\"input[name='identifier']\");\nopUrl.value = \"§browser-input-op_url§\";\nopUrl.form.submit();\n");
-		testConfig.put("FinalValidUrl", "http://www.honestsp.de:8080/simple-web-app/");
-		testConfig.put("HonestUserNeedle", "{sub=honest-op-test-subject, iss=http://idp.oidc.honest-sso.de:8080/" + testId + "}");
-		testConfig.put("EvilUserNeedle", "{sub=evil-op-test-subject, iss=http://idp.oidc.attack-sso.de:8080/" + testId + "}");
-		testConfig.put("ProfileUrl", "http://www.honestsp.de:8080/simple-web-app/user");
+		testConfig.put("SeleniumScript", "var opUrl = document.querySelector(\"input[name='identifier']\");\n"
+				+ "opUrl.value = \"§browser-input-op_url§\";\n"
+				+ "opUrl.form.submit();\n");
+		testConfig.put("FinalValidUrl", "https://testrp.org/simple-web-app/");
+		testConfig.put("HonestUserNeedle", "{sub=honest-op-test-subject, iss=https://honestop.org/" + testId + "}");
+		testConfig.put("EvilUserNeedle", "{sub=evil-op-test-subject, iss=https://evilop.org/" + testId + "}");
+		testConfig.put("ProfileUrl", "https://testrp.org/simple-web-app/user");
 
 		String jsonConfig = new JSONObject(testConfig).toJSONString();
 
@@ -85,6 +92,11 @@ public class RPVerifierIntegrationTests extends IntegrationTests {
 		// run learning phase to make sure we are all set and later tests do not
 		// trigger unexpected client registrations
 		System.out.println("Running learning phase.");
+
+		try (FileWriter fileWriter = new FileWriter("/tmp/logging.txt");
+     PrintStream printStream = new PrintStream(new WriterOutputStream(fileWriter), true)) {
+
+    RestAssured.config = RestAssured.config().logConfig(LogConfig.logConfig().defaultStream(printStream));
 		String learnResult =
 				with().spec(spec)
 //					.log().all().and()
@@ -92,11 +104,12 @@ public class RPVerifierIntegrationTests extends IntegrationTests {
 					.body(jsonConfig)
 					.post("/learn")
 				.then()
-					.log().ifError().and()
+					.log().all().and()
 					.extract().path("TestStepResult.Result");
 
 		Assert.assertEquals(learnResult, "PASS");
 		specification = spec;
+		}
 	}
 
 	@DataProvider(name = "getRPTestConfigs")

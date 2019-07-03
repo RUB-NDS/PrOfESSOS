@@ -61,7 +61,7 @@ public class OPVerifierIntegrationTests extends IntegrationTests {
 		String testId = (String) testObjectMap.get("TestId");
 
 		// set configuration to default values of demo SP
-		testConfig.put("UrlOPTarget", "http://honestidp.de:8080/openid-connect-server-webapp");
+		testConfig.put("UrlOPTarget", "http://honestidp.de:8080/oidc-server");
 		testConfig.put("User1Name", "user1");
 		testConfig.put("User2Name", "user2");
 		testConfig.put("User1Pass", "user1pass");
