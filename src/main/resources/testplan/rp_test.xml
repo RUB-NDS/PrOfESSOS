@@ -512,7 +512,7 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ID Spoofing 11 - UserInfo (sub array)" DisplayGroup="ID Spoofing">
+	<TestStep Name="ID Spoofing 11 - UserInfo (sub array reverse)" DisplayGroup="ID Spoofing">
 		<Description><![CDATA[
 			<h3>ID Spoofing</h3>
 			<p>PrOfESSOS tests the validation of the <code>sub</code> claim on the client by returning a maliciously crafted 
