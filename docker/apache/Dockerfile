@@ -39,9 +39,9 @@ COPY config/scripts/run_letsencrypt.sh /run_letsencrypt.sh
 RUN chmod +x /*.sh && chmod +x /etc/my_init.d/*.sh && chmod +x /etc/service/apache/*
 
 
-ARG USE_LETSENCRYPT
-ARG WEBMASTER_MAIL
-ARG STAGING
+ARG USE_LETSENCRYPT=false
+ARG WEBMASTER_MAIL=""
+ARG STAGING=false
 
 ARG CONTROLLER_HOST
 ARG HONEST_OP_HOST
