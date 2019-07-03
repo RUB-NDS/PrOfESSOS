@@ -227,7 +227,7 @@
 									<destFileName>professos.war</destFileName>
 								</artifactItem>
 							</artifactItems>
-							<outputDirectory>${project.basedir}/docker/wildfly/build</outputDirectory>
+							<outputDirectory>${project.basedir}/docker/professos/build</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
