@@ -185,7 +185,7 @@ public class RequestDispatcher extends HttpServlet {
 						.build();
 				resp.sendRedirect(redirect.toString());
 			} catch (NullPointerException | URISyntaxException ex) {
-				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid r3esource parameter specified.");
+				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid resource parameter specified.");
 			}
 		} else {
 			String msg = String.format("rel=%s is not handled by this server.", rel);

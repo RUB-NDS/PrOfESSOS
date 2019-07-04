@@ -34,7 +34,7 @@ public class ProfConfig {
 
 	public ProfConfig(Config rawCfg) throws IOException, URISyntaxException, GeneralSecurityException {
 		this.profCfg = rawCfg.getConfig("professos");
-		this.endpointCfg = new OPIVConfig(profCfg.getConfig("endpoints"));
+		this.endpointCfg = new OPIVConfig(profCfg);
 		this.seleniumCfg = profCfg.getConfig("selenium");
 	}
 

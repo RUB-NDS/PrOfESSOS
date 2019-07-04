@@ -53,8 +53,11 @@ public class OPIVConfig {
 
 	private final boolean allowCustomTestIDs;
 	private final boolean allowTestWithoutRemotePermission;
+	private final boolean disableTlsTrustCheck;
 
-	public OPIVConfig(Config endpointCfg) throws IOException, URISyntaxException, GeneralSecurityException {
+	public OPIVConfig(Config profCfg) throws IOException, URISyntaxException, GeneralSecurityException {
+		var endpointCfg = profCfg.getConfig("endpoints");
+
 		CONTROLLER_URI = new URI(endpointCfg.getString("controller"));
 		HONEST_OP_URL = new URI(endpointCfg.getString("honest-op"));
 		EVIL_OP_URL = new URI(endpointCfg.getString("evil-op"));
@@ -103,10 +106,9 @@ public class OPIVConfig {
 		this.keyStore.load(ksStream, keystorePass.toCharArray());
 
 		// use config file to set these parameters
-		String acceptTestIds = System.getenv("OPIV_ALLOW_CUSTOM_TEST_ID");
-		allowCustomTestIDs = Boolean.valueOf(acceptTestIds) ;
-
-		allowTestWithoutRemotePermission = Boolean.parseBoolean(System.getenv("OPIV_TARGET_GRANT_NOT_NEEDED"));
+		allowCustomTestIDs = profCfg.getBoolean("allow-custom-test-ids");
+		allowTestWithoutRemotePermission = profCfg.getBoolean("skip-target-grant");
+		disableTlsTrustCheck = profCfg.getBoolean("disable-tls-trust-check");
 	}
 
 
@@ -183,6 +185,10 @@ public class OPIVConfig {
 
 	public boolean isGrantNotNeededOverride() {
 		return allowTestWithoutRemotePermission;
+	}
+
+	public boolean isDisableTlsTrustCheck() {
+		return disableTlsTrustCheck;
 	}
 
 	public KeyStore.PrivateKeyEntry getHonestOPSigningEntry() {	return getSigningEntry(honestSigAlias);	}

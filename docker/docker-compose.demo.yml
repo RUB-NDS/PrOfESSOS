@@ -39,6 +39,8 @@ services:
         EVIL_RP_HOST: evilrp.example.org
         TEST_RP_HOST: testrp.example.org
         TEST_OP_HOST: testop.example.org
+        #SKIP_TARGET_GRANT: "true"
+        #DISABLE_TLS_TRUST_CHECK: "true"
 
   test-rp:
     build:
