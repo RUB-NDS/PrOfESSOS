@@ -51,6 +51,8 @@ public class OPIVConfig {
 	private String keystorePass = "pass";
 	private final KeyStore keyStore;
 
+	private final boolean printTestIdPath;
+
 	private final boolean allowCustomTestIDs;
 	private final boolean allowTestWithoutRemotePermission;
 	private final boolean disableTlsTrustCheck;
@@ -105,7 +107,8 @@ public class OPIVConfig {
 		this.keyStore = KeyStore.getInstance("JKS");
 		this.keyStore.load(ksStream, keystorePass.toCharArray());
 
-		// use config file to set these parameters
+		printTestIdPath = profCfg.getBoolean("print-testid-path");
+
 		allowCustomTestIDs = profCfg.getBoolean("allow-custom-test-ids");
 		allowTestWithoutRemotePermission = profCfg.getBoolean("skip-target-grant");
 		disableTlsTrustCheck = profCfg.getBoolean("disable-tls-trust-check");
@@ -177,6 +180,10 @@ public class OPIVConfig {
 
 	public Optional<URI> getTestRPUri() {
 		return TEST_RP_URL;
+	}
+
+	public boolean isPrintTestIdPath() {
+		return printTestIdPath;
 	}
 
 	public boolean isAllowCustomTestIDs() {

@@ -41,6 +41,7 @@ services:
         TEST_OP_HOST: testop.example.org
         #SKIP_TARGET_GRANT: "true"
         #DISABLE_TLS_TRUST_CHECK: "true"
+        #PRINT_TEST_ID_PATH: "false"
 
   test-rp:
     build:

@@ -47,10 +47,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 public class TestStepLogger {
 
+	private final String testIdPath;
 	private final TestStepResultType stepResult;
 	protected final DatatypeFactory df;
 
-	public TestStepLogger(TestStepResultType stepResult) {
+	public TestStepLogger(TestStepResultType stepResult, String testIdPath) {
+		this.testIdPath = testIdPath;
 		try {
 			this.stepResult = stepResult;
 			this.df = DatatypeFactory.newInstance();
@@ -117,11 +119,24 @@ public class TestStepLogger {
 		e.setCodeBlock(entry);
 		log(e);
 	}
-	
+
+	private String removeDispatchPrefix(String reqUri) {
+		String prefix = "/dispatch" + testIdPath;
+		if (reqUri.startsWith(prefix)) {
+			reqUri = reqUri.substring(prefix.length());
+			// check that path starts with a /
+			if (! reqUri.startsWith("/")) {
+				reqUri = "/" + reqUri;
+			}
+		}
+
+		return reqUri;
+	}
+
 	public void logHttpRequest(@Nonnull HttpServletRequest req, @Nullable String body) {
 		HttpRequestEntryType entry = new HttpRequestEntryType();
 
-		String reqLine = req.getMethod() + " " + req.getRequestURI();
+		String reqLine = req.getMethod() + " " + removeDispatchPrefix(req.getRequestURI());
 		if (req.getQueryString() != null) {
 			reqLine += "?" + req.getQueryString();
 		}
@@ -144,7 +159,7 @@ public class TestStepLogger {
 	public void logHttpRequest(@Nonnull HTTPRequest req, @Nullable String body ){
 				HttpRequestEntryType entry = new HttpRequestEntryType();
 
-		String reqLine = req.getMethod() + " " + req.getURL().getPath();
+		String reqLine = req.getMethod() + " " + removeDispatchPrefix(req.getURL().getPath());
 		// nimbus SDK HttpRequest getQuery() returns the body for POST or the QueryString for GET, see:
 		// https://static.javadoc.io/com.nimbusds/oauth2-oidc-sdk/5.8/com/nimbusds/oauth2/sdk/http/HTTPRequest.html#getQuery--
 		if (req.getQuery() != null) {

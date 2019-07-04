@@ -126,7 +126,8 @@ public class TestRunner {
 			throws ImplementationLoadException {
 		BrowserSimulator simulator = null;
 		TestStepType stepDef = result.getStepReference();
-		TestStepLogger logger = new TestStepLogger(result);
+		String testIdPath = profCfg.getEndpointCfg().isPrintTestIdPath() ? "" : "/" + testId;
+		TestStepLogger logger = new TestStepLogger(result, testIdPath);
 
 		try {
 			// setup the test
