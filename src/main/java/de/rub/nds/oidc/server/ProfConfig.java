@@ -50,4 +50,8 @@ public class ProfConfig {
 		return profCfg.getInt("session-lifetime");
 	}
 
+	public int getTestIdLength() {
+		return profCfg.getInt("test-id-length");
+	}
+
 }

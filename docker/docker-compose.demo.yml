@@ -42,6 +42,7 @@ services:
         #SKIP_TARGET_GRANT: "true"
         #DISABLE_TLS_TRUST_CHECK: "true"
         #PRINT_TEST_ID_PATH: "false"
+        #TEST_ID_LENGTH: 8
 
   test-rp:
     build:

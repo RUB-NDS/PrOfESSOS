@@ -16,12 +16,13 @@
 
 package de.rub.nds.oidc.utils;
 
+import de.rub.nds.oidc.server.ProfConfig;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
-import javax.annotation.Nullable;
 import javax.enterprise.context.ApplicationScoped;
-import javax.validation.constraints.Null;
+import javax.inject.Inject;
+
 
 /**
  *
@@ -31,6 +32,9 @@ import javax.validation.constraints.Null;
 public class ValueGenerator {
 
 	private final SecureRandom rand;
+
+	@Inject
+	ProfConfig cfg;
 
 	public ValueGenerator() throws NoSuchAlgorithmException {
 		rand = new SecureRandom();
@@ -42,7 +46,7 @@ public class ValueGenerator {
 //		rand.nextBytes(data);
 //		String testId = Base64.getUrlEncoder().withoutPadding().encodeToString(data);
 //		return testId;
-		return generateRandString(16);
+		return generateRandString(cfg.getTestIdLength());
 	}
 
 	public String generateRandString(int length) {

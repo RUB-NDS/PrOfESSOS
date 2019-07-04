@@ -58,6 +58,7 @@ ARG TEST_OP_HOST
 ARG SKIP_TARGET_GRANT="false"
 ARG DISABLE_TLS_TRUST_CHECK="false"
 ARG PRINT_TEST_ID_PATH="true"
+ARG TEST_ID_LENGTH=8
 
 COPY ./config/professos.conf /opt/jboss/professos-template.conf
 RUN perl -p -e 's/\$\{(\w+)\}/(exists $ENV{$1}?$ENV{$1}:"missing variable $1")/eg' < /opt/jboss/professos-template.conf > /opt/jboss/professos.conf
