@@ -51,6 +51,7 @@ public interface RPImplementation {
 	void setBaseUri(URI baseUri);
 
 	void setRPType(RPType type);
+	RPType getRPType();
 
 	void setContext(Map<String, Object> suiteCtx, Map<String, Object> stepCtx);
 

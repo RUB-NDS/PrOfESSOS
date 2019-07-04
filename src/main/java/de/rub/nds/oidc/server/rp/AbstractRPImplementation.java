@@ -44,10 +44,12 @@ import de.rub.nds.oidc.server.InvalidConfigurationException;
 import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.server.TestNotApplicableException;
 import de.rub.nds.oidc.server.TestStepParameterConstants;
+import de.rub.nds.oidc.server.op.OPType;
 import de.rub.nds.oidc.test_model.ParameterType;
 import de.rub.nds.oidc.test_model.RPConfigType;
 import de.rub.nds.oidc.test_model.TestOPConfigType;
 import de.rub.nds.oidc.utils.InstanceParameters;
+import de.rub.nds.oidc.utils.LogUtils;
 import de.rub.nds.oidc.utils.UnsafeOIDCProviderMetadata;
 import de.rub.nds.oidc.utils.UnsafeTLSHelper;
 import net.minidev.json.JSONObject;
@@ -116,6 +118,11 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 	@Override
 	public void setRPType(RPType type) {
 		this.type = type;
+	}
+
+	@Override
+	public RPType getRPType() {
+		return type;
 	}
 
 	@Override
@@ -420,6 +427,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		);
 
 		HTTPRequest regHttpRequest = regRequest.toHTTPRequest();
+		LogUtils.addSenderHeader(regHttpRequest, getRPType());
 		regHttpRequest.setHostnameVerifier(tlsHelper.getTrustAllHostnameVerifier());
 		regHttpRequest.setSSLSocketFactory(tlsHelper.getTrustAllSocketFactory());
 		HTTPResponse response = regHttpRequest.send();
@@ -665,6 +673,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		OIDCProviderConfigurationRequest request = new OIDCProviderConfigurationRequest(issuer);
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
+		LogUtils.addSenderHeader(httpRequest, getRPType());
 		httpRequest.setSSLSocketFactory(tlsHelper.getTrustAllSocketFactory());
 		httpRequest.setHostnameVerifier(tlsHelper.getTrustAllHostnameVerifier());
 		try {
@@ -723,6 +732,7 @@ public abstract class AbstractRPImplementation implements RPImplementation {
 		httpRes.setContentType("text/html; charset=UTF-8");
 		httpRes.setHeader("Cache-Control", "no-cache, no-store");
 		httpRes.setHeader("Pragma", "no-cache");
+		LogUtils.addSenderHeader(resp, getRPType());
 		httpRes.setContent(sb.toString());
 
 		ServletUtils.applyHTTPResponse(httpRes, resp);

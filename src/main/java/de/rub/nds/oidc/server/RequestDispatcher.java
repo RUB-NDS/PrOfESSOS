@@ -18,8 +18,11 @@ package de.rub.nds.oidc.server;
 
 import de.rub.nds.oidc.server.op.OPImplementation;
 import de.rub.nds.oidc.server.op.OPInstance;
+import de.rub.nds.oidc.server.op.OPType;
 import de.rub.nds.oidc.server.rp.RPImplementation;
 import de.rub.nds.oidc.server.rp.RPInstance;
+import de.rub.nds.oidc.server.rp.RPType;
+import de.rub.nds.oidc.utils.LogUtils;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -106,6 +109,9 @@ public class RequestDispatcher extends HttpServlet {
 			impl.setBaseUri(path.getDispatchUriAndTestId());
 			impl.setOPIVConfig(opivCfg);
 
+			OPType type = impl.getOPType();
+			LogUtils.addSenderHeader(resp, type);
+
 			try {
 				if (resource.startsWith(OPImplementation.WEBFINGER_PATH)) {
 					impl.webfinger(path, req, resp);
@@ -149,6 +155,9 @@ public class RequestDispatcher extends HttpServlet {
 			RPImplementation impl = inst.getInst().getImpl();
 			impl.setBaseUri(path.getDispatchUriAndTestId());
 			impl.setOPIVConfig(opivCfg);
+
+			RPType type = impl.getRPType();
+			LogUtils.addSenderHeader(resp, type);
 
 			try {
 				if (resource.startsWith(RPImplementation.REDIRECT_PATH)) {

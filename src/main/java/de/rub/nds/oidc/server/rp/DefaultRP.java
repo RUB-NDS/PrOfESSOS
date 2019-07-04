@@ -38,6 +38,7 @@ import java.util.concurrent.TimeoutException;
 
 import static de.rub.nds.oidc.server.rp.RPContextConstants.*;
 import static de.rub.nds.oidc.server.rp.RPParameterConstants.*;
+import de.rub.nds.oidc.utils.LogUtils;
 
 public class DefaultRP extends AbstractRPImplementation {
 
@@ -277,6 +278,7 @@ public class DefaultRP extends AbstractRPImplementation {
 				codeGrant);
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
+		LogUtils.addSenderHeader(httpRequest, getRPType());
 		httpRequest.setSSLSocketFactory(tlsHelper.getTrustAllSocketFactory());
 		httpRequest.setHostnameVerifier(tlsHelper.getTrustAllHostnameVerifier());
 
@@ -368,6 +370,7 @@ public class DefaultRP extends AbstractRPImplementation {
 		BearerAccessToken bat = (BearerAccessToken) at;
 
 		HTTPRequest httpRequest = new UserInfoRequest(opMetaData.getUserInfoEndpointURI(), bat).toHTTPRequest();
+		LogUtils.addSenderHeader(httpRequest, getRPType());
 		httpRequest.setSSLSocketFactory(tlsHelper.getTrustAllSocketFactory());
 		httpRequest.setHostnameVerifier(tlsHelper.getTrustAllHostnameVerifier());
 

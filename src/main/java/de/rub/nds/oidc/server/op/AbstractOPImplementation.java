@@ -121,6 +121,11 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 	@Override
+	public OPType getOPType() {
+		return type;
+	}
+
+	@Override
 	public void setContext(Map<String, Object> suiteCtx, Map<String, Object> stepCtx) {
 		this.suiteCtx = suiteCtx;
 		this.stepCtx = stepCtx;
@@ -137,7 +142,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		ServletUtils.applyHTTPResponse(httpResp, resp);
 
 		resp.flushBuffer();
-		logger.log("Returning " + typeName + " Response.");
+		logger.log(type + "OP is returning " + typeName + " Response.");
 		logger.logHttpResponse(resp, httpResp.getContent());
 	}
 
@@ -146,7 +151,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		ServletUtils.applyHTTPResponse(httpResp, resp);
 
 		resp.flushBuffer();
-		logger.log("Returning " + typeName + " Error Response.");
+		logger.log(type + "OP is returning " + typeName + " Error Response.");
 		logger.logHttpResponse(resp, httpResp.getContent());
 	}
 

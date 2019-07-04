@@ -56,6 +56,7 @@ public interface OPImplementation {
 	void setBaseUri(URI baseUri);
 
 	void setOPType(OPType type);
+	OPType getOPType();
 
 	void setContext(Map<String, Object> suiteCtx, Map<String, Object> stepCtx);
 

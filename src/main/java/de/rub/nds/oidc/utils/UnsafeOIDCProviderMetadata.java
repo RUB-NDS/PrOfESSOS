@@ -1245,6 +1245,7 @@ public class UnsafeOIDCProviderMetadata extends UnsafeAuthorizationServerMetadat
 		}
 
 		HTTPRequest httpRequest = new HTTPRequest(HTTPRequest.Method.GET, configURL);
+		// TODO: add sender header with LogUtils.addSenderHeader
 		httpRequest.setConnectTimeout(connectTimeout);
 		httpRequest.setReadTimeout(readTimeout);
 
