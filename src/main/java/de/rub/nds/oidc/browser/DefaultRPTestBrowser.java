@@ -33,16 +33,16 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 	public TestStepResult run() throws InterruptedException {
 		String startUrl = rpConfig.getUrlClientTarget();
 		logger.log(String.format("Opening browser with URL '%s'.", startUrl));
-		driver.get(startUrl);
-		driver.executeScript(getFormSubmitDelayScript());
+		driver1.get(startUrl);
+		driver1.executeScript(getFormSubmitDelayScript());
 
 		// execute JS to start authentication
 		String submitScriptRaw = rpConfig.getSeleniumScript();
 		String submitScript = te.eval(createRPContext(), submitScriptRaw);
 
 		// wait until a new html element appears, indicating a page load
-		waitForDocumentReadyAndJsReady(() -> {
-			driver.executeScript(submitScript);
+		waitForDocumentReadyAndJsReady1(() -> {
+			driver1.executeScript(submitScript);
 			// capture state where the text is entered
 			logger.log("Webfinger identity entered into the login form.");
 			return null;
@@ -53,7 +53,7 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 
 		// take a screenshot again to show the finished site
 		logger.log("Finished login procedure, please check if it succeeded and correct the success URL and the user needle accordingly.");
-		logScreenshot();
+		logScreenshot1();
 
 		// run condition check code
 		TestStepResult checkResult = checkConditionAfterLogin();
@@ -63,7 +63,7 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 		}
 
 		// save the location of the finished state
-		boolean urlReached = rpConfig.getFinalValidUrl().equals(driver.getCurrentUrl());
+		boolean urlReached = rpConfig.getFinalValidUrl().equals(driver1.getCurrentUrl());
 		boolean forceSuccessUrlFails = params.getBool(OPParameterConstants.FORCE_SUCCESS_URL_FAILS);
 		if (forceSuccessUrlFails && urlReached) {
 			logger.log("Target URL reached. Assuming login is successful.");
@@ -87,14 +87,14 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 		String profileUrl = rpConfig.getProfileUrl();
 		if (profileUrl != null && !profileUrl.isEmpty()) {
 			logger.log("Loading profile URL page.");
-			waitForDocumentReadyAndJsReady(() -> {
-				driver.get(rpConfig.getProfileUrl());
+			waitForDocumentReadyAndJsReady1(() -> {
+				driver1.get(rpConfig.getProfileUrl());
 				return null;
 			});
 			// wait a bit more in case we have an angular app or some other JS heavy application
 			waitMillis(1000);
 			logger.log("Loaded profile URL page.");
-			logScreenshot();
+			logScreenshot1();
 		}
 
 		TestStepResult userInfoCheckResult = checkConditionOnFinalPage();
@@ -124,7 +124,7 @@ public class DefaultRPTestBrowser extends BrowserSimulator {
 		searchTerm = searchTerm.replace("\"", "\\\""); // escape quotation marks
 		String xpath = String.format("//*[contains(., \"%s\")]", searchTerm);
 		// search string
-		boolean found = withSearchTimeout(() -> !driver.findElements(By.xpath(xpath)).isEmpty());
+		boolean found = withSearchTimeout1(() -> !driver1.findElements(By.xpath(xpath)).isEmpty());
 		return found;
 	}
 

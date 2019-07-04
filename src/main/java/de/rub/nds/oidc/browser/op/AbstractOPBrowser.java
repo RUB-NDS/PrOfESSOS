@@ -37,7 +37,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 		blockRP = new CompletableFuture();
 		stepCtx.put(RPContextConstants.BLOCK_RP_FOR_BROWSER_FUTURE, blockRP);
 
-		blockAndResult = new CompletableFuture<TestStepResult>();
+		blockAndResult = new CompletableFuture<>();
 		stepCtx.put(RPContextConstants.BLOCK_BROWSER_AND_TEST_RESULT, blockAndResult);
 	}
 
@@ -129,10 +129,10 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 		// start authentication
 		String authnReq = getAuthnReqString(rpType);
 		logger.logCodeBlock("Authentication Request URL:", authnReq);
-		driver.get(authnReq);
+		driver1.get(authnReq);
 
 		// delay form submissions to allow capturing screenshots
-		driver.executeScript(getFormSubmitDelayScript());
+		driver1.executeScript(getFormSubmitDelayScript());
 		waitMillis(500);
 
 		// prepare scripts for login and consent page
@@ -140,8 +140,8 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 //		logger.log(String.format("Using Login script:%n %s", submitScript));
 
 		try {
-			waitForDocumentReadyAndJsReady(() -> {
-				driver.executeScript(submitScript);
+			waitForDocumentReadyAndJsReady1(() -> {
+				driver1.executeScript(submitScript);
 				// capture state where the text is entered
 //				logScreenshot();
 				logger.log("Login Credentials entered");
@@ -149,13 +149,13 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 			});
 
 			// do not run consentScript if we have already been redirected back to RP
-			String location = driver.getCurrentUrl();
+			String location = driver1.getCurrentUrl();
 			if (consentRequired(location)) {
-				driver.executeScript(getFormSubmitDelayScript());
+				driver1.executeScript(getFormSubmitDelayScript());
 				logger.log("Running Consent-Script to authorize the client");
 
-				waitForDocumentReadyAndJsReady(() -> {
-					driver.executeScript(consentScript);
+				waitForDocumentReadyAndJsReady1(() -> {
+					driver1.executeScript(consentScript);
 //					logScreenshot();
 					return null;
 				});
@@ -163,7 +163,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 		} catch (Exception e) {
 			// script execution failed, likely received an error response earlier due to wrong redirect uri
 			logger.log("Script execution failed, please check manually");
-			logScreenshot();
+			logScreenshot1();
 
 			if (params.getBool(RPParameterConstants.SCRIPT_EXEC_EXCEPTION_FAILS_TEST)) {
 				return TestStepResult.FAIL;
@@ -176,7 +176,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 
 	protected void confirmBrowserFinished() {
 		// store URL to make sure RP can access URI fragments (implicit/hybrid)
-		finalUrl = driver.getCurrentUrl();
+		finalUrl = driver1.getCurrentUrl();
 		stepCtx.put(RPContextConstants.LAST_BROWSER_URL, finalUrl);
 		logger.logCodeBlock("Final URL as seen in Browser:", finalUrl);
 		// confirm submission of redirect uri

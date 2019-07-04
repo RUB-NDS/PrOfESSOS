@@ -33,14 +33,14 @@ public class SessionOverwritingRPBrowser extends DefaultRPTestBrowser {
 			String startUrl = rpConfig.getUrlClientTarget();
 			logger.logCodeBlock("Opening browser with URL :", startUrl);
 
-			waitForPageLoad(() -> {
-				driver.get(startUrl);
+			waitForPageLoad1(() -> {
+				driver1.get(startUrl);
 				return null;
 			});
 //			waitMillis(1000);
 
 			// store session cookies
-			Set<Cookie> cookies = driver.manage().getCookies();
+			Set<Cookie> cookies = driver1.manage().getCookies();
 
 			// execute JS to start authentication
 			stepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, firstOpUrl);
@@ -81,8 +81,8 @@ public class SessionOverwritingRPBrowser extends DefaultRPTestBrowser {
 			// start first authentication in "foreground" thread
 			logger.log("Browser starts authentication at first OP.");
 
-			waitForPageLoad(() -> {
-				driver.executeScript(submitScript);
+			waitForPageLoad1(() -> {
+				driver1.executeScript(submitScript);
 				return null;}
 				);
 //            waitMillis(1000);
@@ -91,18 +91,18 @@ public class SessionOverwritingRPBrowser extends DefaultRPTestBrowser {
 			// wait for result of the test
 			TestStepResult result = blockAndResult.get(15, TimeUnit.SECONDS);
 			logger.log("Authentication result:");
-			logScreenshot();
-			logger.logCodeBlock("Final URL as seen in Browser: ", driver.getCurrentUrl());
+			logScreenshot1();
+			logger.logCodeBlock("Final URL as seen in Browser: ", driver1.getCurrentUrl());
 			return result;
 		} catch (TimeoutException ex) {
 			logger.log("Timeout while waiting for token request, assuming test passed.");
-			logScreenshot();
-			logger.logCodeBlock("Final URL as seen in Browser: ", driver.getCurrentUrl());
+			logScreenshot1();
+			logger.logCodeBlock("Final URL as seen in Browser: ", driver1.getCurrentUrl());
 			return TestStepResult.PASS;
 		} catch (ExecutionException  ex) {
 			logger.log("Waiting for Honest OP or test result gave an error.", ex);
-			logScreenshot();
-			logger.logCodeBlock("Final URL as seen in Browser: ", driver.getCurrentUrl());
+			logScreenshot1();
+			logger.logCodeBlock("Final URL as seen in Browser: ", driver1.getCurrentUrl());
 			return TestStepResult.UNDETERMINED;
 		} catch (InterruptedException ex) {
 			throw new RuntimeException("Test interrupted.", ex);

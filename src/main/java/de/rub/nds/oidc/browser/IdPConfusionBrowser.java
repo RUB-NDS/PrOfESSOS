@@ -41,17 +41,17 @@ public class IdPConfusionBrowser extends DefaultRPTestBrowser {
 
 			// open clients login page
 			String startUrl = rpConfig.getUrlClientTarget();
-			logger.log(String.format("Opening browser with URL '%s'.", startUrl));
-			driver.get(startUrl);
-			driver.executeScript(getFormSubmitDelayScript());
+			logger.log(String.format("Opening attacker browser with URL '%s'.", startUrl));
+			driver2.get(startUrl);
+			driver2.executeScript(getFormSubmitDelayScript());
 
 			// execute JS to start authentication
 			String honestInputOpUrl = (String) stepCtx.get(OPParameterConstants.BROWSER_INPUT_HONEST_OP_URL);
 			stepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, honestInputOpUrl);
 			String submitScriptRaw = rpConfig.getSeleniumScript();
 			String submitScript = te.eval(createRPContext(), submitScriptRaw);
-			logger.log("Start authentication for Honest OP.");
-			driver.executeScript(submitScript);
+			logger.log("Start authentication with attacker browser for Honest OP.");
+			driver2.executeScript(submitScript);
 			// wait for honest op to answer
 			blockUntilHonest.get(60, TimeUnit.SECONDS);
 
@@ -60,20 +60,20 @@ public class IdPConfusionBrowser extends DefaultRPTestBrowser {
 			stepCtx.put(OPParameterConstants.BROWSER_INPUT_OP_URL, evilInputOpUrl);
 
 			// now request evil op
-			logger.log(String.format("Opening browser with URL '%s'.", startUrl));
-			driver.get(startUrl);
-			driver.executeScript(getFormSubmitDelayScript());
+			logger.log(String.format("Opening victim browser with URL '%s'.", startUrl));
+			driver1.get(startUrl);
+			driver1.executeScript(getFormSubmitDelayScript());
 
 			// execute JS to start authentication
 			submitScriptRaw = rpConfig.getSeleniumScript();
 			submitScript = te.eval(createRPContext(), submitScriptRaw);
 			logger.log("Start authentication for Evil OP.");
-			driver.executeScript(submitScript);
+			driver1.executeScript(submitScript);
 			// wait for result of the test
 			return blockAndResult.get(60, TimeUnit.SECONDS);
 		} catch (ExecutionException | TimeoutException ex) {
 			logger.log("Waiting for Honest OP  or test result gave an error.", ex);
-			logScreenshot();
+			logScreenshot1();
 			return TestStepResult.UNDETERMINED;
 		} catch (InterruptedException ex) {
 			throw new RuntimeException("Test interrupted.", ex);

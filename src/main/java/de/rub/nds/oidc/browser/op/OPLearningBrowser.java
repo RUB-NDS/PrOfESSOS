@@ -27,10 +27,10 @@ public class OPLearningBrowser extends MultiRpMultiUserAuthRunner {
 
 		// run login script
 		logger.logCodeBlock("Authentication Request, opening browser with URL:", authnReq);
-		driver.get(authnReq);
+		driver1.get(authnReq);
 		// delay form submissions to allow for taking screenshots
 		// using selenium (after executeScript() returned)
-		driver.executeScript(getFormSubmitDelayScript());
+		driver1.executeScript(getFormSubmitDelayScript());
 		waitMillis(500);
 
 		// prepare scripts for login and consent page
@@ -38,46 +38,46 @@ public class OPLearningBrowser extends MultiRpMultiUserAuthRunner {
 		try {
 			logger.logCodeBlock("Using Login script:", submitScript);
 
-			waitForDocumentReadyAndJsReady(() -> {
-				driver.executeScript(submitScript);
+			waitForDocumentReadyAndJsReady1(() -> {
+				driver1.executeScript(submitScript);
 				// capture state where the text is entered
 				logger.log("Login Credentials entered");
-				logScreenshot();
+				logScreenshot1();
 				return null;
 			});
 		} catch (Exception e) {
 			logger.log("Execution of login script failed", e);
-			logScreenshot();
+			logScreenshot1();
 
 			return TestStepResult.UNDETERMINED;
 		}
 		logger.log("HTML element found in Browser.");
 
 		// don't run consentScript if we have already been redirected back to RP
-		String location = driver.getCurrentUrl();
+		String location = driver1.getCurrentUrl();
 		if (location.startsWith(honestRedirect.toString()) || location.startsWith(evilRedirect.toString())) {
 			logger.log("No consent page encountered in browser");
 		} else {
 			try {
-				driver.executeScript(getFormSubmitDelayScript());
+				driver1.executeScript(getFormSubmitDelayScript());
 				logger.logCodeBlock("Using Consent script:", consentScript);
 
-				waitForPageLoad(() -> {
-					driver.executeScript(consentScript);
-					logScreenshot();
+				waitForPageLoad1(() -> {
+					driver1.executeScript(consentScript);
+					logScreenshot1();
 					logger.log("ConsentScript executed, client authorized.");
 					return null;
 				});
 			} catch (Exception e) {
 				logger.log("Execution of consent script failed.", e);
-				logScreenshot();
+				logScreenshot1();
 
 				return TestStepResult.UNDETERMINED;
 			}
 		}
 		
 		confirmBrowserFinished();
-		logScreenshot();
+		logScreenshot1();
 
 		try {
 			return blockAndResult.get(10, TimeUnit.SECONDS);

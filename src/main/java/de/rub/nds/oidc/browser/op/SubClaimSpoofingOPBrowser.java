@@ -84,7 +84,7 @@ public class SubClaimSpoofingOPBrowser extends AbstractOPBrowser {
 			throw new InterruptedException("Found invalid Authentication Request in stepCtx");
 		}
 		runUserAuth(RPType.HONEST);
-		driver.manage().deleteAllCookies();
+		driver1.manage().deleteAllCookies();
 
 		return getUserSubject(isUser1);
 	}

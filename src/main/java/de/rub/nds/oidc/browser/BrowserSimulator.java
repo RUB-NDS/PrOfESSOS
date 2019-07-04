@@ -50,7 +50,8 @@ public abstract class BrowserSimulator {
 
 	protected Config seleniumCfg;
 
-	protected RemoteWebDriver driver;
+	protected RemoteWebDriver driver1;
+	protected RemoteWebDriver driver2;
 
 	protected final long NORMAL_WAIT_TIMEOUT = 15;
 	protected final long MEDIUM_WAIT_TIMEOUT = 10;
@@ -68,7 +69,8 @@ public abstract class BrowserSimulator {
 
 	private String formSubmitDelayScript;
 
-	private JsWaiter jsWaiter;
+	private JsWaiter jsWaiter1;
+	private JsWaiter jsWaiter2;
 
 
 	public void init(Config seleniumCfg) {
@@ -81,9 +83,14 @@ public abstract class BrowserSimulator {
 		if (quit) {
 			quit();
 		}
-		driver = getDriverInstance();
-		jsWaiter = new JsWaiter();
-		jsWaiter.setJsWaitDriver(driver, MEDIUM_WAIT_TIMEOUT);
+		driver1 = getDriverInstance();
+		driver2 = getDriverInstance();
+		jsWaiter1 = new JsWaiter();
+		jsWaiter1.setJsWaitDriver(driver1, MEDIUM_WAIT_TIMEOUT);
+
+		driver2 = getDriverInstance();
+		jsWaiter2 = new JsWaiter();
+		jsWaiter2.setJsWaitDriver(driver2, MEDIUM_WAIT_TIMEOUT);
 	}
 
 	protected RemoteWebDriver getDriverInstance() {
@@ -100,11 +107,10 @@ public abstract class BrowserSimulator {
 			chromeOptions.setBinary(seleniumCfg.getString("chrome_browser_path"));
 		}
 
-		chromeOptions.addArguments("headless", "no-sandbox", "disable-gpu", "window-size=1024x768",
-				"disable-local-storage");
+		chromeOptions.addArguments("incognito", "headless", "no-sandbox", "disable-gpu", "window-size=1024x768");
 		// disable certificate validation to prevent chrome from getting stuck on cert errors
 		// requires chrome >= 65 to work (ignored otherwise)
-		chromeOptions.setCapability("acceptInsecureCerts", true);
+		chromeOptions.setAcceptInsecureCerts(true);
 
 		RemoteWebDriver d = new ChromeDriver(chromeOptions);
 
@@ -145,11 +151,6 @@ public abstract class BrowserSimulator {
 		this.params = new InstanceParameters(params);
 	}
 
-	public void setJsWaiter(JsWaiter waiter) {
-		this.jsWaiter = waiter;
-		jsWaiter.setJsWaitDriver(driver, MEDIUM_WAIT_TIMEOUT);
-	}
-
 	protected HashMap<String, Object> createRPContext() {
 		HashMap<String, Object> ctx = createTemplateContext();
 		ctx.put("rp", rpConfig);
@@ -182,11 +183,19 @@ public abstract class BrowserSimulator {
 	public abstract TestStepResult run() throws InterruptedException;
 
 	public void quit() {
-		driver.quit();
+		driver1.quit();
+		driver2.quit();
 	}
 
 	// This does not work in SPA scenarios where only the <html> element's content is changed
-	protected final <T> T waitForPageLoad(Func<T> func, long timeout) {
+	protected final <T> T waitForPageLoad1(Func<T> func, long timeout) {
+		return waitForPageLoad(func, timeout, driver1);
+	}
+	protected final <T> T waitForPageLoad2(Func<T> func, long timeout) {
+		return waitForPageLoad(func, timeout, driver2);
+	}
+
+	private <T> T waitForPageLoad(Func<T> func, long timeout, RemoteWebDriver driver) {
 		RemoteWebElement oldHtml = (RemoteWebElement) driver.findElement(By.tagName("html"));
 
 		T result = func.call();
@@ -199,14 +208,24 @@ public abstract class BrowserSimulator {
 		return result;
 	}
 
-	protected final <T> T waitForPageLoad(Func<T> func) {
-		return waitForPageLoad(func, MEDIUM_WAIT_TIMEOUT);
+	protected final <T> T waitForPageLoad1(Func<T> func) {
+		return waitForPageLoad(func, MEDIUM_WAIT_TIMEOUT, driver1);
+	}
+	protected final <T> T waitForPageLoad2(Func<T> func) {
+		return waitForPageLoad(func, MEDIUM_WAIT_TIMEOUT, driver2);
 	}
 
-	protected final <T> T waitForDocumentReadyAndJsReady(Func<T> func) {
+	protected final <T> T waitForDocumentReadyAndJsReady1(Func<T> func) {
+		return waitForDocumentReadyAndJsReady(func, driver1, jsWaiter1);
+	}
+	protected final <T> T waitForDocumentReadyAndJsReady2(Func<T> func) {
+		return waitForDocumentReadyAndJsReady(func, driver2, jsWaiter2);
+	}
+
+	private <T> T waitForDocumentReadyAndJsReady(Func<T> func, RemoteWebDriver driver, JsWaiter jsWaiter) {
 		// first, try if a new <html> element can be detected within 3 seconds
 		try {
-			T result = waitForPageLoad(func, 3);
+			T result = waitForPageLoad(func, 3, driver);
 		} catch (org.openqa.selenium.TimeoutException e) {
 			// ignore
 //			logger.log("debug: timeout during waitForPageLoad");
@@ -218,7 +237,14 @@ public abstract class BrowserSimulator {
 		return null;
 	}
 
-	protected void waitForDocumentReady() {
+	protected void waitForDocumentReady1() {
+		waitForDocumentReady(driver1);
+	}
+	protected void waitForDocumentReady2() {
+		waitForDocumentReady(driver2);
+	}
+
+	protected void waitForDocumentReady(RemoteWebDriver driver) {
 		WebDriverWait wait = new WebDriverWait(driver, MEDIUM_WAIT_TIMEOUT);
 		wait.until((WebDriver d) -> driver.executeScript("return document.readyState").equals("complete"));
 	}
@@ -227,12 +253,26 @@ public abstract class BrowserSimulator {
 		Sleeper.SYSTEM_SLEEPER.sleep(new Duration(timeout, TimeUnit.MILLISECONDS));
 	}
 
-	protected void logScreenshot() {
+	protected void logScreenshot1() {
+		logScreenshot(driver1);
+	}
+	protected void logScreenshot2() {
+		logScreenshot(driver2);
+	}
+
+	protected void logScreenshot(RemoteWebDriver driver) {
 		byte[] screenshot = driver.getScreenshotAs(OutputType.BYTES);
 		logger.log(screenshot, "image/png");
 	}
 
-	protected <T> T withSearchTimeout(Func<T> fun) {
+	protected <T> T withSearchTimeout1(Func<T> fun) {
+		return withSearchTimeout(fun, driver1);
+	}
+	protected <T> T withSearchTimeout2(Func<T> fun) {
+		return withSearchTimeout(fun, driver2);
+	}
+
+	protected <T> T withSearchTimeout(Func<T> fun, RemoteWebDriver driver) {
 		try {
 			driver.manage().timeouts().implicitlyWait(SEARCH_WAIT_TIMEOUT, TimeUnit.SECONDS);
 			return fun.call();

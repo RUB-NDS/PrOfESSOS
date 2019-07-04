@@ -63,8 +63,8 @@ public class RPLearningBrowser extends BrowserSimulator {
 
 		String startUrl = rpConfig.getUrlClientTarget();
 		logger.log(String.format("Opening browser with URL '%s'.", startUrl));
-		driver.get(startUrl);
-		driver.executeScript(getFormSubmitDelayScript());
+		driver1.get(startUrl);
+		driver1.executeScript(getFormSubmitDelayScript());
 
 //		logScreenshot();
 
@@ -90,7 +90,7 @@ public class RPLearningBrowser extends BrowserSimulator {
 				logger.log("Trying to find login form on the target url.");
 				logger.log(xpath);
 
-				List<WebElement> inputs = driver.findElements(By.xpath(xpath));
+				List<WebElement> inputs = driver1.findElements(By.xpath(xpath));
 				// filter out duplicate elements
 				inputs = inputs.stream().distinct().collect(Collectors.toList());
 
@@ -119,14 +119,14 @@ public class RPLearningBrowser extends BrowserSimulator {
 		// execute JS to start authentication
 		String submitScriptRaw = rpConfig.getSeleniumScript();
 		String submitScript = te.eval(createRPContext(), submitScriptRaw);
-		//waitForPageLoad(() -> driver.executeScript(js));
+		//waitForPageLoad(() -> driver1.executeScript(js));
 
 		// wait until a new html element appears, indicating a page load
-		waitForDocumentReadyAndJsReady(() -> {
-			driver.executeScript(submitScript);
+		waitForDocumentReadyAndJsReady1(() -> {
+			driver1.executeScript(submitScript);
 			// capture state where the text is entered
 			logger.log("Webfinger identity entered into the login form.");
-			logScreenshot();
+			logScreenshot1();
 			return null;
 		});
 		logger.log("HTML element found in Browser.");
@@ -134,25 +134,25 @@ public class RPLearningBrowser extends BrowserSimulator {
 		waitMillis(5000);
 
 		// take a screenshot again to show the finished site
-		logger.log("Last URL seen in Browser: " + driver.getCurrentUrl());
+		logger.log("Last URL seen in Browser: " + driver1.getCurrentUrl());
 		logger.log("Finished login procedure, please check if it succeeded and correct the success URL and the user needle accordingly.");
-		logScreenshot();
+		logScreenshot1();
 
 		// save the location of the finished state
-		rpConfig.setFinalValidUrl(driver.getCurrentUrl());
+		rpConfig.setFinalValidUrl(driver1.getCurrentUrl());
 
 		// see if we need to go to another URL
 		String profileUrl = rpConfig.getProfileUrl();
 		if (profileUrl != null && ! profileUrl.isEmpty()) {
 			logger.log("Loading profile URL page.");
-			waitForDocumentReadyAndJsReady(() -> {
-				driver.get(profileUrl);
+			waitForDocumentReadyAndJsReady1(() -> {
+				driver1.get(profileUrl);
 				return null;
 			});
 			// wait a bit more in case we have an angular app or some other JS heavy application
 			waitMillis(400);
 			logger.log("Loaded profile URL page.");
-			logScreenshot();
+			logScreenshot1();
 		}
 
 		//TODO: allow searching for multiple strings on the whole page (e.g., if sub and iss are not contained in the same element)?
@@ -162,7 +162,7 @@ public class RPLearningBrowser extends BrowserSimulator {
 			needle = needle.replace("\"", "\\\""); // escape quotation marks
 			String xpath = String.format("//*[contains(., \"%s\")]", needle);
 			// search string
-			boolean needleFound = withSearchTimeout(() -> ! driver.findElements(By.xpath(xpath)).isEmpty());
+			boolean needleFound = withSearchTimeout1(() -> ! driver1.findElements(By.xpath(xpath)).isEmpty());
 
 			logger.log("User needle search result: needle-found=" + needleFound);
 			return needleFound ? TestStepResult.PASS : TestStepResult.FAIL;

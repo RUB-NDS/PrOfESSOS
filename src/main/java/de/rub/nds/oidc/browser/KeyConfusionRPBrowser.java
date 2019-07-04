@@ -33,8 +33,8 @@ public class KeyConfusionRPBrowser extends DefaultRPTestBrowser {
 		String startUrl = rpConfig.getUrlClientTarget();
 		startOpUrl = startUrl;
 		logger.log(String.format("Opening browser with URL '%s'.", startUrl));
-		driver.get(startUrl);
-		Set<Cookie> cookies = driver.manage().getCookies();
+		driver1.get(startUrl);
+		Set<Cookie> cookies = driver1.manage().getCookies();
 		cookieSet = cookies;
 
 		// execute JS to start authentication at Evil OP
@@ -63,8 +63,8 @@ public class KeyConfusionRPBrowser extends DefaultRPTestBrowser {
 		});
 
 		// start authentication at Evil OP
-		waitForPageLoad(() -> {
-			driver.executeScript(submitScriptEvil);
+		waitForPageLoad1(() -> {
+			driver1.executeScript(submitScriptEvil);
 			return null;
 		});
 
@@ -73,10 +73,10 @@ public class KeyConfusionRPBrowser extends DefaultRPTestBrowser {
 		waitInBackground.join();
 
 		logger.log("Authentication result for Evil OP.");
-		logScreenshot();
+		logScreenshot1();
 
 		// save the location of the finished state
-		boolean urlReached = rpConfig.getFinalValidUrl().equals(driver.getCurrentUrl());
+		boolean urlReached = rpConfig.getFinalValidUrl().equals(driver1.getCurrentUrl());
 		boolean forceSuccessUrlFails = params.getBool(OPParameterConstants.FORCE_SUCCESS_URL_FAILS);
 		if (forceSuccessUrlFails && urlReached) {
 			logger.log("Target URL reached. Assuming login is successful.");

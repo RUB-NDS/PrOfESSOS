@@ -45,7 +45,7 @@ public class OPRumBrowser extends SingleRpSingleUserAuthRunner {
 					initRPLocks();
 					checkUrlOnTimeout = false;
 					stepCtx.put(RPContextConstants.REDIRECT_URI_MANIPULATOR, "trigger for rp");
-					driver.get(url);
+					driver1.get(url);
 					confirmBrowserFinished();
 					return waitForRPResult();
 				}
