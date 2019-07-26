@@ -345,7 +345,7 @@ var OPIV = (function(module) {
 		// TODO: RP verifier specific ???
 		testForm.onsubmit = function() { OPIV.testStep(testDef.Name, container); };
 		var button = document.createElement("button");
-		button.className = "btn btn-default";
+		button.className = "btn btn-primary";
 		button.type = "submit";
 		button.value = "Run Test";
 		button.innerHTML = "Run Test";
@@ -416,7 +416,7 @@ var OPIV = (function(module) {
 
 		hideImgLink.onclick = function() {
 			if (containerToHide.style.display === "none") {
-				containerToHide.style.display = "block";
+				containerToHide.style.display = "";
 				hideImg.src = "img/arrow-down.png";
 			} else {
 				containerToHide.style.display = "none";
@@ -448,6 +448,35 @@ var OPIV = (function(module) {
 		}
 	}
 
+	function formatDate(d) {
+		var month = '' + (d.getMonth() + 1),
+			day = '' + d.getDate(),
+			year = d.getFullYear();
+
+		if (month.length < 2) month = '0' + month;
+		if (day.length < 2) day = '0' + day;
+
+		return [year, month, day].join('-');
+	}
+
+	function formatTime(d) {
+		var hour = '' + d.getHours(),
+			min = '' + d.getMinutes(),
+			sec = '' + d.getSeconds(),
+			mil = '' + d.getMilliseconds();
+
+		if (hour.length < 2) hour = '0' + hour;
+		if (min.length < 2) min = '0' + min;
+		if (sec.length < 2) sec = '0' + sec;
+		while (mil.length < 3) mil = '0' + mil;
+
+		return [hour, min, sec].join(':') + '.' + mil;
+	}
+
+	function formatDateTime(d) {
+		return formatDate(d) + ' ' + formatTime(d);
+	}
+
 	function writeLog(logContainer, testLog, hideLog) {
 		// default parameters
 		hideLog = typeof hideLog !== 'undefined' ? hideLog : false;
@@ -466,7 +495,8 @@ var OPIV = (function(module) {
 			logContainer.appendChild(entryContainer);
 
 			var dateContainer = document.createElement("em");
-			dateContainer.innerHTML = date.toString();
+			dateContainer.className = "log-entry-ts";
+			dateContainer.innerHTML = formatDateTime(date);
 			entryContainer.appendChild(dateContainer);
 			entryContainer.appendChild(document.createElement("br"));
 
@@ -613,7 +643,7 @@ var OPIV = (function(module) {
 		// container.appendChild(caption);
 
 		var dl = document.createElement("dl");
-		dl.className = "dl-horizontal";
+		dl.className = "row";
 		container.appendChild(createHideImage(dl, "Headers"));
 		container.appendChild(dl);
 
@@ -621,9 +651,11 @@ var OPIV = (function(module) {
 			for (var i = 0; i < headers.length; i++) {
 				var entry = headers[i];
 				var dt = document.createElement("dt");
+				dt.className = "col-sm-3";
 				dt.appendChild(document.createTextNode(entry.Key));
 				dl.appendChild(dt);
 				var dd = document.createElement("dd");
+				dd.className = "col-sm-9";
 				dd.appendChild(document.createTextNode(entry.value));
 				dl.appendChild(dd);
 			}

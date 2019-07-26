@@ -31,27 +31,20 @@ limitations under the License.
 	<title>PrOfESSOS</title>
 
 
-	<link rel="stylesheet" href="webjars/bootstrap/3.3.7-1/css/bootstrap.min.css">
-
-	<!-- Optional theme -->
-	<link rel="stylesheet" href="webjars/bootstrap/3.3.7-1/css/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="webjars/bootstrap/4.3.1/css/bootstrap.min.css">
 
 	<link rel="stylesheet" href="css/opiv.css">
 </head>
 <body>
-<nav class="navbar navbar-inverse navbar-fixed-top">
-	<div class="container">
-		<div class="navbar-header">
-			<a class="navbar-brand" href="./">PrOfESSOS</a>
-		</div>
+	<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+		<a class="navbar-brand" href="./">PrOfESSOS</a>
 		<div id="navbar" class="collapse navbar-collapse">
-			<ul class="nav navbar-nav">
-				<li><a href="rp-verifier.html">Client Verifier</a></li>
-				<li class="active"><a href="#" onclick="OPIV.clear();">OP Verifier</a></li>
+			<ul class="navbar-nav">
+				<li class="nav-item"><a class="nav-link" href="rp-verifier.html">Client Verifier</a></li>
+				<li class="active nav-item"><a class="nav-link" href="#" onclick="OPIV.clear();">OP Verifier</a></li>
 			</ul>
-		</div><!--/.nav-collapse -->
-	</div>
-</nav>
+		</div>
+	</nav>
 
 <!-- Progress Modal -->
 <div class="modal fade" id="please-wait-dialog" tabindex="-1" role="dialog" data-backdrop="static">
@@ -78,7 +71,7 @@ limitations under the License.
 			<!-- Cancel is not implemented right now, so disable the cancel button -->
 			<!--
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" onclick="OPIV.cancelProcess();">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="OPIV.cancelProcess();">Cancel</button>
             </div>
             -->
 		</div>
@@ -141,21 +134,21 @@ limitations under the License.
 	</ol>
 
 	<form id="op-demo-form" action="javascript:;" onsubmit="javascript:OPIV.loadDemo();">
-		<button class="btn btn-default" type="submit" value="Load Demo Config">Load Demo Config</button>
+		<button class="btn btn-primary" type="submit" value="Load Demo Config">Load Demo Config</button>
 	</form>
 
 	<hr>
 
 	<h2>Legend</h2>
-	<dl style="" class="dl-horizontal">
-		<dt><img alt="NOT_RUN" src="img/NOT_RUN.png" width="20"></dt>
-		<dd><b>Test not run</b></dd>
-		<dt><img alt="PASS" src="img/PASS.png" width="20"></dt>
-		<dd><b>Test passed</b></dd>
-		<dt><img alt="FAIL" src="img/FAIL.png" width="20"></dt>
-		<dd><b>Test failed (Attack succeeded)</b></dd>
-		<dt><img alt="UNDETERMINED" src="img/UNDETERMINED.png" width="20"></dt>
-		<dd><b>Test outcome undetermined</b></dd>
+	<dl class="row">
+		<dt class="col-sm-1"><img alt="NOT_RUN" src="img/NOT_RUN.png" width="20"></dt>
+		<dd class="col-sm-11"><b>Test not run</b></dd>
+		<dt class="col-sm-1"><img alt="PASS" src="img/PASS.png" width="20"></dt>
+		<dd class="col-sm-11"><b>Test passed</b></dd>
+		<dt class="col-sm-1"><img alt="FAIL" src="img/FAIL.png" width="20"></dt>
+		<dd class="col-sm-11"><b>Test failed (Attack succeeded)</b></dd>
+		<dt class="col-sm-1"><img alt="UNDETERMINED" src="img/UNDETERMINED.png" width="20"></dt>
+		<dd class="col-sm-11"><b>Test outcome undetermined</b></dd>
 	</dl>
 
 	<hr>
@@ -170,12 +163,12 @@ limitations under the License.
 
 			<legend>Target OP Parameters</legend>
 
-			<ul class="nav nav-tabs">
-				<li class="active"><a data-toggle="tab" href="#form-config-tab">HTML Form</a></li>
-				<li><a data-toggle="tab" href="#json-config-tab">JSON</a></li>
-			</ul>
+			<nav class="nav nav-tabs">
+				<a class="active nav-item nav-link" data-toggle="tab" href="#form-config-tab">HTML Form</a>
+				<a class="nav-item nav-link" data-toggle="tab" href="#json-config-tab">JSON</a>
+			</nav>
 			<div class="tab-content">
-				<div id="form-config-tab" class="tab-pane fade in active">
+				<div id="form-config-tab" class="tab-pane fade show active">
 
 					<form class="form-horizontal" id="op-learn-form" action="javascript:;" onsubmit="javascript:OPIV.learnOP();">
 
@@ -323,8 +316,8 @@ limitations under the License.
 
 
 	<h2>Stage 2: Configuration Evaluation</h2>
-	<!--<button class="btn btn-default" type="submit" value="Learn" form="op-learn-form"  onclick="javascript:OPIV.submitOPLearningForm()">Learn</button>-->
-	<button class="btn btn-default" type="button" value="Learn" onclick="javascript:OPIV.submitOPLearningForm()">Learn</button>
+	<!--<button class="btn btn-primary" type="submit" value="Learn" form="op-learn-form"  onclick="javascript:OPIV.submitOPLearningForm()">Learn</button>-->
+	<button class="btn btn-primary" type="button" value="Learn" onclick="javascript:OPIV.submitOPLearningForm()">Learn</button>
 
 	<div id="learn-report">
 		<script>
@@ -349,7 +342,7 @@ limitations under the License.
 
 	<h2>Stage 3: Tests and Attacks</h2>
 	<form id="op-runall-form" action="javascript:;" onsubmit="javascript:OPIV.runAllTests();">
-		<button class="btn btn-default" type="submit" value="Run all Tests" form="op-runall-form">Run all Tests</button>
+		<button class="btn btn-primary" type="submit" value="Run all Tests" form="op-runall-form">Run all Tests</button>
 	</form>
 
 	<div id="test-report">
@@ -358,10 +351,10 @@ limitations under the License.
 
 </div>
 
-<script src="webjars/jquery/3.3.1-1/jquery.min.js">
+<script src="webjars/jquery/3.4.1/jquery.min.js">
 </script>
 
-<script src="webjars/bootstrap/3.3.7-1/js/bootstrap.min.js">
+<script src="webjars/bootstrap/4.3.1/js/bootstrap.min.js">
 </script>
 
 <!-- own scripts -->

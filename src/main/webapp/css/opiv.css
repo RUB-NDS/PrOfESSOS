@@ -24,7 +24,7 @@ body {
 .hide-image {
 	border : none;
 	padding : 5px;
-	marginRight : 3px;
+	margin-right: 3px;
 }
 
 .learn-controls .tab-content form {
@@ -50,6 +50,11 @@ body {
 	border-color: #999999;
 	border-style: solid;
 	border-radius: 15px;
+}
+
+.log-entry-ts {
+	font-size: smaller;
+	color: lightslategray;
 }
 
 .log-entry {
@@ -147,4 +152,3 @@ code {
 .panel-default .panel-heading {
 	background-image: none;
 }
-
