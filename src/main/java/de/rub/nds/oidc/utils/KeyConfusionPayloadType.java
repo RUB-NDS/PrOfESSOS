@@ -1,5 +1,3 @@
-package de.rub.nds.oidc.utils;
-
 /**
   * Copied from the package
   * eu.dety.burp.joseph.attacks.key_confusion, which is part of
@@ -7,6 +5,9 @@ package de.rub.nds.oidc.utils;
   * by Dennis Detering (see https://github.com/RUB-NDS/JOSEPH) and has been
   * licensed under GPL2
   */
+
+package de.rub.nds.oidc.utils;
+
 
 // Types of payload variation
 public enum KeyConfusionPayloadType {
@@ -28,5 +29,5 @@ public enum KeyConfusionPayloadType {
 	PKCS8_WITH_LF,
 	PKCS8_WITH_HEADER_FOOTER_LF,
 	PKCS8_WITH_HEADER_FOOTER_LF_ENDING_LF,
-}
 
+}

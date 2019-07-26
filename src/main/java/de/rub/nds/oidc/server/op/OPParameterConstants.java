@@ -16,7 +16,6 @@
 
 package de.rub.nds.oidc.server.op;
 
-import javax.print.DocFlavor;
 
 /**
  *
