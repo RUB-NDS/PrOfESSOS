@@ -17,16 +17,26 @@
 			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
 		</license>
 	</licenses>
+
 	<organization>
 		<name>Ruhr-Universität Bochum</name>
 		<url>https://www.nds.rub.de/</url>
 	</organization>
+
 	<developers>
 		<developer>
 			<name>Tobias Wich</name>
 			<email>tobias.wich@rub.de</email>
 		</developer>
 	</developers>
+
+	<contributors>
+		<contributor>
+			<name>Nils Engelbertz</name>
+			<email>nils.engelbertz@rub.de</email>
+		</contributor>
+	</contributors>
+
 
 	<properties>
 		<maven.compiler.source>11</maven.compiler.source>
