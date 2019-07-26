@@ -1,4 +1,3 @@
-package de.rub.nds.oidc.utils;
 /****************************************************************************
  * Copyright 2019 Ruhr-Universität Bochum.
  *
@@ -15,22 +14,22 @@ package de.rub.nds.oidc.utils;
  * limitations under the License.
  ***************************************************************************/
 
-import org.apache.commons.codec.binary.Base64;
+package de.rub.nds.oidc.utils;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.PublicKey;
+import java.util.Base64;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.pkcs.RSAPublicKey;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+
 
 /**
  * This class implements some conversion functions needed to perform
@@ -95,14 +94,16 @@ public class KeyConfusionHelper {
 
 	// takes Java PKCS8 pubKey
 	public static String transformKeyByPayload(Enum KeyConfusionPayloadTypeId, PublicKey key) throws UnsupportedEncodingException {
-		Base64 base64Pem = new Base64(64, "\n".getBytes("UTF-8"));
+		Base64.Encoder base64Pem = Base64.getMimeEncoder(64, "\n".getBytes("UTF-8"));
 
 		String modifiedKey;
 
 		switch ((KeyConfusionPayloadType) KeyConfusionPayloadTypeId) {
 
 			case PKCS8_WITH_HEADER_FOOTER:
-				modifiedKey = "-----BEGIN PUBLIC KEY-----" + Base64.encodeBase64String(key.getEncoded()) + "-----END PUBLIC KEY-----";
+				modifiedKey = "-----BEGIN PUBLIC KEY-----"
+						+ Base64.getEncoder().encodeToString(key.getEncoded())
+						+ "-----END PUBLIC KEY-----";
 				break;
 
 			case PKCS8_WITH_LF:
@@ -110,7 +111,9 @@ public class KeyConfusionHelper {
 				break;
 
 			case PKCS8_WITH_HEADER_FOOTER_LF:
-				modifiedKey = "-----BEGIN PUBLIC KEY-----\n" + base64Pem.encodeToString(key.getEncoded()) + "-----END PUBLIC KEY-----";
+				modifiedKey = "-----BEGIN PUBLIC KEY-----\n"
+						+ base64Pem.encodeToString(key.getEncoded())
+						+ "-----END PUBLIC KEY-----";
 				break;
 
 			case PKCS8_WITH_HEADER_FOOTER_LF_ENDING_LF:
@@ -119,7 +122,7 @@ public class KeyConfusionHelper {
 
 			case PKCS8:
 			default:
-				modifiedKey = Base64.encodeBase64String(key.getEncoded());
+				modifiedKey = Base64.getEncoder().encodeToString(key.getEncoded());
 				break;
 		}
 

@@ -23,22 +23,20 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testng.ITest;
 import org.testng.annotations.BeforeGroups;
-import org.testng.annotations.BeforeMethod;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static io.restassured.RestAssured.with;
+import java.io.FileInputStream;
+
 
 //public class IntegrationTests implements ITest {
 public class IntegrationTests {
@@ -63,7 +61,7 @@ public class IntegrationTests {
 //	}
 
 	protected Iterator<Object[]> readTestConfigs(String configFile) throws IOException, ParseException {
-		String configs = FileUtils.readFileToString(new File(configFile), "utf-8");
+		String configs = new String(new FileInputStream(configFile).readAllBytes(), "utf-8");
 		JSONArray configArray = (JSONArray) new JSONParser(JSONParser.MODE_JSON_SIMPLE).parse(configs);
 
 		Set<Object[]> testData = new LinkedHashSet<>();

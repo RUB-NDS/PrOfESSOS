@@ -76,7 +76,7 @@ public class KeyConfusionOP extends DefaultOP {
 							 @Nullable CodeHash cHash) throws GeneralSecurityException, JOSEException, ParseException {
 
 		// TODO: could we use an URI on a different domain, completely unrelated to the OP?
-		untrustedKeyUri = UriBuilder.fromUri(baseUri).path(this.UNTRUSTED_KEY_PATH).build();
+		untrustedKeyUri = UriBuilder.fromUri(baseUri).path(UNTRUSTED_KEY_PATH).build();
 
 		JWTClaimsSet claims = getIdTokenClaims(clientId, nonce, atHash, cHash);
 		SignedJWT signedJwt;
@@ -432,7 +432,7 @@ public class KeyConfusionOP extends DefaultOP {
 			}
 			jsonHeader.put("jwk", octJwk);
 			// the JWKs k member needs Base64URL decoding
-			macKey = org.apache.commons.codec.binary.Base64.decodeBase64(octJwk.getAsString("k"));
+			macKey = java.util.Base64.getUrlDecoder().decode(octJwk.getAsString("k"));
 		}
 
 		// using (parts of) trusted Public RSAKey as HMAC Key

@@ -27,8 +27,6 @@ import de.rub.nds.oidc.server.rp.RPContextConstants;
 import de.rub.nds.oidc.server.rp.RPParameterConstants;
 import de.rub.nds.oidc.server.rp.RPType;
 import de.rub.nds.oidc.test_model.TestStepResult;
-import org.apache.commons.io.IOUtils;
-
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URI;
@@ -37,6 +35,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 
 public abstract class AbstractOPBrowser extends BrowserSimulator {
 
@@ -64,7 +63,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 			if (!Strings.isNullOrEmpty(opConfig.getLoginScript())) {
 				templateString = opConfig.getLoginScript();
 			} else {
-				templateString = IOUtils.toString(getClass().getResourceAsStream("/login-form.st"), "UTF-8");
+				templateString = new String(getClass().getResourceAsStream("/login-form.st").readAllBytes(), "UTF-8");
 			}
 
 			opConfig.setLoginScript(templateString);
@@ -74,7 +73,7 @@ public abstract class AbstractOPBrowser extends BrowserSimulator {
 			if (!Strings.isNullOrEmpty(opConfig.getConsentScript())) {
 				consentScript = opConfig.getConsentScript();
 			} else {
-				consentScript = IOUtils.toString(getClass().getResourceAsStream("/consent-form.st"), "UTF-8");
+				consentScript = new String(getClass().getResourceAsStream("/consent-form.st").readAllBytes(), "UTF-8");
 			}
 			opConfig.setConsentScript(consentScript);
 

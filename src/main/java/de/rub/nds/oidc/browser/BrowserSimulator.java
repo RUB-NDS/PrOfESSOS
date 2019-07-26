@@ -24,7 +24,6 @@ import de.rub.nds.oidc.test_model.*;
 import de.rub.nds.oidc.utils.Func;
 import de.rub.nds.oidc.utils.InstanceParameters;
 import de.rub.nds.oidc.utils.JsWaiter;
-import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
@@ -32,11 +31,11 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
-import org.openqa.selenium.support.ui.Duration;
 import org.openqa.selenium.support.ui.Sleeper;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -250,7 +249,7 @@ public abstract class BrowserSimulator {
 	}
 
 	protected void waitMillis(long timeout) throws InterruptedException {
-		Sleeper.SYSTEM_SLEEPER.sleep(new Duration(timeout, TimeUnit.MILLISECONDS));
+		Sleeper.SYSTEM_SLEEPER.sleep(Duration.ofMillis(timeout));
 	}
 
 	protected void logScreenshot1() {
@@ -287,7 +286,7 @@ public abstract class BrowserSimulator {
 
 	private void loadFormSubmissionDelayScript() {
 		try {
-			String script = IOUtils.toString(getClass().getResourceAsStream("/delayFormSubmission.js"), "UTF-8");
+			String script = new String(getClass().getResourceAsStream("/delayFormSubmission.js").readAllBytes(), "UTF-8");
 			formSubmitDelayScript = script;
 		} catch (IOException e) {
 			logger.log("Failed to load script template from resources.", e);

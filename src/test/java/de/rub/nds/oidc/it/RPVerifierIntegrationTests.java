@@ -26,23 +26,23 @@ import net.javacrumbs.jsonunit.JsonAssert;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.ParseException;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 
 import static io.restassured.RestAssured.*;
 import io.restassured.config.LogConfig;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.PrintStream;
 import org.testcontainers.shaded.org.apache.commons.io.output.WriterOutputStream;
+
 
 public class RPVerifierIntegrationTests extends IntegrationTests {
 	private HashMap<String, Object> rpConfig;
@@ -139,7 +139,7 @@ public class RPVerifierIntegrationTests extends IntegrationTests {
 			dataProvider = "getRPTestConfigs"
 	)
 	public void testTestStep(String testname, String filename, String expectedResult) throws IOException {
-		String expectedJSON = FileUtils.readFileToString(new File(filename), "utf-8");
+		String expectedJSON = new String(new FileInputStream(filename).readAllBytes(), "utf-8");
 
 		Pair<String, JSONArray> outcome = runTestForLogentry(testname);
 

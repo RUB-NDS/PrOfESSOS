@@ -19,7 +19,6 @@ package de.rub.nds.oidc.browser;
 import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.server.op.OPType;
 import de.rub.nds.oidc.test_model.TestStepResult;
-import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.stringtemplate.v4.ST;
@@ -182,7 +181,7 @@ public class RPLearningBrowser extends BrowserSimulator {
 		logger.log("Found input field with name '" + inputName + "'.");
 
 		try {
-			String templateString = IOUtils.toString(getClass().getResourceAsStream("/submit-form.st"), "UTF-8");
+			String templateString = new String(getClass().getResourceAsStream("/submit-form.st").readAllBytes(), "UTF-8");
 			ST st = new ST(templateString, '§','§');
 			st.add("input-field", inputName);
 			String result = st.render();
