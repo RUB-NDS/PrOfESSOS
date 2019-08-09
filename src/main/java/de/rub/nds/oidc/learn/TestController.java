@@ -30,7 +30,8 @@ import javax.xml.bind.JAXBElement;
  * @author Tobias Wich
  */
 @Path("/")
-public class Learner {
+@Cors
+public class TestController {
 
 	private ValueGenerator valueGenerator;
 	private TestRunnerRegistry testObjs;
