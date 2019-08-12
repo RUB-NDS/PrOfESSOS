@@ -32,14 +32,22 @@ limitations under the License.
 			<!--</choice>-->
 			<element name="TestConfig" type="tm:TestConfigType" />
 			<element name="TestReport" type="tm:TestReportType" minOccurs="0" />
+			<element name="ServiceEndpoint" type="tm:ServiceEndpointType" minOccurs="0" maxOccurs="unbounded" />
 		</sequence>
 		<attribute name="TestId" type="NCName" use="required" />
 		<attribute name="TestPlanReference" type="normalizedString" use="required" />
 	</complexType>
 
-<complexType name="TestConfigType" abstract="true">
-	<attribute name="Type" type="string" />
-</complexType>
+	<complexType name="ServiceEndpointType">
+		<sequence>
+			<element name="Name" type="normalizedString" />
+			<element name="URI" type="anyURI" />
+		</sequence>
+	</complexType>
+
+	<complexType name="TestConfigType" abstract="true">
+		<attribute name="Type" type="string" />
+	</complexType>
 
 	<complexType name="TestRPConfigType">
 		<complexContent>

@@ -16,10 +16,13 @@
 
 package de.rub.nds.oidc.learn;
 
+import de.rub.nds.oidc.server.ProfConfig;
 import de.rub.nds.oidc.server.TestInstanceRegistry;
 import de.rub.nds.oidc.test_model.*;
 import de.rub.nds.oidc.utils.ImplementationLoadException;
 import de.rub.nds.oidc.utils.ValueGenerator;
+import java.util.List;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -36,6 +39,8 @@ public class TestController {
 	private ValueGenerator valueGenerator;
 	private TestRunnerRegistry testObjs;
 	private TestInstanceRegistry testInsts;
+	private ProfConfig profCfg;
+
 
 	@Inject
 	public void setValueGenerator(ValueGenerator valueGenerator) {
@@ -50,6 +55,11 @@ public class TestController {
 	@Inject
 	public void setTestInsts(TestInstanceRegistry testInsts) {
 		this.testInsts = testInsts;
+	}
+
+	@Inject
+	public void setProfConfig(ProfConfig cfg) {
+		this.profCfg = cfg;
 	}
 
 	@GET
@@ -83,7 +93,25 @@ public class TestController {
 		else
 			runner = testObjs.createOPTestObject(testId);
 
-		return runner.getTestObj();
+		var testObj = runner.getTestObj();
+
+		// add default endpoints from config
+		var endp = testObj.getServiceEndpoint();
+		var endCfg = profCfg.getEndpointCfg();
+
+		addEndpoint(endp, "TestRpUri", endCfg.getTestRPUri().map(v -> v.toString()));
+		addEndpoint(endp, "TestOpUri", endCfg.getTestOPUri().map(v -> v.toString()));
+
+		return testObj;
+	}
+
+	private void addEndpoint(List<ServiceEndpointType> endp, String name, Optional<String> uri) {
+		uri.ifPresent(uriVal -> {
+			var obj = new ServiceEndpointType();
+			obj.setName(name);
+			obj.setURI(uriVal);
+			endp.add(obj);
+		});
 	}
 
 	@POST
