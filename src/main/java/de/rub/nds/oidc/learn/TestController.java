@@ -62,6 +62,27 @@ public class TestController {
 		this.profCfg = cfg;
 	}
 
+	@OPTIONS
+	@Path("/{v1}")
+	public void preflight1() {
+		System.out.println("Preflight var1 called");
+	}
+	@OPTIONS
+	@Path("/{v1}/{v2}")
+	public void preflight2() {
+		System.out.println("Preflight var2 called");
+	}
+	@OPTIONS
+	@Path("/{v1}/{v2}/{v3}")
+	public void preflight3() {
+		System.out.println("Preflight var3 called");
+	}
+	@OPTIONS
+	@Path("/{v1}/{v2}/{v3}/{v4}")
+	public void preflight4() {
+		System.out.println("Preflight var4 called");
+	}
+
 	@GET
 	@Path("/{role: rp|op}/{testId}/export")
 	@Produces({MediaType.APPLICATION_XML})
