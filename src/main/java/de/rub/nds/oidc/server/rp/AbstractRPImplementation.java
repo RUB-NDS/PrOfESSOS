@@ -44,7 +44,6 @@ import de.rub.nds.oidc.server.InvalidConfigurationException;
 import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.server.TestNotApplicableException;
 import de.rub.nds.oidc.server.TestStepParameterConstants;
-import de.rub.nds.oidc.server.op.OPType;
 import de.rub.nds.oidc.test_model.ParameterType;
 import de.rub.nds.oidc.test_model.RPConfigType;
 import de.rub.nds.oidc.test_model.TestOPConfigType;
@@ -54,7 +53,6 @@ import de.rub.nds.oidc.utils.UnsafeOIDCProviderMetadata;
 import de.rub.nds.oidc.utils.UnsafeTLSHelper;
 import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.RandomStringUtils;
-
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

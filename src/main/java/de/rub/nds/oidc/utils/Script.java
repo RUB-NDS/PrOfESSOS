@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2016-2019 Ruhr-Universität Bochum.
+ * Copyright 2019 Ruhr-Universität Bochum.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,34 @@
 
 package de.rub.nds.oidc.utils;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
+import java.util.Map;
+import javax.script.ScriptException;
 
 
 /**
  *
  * @author Tobias Wich
+ * @param <T> Rewsult type of the script.
  */
-public class ImplementationLoader {
+public interface Script <T> {
 
-	public static <T> T loadClassInstance(String clazz, Class<T> iface) throws ImplementationLoadException {
+	default T exec() throws ScriptException, ClassCastException {
+		return exec(Collections.emptyMap());
+	}
+
+	default T execSafe() {
+		return execSafe(Collections.emptyMap());
+	}
+
+	default T execSafe(Map<String, Object> additionalParams) {
 		try {
-			Class<?> classInst = ImplementationLoader.class.getClassLoader().loadClass(clazz);
-			Object newInstance = classInst.getConstructor().newInstance();
-			return iface.cast(newInstance);
-		} catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException ex) {
-			throw new ImplementationLoadException("Failed to load class and constructor.", ex);
-		} catch (InvocationTargetException | InstantiationException ex) {
-			throw new ImplementationLoadException("Failed to instantiate class.", ex);
+			return exec(additionalParams);
+		} catch (ClassCastException | ScriptException ex) {
+			throw new RuntimeException("Error executing requested script", ex);
 		}
 	}
+
+	T exec(Map<String, Object> additionalParams) throws ScriptException, ClassCastException;
 
 }

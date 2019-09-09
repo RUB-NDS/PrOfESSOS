@@ -174,7 +174,7 @@ public abstract class BrowserSimulator {
 		// optional
 		teCtx.put("suite", suiteCtx);
 		teCtx.put("step", stepCtx);
-		teCtx.put("params", params.getMap());
+		teCtx.put("params", params.getParamMap());
 
 		return teCtx;
 	}

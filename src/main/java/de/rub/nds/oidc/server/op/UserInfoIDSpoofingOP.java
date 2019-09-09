@@ -77,7 +77,7 @@ public class UserInfoIDSpoofingOP extends DefaultOP {
 			UnsafeJSONObject userInfoJson = new UnsafeJSONObject();
 			JSONArray subs = new JSONArray();
 
-			for (Map.Entry param : params.getMap().entrySet()) {
+			for (Map.Entry param : params.getParamMap().entrySet()) {
 				if (param.getKey().equals(OPParameterConstants.USERINFO_INCLUDE_HONEST_SUB) 
 						&& param.getValue().equals("true")) {
 					subs.appendElement(getHonestSubject().getValue());

@@ -71,9 +71,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
 import static de.rub.nds.oidc.server.TestStepParameterConstants.*;
 import static de.rub.nds.oidc.server.op.OPParameterConstants.*;
+import de.rub.nds.oidc.utils.ParamScriptExecutor;
+
 
 /**
  * @author Tobias Wich
@@ -89,6 +90,13 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	protected Map<String, Object> suiteCtx;
 	protected Map<String, Object> stepCtx;
 	protected InstanceParameters params;
+
+	protected ParamScriptExecutor exec;
+
+	public AbstractOPImplementation() {
+		this.exec = new ParamScriptExecutor();
+	}
+
 
 	@Override
 	public void setOPConfig(OPConfigType cfg) {
@@ -129,11 +137,14 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	public void setContext(Map<String, Object> suiteCtx, Map<String, Object> stepCtx) {
 		this.suiteCtx = suiteCtx;
 		this.stepCtx = stepCtx;
+		this.exec.setImpl(this);
+		this.exec.setContext(suiteCtx, stepCtx);
 	}
 
 	@Override
 	public void setParameters(List<ParameterType> params) {
 		this.params = new InstanceParameters(params);
+		this.exec.setInstanceParams(this.params);
 	}
 
 

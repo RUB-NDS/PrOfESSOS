@@ -156,7 +156,7 @@ public class KeyConfusionOP extends DefaultOP {
 		logger.log("Untrusted key requested");
 		logger.logHttpRequest(req, null);
 
-//        String jsonString = (String) stepCtx.get(OPContextConstants.UNTRUSTED_KEY_RESPONSE);
+//        String jsonString = (String) stepCtx.getParam(OPContextConstants.UNTRUSTED_KEY_RESPONSE);
 //        untrustedKeyResponseString = Strings.isNullOrEmpty(jsonString) ? "{}" : jsonString;
 		untrustedKeyResponseString = Strings.isNullOrEmpty(untrustedKeyResponseString) ? "{}" : untrustedKeyResponseString;
 
@@ -470,7 +470,7 @@ public class KeyConfusionOP extends DefaultOP {
 				logger.log("Key conversion failed");
 				throw new ParseException("Error converting JWK to PEM");
 			}
-			String payloadType = params.get(P1_KEY_CONFUSION_PAYLOAD_TYPE);
+			String payloadType = params.getParam(P1_KEY_CONFUSION_PAYLOAD_TYPE);
 			try {
 				macKey = KeyConfusionHelper.transformKeyByPayload(KeyConfusionPayloadType.valueOf(payloadType),
 						pkcs1KeyString).getBytes();
@@ -481,7 +481,7 @@ public class KeyConfusionOP extends DefaultOP {
 			jsonHeader.putIfAbsent("alg", algorithm);
 
 		} else if (params.getBool(IDTOKEN_HMAC_PUBKEY_PKCS8)) {
-			String payloadType = params.get(P8_KEY_CONFUSION_PAYLOAD_TYPE);
+			String payloadType = params.getParam(P8_KEY_CONFUSION_PAYLOAD_TYPE);
 			try {
 				macKey = KeyConfusionHelper.transformKeyByPayload(KeyConfusionPayloadType.valueOf(payloadType),
 						publicKey).getBytes();
@@ -536,7 +536,7 @@ public class KeyConfusionOP extends DefaultOP {
 	 */
 	private SignedJWT sessionOverwritingKeyConfusion(JWTClaimsSet claims) throws GeneralSecurityException {
 		// replace client ID (use same ID for evil and honest
-		OIDCClientInformation cinfo = getRegisteredClientInfo(); //(OIDCClientInformation) stepCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL);
+		OIDCClientInformation cinfo = getRegisteredClientInfo(); //(OIDCClientInformation) stepCtx.getParam(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL);
 		logger.logCodeBlock("Generating HS256 using client_secret from stored ClientInfo:", cinfo.toString());
 
 		JWSHeader.Builder hb = new JWSHeader.Builder(JWSAlgorithm.HS256).type(JOSEObjectType.JWT);
