@@ -275,9 +275,17 @@ limitations under the License.
 		<simpleContent>
 			<extension base="string">
 				<attribute name="Key" type="string" use="required" />
+				<attribute name="Type" type="tm:ParameterTypeType" use="optional" default="String" />
 			</extension>
 		</simpleContent>
 	</complexType>
+
+	<simpleType name="ParameterTypeType">
+		<restriction base="string">
+			<enumeration value="String"></enumeration>
+			<enumeration value="JS"></enumeration>
+		</restriction>
+	</simpleType>
 
 
 	<!-- REST API -->
