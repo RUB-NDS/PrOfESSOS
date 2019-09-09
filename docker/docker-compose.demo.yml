@@ -43,6 +43,8 @@ services:
         #DISABLE_TLS_TRUST_CHECK: "true"
         #PRINT_TEST_ID_PATH: "false"
         #TEST_ID_LENGTH: 8
+    networks:
+      profnet:
 
   test-rp:
     build:
