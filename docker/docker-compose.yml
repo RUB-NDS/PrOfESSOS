@@ -13,6 +13,8 @@ services:
   prof:
     build:
       context: ./professos
+    ports:
+      - "8787:8787"
     networks:
       profnet:
 
