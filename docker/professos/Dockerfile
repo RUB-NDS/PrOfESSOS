@@ -81,4 +81,4 @@ EXPOSE 8787
 
 # Set the default command to run on boot
 # This will boot WildFly in the standalone mode and bind to all interface
-ENTRYPOINT ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0", "--debug", "8787"]
+ENTRYPOINT ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0", "--debug", "0.0.0.0:8787"]
