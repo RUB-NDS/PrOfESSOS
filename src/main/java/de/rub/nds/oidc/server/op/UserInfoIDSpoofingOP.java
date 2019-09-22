@@ -80,11 +80,11 @@ public class UserInfoIDSpoofingOP extends DefaultOP {
 			for (Map.Entry param : params.getParamMap().entrySet()) {
 				if (param.getKey().equals(OPParameterConstants.USERINFO_INCLUDE_HONEST_SUB) 
 						&& param.getValue().equals("true")) {
-					subs.appendElement(getHonestSubject().getValue());
+					subs.appendElement(getHonestSubject());
 				}
 				if (param.getKey().equals(OPParameterConstants.USERINFO_INCLUDE_EVIL_SUB) 
 						&& param.getValue().equals("true")) {
-					subs.appendElement(getEvilSubject().getValue());
+					subs.appendElement(getEvilSubject());
 				}
 			}
 			if (params.getBool(OPParameterConstants.USERINFO_SUB_ARRAY)) {
@@ -140,7 +140,7 @@ public class UserInfoIDSpoofingOP extends DefaultOP {
 	 * may make use of these claims nonetheless.
 	 */
 	@Override
-	protected JWT getIdToken(@Nonnull ClientID clientId, @Nullable Nonce nonce, @Nullable AccessTokenHash atHash,
+	public JWT getIdToken(@Nonnull ClientID clientId, @Nullable Nonce nonce, @Nullable AccessTokenHash atHash,
 										  @Nullable CodeHash cHash) throws GeneralSecurityException, JOSEException, ParseException {
 		if (!params.getBool(OPParameterConstants.FORCE_TOKENHEADER_CLAIMS)) {
 			JWT token = super.getIdToken(clientId, nonce, atHash, cHash);

@@ -12,6 +12,21 @@
 		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+			<!-- Example scripts -->
+			<!--Parameter Key="honest_idtoken_iss" Type="JS">
+				var ei = impl.getHonestOrEvilIssuer();
+				ei;
+			</Parameter-->
+			<!-- Note the variable which is needed as pure object definitions are not allowed on the top level -->
+			<!--Parameter Key="script_user_info" Type="JS">
+				var obj = {
+					"sub": impl.getTokenSubject(),
+					"name": impl.getTokenName(),
+					"preferred_username": impl.getTokenUsername(),
+					"email": impl.getTokenEmail()
+				};
+				obj;
+			</Parameter-->
 		</OPConfig-1>
 		<OPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>

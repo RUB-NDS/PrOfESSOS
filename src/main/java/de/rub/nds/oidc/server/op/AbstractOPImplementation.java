@@ -74,6 +74,8 @@ import java.util.stream.Collectors;
 import static de.rub.nds.oidc.server.TestStepParameterConstants.*;
 import static de.rub.nds.oidc.server.op.OPParameterConstants.*;
 import de.rub.nds.oidc.utils.ParamScriptExecutor;
+import de.rub.nds.oidc.utils.Script;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -167,17 +169,17 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected Issuer getHonestIssuer() {
+	public Issuer getHonestIssuer() {
 		return new Issuer(UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).build());
 	}
 
-	protected Issuer getEvilIssuer() {
+	public Issuer getEvilIssuer() {
 		return new Issuer(UriBuilder.fromUri(opivCfg.getEvilOPUri())
 				.path((String) stepCtx.getOrDefault(OPContextConstants.REGISTRATION_ENFORCING_PATH_FRAGMENT, ""))
 				.path(testId).build());
 	}
 
-	protected Issuer getMetadataIssuer() {
+	public Issuer getMetadataIssuer() {
 		Issuer issuer;
 		if (params.getBool(FORCE_HONEST_DISCOVERY_ISS)) {
 			issuer = getHonestIssuer();
@@ -188,34 +190,42 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected String getTokenIssuerString() {
-		if (params.getBool(FORCE_TOKEN_ISS_EXCL)) {
-			return null;
-		}
-		if (params.getBool(FORCE_TOKEN_ISS_EMPTY)) {
-			return "";
-		}
+	public String getTokenIssuerString() {
+		logger.log("Executing getTokenIssuerString");
+		return exec.<String>getScript(SCRIPT_HONEST_TOKEN_ISS)
+				.map(f -> {logger.log("Executing script");return f.execSafe();})
+				.orElseGet(() -> {
+					if (params.getBool(FORCE_TOKEN_ISS_EXCL)) {
+						return null;
+					}
+					if (params.getBool(FORCE_TOKEN_ISS_EMPTY)) {
+						return "";
+					}
 
-		Issuer issuer;
-		if (params.getBool(FORCE_HONEST_TOKEN_ISS)) {
-			issuer = getHonestIssuer();
-		} else {
-			issuer = supplyHonestOrEvil(this::getHonestIssuer, this::getEvilIssuer);
-		}
-		return issuer.getValue();
+					Issuer issuer;
+					if (params.getBool(FORCE_HONEST_TOKEN_ISS)) {
+						issuer = getHonestIssuer();
+					} else {
+						issuer = supplyHonestOrEvil(this::getHonestIssuer, this::getEvilIssuer);
+					}
+					return issuer.getValue();
+				});
 	}
 
-
-	protected Subject getHonestSubject() {
-		return new Subject("honest-op-test-subject");
+	public String getHonestOrEvilIssuer() {
+		return supplyHonestOrEvil(this::getHonestIssuer, this::getEvilIssuer).getValue();
 	}
 
-	protected Subject getEvilSubject() {
-		return new Subject("evil-op-test-subject");
+	public String getHonestSubject() {
+		return "honest-op-test-subject";
 	}
 
-	protected Subject getTokenSubject() {
-		Subject sub;
+	public String getEvilSubject() {
+		return "evil-op-test-subject";
+	}
+
+	public String getTokenSubject() {
+		String sub;
 		if (params.getBool(FORCE_HONEST_TOKEN_SUB)) {
 			sub = getHonestSubject();
 		} else {
@@ -225,15 +235,15 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected String getHonestName() {
+	public String getHonestName() {
 		return "Honest User";
 	}
 
-	protected String getEvilName() {
+	public String getEvilName() {
 		return "Evil User";
 	}
 
-	protected String getTokenName() {
+	public String getTokenName() {
 		String name;
 		if (params.getBool(FORCE_HONEST_TOKEN_NAME)) {
 			name = getHonestName();
@@ -244,15 +254,15 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected String getHonestUsername() {
+	public String getHonestUsername() {
 		return "honest-user-name";
 	}
 
-	protected String getEvilUsername() {
+	public String getEvilUsername() {
 		return "evil-user-name";
 	}
 
-	protected String getTokenUsername() {
+	public String getTokenUsername() {
 		String name;
 		if (params.getBool(FORCE_HONEST_TOKEN_USERNAME)) {
 			name = getHonestUsername();
@@ -263,15 +273,15 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected URI getHonestRegistrationEndpoint() {
+	public URI getHonestRegistrationEndpoint() {
 		return UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).path(REGISTER_CLIENT_PATH).build();
 	}
 
-	protected URI getEvilRegistrationEndpoint() {
+	public URI getEvilRegistrationEndpoint() {
 		return UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).path(REGISTER_CLIENT_PATH).build();
 	}
 
-	protected URI getMetadataRegistrationEndpoint() {
+	public URI getMetadataRegistrationEndpoint() {
 		URI uri;
 		if (params.getBool(FORCE_HONEST_DISCOVERY_REG_EP)) {
 			uri = getHonestRegistrationEndpoint();
@@ -282,15 +292,15 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected URI getHonestAuthorizationEndpoint() {
+	public URI getHonestAuthorizationEndpoint() {
 		return UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).path(AUTH_REQUEST_PATH).build();
 	}
 
-	protected URI getEvilAuthorizationEndpoint() {
+	public URI getEvilAuthorizationEndpoint() {
 		return UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).path(AUTH_REQUEST_PATH).build();
 	}
 
-	protected URI getMetadataAuthorizationEndpoint() {
+	public URI getMetadataAuthorizationEndpoint() {
 		URI uri;
 		if (params.getBool(FORCE_HONEST_DISCOVERY_AUTH_EP)) {
 			uri = getHonestAuthorizationEndpoint();
@@ -301,15 +311,15 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected URI getHonestTokenEndpoint() {
+	public URI getHonestTokenEndpoint() {
 		return UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).path(TOKEN_REQUEST_PATH).build();
 	}
 
-	protected URI getEvilTokenEndpoint() {
+	public URI getEvilTokenEndpoint() {
 		return UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).path(TOKEN_REQUEST_PATH).build();
 	}
 
-	protected URI getMetadataTokenEndpoint() {
+	public URI getMetadataTokenEndpoint() {
 		URI uri;
 		if (params.getBool(FORCE_HONEST_DISCOVERY_TOKEN_EP)) {
 			uri = getHonestTokenEndpoint();
@@ -320,15 +330,15 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected URI getHonestUserinfoEndpoint() {
+	public URI getHonestUserinfoEndpoint() {
 		return UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).path(USER_INFO_REQUEST_PATH).build();
 	}
 
-	protected URI getEvilUserinfoEndpoint() {
+	public URI getEvilUserinfoEndpoint() {
 		return UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).path(USER_INFO_REQUEST_PATH).build();
 	}
 
-	protected URI getMetadataUserinfoEndpoint() {
+	public URI getMetadataUserinfoEndpoint() {
 		URI uri;
 		if (params.getBool(FORCE_HONEST_DISCOVERY_AUTH_EP)) {
 			uri = getHonestUserinfoEndpoint();
@@ -339,19 +349,19 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected InternetAddress getHonestEmail() {
+	public InternetAddress getHonestEmail() {
 		InternetAddress mail = new InternetAddress();
 		mail.setAddress("user@honest.com");
 		return mail;
 	}
 
-	protected InternetAddress getEvilEmail() {
+	public InternetAddress getEvilEmail() {
 		InternetAddress mail = new InternetAddress();
 		mail.setAddress("user@evil.com");
 		return mail;
 	}
 
-	protected InternetAddress getTokenEmail() {
+	public InternetAddress getTokenEmail() {
 		InternetAddress mail;
 		if (params.getBool(FORCE_HONEST_TOKEN_EMAIL)) {
 			mail = getHonestEmail();
@@ -361,23 +371,23 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return mail;
 	}
 
-	protected OIDCClientInformation getHonestRegisteredClientInfo() {
+	public OIDCClientInformation getHonestRegisteredClientInfo() {
 		// Note that ClientInfo @ Honest OP is stored in suite context and does not depend on test step setup
 		OIDCClientInformation ci = (OIDCClientInformation) suiteCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST);
 		return ci;
 	}
 
-	protected OIDCClientInformation getEvilRegisteredClientInfo() {
+	public OIDCClientInformation getEvilRegisteredClientInfo() {
 		OIDCClientInformation ci = (OIDCClientInformation) stepCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL);
 		return ci;
 	}
 
-	protected OIDCClientInformation getRegisteredClientInfo() {
+	public OIDCClientInformation getRegisteredClientInfo() {
 		OIDCClientInformation ci = supplyHonestOrEvil(this::getHonestRegisteredClientInfo, this::getEvilRegisteredClientInfo);
 		return ci;
 	}
 
-	protected ClientID getRegistrationClientId() {
+	public ClientID getRegistrationClientId() {
 		OIDCClientInformation ci;
 		if (params.getBool(OPParameterConstants.FORCE_REGISTER_HONEST_CLIENTID)) {
 			ci = getHonestRegisteredClientInfo();
@@ -393,7 +403,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return new ClientID();
 	}
 
-	protected Date getTokenIssuedAt() {
+	public Date getTokenIssuedAt() {
 		Date date = new Date();
 		if (params.getBool(FORCE_TOKEN_IAT_DAY)) {
 			logger.log("Setting iat to 1 day.");
@@ -405,7 +415,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return date;
 	}
 
-	protected Date getTokenExpiration() {
+	public Date getTokenExpiration() {
 		Date date = Date.from(Instant.now().plus(Duration.ofMinutes(15)));
 		if (params.getBool(FORCE_TOKEN_EXP_DAY)) {
 			logger.log("Setting exp to -1 day + 15min.");
@@ -418,7 +428,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected OIDCProviderMetadata getDefaultOPMetadata() throws ParseException {
+	public OIDCProviderMetadata getDefaultOPMetadata() throws ParseException {
 		Issuer issuer = getMetadataIssuer();
 		List<SubjectType> subjectTypes = Arrays.asList(SubjectType.PUBLIC);
 		URI jwksUri = UriBuilder.fromUri(baseUri).path(JWKS_PATH).build();
@@ -460,16 +470,22 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected UserInfo getUserInfo() {
-		UserInfo ui = new UserInfo(getTokenSubject());
-		ui.setName(getTokenName());
-		ui.setPreferredUsername(getTokenUsername());
-		ui.setEmail(getTokenEmail());
-
-		return ui;
+	public UserInfo getUserInfo() {
+		var userInfo = exec.<Map<String, Object>>getScript(SCRIPT_USER_INFO)
+				.map(Script::execSafe)
+				.map(o -> new JSONObject(o))
+				.map(jo -> new UserInfo(jo))
+				.orElseGet(() -> {
+					UserInfo ui = new UserInfo(new Subject(getTokenSubject()));
+					ui.setName(getTokenName());
+					ui.setPreferredUsername(getTokenUsername());
+					ui.setEmail(getTokenEmail());
+					return ui;
+				});
+		return userInfo;
 	}
 
-	protected String getTokenAudience(ClientID clientId) {
+	public String getTokenAudience(ClientID clientId) {
 		if (params.getBool(FORCE_TOKEN_AUD_EXCL)) {
 			return null;
 		} else if (params.getBool(FORCE_TOKEN_AUD_INVALID)) {
@@ -479,7 +495,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		}
 	}
 
-	protected JWTClaimsSet getIdTokenClaims(@Nonnull ClientID clientId, @Nullable Nonce nonce,
+	public JWTClaimsSet getIdTokenClaims(@Nonnull ClientID clientId, @Nullable Nonce nonce,
 											@Nullable AccessTokenHash atHash, @Nullable CodeHash cHash) throws ParseException {
 		UserInfo ui = getUserInfo();
 		if (params.getBool(FORCE_TOKEN_USERCLAIMS_EXCL)) {
@@ -512,7 +528,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return claims;
 	}
 
-	protected JWT getIdToken(@Nonnull ClientID clientId, @Nullable Nonce nonce, @Nullable AccessTokenHash atHash,
+	public JWT getIdToken(@Nonnull ClientID clientId, @Nullable Nonce nonce, @Nullable AccessTokenHash atHash,
 							 @Nullable CodeHash cHash) throws GeneralSecurityException, JOSEException, ParseException {
 		JWTClaimsSet claims = getIdTokenClaims(clientId, nonce, atHash, cHash);
 
@@ -548,13 +564,13 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return signedJwt;
 	}
 
-	protected RSAKey getSigningJwk() {
+	public RSAKey getSigningJwk() {
 		KeyStore.PrivateKeyEntry keyEntry = supplyHonestOrEvil(opivCfg::getHonestOPSigningEntry, opivCfg::getEvilOPSigningEntry);
 
 		return getSigningJwk(keyEntry);
 	}
 
-	protected RSAKey getSigningJwk(KeyStore.PrivateKeyEntry keyEntry) {
+	public RSAKey getSigningJwk(KeyStore.PrivateKeyEntry keyEntry) {
 		RSAPublicKey pubKey = (RSAPublicKey) keyEntry.getCertificate().getPublicKey();
 		RSAPrivateKey privKey = (RSAPrivateKey) keyEntry.getPrivateKey();
 		List<Base64> chain = Arrays.stream(keyEntry.getCertificateChain()).map(c -> {

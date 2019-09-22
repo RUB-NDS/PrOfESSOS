@@ -34,6 +34,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.UriBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -43,6 +45,8 @@ import javax.ws.rs.core.UriBuilder;
 	"/dispatch/*", "/.well-known/webfinger"
 })
 public class RequestDispatcher extends HttpServlet {
+
+	private static final Logger LOG = LoggerFactory.getLogger(RequestDispatcher.class);
 
 	private TestInstanceRegistry registry;
 	private OPIVConfig opivCfg;
@@ -134,6 +138,7 @@ public class RequestDispatcher extends HttpServlet {
 					notFound(resource, resp);
 				}
 			} catch (Exception ex) {
+				LOG.error("Error processing OP request.", ex);
 				inst.getLogger().log("Failed to process request.", ex);
 				serverError(resource, resp);
 			}
@@ -164,6 +169,7 @@ public class RequestDispatcher extends HttpServlet {
 					impl.callback(path, req, resp);
 				}
 			} catch (Exception ex) {
+				LOG.error("Error processing RP request.", ex);
 				inst.getLogger().log("Failed to process request.", ex);
 				serverError(resource, resp);
 			}

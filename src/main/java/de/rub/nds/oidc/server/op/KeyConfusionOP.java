@@ -72,7 +72,7 @@ public class KeyConfusionOP extends DefaultOP {
 	private String untrustedKeyResponseString;
 
 	@Override
-	protected JWT getIdToken(@Nonnull ClientID clientId, @Nullable Nonce nonce, @Nullable AccessTokenHash atHash,
+	public JWT getIdToken(@Nonnull ClientID clientId, @Nullable Nonce nonce, @Nullable AccessTokenHash atHash,
 							 @Nullable CodeHash cHash) throws GeneralSecurityException, JOSEException, ParseException {
 
 		// TODO: could we use an URI on a different domain, completely unrelated to the OP?

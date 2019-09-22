@@ -37,7 +37,7 @@ import net.minidev.json.JSONObject;
 public class SignatureManipulationOP extends DefaultOP {
 
 	@Override
-	protected JWT getIdToken(ClientID clientId, Nonce nonce, AccessTokenHash atHash, CodeHash cHash)
+	public JWT getIdToken(ClientID clientId, Nonce nonce, AccessTokenHash atHash, CodeHash cHash)
 			throws GeneralSecurityException, JOSEException, ParseException {
 		JWT jwt = super.getIdToken(clientId, nonce, atHash, cHash);
 		SignedJWT origJwt = (SignedJWT) jwt;

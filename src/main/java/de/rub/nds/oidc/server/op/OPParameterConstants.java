@@ -39,6 +39,8 @@ public class OPParameterConstants {
 	public static final String FORCE_HONEST_DISCOVERY_TOKEN_EP    = "force_honest_discovery_tokenEP";
 	public static final String FORCE_HONEST_DISCOVERY_USERINFO_EP = "force_honest_discovery_userinfoEP";
 
+	public static final String SCRIPT_USER_INFO            = "script_user_info";
+	public static final String SCRIPT_HONEST_TOKEN_ISS     = "honest_idtoken_iss";
 	public static final String FORCE_HONEST_TOKEN_ISS      = "force_honest_idtoken_iss";
 	public static final String FORCE_TOKEN_ISS_EXCL        = "force_idtoken_iss_excluded";
 	public static final String FORCE_TOKEN_ISS_EMPTY       = "force_idtoken_iss_empty_string";
