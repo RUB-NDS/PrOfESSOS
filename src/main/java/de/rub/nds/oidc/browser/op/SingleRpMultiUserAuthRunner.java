@@ -49,7 +49,7 @@ public class SingleRpMultiUserAuthRunner extends AbstractOPBrowser {
 				return result;
 			}
 			// reload browser to clear sessions
-			loadDriver(true);
+			reloadDriver();
 		}
 
 		return result;

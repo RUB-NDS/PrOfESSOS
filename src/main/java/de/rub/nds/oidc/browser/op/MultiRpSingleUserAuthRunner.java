@@ -44,7 +44,7 @@ public class MultiRpSingleUserAuthRunner extends AbstractOPBrowser {
 				return result;
 			}
 			// reload browser to clear sessions
-			loadDriver(true);
+			reloadDriver();
 		}
 
 		return TestStepResult.PASS;

@@ -110,7 +110,7 @@ public class KeyConfusionRPBrowser extends DefaultRPTestBrowser {
 
 	private void runHonestAuth() {
 		try {
-			RemoteWebDriver second = getDriverInstance();
+			RemoteWebDriver second = driver2;
 			// copy all cookies that were set in first browser instance
 			// 1. navigate to correct domain
 			second.get(startOpUrl);

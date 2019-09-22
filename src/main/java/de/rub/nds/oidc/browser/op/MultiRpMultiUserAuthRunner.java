@@ -55,7 +55,7 @@ public class MultiRpMultiUserAuthRunner extends AbstractOPBrowser {
 					}
 				}
 				// reload browser to clear sessions
-				loadDriver(true);
+				reloadDriver();
 			}
 		}
 

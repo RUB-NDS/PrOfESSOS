@@ -49,7 +49,7 @@ public class OPCodeReuseBrowser extends AbstractOPBrowser {
 			result = runUserAuth(type);
 
 			// reload browser to clear sessions
-			loadDriver(true);
+			reloadDriver();
 		}
 		return result;
 	}

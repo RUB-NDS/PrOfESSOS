@@ -70,7 +70,7 @@ public class SessionOverwritingRPBrowser extends DefaultRPTestBrowser {
 					// wait, till first OP received authrequest
 					blockSecondBrowser.get(15, TimeUnit.SECONDS);
 
-					RemoteWebDriver second = getDriverInstance();
+					RemoteWebDriver second = driver2;
 
 					// copy all cookies that were set in first browser instance
 					// 1. navigate to correct domain

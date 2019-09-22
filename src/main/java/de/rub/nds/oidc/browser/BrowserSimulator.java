@@ -78,12 +78,15 @@ public abstract class BrowserSimulator {
 		loadFormSubmissionDelayScript();
 	}
 
-	protected final void loadDriver(boolean quit) {
+	protected final void reloadDriver() {
+		loadDriver(true);
+	}
+
+	private void loadDriver(boolean quit) {
 		if (quit) {
 			quit();
 		}
 		driver1 = getDriverInstance();
-		driver2 = getDriverInstance();
 		jsWaiter1 = new JsWaiter();
 		jsWaiter1.setJsWaitDriver(driver1, MEDIUM_WAIT_TIMEOUT);
 

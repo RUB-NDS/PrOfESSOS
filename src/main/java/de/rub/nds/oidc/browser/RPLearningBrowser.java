@@ -22,10 +22,11 @@ import de.rub.nds.oidc.test_model.TestStepResult;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.stringtemplate.v4.ST;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+
+
 /**
  *
  * @author Tobias Wich
@@ -40,7 +41,7 @@ public class RPLearningBrowser extends BrowserSimulator {
 			return resultHonest;
 		}
 		// run with evil OP with fresh browser, when honest OP passed
-		loadDriver(true);
+		reloadDriver();
 		TestStepResult resultEvil = runEvil();
 		return resultEvil;
 	}
