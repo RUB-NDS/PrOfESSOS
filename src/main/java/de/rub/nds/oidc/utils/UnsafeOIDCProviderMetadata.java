@@ -948,8 +948,13 @@ public class UnsafeOIDCProviderMetadata extends UnsafeAuthorizationServerMetadat
 		UnsafeAuthorizationServerMetadata as = UnsafeAuthorizationServerMetadata.parse(jsonObject);
 
 		List<SubjectType> subjectTypes = new ArrayList<>();
-		for (String v: JSONObjectUtils.getStringArray(jsonObject, "subject_types_supported")) {
-			subjectTypes.add(SubjectType.parse(v));
+		if(JSONObjectUtils.containsKey(jsonObject,"subject_types_supported")) {
+			for (String v : JSONObjectUtils.getStringArray(jsonObject, "subject_types_supported")) {
+				subjectTypes.add(SubjectType.parse(v));
+			}
+		} else {
+		    /* XXX subject_types_supported is required, but Gravitee does not provide it and support currently only PUBLIC */
+			subjectTypes.add(SubjectType.PUBLIC);
 		}
 
 		UnsafeOIDCProviderMetadata op = new UnsafeOIDCProviderMetadata(
