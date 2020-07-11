@@ -37,7 +37,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -49,6 +48,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.engines.URLConnectionEngine;
 
 /**
  * @author Tobias Wich
@@ -245,8 +247,9 @@ public class TestRunner {
 						.replaceQuery(null)
 						.build();
 
+				ResteasyClient client = new ResteasyClientBuilder().httpEngine(new URLConnectionEngine()).build();
 				logger.log("Obtaining permission to perform test from url '" + wellKnown + "'.");
-				Response grantTokenResp = ClientBuilder.newClient().target(wellKnown)
+				Response grantTokenResp = client.target(wellKnown)
 						.request().accept(MediaType.WILDCARD).get();
 				if (grantTokenResp.getStatus() == 200 && grantTokenResp.getLength() > 0) {
 					String grantToken = grantTokenResp.readEntity(String.class);
