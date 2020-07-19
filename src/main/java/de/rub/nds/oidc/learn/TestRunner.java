@@ -123,6 +123,47 @@ public class TestRunner {
 		return learnResult;
 	}
 
+	public void prepareDiscovery(String testId, TestInstanceRegistry instReg) throws ImplementationLoadException {
+		// find matching test
+		TestStepResultType result = getTestObj().getTestReport().getTestStepResult().stream()
+				.filter(stepResult -> stepResult.getStepReference().getName().equals(testId))
+				.findFirst()
+				.orElseThrow(() -> new WebApplicationException("Requested test case is not defined.", Response.Status.NOT_FOUND));
+		// clear log
+		result.getLogEntry().clear();
+
+		TestStepType stepDef = result.getStepReference();
+		String testIdPath = profCfg.getEndpointCfg().isPrintTestIdPath() ? "" : "/" + testId;
+		TestStepLogger logger = new TestStepLogger(result, testIdPath);
+
+		try {
+			// setup the test
+			Map<String, Object> testStepCtx = Collections.synchronizedMap(new HashMap<>());
+			// add parameters to step context
+			Optional.ofNullable(testPlan.getSuiteParameters()).ifPresent(sp -> {
+				sp.getParameter().forEach(p -> testStepCtx.put(p.getKey(), p.getValue()));
+			});
+			// overwrite suite parameters
+			Optional.ofNullable(stepDef.getTestParameters()).ifPresent(tp -> {
+				tp.getParameter().forEach(p -> testStepCtx.put(p.getKey(), p.getValue()));
+			});
+
+			prepareTestStep(instReg, testStepCtx, stepDef, logger);
+		} catch (InvalidConfigurationException | TestNotApplicableException ex) {
+			logger.logCodeBlock("Test step preparation failed with:", ex.toString());
+			return;
+		} catch (Exception ex) {
+			logger.log("Error setting up discovery informations.", ex);
+			return;
+		} finally {
+			// clean up test
+			if (isRPTest()) {
+				instReg.removeOP1(testId);
+				instReg.removeOP2(testId);
+			}
+		}
+	}
+
 	private <T> T runTestFun(TestInstanceRegistry instReg, TestStepResultType result, TestFunction<T> f,
 							 T errorResponse)
 			throws ImplementationLoadException {

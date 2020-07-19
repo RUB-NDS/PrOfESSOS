@@ -217,4 +217,15 @@ public class TestController {
 		config.setType(TestOPConfigType.class.getName());
 		obj.getTestObj().setTestConfig(config);
 	}
+
+	@POST
+	@Path("/rp/{testId}/expose/{stepId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void exposeDiscovery(@PathParam("testId") String testId, @PathParam("stepId") String stepId)
+			throws NoSuchTestObject, ImplementationLoadException {
+		TestRunner runner = testObjs.getTestObject(testId);
+
+		runner.prepareDiscovery(stepId, testInsts);
+	}
+
 }
