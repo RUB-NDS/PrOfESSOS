@@ -71,6 +71,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import static com.nimbusds.jose.jwk.KeyUse.SIGNATURE;
 import static de.rub.nds.oidc.server.TestStepParameterConstants.*;
 import static de.rub.nds.oidc.server.op.OPParameterConstants.*;
 import de.rub.nds.oidc.utils.ParamScriptExecutor;
@@ -586,10 +588,14 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 				.x509CertChain(chain)
 				.algorithm(JWSAlgorithm.RS256);
 
-		String keyID = (String) stepCtx.getOrDefault(OPContextConstants.SIGNING_JWK_KEYID, "");
+		/* angular oauth needs kid and key use definition.
+		 * Both should be optional only!
+		 * Hopefully this will not affect other tests */
+		String keyID = (String) stepCtx.getOrDefault(OPContextConstants.SIGNING_JWK_KEYID, "professos");
 		if (!Strings.isNullOrEmpty(keyID)) {
 			kb.keyID(keyID);
 		}
+		kb.keyUse(SIGNATURE);
 
 		RSAKey key = kb.build();
 
