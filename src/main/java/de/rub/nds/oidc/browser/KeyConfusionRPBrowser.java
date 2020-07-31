@@ -80,7 +80,7 @@ public class KeyConfusionRPBrowser extends DefaultRPTestBrowser {
 		});
 
 		// start authentication at Evil OP
-		waitForPageLoad1(() -> {
+		waitForDocumentReadyAndJsReady1(() -> {
 			driver1.executeScript(submitScriptEvil);
 			return null;
 		});

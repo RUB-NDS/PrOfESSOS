@@ -50,7 +50,7 @@ public class SessionOverwritingRPBrowser extends DefaultRPTestBrowser {
 			String startUrl = rpConfig.getUrlClientTarget();
 			logger.logCodeBlock("Opening browser with URL :", startUrl);
 
-			waitForPageLoad1(() -> {
+			waitForDocumentReadyAndJsReady1(() -> {
 				driver1.get(startUrl);
 				return null;
 			});
@@ -98,7 +98,7 @@ public class SessionOverwritingRPBrowser extends DefaultRPTestBrowser {
 			// start first authentication in "foreground" thread
 			logger.log("Browser starts authentication at first OP.");
 
-			waitForPageLoad1(() -> {
+			waitForDocumentReadyAndJsReady1(() -> {
 				driver1.executeScript(submitScript);
 				return null;}
 				);

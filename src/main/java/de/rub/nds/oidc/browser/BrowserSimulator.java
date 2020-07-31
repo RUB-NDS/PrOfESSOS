@@ -210,6 +210,21 @@ public abstract class BrowserSimulator {
 		return result;
 	}
 
+	private <T> T waitForPageLoadJs(Func<T> func, long timeout, RemoteWebDriver driver, JsWaiter jsWaiter) {
+		RemoteWebElement oldHtml = (RemoteWebElement) driver.findElement(By.tagName("html"));
+		// Wait for old page has loaded java scripts, before try to click a button which may be created by JS
+		jsWaiter.waitAllRequest();
+
+		T result = func.call();
+		WebDriverWait wait = new WebDriverWait(driver, timeout);
+		wait.until((WebDriver input) -> {
+			RemoteWebElement newHtml = (RemoteWebElement) driver.findElement(By.tagName("html"));
+			return !newHtml.getId().equals(oldHtml.getId());
+		});
+
+		return result;
+	}
+
 	protected final <T> T waitForPageLoad1(Func<T> func) {
 		return waitForPageLoad(func, MEDIUM_WAIT_TIMEOUT, driver1);
 	}
@@ -227,13 +242,13 @@ public abstract class BrowserSimulator {
 	private <T> T waitForDocumentReadyAndJsReady(Func<T> func, RemoteWebDriver driver, JsWaiter jsWaiter) {
 		// first, try if a new <html> element can be detected within 3 seconds
 		try {
-			T result = waitForPageLoad(func, 3, driver);
+			T result = waitForPageLoadJs(func, 3, driver, jsWaiter);
 		} catch (org.openqa.selenium.TimeoutException e) {
 			// ignore
 //			logger.log("debug: timeout during waitForPageLoad");
 		}
-		// next, even if no new html element was detected, wait until 
-		// document.readyState is complete and check various JS frameworks if 
+		// next, even if no new html element was detected, wait until
+		// document.readyState is complete and check various JS frameworks if
 		// they finished loading and are ready. Currently, jsWaiter waits for up to 10 seconds
 		jsWaiter.waitAllRequest();
 		return null;

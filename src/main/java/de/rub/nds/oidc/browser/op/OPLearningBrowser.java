@@ -79,7 +79,7 @@ public class OPLearningBrowser extends MultiRpMultiUserAuthRunner {
 				driver1.executeScript(getFormSubmitDelayScript());
 				logger.logCodeBlock("Using Consent script:", consentScript);
 
-				waitForPageLoad1(() -> {
+				waitForDocumentReadyAndJsReady1(() -> {
 					driver1.executeScript(consentScript);
 					logScreenshot1();
 					logger.log("ConsentScript executed, client authorized.");

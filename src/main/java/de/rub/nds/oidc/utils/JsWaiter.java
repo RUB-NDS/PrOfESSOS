@@ -157,6 +157,9 @@ public class JsWaiter {
 	}
 
 	public void waitAllRequest() {
+		// FIXME Add time for lazy loaded elements, not nice but generic.
+		//  waitForElementAreComplete() would maybe work, but Element is different per webapp
+		poll(400);
 		waitUntilJSReady();
 //		ajaxComplete();
 		waitUntilJQueryReady();
