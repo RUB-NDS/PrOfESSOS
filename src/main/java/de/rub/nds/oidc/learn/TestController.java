@@ -91,7 +91,7 @@ public class TestController {
 	}
 
 	@GET
-	@Path("/{role: rp|op}/{testId}/export")
+	@Path("/{role: rp|op}/{testId}/export-json")
 	@Produces({MediaType.APPLICATION_JSON})
 	public TestObjectType exportJson(@PathParam("testId") String testId) throws NoSuchTestObject {
 		TestRunner obj = testObjs.getTestObject(testId);
