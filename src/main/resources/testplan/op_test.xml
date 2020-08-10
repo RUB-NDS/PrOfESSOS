@@ -1057,7 +1057,7 @@
 		<h4>Execution</h4>
 		PrOfESSOS attempts to redeem an authorization code using Basic Authentication with an empty string as
 			<code>client_secret</code>. That is, the Authorization Header looks like
-			<pre><code>Authorization: Basic <code><pre>
+			<pre><code>Authorization: Basic </code></pre>
 
 		<h4>Result Evaluation</h4>
 		The attack is considered successful if a valid Token Response is returned.
