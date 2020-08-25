@@ -2226,7 +2226,7 @@
 			The attack is successful if the token is accepted by the client.
 
 			<h4>Mitigation</h4>
-			The <code>iat<code> value MUST be validated, see Step 10 in Section 
+			The <code>iat</code> value MUST be validated, see Step 10 in Section
 			3.1.3.7 in OpenIDConnect-Core. ID Tokens created in 
 			the future should not be accepted.
 		]]>
