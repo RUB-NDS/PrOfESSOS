@@ -515,6 +515,9 @@ public class DefaultRP extends AbstractRPImplementation {
 		if (params.getBool(AUTHNREQ_RESPONSE_MODE_FRAGMENT)) {
 			return ResponseMode.FRAGMENT;
 		}
+		if (params.getBool(AUTHNREQ_RESPONSE_MODE_QUERY)) {
+			return ResponseMode.QUERY;
+		}
 		if (params.getBool(AUTHNREQ_RESPONSE_TYPE_FORM_POST)) {
 			// TODO: check if a form_post response is succesfully reeceived
 			return ResponseMode.FORM_POST;
