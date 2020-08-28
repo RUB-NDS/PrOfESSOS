@@ -1036,6 +1036,47 @@
 
 		<RPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
+			<Parameter Key="tokenreq-clientauth-exclude-client-secret">true</Parameter>
+			<Parameter Key="code-redemption-fails-test">true</Parameter>
+		</RPConfig-1>
+		<RPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.CodeReuseRP</ImplementationClass>
+
+			<!--<Parameter Key="force-use-stored-auth-code">true</Parameter>-->
+		</RPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Client Authentication - Basic Auth, Exclude ID" DisplayGroup="Client Authentication">
+		<Description><![CDATA[
+		<h3>Client Authentication Validation</h4>
+		PrOfESSOS tests the validation of the client credentials at the Token Endpoint.
+
+		<h4>Prerequisites</h4>
+		The OP supports the <code>authorization_code_grant</code> and PrOfESSOS test clients can make use of the code flow.
+
+		<h4>Execution</h4>
+		PrOfESSOS attempts to redeem an authorization code using Basic Authentication with an empty string as
+		<code>client_id</code>. That is, the Authorization Header's value is made up as
+		<pre><code>Authorization: Basic Base64(":ClientSecret")</code><pre>
+
+		<h4>Result Evaluation</h4>
+		The attack is considered successful if a valid Token Response is returned.
+
+		<h4>Mitigation</h4>
+		According to <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequestValidation" target="_blank">OpenID Connect Core 1.0, Section 3.1.3.1,</a> the OP MUST <q>Authenticate the Client if it was issued
+		Client Credentials or if it uses another Client Authentication method, per Section 9.</q>
+		Implementations must take special care not to introduce vulnerabilities in this important validation step.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="is_single_rp_test">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.op.SingleRpSingleUserAuthRunner</ImplementationClass>
+		</BrowserSimulator>
+
+		<RPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.rp.DefaultRP</ImplementationClass>
 			<Parameter Key="tokenreq-clientauth-empty-client-id">true</Parameter>
 			<Parameter Key="code-redemption-fails-test">true</Parameter>
 		</RPConfig-1>
