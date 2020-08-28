@@ -53,7 +53,8 @@ public class JwtAuthRP extends DefaultRP {
 
 			// Prepare a dummy "client_assertion" query parameter
 			Secret assertionSecret;
-			if (clientInfo.getSecret().getValueBytes().length < 32) {
+			if (clientInfo.getSecret() == null ||
+				clientInfo.getSecret().getValueBytes().length < 32) {
 				assertionSecret = new Secret();
 				// we should leave a message about this:
 				logger.log("Generated a new client Secret as dummy key for the client_assert HMAC generation");

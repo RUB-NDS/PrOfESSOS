@@ -21,6 +21,7 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
+import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.http.ServletUtils;
@@ -291,7 +292,9 @@ public class DefaultRP extends AbstractRPImplementation {
 				opMetaData.getTokenEndpointURI(),
 				// set Basic Authorization header to construct a temporary request
 				// that is customized according to TestStepReference later on
-				new ClientSecretBasic(clientInfo.getID(), clientInfo.getSecret()),
+				new ClientSecretBasic(
+						clientInfo.getID(),
+						clientInfo.getSecret() != null ? clientInfo.getSecret() : new Secret("REPLACED")),
 				codeGrant);
 
 		HTTPRequest httpRequest = request.toHTTPRequest();
