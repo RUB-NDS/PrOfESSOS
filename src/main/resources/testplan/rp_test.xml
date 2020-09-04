@@ -2926,4 +2926,25 @@
 		</OPConfig-2>
 	</TestStep>
 
+	<TestStep Name="Custom Script 1 - Default OP" DisplayGroup="Custom">
+		<Description><![CDATA[
+			<h3>Custom Script</h3>
+		 	Professos provides a default OP which could be used for manipulations via mitm proxy scripts
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-2>
+	</TestStep>
 </TestPlan>
