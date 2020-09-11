@@ -2929,7 +2929,12 @@
 	<TestStep Name="Custom Script 1 - Default OP" DisplayGroup="Custom">
 		<Description><![CDATA[
 			<h3>Custom Script</h3>
-		 	Professos provides a default OP which could be used for manipulations via mitm proxy scripts
+		 	PrOfESSOS provides a default OP which could be used for manipulations via MitM-Proxy scripts.
+
+		 	<h4>Result Evaluation</h4>
+		 	It is expected that this test will FAIL with no MitM-Proxy script!
+		 	In cases a MitM-Proxy script was used the tester must take a closer look. PrOfESSOS does not have any
+		 	information about this tests.
 		]]>
 		</Description>
 		<TestParameters>

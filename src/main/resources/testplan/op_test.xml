@@ -2146,7 +2146,12 @@ parameter in the Authentication Request.
 		<Description>
 			<![CDATA[
 			<h3>Custom Redirect URI</h3>
-			Professos provides a default RP which could be used for manipulations via mitm proxy scripts
+			PrOfESSOS provides a default RP which could be used for manipulations via MitM-Proxy scripts.
+
+			<h4>Result Evaluation</h4>
+			It is expected that this test will pass without a MitM-Proxy script.
+			In cases a MitM-Proxy script was used the tester must take a closer look. PrOfESSOS does not have any
+		 	information about this tests.
 			]]>
 		</Description>
 		<TestParameters>
