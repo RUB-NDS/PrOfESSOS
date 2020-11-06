@@ -481,7 +481,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 					UserInfo ui = new UserInfo(new Subject(getTokenSubject()));
 					ui.setName(getTokenName());
 					ui.setPreferredUsername(getTokenUsername());
-					ui.setEmail(getTokenEmail());
+					ui.setEmailAddress(getTokenEmail().getAddress());
 					return ui;
 				});
 		return userInfo;
@@ -504,7 +504,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 			// reset all user claims except "sub"
 			ui.setName(null);
 			ui.setPreferredUsername(null);
-			ui.setEmail(null);
+			ui.setEmailAddress(null);
 		}
 
 		JWTClaimsSet.Builder cb = new JWTClaimsSet.Builder(ui.toJWTClaimsSet());

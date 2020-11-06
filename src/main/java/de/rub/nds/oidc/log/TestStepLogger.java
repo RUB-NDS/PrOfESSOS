@@ -17,6 +17,7 @@
 package de.rub.nds.oidc.log;
 
 import com.google.common.base.Strings;
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import de.rub.nds.oidc.test_model.*;
@@ -166,7 +167,7 @@ public class TestStepLogger {
 			if (req.getMethod() != HTTPRequest.Method.POST) {
 				reqLine += "?" + req.getQuery();
 			} else {
-				entry.setBody(formatBody(req.getContentType().toString(), req.getQuery()));
+				entry.setBody(formatBody(req.getHeaderValue("Content-Type").toString(), req.getQuery()));
 			}
 		}
 //		reqLine += " " + req.getProtocol();
@@ -176,7 +177,7 @@ public class TestStepLogger {
 		entry.getHeader().add(createHeader("X-Protocol-Scheme", req.getURL().getProtocol()));
 		entry.getHeader().add(createHeader("X-Protocol-Port", Integer.toString(req.getURL().getPort())));
 
-		entry.getHeader().addAll(readHeaders(req.getHeaders()));
+		entry.getHeader().addAll(readHeaders(req.getHeaderMap()));
 
 		logHttpRequest(entry);
 	}
@@ -211,8 +212,8 @@ public class TestStepLogger {
 		HttpResponseEntryType entry = new HttpResponseEntryType();
 
 		entry.setStatus(BigInteger.valueOf(res.getStatusCode()));
-		entry.getHeader().addAll(readHeaders(res.getHeaders()));
-		entry.setBody(formatBody(res.getContentType().toString(), body));
+		entry.getHeader().addAll(readHeaders(res.getHeaderMap()));
+		entry.setBody(formatBody(res.getHeaderValue("Content-Type").toString(), body));
 
 		logHttpResponse(entry);
 	}
@@ -233,13 +234,13 @@ public class TestStepLogger {
 	}
 
 	// nimbus SDK uses different types
-	private List<HeaderType> readHeaders(Map<String,String> headers) {
+	private List<HeaderType> readHeaders(Map<String, List<String>> headers) {
 		List<HeaderType> result = new ArrayList<>();
 //		for (String key : headers.keySet()) {
 //			result.add(createHeader(key, headers.get(key)));
 //		}
-		for (Map.Entry<String,String> e : headers.entrySet()) {
-			result.add(createHeader(e.getKey(), e.getValue()));
+		for (Map.Entry<String,List<String>> e : headers.entrySet()) {
+			result.add(createHeader(e.getKey(), e.getValue().get(0)));
 		}
 		return result;
 	}

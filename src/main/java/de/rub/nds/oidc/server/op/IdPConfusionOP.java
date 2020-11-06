@@ -34,6 +34,8 @@ import de.rub.nds.oidc.server.RequestPath;
 import de.rub.nds.oidc.test_model.TestStepResult;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import javax.servlet.http.HttpServletRequest;
@@ -82,18 +84,18 @@ public class IdPConfusionOP extends DefaultOP {
 				State opState = (State) stepCtx.get(OPContextConstants.AUTH_REQ_HONEST_STATE);
 				Nonce opNonce = (Nonce) stepCtx.get(OPContextConstants.AUTH_REQ_HONEST_NONCE);
 
-				Map<String, String> authReqParams = reqMsg.getQueryParameters();
+				Map<String, List<String>> authReqParams = reqMsg.getQueryParameters();
 				if (opState != null) {
 					// authReqParams.put("state", opState.toString());
 				}
 				if (opNonce != null) {
-					authReqParams.put("nonce", opNonce.toString());
+					authReqParams.put("nonce", Arrays.asList(opNonce.toString()));
 				}
 
 				// build URI pointing to honest OP
 				UriBuilder honestAuthReqUriBuilder = UriBuilder.fromUri(getHonestAuthorizationEndpoint());
-				for (Map.Entry<String, String> next : authReqParams.entrySet()) {
-					honestAuthReqUriBuilder = honestAuthReqUriBuilder.queryParam(next.getKey(), next.getValue());
+				for (Map.Entry<String, List<String>> next : authReqParams.entrySet()) {
+					honestAuthReqUriBuilder = honestAuthReqUriBuilder.queryParam(next.getKey(), next.getValue().get(0));
 				}
 				URI honestAuthReqUri = honestAuthReqUriBuilder.build();
 				resp.sendRedirect(honestAuthReqUri.toString());

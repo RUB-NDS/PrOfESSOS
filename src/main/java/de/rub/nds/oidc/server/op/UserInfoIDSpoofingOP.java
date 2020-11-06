@@ -16,6 +16,7 @@
 
 package de.rub.nds.oidc.server.op;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -25,7 +26,6 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.ServletUtils;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -122,7 +122,7 @@ public class UserInfoIDSpoofingOP extends DefaultOP {
 			}
 			
 			resp.setStatus(HttpServletResponse.SC_OK);
-			resp.setContentType(CommonContentTypes.APPLICATION_JSON.toString()); 
+			resp.setContentType(ContentType.APPLICATION_JSON.toString()); 
 			resp.setCharacterEncoding("UTF-8");
 			resp.getWriter().write(content);
 			resp.flushBuffer();

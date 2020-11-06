@@ -19,6 +19,7 @@ package de.rub.nds.oidc.utils;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import de.rub.nds.oidc.server.op.OPType;
 import de.rub.nds.oidc.server.rp.RPType;
+import java.util.Arrays;
 import javax.servlet.http.HttpServletResponse;
 
 
@@ -37,7 +38,7 @@ public class LogUtils {
 	}
 
 	public static void addSenderHeader(HTTPRequest regHttpRequest, RPType type) {
-		regHttpRequest.getHeaders().put("X-Prof-Sender", type + "-RP");
+		regHttpRequest.getHeaderMap().put("X-Prof-Sender", Arrays.asList(type + "-RP"));
 	}
 
 }

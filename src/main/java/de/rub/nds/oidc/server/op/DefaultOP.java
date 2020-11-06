@@ -60,6 +60,7 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -175,7 +176,7 @@ public class DefaultOP extends AbstractOPImplementation {
 				}
 
 				// answer the response
-				OIDCClientInformationResponse regResp = new OIDCClientInformationResponse(info);
+				OIDCClientInformationResponse regResp = new OIDCClientInformationResponse (info, true);
 				HTTPResponse httpRes = regResp.toHTTPResponse();
 				ServletUtils.applyHTTPResponse(httpRes, resp);
 
@@ -185,7 +186,7 @@ public class DefaultOP extends AbstractOPImplementation {
 			} else {
 				// client is already registered
 				// answer the response
-				OIDCClientInformationResponse regResp = new OIDCClientInformationResponse(info);
+				OIDCClientInformationResponse regResp = new OIDCClientInformationResponse(info, false);
 				HTTPResponse httpRes = regResp.toHTTPResponse();
 				ServletUtils.applyHTTPResponse(httpRes, resp);
 
@@ -264,8 +265,8 @@ public class DefaultOP extends AbstractOPImplementation {
 					sb.append("<head><title>PrOfESSOS form post</title></head>");
 					sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
 					sb.append("<form method=\"post\" action=\"" + authRes.getRedirectionURI().toString() + "\">");
-					for (Map.Entry<String, String> entry : authRes.toParameters().entrySet()) {
-						String entryValue = StringEscapeUtils.escapeHtml4(entry.getValue());
+					for (Map.Entry<String, List<String>> entry : authRes.toParameters().entrySet()) {
+						String entryValue = StringEscapeUtils.escapeHtml4(entry.getValue().get(0));
 						sb.append("<input type=\"hidden\" name=\"" + entry.getKey() + "\" value=\"" + entryValue + "\"/>");
 					}
 					sb.append("</form>");

@@ -71,7 +71,7 @@
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>oauth2-oidc-sdk</artifactId>
-			<version>5.64.4</version>
+			<version>8.22</version>
 			<exclusions>
 				<!-- this is part of the application server already -->
 				<exclusion>
