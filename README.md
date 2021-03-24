@@ -1,8 +1,8 @@
 <table width="100%" border="0">
   <tr>    
-  <td align="center"><img src="http://www.syssec.rub.de/media/attachments/cache/attachments/images/2012/11/NDS_Logo_scaled_scaled.jpeg" width="60%" height="60%" alt=""/></td>
-  <td align="center"><img src="https://www.hackmanit.de/img/Hackmanit_Logo.png" alt="" align="center" width="40%" height="40%"/></td>
-  <td align="center"><img src="https://www.ecsec.de/fileadmin/Ecsec-files/templates/img/ecsec-logo_100px.png" width="50%" height="50%"/></td>
+  <td align="center"><img src="http://www.syssec.rub.de/media/attachments/cache/attachments/images/2012/11/NDS_Logo_scaled_scaled.jpeg" width="70%" alt=""/></td>
+  <td align="center"><img src="https://hackmanit.de/templates/hackmanit-v2/img/wbm_hackmanit.png" alt="" align="center" width="20%" /></td>
+  <td align="center"><img src="https://www.ecsec.de/fileadmin/Ecsec-files/templates/img/ecsec-logo_100px.png" width="60%"/></td>
   </tr>
 </table>
 
