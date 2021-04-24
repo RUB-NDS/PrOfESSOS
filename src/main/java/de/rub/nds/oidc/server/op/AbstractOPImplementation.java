@@ -583,19 +583,18 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 			}
 		}).collect(Collectors.toList());
 
-		RSAKey.Builder kb = new RSAKey.Builder(pubKey)
-				.privateKey(privKey)
-				.x509CertChain(chain)
-				.algorithm(JWSAlgorithm.RS256);
-
 		/* angular oauth needs kid and key use definition.
 		 * Both should be optional only!
 		 * Hopefully this will not affect other tests */
 		String keyID = (String) stepCtx.getOrDefault(OPContextConstants.SIGNING_JWK_KEYID, "professos");
-		if (!Strings.isNullOrEmpty(keyID)) {
-			kb.keyID(keyID);
-		}
-		kb.keyUse(SIGNATURE);
+		keyID = Strings.emptyToNull(keyID);
+
+		RSAKey.Builder kb = new RSAKey.Builder(pubKey)
+				.privateKey(privKey)
+				.x509CertChain(chain)
+				.algorithm(JWSAlgorithm.RS256)
+				.keyID(keyID)
+				.keyUse(SIGNATURE);
 
 		RSAKey key = kb.build();
 
