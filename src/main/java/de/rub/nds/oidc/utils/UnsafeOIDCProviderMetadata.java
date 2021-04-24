@@ -223,13 +223,15 @@ public class UnsafeOIDCProviderMetadata extends UnsafeAuthorizationServerMetadat
 
 		super(issuer);
 
-		if (subjectTypes.size() < 1)
+		if (subjectTypes.size() < 1) {
 			throw new IllegalArgumentException("At least one supported subject type must be specified");
+		}
 
 		this.subjectTypes = subjectTypes;
 
-		if (jwkSetURI == null)
+		if (jwkSetURI == null) {
 			throw new IllegalArgumentException("The public JWK set URI must not be null");
+		}
 
 		setJWKSetURI(jwkSetURI);
 	}
@@ -768,6 +770,7 @@ public class UnsafeOIDCProviderMetadata extends UnsafeAuthorizationServerMetadat
 	 *     <li>The claim types default to {@code ["normal]}.
 	 * </ul>
 	 */
+	@Override
 	public void applyDefaults() {
 
 		super.applyDefaults();
@@ -785,132 +788,29 @@ public class UnsafeOIDCProviderMetadata extends UnsafeAuthorizationServerMetadat
 	 *
 	 * @return The JSON object representation.
 	 */
+	@Override
 	public JSONObject toJSONObject() {
 
 		JSONObject o = super.toJSONObject();
 
 		// Mandatory fields
-
-		List<String> stringList = new ArrayList<>(subjectTypes.size());
-
-		for (SubjectType st: subjectTypes)
-			stringList.add(st.toString());
-
-		o.put("subject_types_supported", stringList);
+		o.put("subject_types_supported", mapToStringList(SubjectType::toString).apply(subjectTypes));
 
 		// Optional fields
-
-		if (userInfoEndpoint != null)
-			o.put("userinfo_endpoint", userInfoEndpoint.toString());
-
-		if (checkSessionIframe != null)
-			o.put("check_session_iframe", checkSessionIframe.toString());
-
-		if (endSessionEndpoint != null)
-			o.put("end_session_endpoint", endSessionEndpoint.toString());
-
-		if (acrValues != null) {
-
-			stringList = new ArrayList<>(acrValues.size());
-
-			for (ACR acr: acrValues)
-				stringList.add(acr.getValue());
-
-			o.put("acr_values_supported", stringList);
-		}
-
-		if (idTokenJWSAlgs != null) {
-
-			stringList = new ArrayList<>(idTokenJWSAlgs.size());
-
-			for (JWSAlgorithm alg: idTokenJWSAlgs)
-				stringList.add(alg.getName());
-
-			o.put("id_token_signing_alg_values_supported", stringList);
-		}
-
-		if (idTokenJWEAlgs != null) {
-
-			stringList = new ArrayList<>(idTokenJWEAlgs.size());
-
-			for (JWEAlgorithm alg: idTokenJWEAlgs)
-				stringList.add(alg.getName());
-
-			o.put("id_token_encryption_alg_values_supported", stringList);
-		}
-
-		if (idTokenJWEEncs != null) {
-
-			stringList = new ArrayList<>(idTokenJWEEncs.size());
-
-			for (EncryptionMethod m: idTokenJWEEncs)
-				stringList.add(m.getName());
-
-			o.put("id_token_encryption_enc_values_supported", stringList);
-		}
-
-		if (userInfoJWSAlgs != null) {
-
-			stringList = new ArrayList<>(userInfoJWSAlgs.size());
-
-			for (JWSAlgorithm alg: userInfoJWSAlgs)
-				stringList.add(alg.getName());
-
-			o.put("userinfo_signing_alg_values_supported", stringList);
-		}
-
-		if (userInfoJWEAlgs != null) {
-
-			stringList = new ArrayList<>(userInfoJWEAlgs.size());
-
-			for (JWEAlgorithm alg: userInfoJWEAlgs)
-				stringList.add(alg.getName());
-
-			o.put("userinfo_encryption_alg_values_supported", stringList);
-		}
-
-		if (userInfoJWEEncs != null) {
-
-			stringList = new ArrayList<>(userInfoJWEEncs.size());
-
-			for (EncryptionMethod m: userInfoJWEEncs)
-				stringList.add(m.getName());
-
-			o.put("userinfo_encryption_enc_values_supported", stringList);
-		}
-
-		if (displays != null) {
-
-			stringList = new ArrayList<>(displays.size());
-
-			for (Display d: displays)
-				stringList.add(d.toString());
-
-			o.put("display_values_supported", stringList);
-		}
-
-		if (claimTypes != null) {
-
-			stringList = new ArrayList<>(claimTypes.size());
-
-			for (ClaimType ct: claimTypes)
-				stringList.add(ct.toString());
-
-			o.put("claim_types_supported", stringList);
-		}
-
-		if (claims != null)
-			o.put("claims_supported", claims);
-
-		if (claimsLocales != null) {
-
-			stringList = new ArrayList<>(claimsLocales.size());
-
-			for (LangTag l: claimsLocales)
-				stringList.add(l.toString());
-
-			o.put("claims_locales_supported", stringList);
-		}
+		putIfNonnull(o, "userinfo_endpoint", userInfoEndpoint);
+		putIfNonnull(o, "check_session_iframe", checkSessionIframe);
+		putIfNonnull(o, "end_session_endpoint", endSessionEndpoint);
+		putIfNonnull(o, "acr_values_supported", acrValues, mapToStringList(ACR::getValue));
+		putIfNonnull(o, "id_token_signing_alg_values_supported", idTokenJWSAlgs, mapToStringList(JWSAlgorithm::getName));
+		putIfNonnull(o, "id_token_encryption_alg_values_supported", idTokenJWEAlgs, mapToStringList(JWEAlgorithm::getName));
+		putIfNonnull(o, "id_token_encryption_enc_values_supported", idTokenJWEEncs, mapToStringList(EncryptionMethod::getName));
+		putIfNonnull(o, "userinfo_signing_alg_values_supported", userInfoJWSAlgs, mapToStringList(JWSAlgorithm::getName));
+		putIfNonnull(o, "userinfo_encryption_alg_values_supported", userInfoJWEAlgs, mapToStringList(JWEAlgorithm::getName));
+		putIfNonnull(o, "userinfo_encryption_enc_values_supported", userInfoJWEEncs, mapToStringList(EncryptionMethod::getName));
+		putIfNonnull(o, "display_values_supported", displays, mapToStringList(Display::toString));
+		putIfNonnull(o, "claim_types_supported", claimTypes, mapToStringList(ClaimType::toString));
+		putIfNonnull(o, "claims_supported", claims, v -> v);
+		putIfNonnull(o, "claims_locales_supported", claimsLocales, mapToStringList(LangTag::toString));
 
 		o.put("claims_parameter_supported", claimsParamSupported);
 
@@ -969,14 +869,9 @@ public class UnsafeOIDCProviderMetadata extends UnsafeAuthorizationServerMetadat
 		op.setIntrospectionEndpointURI(as.getIntrospectionEndpointURI());
 		op.setRevocationEndpointURI(as.getRevocationEndpointURI());
 
-		if (jsonObject.get("userinfo_endpoint") != null)
-			op.userInfoEndpoint = JSONObjectUtils.getURI(jsonObject, "userinfo_endpoint");
-
-		if (jsonObject.get("check_session_iframe") != null)
-			op.checkSessionIframe = JSONObjectUtils.getURI(jsonObject, "check_session_iframe");
-
-		if (jsonObject.get("end_session_endpoint") != null)
-			op.endSessionEndpoint = JSONObjectUtils.getURI(jsonObject, "end_session_endpoint");
+		op.userInfoEndpoint = extractFromJson(jsonObject, "userinfo_endpoint", readJsonUri);
+		op.checkSessionIframe = extractFromJson(jsonObject, "check_session_iframe", readJsonUri);
+		op.endSessionEndpoint = extractFromJson(jsonObject, "end_session_endpoint", readJsonUri);
 
 		// Capabilities
 		op.setScopes(as.getScopes());
@@ -1003,174 +898,55 @@ public class UnsafeOIDCProviderMetadata extends UnsafeAuthorizationServerMetadat
 
 		op.setCodeChallengeMethods(as.getCodeChallengeMethods());
 
-		if (jsonObject.get("acr_values_supported") != null) {
-
-			op.acrValues = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "acr_values_supported")) {
-
-				if (v != null)
-					op.acrValues.add(new ACR(v));
-			}
-		}
+		op.acrValues = extractFromJson(jsonObject, "acr_values_supported", extractNestedAdd(ArrayList::new, ACR::new));
 
 		// ID token
-
-		if (jsonObject.get("id_token_signing_alg_values_supported") != null) {
-
-			op.idTokenJWSAlgs = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "id_token_signing_alg_values_supported")) {
-
-				if (v != null)
-					op.idTokenJWSAlgs.add(JWSAlgorithm.parse(v));
-			}
-		}
-
-
-		if (jsonObject.get("id_token_encryption_alg_values_supported") != null) {
-
-			op.idTokenJWEAlgs = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "id_token_encryption_alg_values_supported")) {
-
-				if (v != null)
-					op.idTokenJWEAlgs.add(JWEAlgorithm.parse(v));
-			}
-		}
-
-
-		if (jsonObject.get("id_token_encryption_enc_values_supported") != null) {
-
-			op.idTokenJWEEncs = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "id_token_encryption_enc_values_supported")) {
-
-				if (v != null)
-					op.idTokenJWEEncs.add(EncryptionMethod.parse(v));
-			}
-		}
+		op.idTokenJWSAlgs = extractFromJson(jsonObject, "id_token_signing_alg_values_supported", extractNestedAdd(ArrayList::new, JWSAlgorithm::parse));
+		op.idTokenJWEAlgs = extractFromJson(jsonObject, "id_token_encryption_alg_values_supported", extractNestedAdd(ArrayList::new, JWEAlgorithm::parse));
+		op.idTokenJWEEncs = extractFromJson(jsonObject, "id_token_encryption_enc_values_supported", extractNestedAdd(ArrayList::new, EncryptionMethod::parse));
 
 		// UserInfo
-
-		if (jsonObject.get("userinfo_signing_alg_values_supported") != null) {
-
-			op.userInfoJWSAlgs = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "userinfo_signing_alg_values_supported")) {
-
-				if (v != null)
-					op.userInfoJWSAlgs.add(JWSAlgorithm.parse(v));
-			}
-		}
-
-
-		if (jsonObject.get("userinfo_encryption_alg_values_supported") != null) {
-
-			op.userInfoJWEAlgs = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "userinfo_encryption_alg_values_supported")) {
-
-				if (v != null)
-					op.userInfoJWEAlgs.add(JWEAlgorithm.parse(v));
-			}
-		}
-
-
-		if (jsonObject.get("userinfo_encryption_enc_values_supported") != null) {
-
-			op.userInfoJWEEncs = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "userinfo_encryption_enc_values_supported")) {
-
-				if (v != null)
-					op.userInfoJWEEncs.add(EncryptionMethod.parse(v));
-			}
-		}
-
+		op.userInfoJWSAlgs = extractFromJson(jsonObject, "userinfo_signing_alg_values_supported", extractNestedAdd(ArrayList::new, JWSAlgorithm::parse));
+		op.userInfoJWEAlgs = extractFromJson(jsonObject, "userinfo_encryption_alg_values_supported", extractNestedAdd(ArrayList::new, JWEAlgorithm::parse));
+		op.userInfoJWEEncs = extractFromJson(jsonObject, "userinfo_encryption_enc_values_supported", extractNestedAdd(ArrayList::new, EncryptionMethod::parse));
 
 		// Misc
-
-		if (jsonObject.get("display_values_supported") != null) {
-
-			op.displays = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "display_values_supported")) {
-
-				if (v != null)
-					op.displays.add(Display.parse(v));
+		op.displays = extractFromJson(jsonObject, "display_values_supported", extractNestedAdd(ArrayList::new, Display::parse));
+		op.claimTypes = extractFromJson(jsonObject, "claim_types_supported", extractNestedAdd(ArrayList::new, ClaimType::parse));
+		op.claims = extractFromJson(jsonObject, "claims_supported", extractNestedAdd(ArrayList::new, v -> v));
+		op.claimsLocales = extractFromJson(jsonObject, "claims_locales_supported", extractNestedAdd(ArrayList::new, v -> {
+			try {
+				return LangTag.parse(v);
+			} catch (LangTagException e) {
+				throw new ParseException("Invalid claims_locales_supported field: " + e.getMessage(), e);
 			}
-		}
-
-		if (jsonObject.get("claim_types_supported") != null) {
-
-			op.claimTypes = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "claim_types_supported")) {
-
-				if (v != null)
-					op.claimTypes.add(ClaimType.parse(v));
-			}
-		}
-
-
-		if (jsonObject.get("claims_supported") != null) {
-
-			op.claims = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "claims_supported")) {
-
-				if (v != null)
-					op.claims.add(v);
-			}
-		}
-
-		if (jsonObject.get("claims_locales_supported") != null) {
-
-			op.claimsLocales = new ArrayList<>();
-
-			for (String v : JSONObjectUtils.getStringArray(jsonObject, "claims_locales_supported")) {
-
-				if (v != null) {
-
-					try {
-						op.claimsLocales.add(LangTag.parse(v));
-
-					} catch (LangTagException e) {
-
-						throw new ParseException("Invalid claims_locales_supported field: " + e.getMessage(), e);
-					}
-				}
-			}
-		}
+		}));
 
 		op.setUILocales(as.getUILocales());
 		op.setServiceDocsURI(as.getServiceDocsURI());
 		op.setPolicyURI(as.getPolicyURI());
 		op.setTermsOfServiceURI(as.getTermsOfServiceURI());
 
-		if (jsonObject.get("claims_parameter_supported") != null)
-			op.claimsParamSupported = JSONObjectUtils.getBoolean(jsonObject, "claims_parameter_supported");
+		op.claimsParamSupported = extractFromJson(jsonObject, "claims_parameter_supported", readJsonBool, false);
 
 		// Optional front and back-channel logout
-		if (jsonObject.get("frontchannel_logout_supported") != null)
-			op.frontChannelLogoutSupported = JSONObjectUtils.getBoolean(jsonObject, "frontchannel_logout_supported");
-
-		if (op.frontChannelLogoutSupported && jsonObject.get("frontchannel_logout_session_supported") != null)
+		op.frontChannelLogoutSupported = extractFromJson(jsonObject, "frontchannel_logout_supported", readJsonBool, false);
+		if (op.frontChannelLogoutSupported && jsonObject.get("frontchannel_logout_session_supported") != null) {
 			op.frontChannelLogoutSessionSupported = JSONObjectUtils.getBoolean(jsonObject, "frontchannel_logout_session_supported");
+		}
 
-		if (jsonObject.get("backchannel_logout_supported") != null)
-			op.backChannelLogoutSupported = JSONObjectUtils.getBoolean(jsonObject, "backchannel_logout_supported");
-
-		if (op.frontChannelLogoutSupported && jsonObject.get("backchannel_logout_session_supported") != null)
+		op.backChannelLogoutSupported = extractFromJson(jsonObject, "backchannel_logout_supported", readJsonBool, false);
+		if (op.frontChannelLogoutSupported && jsonObject.get("backchannel_logout_session_supported") != null) {
 			op.backChannelLogoutSessionSupported = JSONObjectUtils.getBoolean(jsonObject, "backchannel_logout_session_supported");
+		}
 
 		op.setSupportsTLSClientCertificateBoundAccessTokens(as.supportsTLSClientCertificateBoundAccessTokens());
 
 		// Parse custom (not registered) parameters
 		for (Map.Entry<String,?> entry: as.getCustomParameters().entrySet()) {
-			if (REGISTERED_PARAMETER_NAMES.contains(entry.getKey()))
+			if (REGISTERED_PARAMETER_NAMES.contains(entry.getKey())) {
 				continue; // skip
+			}
 			op.setCustomParameter(entry.getKey(), entry.getValue());
 		}
 

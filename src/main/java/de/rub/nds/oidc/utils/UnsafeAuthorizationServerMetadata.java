@@ -37,6 +37,9 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.oauth2.sdk.util.OrderedJSONObject;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import net.minidev.json.JSONObject;
 
 
@@ -304,13 +307,75 @@ public class UnsafeAuthorizationServerMetadata {
 			throw new IllegalArgumentException("The issuer identifier must be a URI: " + e.getMessage(), e);
 		}
 
-		if (uri.getRawQuery() != null)
+		if (uri.getRawQuery() != null) {
 			throw new IllegalArgumentException("The issuer URI must be without a query component");
+		}
 
-		if (uri.getRawFragment() != null)
+		if (uri.getRawFragment() != null) {
 			throw new IllegalArgumentException("The issuer URI must be without a fragment component");
+		}
 
 		this.issuer = issuer;
+	}
+
+
+	protected static <T extends Object> Function<T, String> mapToString() {
+		return (val) -> val.toString();
+	}
+
+	protected static <T> Function<List<T>, List<String>> mapToStringList(Function<T, String> converter) {
+		return (list) -> {
+			return list.stream().map(converter).collect(Collectors.toList());
+		};
+	}
+
+	protected static <T> void putIfNonnull(JSONObject o, String key, T val) {
+		putIfNonnull(o, key, val, mapToString());
+	}
+
+	protected static <T> void putIfNonnull(JSONObject o, String key, T val, Function<T, ?> converter) {
+		if (val != null) {
+			o.put(key, converter.apply(val));
+		}
+	}
+
+
+	protected static interface JsonExtractor <T> {
+		T extract(JSONObject jsonObject, String key) throws ParseException;
+	}
+
+	protected static final JsonExtractor<URI> readJsonUri = (j, k) -> JSONObjectUtils.getURI(j, k);
+	protected static final JsonExtractor<Boolean> readJsonBool = (j, k) -> JSONObjectUtils.getBoolean(j, k);
+
+
+	protected static interface JsonValueConverter <T> {
+		T convert(String value) throws ParseException;
+	}
+
+	protected static <T> T extractFromJson(JSONObject jsonObject, String key, JsonExtractor<T> extractor) throws ParseException {
+		return extractFromJson(jsonObject, key, extractor, null);
+	}
+
+	protected static <T> T extractFromJson(JSONObject jsonObject, String key, JsonExtractor<T> extractor, T defaultVal) throws ParseException {
+		if (jsonObject.get(key) != null) {
+			return extractor.extract(jsonObject, key);
+		} else {
+			return defaultVal;
+		}
+	}
+
+	protected static <V, T extends Collection<V>> JsonExtractor<T> extractNestedAdd(Supplier<T> constructor, JsonValueConverter<V> converter) {
+		return (j, k) -> {
+			T result = constructor.get();
+
+			var sublist = JSONObjectUtils.getStringList(j, k);
+			for (String next : sublist) {
+				var v = converter.convert(next);
+				result.add(v);
+			}
+
+			return result;
+		};
 	}
 
 
@@ -1228,180 +1293,31 @@ public class UnsafeAuthorizationServerMetadata {
 		// Mandatory fields
 		o.put("issuer", issuer.getValue());
 
-
 		// Optional fields
-		if (jwkSetURI != null)
-			o.put("jwks_uri", jwkSetURI.toString());
-
-		if (authzEndpoint != null)
-			o.put("authorization_endpoint", authzEndpoint.toString());
-
-		if (tokenEndpoint != null)
-			o.put("token_endpoint", tokenEndpoint.toString());
-
-		if (regEndpoint != null)
-			o.put("registration_endpoint", regEndpoint.toString());
-
-		if (introspectionEndpoint != null)
-			o.put("introspection_endpoint", introspectionEndpoint.toString());
-
-		if (revocationEndpoint != null)
-			o.put("revocation_endpoint", revocationEndpoint.toString());
-
-		if (scope != null)
-			o.put("scopes_supported", scope.toStringList());
-
-		List<String> stringList;
-
-		if (rts != null) {
-
-			stringList = new ArrayList<>(rts.size());
-
-			for (ResponseType rt: rts)
-				stringList.add(rt.toString());
-
-			o.put("response_types_supported", stringList);
-		}
-
-		if (rms != null) {
-
-			stringList = new ArrayList<>(rms.size());
-
-			for (ResponseMode rm: rms)
-				stringList.add(rm.getValue());
-
-			o.put("response_modes_supported", stringList);
-		}
-
-		if (gts != null) {
-
-			stringList = new ArrayList<>(gts.size());
-
-			for (GrantType gt: gts)
-				stringList.add(gt.toString());
-
-			o.put("grant_types_supported", stringList);
-		}
-
-		if (codeChallengeMethods != null) {
-
-			stringList = new ArrayList<>(codeChallengeMethods.size());
-
-			for (CodeChallengeMethod m: codeChallengeMethods)
-				stringList.add(m.getValue());
-
-			o.put("code_challenge_methods_supported", stringList);
-		}
-
-
-		if (tokenEndpointAuthMethods != null) {
-
-			stringList = new ArrayList<>(tokenEndpointAuthMethods.size());
-
-			for (ClientAuthenticationMethod m: tokenEndpointAuthMethods)
-				stringList.add(m.getValue());
-
-			o.put("token_endpoint_auth_methods_supported", stringList);
-		}
-
-		if (tokenEndpointJWSAlgs != null) {
-
-			stringList = new ArrayList<>(tokenEndpointJWSAlgs.size());
-
-			for (JWSAlgorithm alg: tokenEndpointJWSAlgs)
-				stringList.add(alg.getName());
-
-			o.put("token_endpoint_auth_signing_alg_values_supported", stringList);
-		}
-
-		if (introspectionEndpointAuthMethods != null) {
-
-			stringList = new ArrayList<>(introspectionEndpointAuthMethods.size());
-
-			for (ClientAuthenticationMethod m: introspectionEndpointAuthMethods)
-				stringList.add(m.getValue());
-
-			o.put("introspection_endpoint_auth_methods_supported", stringList);
-		}
-
-		if (introspectionEndpointJWSAlgs != null) {
-
-			stringList = new ArrayList<>(introspectionEndpointJWSAlgs.size());
-
-			for (JWSAlgorithm alg: introspectionEndpointJWSAlgs)
-				stringList.add(alg.getName());
-
-			o.put("introspection_endpoint_auth_signing_alg_values_supported", stringList);
-		}
-
-		if (revocationEndpointAuthMethods != null) {
-
-			stringList = new ArrayList<>(revocationEndpointAuthMethods.size());
-
-			for (ClientAuthenticationMethod m: revocationEndpointAuthMethods)
-				stringList.add(m.getValue());
-
-			o.put("revocation_endpoint_auth_methods_supported", stringList);
-		}
-
-		if (revocationEndpointJWSAlgs != null) {
-
-			stringList = new ArrayList<>(revocationEndpointJWSAlgs.size());
-
-			for (JWSAlgorithm alg: revocationEndpointJWSAlgs)
-				stringList.add(alg.getName());
-
-			o.put("revocation_endpoint_auth_signing_alg_values_supported", stringList);
-		}
-
-		if (requestObjectJWSAlgs != null) {
-
-			stringList = new ArrayList<>(requestObjectJWSAlgs.size());
-
-			for (JWSAlgorithm alg: requestObjectJWSAlgs)
-				stringList.add(alg.getName());
-
-			o.put("request_object_signing_alg_values_supported", stringList);
-		}
-
-		if (requestObjectJWEAlgs != null) {
-
-			stringList = new ArrayList<>(requestObjectJWEAlgs.size());
-
-			for (JWEAlgorithm alg: requestObjectJWEAlgs)
-				stringList.add(alg.getName());
-
-			o.put("request_object_encryption_alg_values_supported", stringList);
-		}
-
-		if (requestObjectJWEEncs != null) {
-
-			stringList = new ArrayList<>(requestObjectJWEEncs.size());
-
-			for (EncryptionMethod m: requestObjectJWEEncs)
-				stringList.add(m.getName());
-
-			o.put("request_object_encryption_enc_values_supported", stringList);
-		}
-
-		if (uiLocales != null) {
-
-			stringList = new ArrayList<>(uiLocales.size());
-
-			for (LangTag l: uiLocales)
-				stringList.add(l.toString());
-
-			o.put("ui_locales_supported", stringList);
-		}
-
-		if (serviceDocsURI != null)
-			o.put("service_documentation", serviceDocsURI.toString());
-
-		if (policyURI != null)
-			o.put("op_policy_uri", policyURI.toString());
-
-		if (tosURI != null)
-			o.put("op_tos_uri", tosURI.toString());
+		putIfNonnull(o, "jwks_uri", jwkSetURI);
+		putIfNonnull(o, "authorization_endpoint", authzEndpoint);
+		putIfNonnull(o, "token_endpoint", tokenEndpoint);
+		putIfNonnull(o, "registration_endpoint", regEndpoint);
+		putIfNonnull(o, "introspection_endpoint", introspectionEndpoint);
+		putIfNonnull(o, "revocation_endpoint", revocationEndpoint);
+		putIfNonnull(o, "scopes_supported", scope, Scope::toStringList);
+
+		putIfNonnull(o, "response_types_supported", rts, mapToStringList(ResponseType::toString));
+		putIfNonnull(o, "grant_types_supported", rms, mapToStringList(ResponseMode::getValue));
+		putIfNonnull(o, "code_challenge_methods_supported", codeChallengeMethods, mapToStringList(CodeChallengeMethod::getValue));
+		putIfNonnull(o, "token_endpoint_auth_methods_supported", tokenEndpointAuthMethods, mapToStringList(ClientAuthenticationMethod::getValue));
+		putIfNonnull(o, "token_endpoint_auth_signing_alg_values_supported", tokenEndpointJWSAlgs, mapToStringList(JWSAlgorithm::getName));
+		putIfNonnull(o, "introspection_endpoint_auth_methods_supported", introspectionEndpointAuthMethods, mapToStringList(ClientAuthenticationMethod::getValue));
+		putIfNonnull(o, "introspection_endpoint_auth_signing_alg_values_supported", introspectionEndpointJWSAlgs, mapToStringList(JWSAlgorithm::getName));
+		putIfNonnull(o, "revocation_endpoint_auth_methods_supported", revocationEndpointAuthMethods, mapToStringList(ClientAuthenticationMethod::getValue));
+		putIfNonnull(o, "revocation_endpoint_auth_signing_alg_values_supported", revocationEndpointJWSAlgs, mapToStringList(JWSAlgorithm::getName));
+		putIfNonnull(o, "request_object_signing_alg_values_supported", requestObjectJWSAlgs, mapToStringList(JWSAlgorithm::getName));
+		putIfNonnull(o, "request_object_encryption_alg_values_supported", requestObjectJWEAlgs, mapToStringList(JWEAlgorithm::getName));
+		putIfNonnull(o, "request_object_encryption_enc_values_supported", requestObjectJWEEncs, mapToStringList(EncryptionMethod::getName));
+		putIfNonnull(o, "ui_locales_supported", uiLocales, mapToStringList(LangTag::toString));
+		putIfNonnull(o, "service_documentation", serviceDocsURI);
+		putIfNonnull(o, "op_policy_uri", policyURI);
+		putIfNonnull(o, "op_tos_uri", tosURI);
 
 		o.put("request_parameter_supported", requestParamSupported);
 		o.put("request_uri_parameter_supported", requestURIParamSupported);
@@ -1450,228 +1366,47 @@ public class UnsafeAuthorizationServerMetadata {
 		}
 
 		// Endpoints
-		if (jsonObject.get("authorization_endpoint") != null)
-			as.authzEndpoint = JSONObjectUtils.getURI(jsonObject, "authorization_endpoint");
-
-		if (jsonObject.get("token_endpoint") != null)
-			as.tokenEndpoint = JSONObjectUtils.getURI(jsonObject, "token_endpoint");
-
-		if (jsonObject.get("registration_endpoint") != null)
-			as.regEndpoint = JSONObjectUtils.getURI(jsonObject, "registration_endpoint");
-
-		if (jsonObject.get("jwks_uri") != null)
-			as.jwkSetURI = JSONObjectUtils.getURI(jsonObject, "jwks_uri");
-
-		if (jsonObject.get("introspection_endpoint") != null)
-			as.introspectionEndpoint = JSONObjectUtils.getURI(jsonObject, "introspection_endpoint");
-
-		if (jsonObject.get("revocation_endpoint") != null)
-			as.revocationEndpoint = JSONObjectUtils.getURI(jsonObject, "revocation_endpoint");
+		as.authzEndpoint = extractFromJson(jsonObject, "authorization_endpoint", readJsonUri);
+		as.tokenEndpoint = extractFromJson(jsonObject, "token_endpoint", readJsonUri);
+		as.regEndpoint = extractFromJson(jsonObject, "registration_endpoint", readJsonUri);
+		as.jwkSetURI = extractFromJson(jsonObject, "jwks_uri", readJsonUri);
+		as.introspectionEndpoint = extractFromJson(jsonObject, "introspection_endpoint", readJsonUri);
+		as.revocationEndpoint = extractFromJson(jsonObject, "revocation_endpoint", readJsonUri);
 
 		// AS capabilities
-		if (jsonObject.get("scopes_supported") != null) {
-
-			as.scope = new Scope();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "scopes_supported")) {
-
-				if (v != null)
-					as.scope.add(new Scope.Value(v));
-			}
-		}
-
-		if (jsonObject.get("response_types_supported") != null) {
-
-			as.rts = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "response_types_supported")) {
-
-				if (v != null)
-					as.rts.add(ResponseType.parse(v));
-			}
-		}
-
-		if (jsonObject.get("response_modes_supported") != null) {
-
-			as.rms = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "response_modes_supported")) {
-
-				if (v != null)
-					as.rms.add(new ResponseMode(v));
-			}
-		}
-
-		if (jsonObject.get("grant_types_supported") != null) {
-
-			as.gts = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "grant_types_supported")) {
-
-				if (v != null)
-					as.gts.add(GrantType.parse(v));
-			}
-		}
-
-		if (jsonObject.get("code_challenge_methods_supported") != null) {
-
-			as.codeChallengeMethods = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "code_challenge_methods_supported")) {
-
-				if (v != null)
-					as.codeChallengeMethods.add(CodeChallengeMethod.parse(v));
-			}
-		}
-
-		if (jsonObject.get("token_endpoint_auth_methods_supported") != null) {
-
-			as.tokenEndpointAuthMethods = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "token_endpoint_auth_methods_supported")) {
-
-				if (v != null)
-					as.tokenEndpointAuthMethods.add(ClientAuthenticationMethod.parse(v));
-			}
-		}
-
-		if (jsonObject.get("token_endpoint_auth_signing_alg_values_supported") != null) {
-
-			as.tokenEndpointJWSAlgs = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "token_endpoint_auth_signing_alg_values_supported")) {
-
-
-				if (v != null)
-					as.tokenEndpointJWSAlgs.add(JWSAlgorithm.parse(v));
-			}
-		}
-
-		if (jsonObject.get("introspection_endpoint_auth_methods_supported") != null) {
-
-			as.introspectionEndpointAuthMethods = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "introspection_endpoint_auth_methods_supported")) {
-
-				if (v != null)
-					as.introspectionEndpointAuthMethods.add(ClientAuthenticationMethod.parse(v));
-			}
-		}
-
-		if (jsonObject.get("introspection_endpoint_auth_signing_alg_values_supported") != null) {
-
-			as.introspectionEndpointJWSAlgs = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "introspection_endpoint_auth_signing_alg_values_supported")) {
-
-
-				if (v != null)
-					as.introspectionEndpointJWSAlgs.add(JWSAlgorithm.parse(v));
-			}
-		}
-
-		if (jsonObject.get("revocation_endpoint_auth_methods_supported") != null) {
-
-			as.revocationEndpointAuthMethods = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "revocation_endpoint_auth_methods_supported")) {
-
-				if (v != null)
-					as.revocationEndpointAuthMethods.add(ClientAuthenticationMethod.parse(v));
-			}
-		}
-
-		if (jsonObject.get("revocation_endpoint_auth_signing_alg_values_supported") != null) {
-
-			as.revocationEndpointJWSAlgs = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "revocation_endpoint_auth_signing_alg_values_supported")) {
-				
-				if (v != null)
-					as.revocationEndpointJWSAlgs.add(JWSAlgorithm.parse(v));
-			}
-		}
-
+		as.scope = extractFromJson(jsonObject, "scopes_supported", extractNestedAdd(Scope::new, Scope.Value::new));
+		as.rts = extractFromJson(jsonObject, "response_types_supported", extractNestedAdd(ArrayList::new, ResponseType::parse));
+		as.rms = extractFromJson(jsonObject, "response_modes_supported", extractNestedAdd(ArrayList::new, ResponseMode::new));
+		as.gts = extractFromJson(jsonObject, "grant_types_supported", extractNestedAdd(ArrayList::new, GrantType::parse));
+		as.codeChallengeMethods = extractFromJson(jsonObject, "code_challenge_methods_supported", extractNestedAdd(ArrayList::new, CodeChallengeMethod::parse));
+		as.tokenEndpointAuthMethods = extractFromJson(jsonObject, "token_endpoint_auth_methods_supported", extractNestedAdd(ArrayList::new, ClientAuthenticationMethod::parse));
+		as.tokenEndpointJWSAlgs = extractFromJson(jsonObject, "token_endpoint_auth_signing_alg_values_supported", extractNestedAdd(ArrayList::new, JWSAlgorithm::parse));
+		as.introspectionEndpointAuthMethods = extractFromJson(jsonObject, "introspection_endpoint_auth_methods_supported", extractNestedAdd(ArrayList::new, ClientAuthenticationMethod::parse));
+		as.introspectionEndpointJWSAlgs = extractFromJson(jsonObject, "introspection_endpoint_auth_signing_alg_values_supported", extractNestedAdd(ArrayList::new, JWSAlgorithm::parse));
+		as.revocationEndpointAuthMethods = extractFromJson(jsonObject, "revocation_endpoint_auth_methods_supported", extractNestedAdd(ArrayList::new, ClientAuthenticationMethod::parse));
+		as.revocationEndpointJWSAlgs = extractFromJson(jsonObject, "revocation_endpoint_auth_signing_alg_values_supported", extractNestedAdd(ArrayList::new, JWSAlgorithm::parse));
 
 		// Request object
-
-		if (jsonObject.get("request_object_signing_alg_values_supported") != null) {
-
-			as.requestObjectJWSAlgs = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "request_object_signing_alg_values_supported")) {
-
-				if (v != null)
-					as.requestObjectJWSAlgs.add(JWSAlgorithm.parse(v));
-			}
-		}
-
-
-		if (jsonObject.get("request_object_encryption_alg_values_supported") != null) {
-
-			as.requestObjectJWEAlgs = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "request_object_encryption_alg_values_supported")) {
-
-				if (v != null)
-					as.requestObjectJWEAlgs.add(JWEAlgorithm.parse(v));
-			}
-		}
-
-
-		if (jsonObject.get("request_object_encryption_enc_values_supported") != null) {
-
-			as.requestObjectJWEEncs = new ArrayList<>();
-
-			for (String v: JSONObjectUtils.getStringArray(jsonObject, "request_object_encryption_enc_values_supported")) {
-
-				if (v != null)
-					as.requestObjectJWEEncs.add(EncryptionMethod.parse(v));
-			}
-		}
-
+		as.requestObjectJWSAlgs = extractFromJson(jsonObject, "request_object_signing_alg_values_supported", extractNestedAdd(ArrayList::new, JWSAlgorithm::parse));
+		as.requestObjectJWEAlgs = extractFromJson(jsonObject, "request_object_encryption_alg_values_supported", extractNestedAdd(ArrayList::new, JWEAlgorithm::parse));
+		as.requestObjectJWEEncs = extractFromJson(jsonObject, "request_object_encryption_enc_values_supported", extractNestedAdd(ArrayList::new, EncryptionMethod::parse));
 
 		// Misc
-
-		if (jsonObject.get("ui_locales_supported") != null) {
-
-			as.uiLocales = new ArrayList<>();
-
-			for (String v : JSONObjectUtils.getStringArray(jsonObject, "ui_locales_supported")) {
-
-				if (v != null) {
-
-					try {
-						as.uiLocales.add(LangTag.parse(v));
-
-					} catch (LangTagException e) {
-
-						throw new ParseException("Invalid ui_locales_supported field: " + e.getMessage(), e);
-					}
-				}
+		as.uiLocales = extractFromJson(jsonObject, "ui_locales_supported", extractNestedAdd(ArrayList::new, v -> {
+			try {
+				return LangTag.parse(v);
+			} catch (LangTagException e) {
+				throw new ParseException("Invalid ui_locales_supported field: " + e.getMessage(), e);
 			}
-		}
+		}));
+		as.serviceDocsURI = extractFromJson(jsonObject, "service_documentation", readJsonUri);
+		as.policyURI = extractFromJson(jsonObject, "op_policy_uri", readJsonUri);
+		as.tosURI = extractFromJson(jsonObject, "op_tos_uri", readJsonUri);
+		as.requestParamSupported = extractFromJson(jsonObject, "request_parameter_supported", readJsonBool, false);
+		as.requestURIParamSupported = extractFromJson(jsonObject, "request_uri_parameter_supported", readJsonBool, true);
+		as.requireRequestURIReg = extractFromJson(jsonObject, "require_request_uri_registration", readJsonBool, false);
+		as.tlsClientCertificateBoundAccessTokens = extractFromJson(jsonObject, "tls_client_certificate_bound_access_tokens", readJsonBool, false);
 
-		if (jsonObject.get("service_documentation") != null)
-			as.serviceDocsURI = JSONObjectUtils.getURI(jsonObject, "service_documentation");
-
-		if (jsonObject.get("op_policy_uri") != null)
-			as.policyURI = JSONObjectUtils.getURI(jsonObject, "op_policy_uri");
-
-		if (jsonObject.get("op_tos_uri") != null)
-			as.tosURI = JSONObjectUtils.getURI(jsonObject, "op_tos_uri");
-
-		if (jsonObject.get("request_parameter_supported") != null)
-			as.requestParamSupported = JSONObjectUtils.getBoolean(jsonObject, "request_parameter_supported");
-
-		if (jsonObject.get("request_uri_parameter_supported") != null)
-			as.requestURIParamSupported = JSONObjectUtils.getBoolean(jsonObject, "request_uri_parameter_supported");
-
-		if (jsonObject.get("require_request_uri_registration") != null)
-			as.requireRequestURIReg = JSONObjectUtils.getBoolean(jsonObject, "require_request_uri_registration");
-
-		if (jsonObject.get("tls_client_certificate_bound_access_tokens") != null)
-			as.tlsClientCertificateBoundAccessTokens = JSONObjectUtils.getBoolean(jsonObject, "tls_client_certificate_bound_access_tokens");
 
 		// Parse custom (not registered) parameters
 		JSONObject customParams = new JSONObject(jsonObject);
