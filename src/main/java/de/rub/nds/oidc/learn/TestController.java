@@ -84,7 +84,7 @@ public class TestController {
 	}
 
 	@GET
-	@Path("/{role: rp|op}/{testId}/export")
+	@Path("/{role: rp|op}/{testId}/export-xml")
 	@Produces({MediaType.APPLICATION_XML})
 	public JAXBElement<TestObjectType> exportXml(@PathParam("testId") String testId) throws NoSuchTestObject {
 		return new ObjectFactory().createTestObject(exportJson(testId));

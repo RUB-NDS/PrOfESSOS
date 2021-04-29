@@ -67,6 +67,7 @@ This requires that a valid config has been set beforehand using the `/set-config
 Includes Testresults, if run. Set the `Accept` header to JSON or XML to retrieve the report in the respective format.
 
 ```
-curl -vv -H "Accept: application/json" http://localhost:8080/api/rp/{testId}/export
+curl -vv -H "Accept: application/json" http://localhost:8080/api/rp/{testId}/export-json
+curl -vv -H "Accept: application/json" http://localhost:8080/api/rp/{testId}/export-xml
 ```
 
