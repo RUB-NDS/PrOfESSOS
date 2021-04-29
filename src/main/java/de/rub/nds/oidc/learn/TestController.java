@@ -109,10 +109,11 @@ public class TestController {
 		}
 
 		TestRunner runner;
-		if (role.equals("rp"))
+		if (role.equals("rp")) {
 			runner = testObjs.createRPTestObject(testId);
-		else
+		} else {
 			runner = testObjs.createOPTestObject(testId);
+		}
 
 		var testObj = runner.getTestObj();
 
@@ -192,10 +193,11 @@ public class TestController {
 	@Produces(MediaType.APPLICATION_JSON)
 	public TestConfigType getConfig(@PathParam("role") String role, @PathParam("testId") String testId) throws NoSuchTestObject {
 		TestRunner obj = testObjs.getTestObject(testId);
-		if (role.equals("rp"))
+		if (role.equals("rp")) {
 			obj.getTestObj().getTestConfig().setType(TestRPConfigType.class.getName());
-		else
+		} else {
 			obj.getTestObj().getTestConfig().setType(TestOPConfigType.class.getName());
+		}
 
 		return obj.getTestObj().getTestConfig();
 	}
