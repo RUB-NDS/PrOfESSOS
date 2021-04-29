@@ -47,10 +47,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.engines.URLConnectionEngine;
+
 
 /**
  * @author Tobias Wich
@@ -288,7 +287,11 @@ public class TestRunner {
 						.replaceQuery(null)
 						.build();
 
-				ResteasyClient client = new ResteasyClientBuilder().httpEngine(new URLConnectionEngine()).build();
+				var conEngine = new URLConnectionEngine();
+				var client = new ResteasyClientBuilder()
+						.httpEngine(conEngine)
+						.build();
+
 				logger.log("Obtaining permission to perform test from url '" + wellKnown + "'.");
 				Response grantTokenResp = client.target(wellKnown)
 						.request().accept(MediaType.WILDCARD).get();
@@ -395,4 +398,5 @@ public class TestRunner {
 		rp1Inst.getImpl().runTestStepSetup();
 		rp2Inst.getImpl().runTestStepSetup();
 	}
+
 }
