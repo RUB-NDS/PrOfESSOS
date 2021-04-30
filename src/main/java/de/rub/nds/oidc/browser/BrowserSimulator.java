@@ -185,8 +185,12 @@ public abstract class BrowserSimulator {
 	public abstract TestStepResult run() throws InterruptedException;
 
 	public void quit() {
-		driver1.quit();
-		driver2.quit();
+		if (driver1 != null) {
+			driver1.quit();
+		}
+		if (driver2 != null) {
+			driver2.quit();
+		}
 	}
 
 	// This does not work in SPA scenarios where only the <html> element's content is changed
