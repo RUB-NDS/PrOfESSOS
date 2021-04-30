@@ -1,14 +1,8 @@
 FROM ubuntu:18.04
 
-ENV CHROMEDRIVER_VERSION=2.46
-
 # install chromedriver, chromium
 USER root
-RUN apt-get update && apt-get install -y curl vim openjdk-11-jdk unzip chromium-browser \ 
- && curl -L -O https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip \
- && mkdir -p /opt/bin/ \
- && unzip chromedriver_linux64.zip -d /opt/bin/ \
- && rm -f chromedriver_linux64.zip \
+RUN apt-get update && apt-get install -y curl vim openjdk-11-jdk chromium-browser chromium-chromedriver \ 
  && apt-get clean
 
 ###
