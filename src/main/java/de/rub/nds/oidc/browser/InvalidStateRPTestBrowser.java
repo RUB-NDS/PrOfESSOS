@@ -39,12 +39,13 @@ public class InvalidStateRPTestBrowser extends DefaultRPTestBrowser {
 		try {
 			String startUrl = rpConfig.getUrlClientTarget();
 			logger.log(String.format("Opening browser with URL '%s'.", startUrl));
-			driver.get(startUrl);
+			driver1.get(startUrl);
+			driver1.executeScript(getFormSubmitDelayScript());
 
 			// execute JS to start authentication
 			String submitScriptRaw = rpConfig.getSeleniumScript();
 			String submitScript = te.eval(createRPContext(), submitScriptRaw);
-			driver.executeScript(submitScript);
+			driver1.executeScript(submitScript);
 			// capture state where the text is entered
 			logger.log("Webfinger identity entered into the login form.");
 
@@ -61,7 +62,7 @@ public class InvalidStateRPTestBrowser extends DefaultRPTestBrowser {
 			}
 
 			// reload browser so we have a clean start
-			loadDriver(true);
+			reloadDriver();
 
 			// call normal processing code
 			return super.run();

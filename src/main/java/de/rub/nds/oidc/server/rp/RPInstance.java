@@ -16,12 +16,16 @@
 
 package de.rub.nds.oidc.server.rp;
 
-import de.rub.nds.oidc.utils.ImplementationLoader;
+import de.rub.nds.oidc.log.TestStepLogger;
+import de.rub.nds.oidc.server.OPIVConfig;
 import de.rub.nds.oidc.test_model.RPConfigType;
+import de.rub.nds.oidc.test_model.TestOPConfigType;
 import de.rub.nds.oidc.utils.ImplementationLoadException;
+import de.rub.nds.oidc.utils.ImplementationLoader;
+import java.util.Map;
+
 
 /**
- *
  * @author Tobias Wich
  */
 public class RPInstance {
@@ -29,9 +33,16 @@ public class RPInstance {
 	private final RPConfigType config;
 	private final RPImplementation impl;
 
-	public RPInstance(RPConfigType config) throws ImplementationLoadException {
+	public RPInstance(RPConfigType config, TestStepLogger log, Map<String, Object> suiteCtx, Map<String, Object> stepCtx,
+					  TestOPConfigType remoteOPConfig, RPType type, OPIVConfig hostCfg) throws ImplementationLoadException {
 		this.config = config;
 		impl = ImplementationLoader.loadClassInstance(config.getImplementationClass(), RPImplementation.class);
+		impl.setLogger(log);
+		impl.setRPType(type);
+		impl.setContext(suiteCtx, stepCtx);
+		impl.setParameters(config.getParameter());
+		impl.setTestOPConfig(remoteOPConfig);
+		impl.setOPIVConfig(hostCfg);
 	}
 
 	public RPImplementation getImpl() {

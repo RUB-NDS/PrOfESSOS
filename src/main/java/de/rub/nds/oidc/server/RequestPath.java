@@ -38,6 +38,7 @@ public class RequestPath {
 	private final String resourcePath;
 	private final List<String> segments;
 	private final URI originalRequestUri;
+	private final String registrationEnforced;
 
 	public RequestPath(HttpServletRequest req) {
 		// resources look like this /<ctx>/<servlet>/<testId>/<resource>
@@ -46,13 +47,25 @@ public class RequestPath {
 		servletPath = req.getServletPath();  // "" or "/bar"
 		String fullPath = req.getRequestURI();
 
-		// seperate out the prefix
-		String regexp = String.format("^%s%s(/.*)$", Pattern.quote(ctxPath), Pattern.quote(servletPath));
-		Pattern p = Pattern.compile(regexp);
-		Matcher m = p.matcher(fullPath);
-		m.matches();
-		resourcePath = m.group(1);
+		if ("/.well-known/webfinger" .equals(fullPath)) {
+			resourcePath = fullPath;
+			registrationEnforced = "";
+		} else {
+			// seperate out the prefix
+			// TODO: "enforce-rp-reg" should be a constant, maybe in OPIVconfig?
+			String regexp = String.format("^%s%s(/enforce-rp-reg-.{8})?(/.*)$", Pattern.quote(ctxPath), Pattern.quote(servletPath));
+			Pattern p = Pattern.compile(regexp);
+			Matcher m = p.matcher(fullPath);
+			m.matches();
 
+			if (m.groupCount() == 2) {
+				registrationEnforced = m.group(1);
+				resourcePath = m.group(2);
+			} else {
+				registrationEnforced = "";
+				resourcePath = m.group(1);
+			}
+		}
 		// extract path segments
 		List<String> segmentList = Arrays.stream(resourcePath.split("/"))
 				.map(String::trim)
@@ -100,6 +113,17 @@ public class RequestPath {
 				.replacePath(getTestId())
 				.replaceQuery(null)
 				.build();
+	}
+
+	public URI getDispatchUriAndTestId() {
+		return UriBuilder.fromUri(originalRequestUri)
+				.replacePath("/" + getTestId())
+				.replaceQuery(null)
+				.build();
+	}
+
+	public String getRegistrationEnforced() {
+		return registrationEnforced == null ? "" : registrationEnforced;
 	}
 
 }

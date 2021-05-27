@@ -26,41 +26,73 @@ limitations under the License.
 	<element name="TestObject" type="tm:TestObjectType" />
 	<complexType name="TestObjectType">
 		<sequence>
-			<choice>
-				<element name="TestRPConfig" type="tm:TestRPConfigType" />
-				<element name="TestOPConfig" type="tm:TestOPConfigType" />
-			</choice>
+			<!--<choice>-->
+				<!--<element name="TestRPConfig" type="tm:TestRPConfigType" />-->
+				<!--<element name="TestOPConfig" type="tm:TestOPConfigType" />-->
+			<!--</choice>-->
+			<element name="TestConfig" type="tm:TestConfigType" />
 			<element name="TestReport" type="tm:TestReportType" minOccurs="0" />
+			<element name="ServiceEndpoint" type="tm:ServiceEndpointType" minOccurs="0" maxOccurs="unbounded" />
 		</sequence>
 		<attribute name="TestId" type="NCName" use="required" />
 		<attribute name="TestPlanReference" type="normalizedString" use="required" />
 	</complexType>
 
-	<complexType name="TestRPConfigType">
+	<complexType name="ServiceEndpointType">
 		<sequence>
-			<element name="HonestWebfingerResourceId" type="normalizedString" />
-			<element name="EvilWebfingerResourceId" type="normalizedString" />
-			<element name="UrlClientTarget" type="anyURI" minOccurs="0" />
-			<element name="InputFieldName" type="NCName" minOccurs="0" />
-			<element name="SeleniumScript" type="string" minOccurs="0" />
-			<element name="FinalValidUrl" type="anyURI" minOccurs="0" />
-			<element name="HonestUserNeedle" type="string" minOccurs="0" />
-			<element name="EvilUserNeedle" type="string" minOccurs="0" />
-			<element name="ProfileUrl" type="anyURI" minOccurs="0" />
-			<!--<element name="FinalInvalidUrl" type="anyURI" minOccurs="0" />-->
-			<!--<element name="InvalidReturnCode" type="nonNegativeInteger" minOccurs="0" />-->
+			<element name="Name" type="normalizedString" />
+			<element name="URI" type="anyURI" />
 		</sequence>
 	</complexType>
 
+	<complexType name="TestConfigType" abstract="true">
+		<attribute name="Type" type="string" />
+	</complexType>
+
+	<complexType name="TestRPConfigType">
+		<complexContent>
+			<extension base="tm:TestConfigType">
+				<sequence>
+					<element name="HonestWebfingerResourceId" type="normalizedString" />
+					<element name="EvilWebfingerResourceId" type="normalizedString" />
+					<element name="UrlClientTarget" type="anyURI" minOccurs="0" />
+					<element name="InputFieldName" type="NCName" minOccurs="0" />
+					<element name="SeleniumScript" type="string" minOccurs="0" />
+					<element name="FinalValidUrl" type="anyURI" minOccurs="0" />
+					<element name="HonestUserNeedle" type="string" minOccurs="0" />
+					<element name="EvilUserNeedle" type="string" minOccurs="0" />
+					<element name="ProfileUrl" type="anyURI" minOccurs="0" />
+					<!--<element name="FinalInvalidUrl" type="anyURI" minOccurs="0" />-->
+					<!--<element name="InvalidReturnCode" type="nonNegativeInteger" minOccurs="0" />-->
+				</sequence>
+			</extension>
+		</complexContent>
+
+
+	</complexType>
+
 	<complexType name="TestOPConfigType">
-		<sequence>
-			<element name="OPUrl" type="anyURI" />
-			<element name="UserCredentials" type="tm:UserCredentialsType" />
-			<element name="CodeRequestUrl" type="anyURI" />
-			<element name="TokenRequestUrl" type="anyURI" />
-			<element name="ClientCredentials" type="tm:ClientCredentialsType" />
-			<element name="LoginFormHelp" type="string" minOccurs="0" />
-		</sequence>
+		<complexContent>
+			<extension base="tm:TestConfigType">
+				<sequence>
+					<element name="HonestRpResourceId" type="normalizedString" />
+					<element name="EvilRpResourceId" type="normalizedString" />
+					<element name="UrlOPTarget" type="anyURI" minOccurs="0" />
+					<element name="OPMetadata" type="string" minOccurs="0" />
+					<element name="AccessToken1" type="string" minOccurs="0" />
+					<element name="AccessToken2" type="string" minOccurs="0" />
+					<element name="User1Name" type="string" />
+					<element name="User2Name" type="string" />
+					<element name="User1Pass" type="string" />
+					<element name="User2Pass" type="string" />
+					<element name="LoginScript" type="string" minOccurs="0" />
+					<element name="ConsentScript" type="string" minOccurs="0" />
+					<element name="Client1Config" type="string" minOccurs="0" />
+					<element name="Client2Config" type="string" minOccurs="0" />
+					<!--<element name="LoginFormHelp" type="string" minOccurs="0" />-->
+				</sequence>
+			</extension>
+		</complexContent>
 	</complexType>
 
 	<complexType name="UserCredentialsType">
@@ -122,6 +154,7 @@ limitations under the License.
 			<element name="Date" type="dateTime" />
 			<choice>
 				<element name="Text" type="string" />
+				<element name="CodeBlock" type="tm:CodeBlockEntryType" />
 				<element name="Screenshot" type="tm:ScreenshotEntryType" />
 				<element name="HttpRequest" type="tm:HttpRequestEntryType" />
 				<element name="HttpResponse" type="tm:HttpResponseEntryType" />
@@ -149,6 +182,13 @@ limitations under the License.
 			<element name="Status" type="nonNegativeInteger" />
 			<element name="Header" type="tm:HeaderType" minOccurs="0" maxOccurs="unbounded" />
 			<element name="Body" type="string" minOccurs="0" />
+		</sequence>
+	</complexType>
+	
+	<complexType name="CodeBlockEntryType">
+		<sequence>
+			<element name="Description" type="string" minOccurs="0" />
+			<element name="Content" type="string"/>
 		</sequence>
 	</complexType>
 
@@ -196,10 +236,14 @@ limitations under the License.
 					<element name="OPConfig-1" type="tm:OPConfigType" />
 					<element name="OPConfig-2" type="tm:OPConfigType" />
 				</sequence>
-				<element name="RPConfig" type="tm:RPConfigType" />
+				<sequence>
+					<element name="RPConfig-1" type="tm:RPConfigType" />
+					<element name="RPConfig-2" type="tm:RPConfigType" />
+				</sequence>
 			</choice>
 		</sequence>
 		<attribute name="Name" type="normalizedString" use="required" />
+		<attribute name="DisplayGroup" type="normalizedString" />
 	</complexType>
 
 	<complexType name="BrowserSimulatorType">
@@ -231,9 +275,17 @@ limitations under the License.
 		<simpleContent>
 			<extension base="string">
 				<attribute name="Key" type="string" use="required" />
+				<attribute name="Type" type="tm:ParameterTypeType" use="optional" default="String" />
 			</extension>
 		</simpleContent>
 	</complexType>
+
+	<simpleType name="ParameterTypeType">
+		<restriction base="string">
+			<enumeration value="String"></enumeration>
+			<enumeration value="JS"></enumeration>
+		</restriction>
+	</simpleType>
 
 
 	<!-- REST API -->
@@ -241,10 +293,11 @@ limitations under the License.
 	<element name="LearnResult" type="tm:LearnResultType" />
 	<complexType name="LearnResultType">
 		<sequence>
-			<choice>
-				<element name="TestRPConfig" type="tm:TestRPConfigType" />
-				<element name="TestOPConfig" type="tm:TestOPConfigType" />
-			</choice>
+			<!--<choice>-->
+				<!--<element name="TestRPConfig" type="tm:TestRPConfigType" />-->
+				<!--<element name="TestOPConfig" type="tm:TestOPConfigType" />-->
+			<!--</choice>-->
+			<element name="TestConfig" type="tm:TestConfigType" />
 			<element name="TestStepResult" type="tm:TestStepResultType" />
 		</sequence>
 	</complexType>

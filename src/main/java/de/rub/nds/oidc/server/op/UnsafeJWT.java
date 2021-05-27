@@ -35,6 +35,8 @@ public class UnsafeJWT implements JWT {
 	private Base64URL payload;
 	private Base64URL signature;
 
+	public UnsafeJWT(){this(null, null, null);};
+
 	public UnsafeJWT(Base64URL header, Base64URL payload) {
 		this(header, payload, null);
 	}
@@ -58,7 +60,7 @@ public class UnsafeJWT implements JWT {
 	@Override
 	public JWTClaimsSet getJWTClaimsSet() throws ParseException {
 		// code copied from SignedJWT
-		JSONObject json = JSONObjectUtils.parseJSONObject(payload.decodeToString());
+		JSONObject json = JSONObjectUtils.parse(payload.decodeToString());
 		if (json == null) {
 			throw new ParseException("Payload of JWS object is not a valid JSON object", 0);
 		}

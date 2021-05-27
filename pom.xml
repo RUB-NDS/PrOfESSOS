@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xmlns="http://maven.apache.org/POM/4.0.0"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -17,10 +17,12 @@
 			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
 		</license>
 	</licenses>
+
 	<organization>
 		<name>Ruhr-Universität Bochum</name>
 		<url>https://www.nds.rub.de/</url>
 	</organization>
+
 	<developers>
 		<developer>
 			<name>Tobias Wich</name>
@@ -28,18 +30,28 @@
 		</developer>
 	</developers>
 
-	<repositories>
-		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
-		</repository>
-	</repositories>
+	<contributors>
+		<contributor>
+			<name>Nils Engelbertz</name>
+			<email>nils.engelbertz@rub.de</email>
+		</contributor>
+	</contributors>
+
 
 	<properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.release>11</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<failOnMissingWebXml>false</failOnMissingWebXml>
+
+		<!-- Netbeans config properties -->
+		<org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.tab-size>4</org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.tab-size>
+		<org-netbeans-modules-editor-indent.CodeStyle.project.text-line-wrap>none</org-netbeans-modules-editor-indent.CodeStyle.project.text-line-wrap>
+		<org-netbeans-modules-editor-indent.CodeStyle.project.indent-shift-width>4</org-netbeans-modules-editor-indent.CodeStyle.project.indent-shift-width>
+		<org-netbeans-modules-editor-indent.CodeStyle.project.spaces-per-tab>4</org-netbeans-modules-editor-indent.CodeStyle.project.spaces-per-tab>
+		<org-netbeans-modules-editor-indent.CodeStyle.project.tab-size>4</org-netbeans-modules-editor-indent.CodeStyle.project.tab-size>
+		<org-netbeans-modules-editor-indent.CodeStyle.project.text-limit-width>120</org-netbeans-modules-editor-indent.CodeStyle.project.text-limit-width>
+		<org-netbeans-modules-editor-indent.CodeStyle.project.expand-tabs>false</org-netbeans-modules-editor-indent.CodeStyle.project.expand-tabs>
+		<org-netbeans-modules-editor-indent.CodeStyle.usedProfile>project</org-netbeans-modules-editor-indent.CodeStyle.usedProfile>
 	</properties>
 
 	<dependencies>
@@ -48,91 +60,218 @@
 			<artifactId>javaee-api</artifactId>
 			<version>7.0</version>
 			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun.mail</groupId>
+					<artifactId>javax.mail</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>oauth2-oidc-sdk</artifactId>
-			<version>5.20</version>
+			<version>8.22</version>
 			<exclusions>
 				<!-- this is part of the application server already -->
 				<exclusion>
-					<groupId>javax.mail</groupId>
-					<artifactId>mail</artifactId>
+					<groupId>com.sun.mail</groupId>
+					<artifactId>javax.mail</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
 
-		<!-- use jbrowserdriver when it is more mature -->
-		<!--
-		<dependency>
-			<groupId>com.machinepublishers.jbrowserdriver</groupId>
-			<artifactId>jbrowserdriver</artifactId>
-			<version>0.7.0</version>
-		</dependency>
-		-->
-		<dependency>
-			<groupId>com.github.detro</groupId>
-			<artifactId>ghostdriver</artifactId>
-			<version>2.1.0</version>
-		</dependency>
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-support</artifactId>
-			<version>3.1.0</version>
+			<version>3.141.59</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-chrome-driver -->
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-chrome-driver</artifactId>
+			<version>3.141.59</version>
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.velocity</groupId>
-			<artifactId>velocity</artifactId>
+			<groupId>org.webjars</groupId>
+			<artifactId>jquery</artifactId>
+			<version>3.4.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>bootstrap</artifactId>
+			<version>4.3.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>ST4</artifactId>
+			<version>4.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
 			<version>1.7</version>
 		</dependency>
 
 		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>annotations</artifactId>
-			<version>3.0.1u2</version>
-			<scope>provided</scope>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.9</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.typesafe</groupId>
+			<artifactId>config</artifactId>
+			<version>1.3.4</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.25</version>
+			<version>1.7.26</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.9.9.1</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers</artifactId>
+			<version>1.11.4</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>net.javacrumbs.json-unit</groupId>
+			<artifactId>json-unit</artifactId>
+			<version>2.7.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.rest-assured</groupId>
+			<artifactId>rest-assured</artifactId>
+			<version>4.0.0</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
-			<version>6.11</version>
+			<version>6.14.3</version>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+			<version>1.62</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jaxrs</artifactId>
+			<version>3.0.13.Final</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client</artifactId>
+			<version>3.0.13.Final</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.jvnet.jaxb2.maven2</groupId>
-				<artifactId>maven-jaxb2-plugin</artifactId>
-				<version>0.13.1</version>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-xjc-plugin</artifactId>
+				<version>3.3.0</version>
 				<executions>
-					<!-- rest -->
 					<execution>
+						<id>xjc</id>
+						<phase>generate-sources</phase>
 						<goals>
-							<goal>generate</goal>
+							<goal>xsdtojava</goal>
 						</goals>
 						<configuration>
-							<schemaDirectory>src/main/xsd</schemaDirectory>
-							<bindingFiles>
-								<bindingFile>${wsdl.source}/serialization.xjc</bindingFile>
-							</bindingFiles>
-							<specVersion>2.2</specVersion>
-							<packageLevelAnnotations>false</packageLevelAnnotations>
+							<sourceRoot>${basedir}/target/generated-sources/cxf-xjb</sourceRoot>
+							<xsdOptions>
+								<xsdOption>
+									<xsd>src/main/xsd/TestModel.xsd</xsd>
+									<bindingFile>src/main/xsd/serialization.xjb</bindingFile>
+								</xsdOption>
+							</xsdOptions>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
 
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.1.1</version>
+				<executions>
+					<execution>
+						<id>copy-installed</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>${project.version}</version>
+									<type>${project.packaging}</type>
+									<destFileName>professos.war</destFileName>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${project.basedir}/docker/professos/build</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M3</version>
+				<configuration>
+					<suiteXmlFiles>
+						<suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+					</suiteXmlFiles>
+					<groups>unittests</groups>
+					<excludedGroups>docker,docker-[ro]p,[ro]p-it</excludedGroups>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>3.0.0-M3</version>
+				<configuration>
+					<forkCount>0</forkCount>
+					<suiteXmlFiles>
+						<suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+					</suiteXmlFiles>
+				</configuration>
+			</plugin>
 			<!--
 			<plugin>
 				<groupId>com.github.eirslett</groupId>

@@ -32,7 +32,7 @@ import java.security.GeneralSecurityException;
 public class ReplayOP extends DefaultOP {
 
 	@Override
-	protected JWT getIdToken(ClientID clientId, Nonce nonce, AccessTokenHash atHash, CodeHash cHash)
+	public JWT getIdToken(ClientID clientId, Nonce nonce, AccessTokenHash atHash, CodeHash cHash)
 			throws GeneralSecurityException, JOSEException, ParseException {
 		Nonce newNonce;
 		if (params.getBool(OPParameterConstants.FORCE_TOKEN_NONCE_EXCL)) {

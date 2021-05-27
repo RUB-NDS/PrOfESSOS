@@ -16,23 +16,17 @@
 
 package de.rub.nds.oidc.log;
 
-import de.rub.nds.oidc.test_model.HeaderType;
-import de.rub.nds.oidc.test_model.HttpRequestEntryType;
-import de.rub.nds.oidc.test_model.HttpResponseEntryType;
-import de.rub.nds.oidc.test_model.LogEntryType;
-import de.rub.nds.oidc.test_model.ScreenshotEntryType;
-import de.rub.nds.oidc.test_model.TestStepResultType;
+import com.google.common.base.Strings;
+import com.nimbusds.common.contenttype.ContentType;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import de.rub.nds.oidc.test_model.*;
+
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -54,10 +48,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 public class TestStepLogger {
 
+	private final String testIdPath;
 	private final TestStepResultType stepResult;
 	protected final DatatypeFactory df;
 
-	public TestStepLogger(TestStepResultType stepResult) {
+	public TestStepLogger(TestStepResultType stepResult, String testIdPath) {
+		this.testIdPath = testIdPath;
 		try {
 			this.stepResult = stepResult;
 			this.df = DatatypeFactory.newInstance();
@@ -86,15 +82,18 @@ public class TestStepLogger {
 		log(e);
 	}
 
-	public void log(String text, Throwable ex) {
+	public void log(Throwable ex) {
+		log(null, ex);
+	}
+	
+	public void log(@Nullable String text, Throwable ex) {
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 
-		pw.println(text);
 		ex.printStackTrace(pw);
 		String fullText = sw.toString();
 
-		log(fullText);
+		logCodeBlock(text, fullText);
 	}
 
 	public void log(byte[] screenshot, String mimeType) {
@@ -106,10 +105,39 @@ public class TestStepLogger {
 		log(e);
 	}
 
+	public void logCodeBlock(String content) {
+		logCodeBlock(null, content);
+	}
+
+	public void logCodeBlock(@Nullable String description, @Nonnull String content) {
+		CodeBlockEntryType entry = new CodeBlockEntryType();
+		if (!Strings.isNullOrEmpty(description)) {
+			entry.setDescription(description);
+		}
+		entry.setContent(content);
+		
+		LogEntryType e = createLogEntry();
+		e.setCodeBlock(entry);
+		log(e);
+	}
+
+	private String removeDispatchPrefix(String reqUri) {
+		String prefix = "/dispatch" + testIdPath;
+		if (reqUri.startsWith(prefix)) {
+			reqUri = reqUri.substring(prefix.length());
+			// check that path starts with a /
+			if (! reqUri.startsWith("/")) {
+				reqUri = "/" + reqUri;
+			}
+		}
+
+		return reqUri;
+	}
+
 	public void logHttpRequest(@Nonnull HttpServletRequest req, @Nullable String body) {
 		HttpRequestEntryType entry = new HttpRequestEntryType();
 
-		String reqLine = req.getMethod() + " " + req.getRequestURI();
+		String reqLine = req.getMethod() + " " + removeDispatchPrefix(req.getRequestURI());
 		if (req.getQueryString() != null) {
 			reqLine += "?" + req.getQueryString();
 		}
@@ -129,19 +157,63 @@ public class TestStepLogger {
 		logHttpRequest(entry);
 	}
 
+	public void logHttpRequest(@Nonnull HTTPRequest req, @Nullable String body ){
+				HttpRequestEntryType entry = new HttpRequestEntryType();
+
+		String reqLine = req.getMethod() + " " + removeDispatchPrefix(req.getURL().getPath());
+		// nimbus SDK HttpRequest getQuery() returns the body for POST or the QueryString for GET, see:
+		// https://static.javadoc.io/com.nimbusds/oauth2-oidc-sdk/5.8/com/nimbusds/oauth2/sdk/http/HTTPRequest.html#getQuery--
+		if (req.getQuery() != null) {
+			if (req.getMethod() != HTTPRequest.Method.POST) {
+				reqLine += "?" + req.getQuery();
+			} else {
+				entry.setBody(formatBody(req.getHeaderValue("Content-Type").toString(), req.getQuery()));
+			}
+		}
+//		reqLine += " " + req.getProtocol();
+		entry.setRequestLine(reqLine);
+
+		// add special headers to indicate the protocol scheme and port
+		entry.getHeader().add(createHeader("X-Protocol-Scheme", req.getURL().getProtocol()));
+		entry.getHeader().add(createHeader("X-Protocol-Port", Integer.toString(req.getURL().getPort())));
+
+		entry.getHeader().addAll(readHeaders(req.getHeaderMap()));
+
+		logHttpRequest(entry);
+	}
+
 	public void logHttpRequest(@Nonnull HttpRequestEntryType req) {
 		LogEntryType e = createLogEntry();
 		e.setHttpRequest(req);
 		log(e);
 	}
 
-
 	public void logHttpResponse(@Nonnull HttpServletResponse res, @Nullable String body) {
+		logHttpResponse(res, body, true);
+	}
+
+	public void logHttpResponse(@Nonnull HttpServletResponse res, @Nullable String body, @Nullable boolean formatBody) {
 		HttpResponseEntryType entry = new HttpResponseEntryType();
 
 		entry.setStatus(BigInteger.valueOf(res.getStatus()));
 		entry.getHeader().addAll(readHeaders(res.getHeaderNames(), res::getHeaders));
-		entry.setBody(formatBody(res.getContentType(), body));
+
+		String content = body;
+		if (formatBody) {
+			content = formatBody(res.getContentType(), body);
+		}
+		entry.setBody(content);
+
+		logHttpResponse(entry);
+	}
+
+	// nimbus SDK uses different response type
+	public void logHttpResponse(@Nonnull HTTPResponse res, @Nullable String body) {
+		HttpResponseEntryType entry = new HttpResponseEntryType();
+
+		entry.setStatus(BigInteger.valueOf(res.getStatusCode()));
+		entry.getHeader().addAll(readHeaders(res.getHeaderMap()));
+		entry.setBody(formatBody(res.getHeaderValue("Content-Type").toString(), body));
 
 		logHttpResponse(entry);
 	}
@@ -159,6 +231,18 @@ public class TestStepLogger {
 			return headers.apply(key).stream()
 					.map(value -> createHeader(key, value));
 		}).collect(Collectors.toList());
+	}
+
+	// nimbus SDK uses different types
+	private List<HeaderType> readHeaders(Map<String, List<String>> headers) {
+		List<HeaderType> result = new ArrayList<>();
+//		for (String key : headers.keySet()) {
+//			result.add(createHeader(key, headers.get(key)));
+//		}
+		for (Map.Entry<String,List<String>> e : headers.entrySet()) {
+			result.add(createHeader(e.getKey(), e.getValue().get(0)));
+		}
+		return result;
 	}
 
 	private HeaderType createHeader(String key, String value) {

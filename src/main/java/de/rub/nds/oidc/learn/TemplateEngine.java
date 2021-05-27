@@ -16,18 +16,13 @@
 
 package de.rub.nds.oidc.learn;
 
-import de.rub.nds.oidc.test_model.TestOPConfigType;
-import de.rub.nds.oidc.test_model.TestRPConfigType;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.util.HashMap;
+
 import javax.enterprise.context.ApplicationScoped;
-import org.apache.velocity.app.Velocity;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.context.Context;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.stringtemplate.v4.ST;
 
 
 /**
@@ -37,39 +32,17 @@ import org.slf4j.LoggerFactory;
 @ApplicationScoped
 public class TemplateEngine {
 
-	private final VelocityEngine engine;
+//	private final VelocityEngine engine;
+	private static Logger logger = LoggerFactory.getLogger(TemplateEngine.class.getPackage() + ".TemplateEngine");
 
-	public TemplateEngine() {
-		this.engine = new VelocityEngine();
-		Logger logger = LoggerFactory.getLogger(TemplateEngine.class.getPackage() + ".TemplateEngine");
-		this.engine.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, new Slf4jLogger(logger));
-		this.engine.init();
-	}
+	public String eval(HashMap<String, Object> context, String template) {
 
-	public VelocityEngine getEngine() {
-		return engine;
-	}
+		ST st = new ST(template, '§','§');
+		context.entrySet().stream().forEach(entry -> {st.add(entry.getKey(), entry.getValue());});
 
-	public Context createContext(TestRPConfigType rpCfg) {
-		VelocityContext ctx = new VelocityContext();
-		ctx.put("rp", rpCfg);
-		return ctx;
-	}
-
-	public Context createContext(TestOPConfigType opCfg) {
-		VelocityContext ctx = new VelocityContext();
-		ctx.put("op", opCfg);
-		return ctx;
-	}
-
-	public String eval(Context ctx, String template) {
-		return eval(ctx, new StringReader(template));
-	}
-
-	public String eval(Context ctx, Reader template) {
-		StringWriter w = new StringWriter();
-		engine.evaluate(ctx, w, "opiv", template);
-		return w.toString();
+		String result = st.render();
+		logger.info(result);
+		return result;
 	}
 
 }

@@ -28,6 +28,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+
 /**
  *
  * @author Tobias Wich
@@ -41,6 +42,8 @@ public interface OPImplementation {
 	public static final String AUTH_REQUEST_PATH = "/auth-req";
 	public static final String TOKEN_REQUEST_PATH = "/token-req";
 	public static final String USER_INFO_REQUEST_PATH = "/user-info";
+	// key material for key confusion attacks
+	public static final String UNTRUSTED_KEY_PATH = "/untrusted-key";
 
 
 	void setOPConfig(OPConfigType cfg);
@@ -54,6 +57,7 @@ public interface OPImplementation {
 	void setBaseUri(URI baseUri);
 
 	void setOPType(OPType type);
+	OPType getOPType();
 
 	void setContext(Map<String, Object> suiteCtx, Map<String, Object> stepCtx);
 
@@ -73,5 +77,7 @@ public interface OPImplementation {
 	void tokenRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
 
 	void userInfoRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+
+	void untrustedKeyRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
 
 }

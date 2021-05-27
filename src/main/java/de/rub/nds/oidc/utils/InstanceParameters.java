@@ -17,14 +17,17 @@
 package de.rub.nds.oidc.utils;
 
 import de.rub.nds.oidc.test_model.ParameterType;
+import de.rub.nds.oidc.test_model.ParameterTypeType;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+
 
 /**
  *
@@ -34,32 +37,38 @@ import javax.annotation.concurrent.Immutable;
 public class InstanceParameters {
 
 	private final Map<String, String> params;
-
-	public InstanceParameters(Map<String, String> params) {
-		this.params = Collections.unmodifiableMap(params);
-	}
+	private final Map<String, String> scripts;
 
 	public InstanceParameters(List<ParameterType> params) {
 		this.params = Collections.unmodifiableMap(params.stream()
+				.filter(p -> p.getType() == ParameterTypeType.STRING)
+				.collect(Collectors.toMap(ParameterType::getKey, ParameterType::getValue)));
+		this.scripts = Collections.unmodifiableMap(params.stream()
+				.filter(p -> p.getType() == ParameterTypeType.JS)
 				.collect(Collectors.toMap(ParameterType::getKey, ParameterType::getValue)));
 	}
+
 
 	public boolean containsKey(String key) {
 		return params.containsKey(key);
 	}
 
-	public Map<String, String> getMap() {
+	public Map<String, String> getParamMap() {
 		return params;
 	}
 
 	@Nullable
-	public String get(String key) {
+	public String getParam(String key) {
 		return params.get(key);
+	}
+
+	public Optional<String> getScript(String key) {
+		return Optional.ofNullable(scripts.get(key));
 	}
 
 	@Nonnull
 	public boolean getBool(String key) {
-		return Boolean.parseBoolean(get(key));
+		return Boolean.parseBoolean(getParam(key));
 	}
 
 	public void forEach(BiConsumer<? super String, ? super String> action) {

@@ -21,18 +21,7 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.JWT;
-import com.nimbusds.oauth2.sdk.AuthorizationCode;
-import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
-import com.nimbusds.oauth2.sdk.AuthorizationGrant;
-import com.nimbusds.oauth2.sdk.ErrorObject;
-import com.nimbusds.oauth2.sdk.GrantType;
-import com.nimbusds.oauth2.sdk.OAuth2Error;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.ResponseMode;
-import com.nimbusds.oauth2.sdk.ResponseType;
-import com.nimbusds.oauth2.sdk.Scope;
-import com.nimbusds.oauth2.sdk.TokenErrorResponse;
-import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.client.ClientRegistrationErrorResponse;
@@ -44,15 +33,7 @@ import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.BearerTokenError;
-import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
-import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
-import com.nimbusds.openid.connect.sdk.Nonce;
-import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoRequest;
-import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
+import com.nimbusds.openid.connect.sdk.*;
 import com.nimbusds.openid.connect.sdk.claims.AccessTokenHash;
 import com.nimbusds.openid.connect.sdk.claims.CodeHash;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
@@ -63,23 +44,26 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientMetadata;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientRegistrationRequest;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import de.rub.nds.oidc.server.RequestPath;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.net.URI;
-import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
+import de.rub.nds.oidc.server.TestNotApplicableException;
+import net.minidev.json.JSONObject;
+import org.apache.commons.text.StringEscapeUtils;
+
 import javax.annotation.Nullable;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.minidev.json.JSONObject;
-import org.apache.commons.lang.StringEscapeUtils;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.net.URI;
+import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
- *
  * @author Tobias Wich
  */
 public class DefaultOP extends AbstractOPImplementation {
@@ -90,12 +74,14 @@ public class DefaultOP extends AbstractOPImplementation {
 		logger.logHttpRequest(req, null);
 		String rel = req.getParameter("rel");
 		String resource = req.getParameter("resource");
+		// TODO this should be a final constant
+		String href = resource.contains("enforce-rp-reg") ? resource : path.getDispatchUriAndTestId().toString();
 		if ("http://openid.net/specs/connect/1.0/issuer".equals(rel)) {
 			JsonObject result = Json.createObjectBuilder()
 					.add("subject", resource)
 					.add("links", Json.createArrayBuilder().add(Json.createObjectBuilder()
-					.add("rel", "http://openid.net/specs/connect/1.0/issuer")
-					.add("href", path.getServerHostAndTestId().toString())))
+							.add("rel", "http://openid.net/specs/connect/1.0/issuer")
+							.add("href", href)))
 					.build();
 			StringWriter sw = new StringWriter();
 			Json.createWriter(sw).writeObject(result);
@@ -117,6 +103,7 @@ public class DefaultOP extends AbstractOPImplementation {
 		logger.log("Provider configuration requested.");
 		logger.logHttpRequest(req, null);
 		try {
+
 			OIDCProviderMetadata md = getDefaultOPMetadata();
 			String mdStr = md.toJSONObject().toString();
 
@@ -126,6 +113,8 @@ public class DefaultOP extends AbstractOPImplementation {
 			resp.flushBuffer();
 			logger.log("Returning default provider config.");
 			logger.logHttpResponse(resp, mdStr);
+
+			stepCtx.put(OPContextConstants.DISCOVERY_REQUESTED_AT_OP_TYPE, type);
 		} catch (IOException | ParseException ex) {
 			logger.log("Failed to process default provider config.", ex);
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -173,12 +162,12 @@ public class DefaultOP extends AbstractOPImplementation {
 				OIDCClientMetadata clientMd = regReq.getOIDCClientMetadata();
 
 				// create info object and safe it in context aka register the client
-				ClientID id = new ClientID();
+				ClientID id = getRegistrationClientId();
 				Secret secret = new Secret();
 				info = new OIDCClientInformation(id, new Date(), clientMd, secret);
 
 				// replace some of the values with our own
-				info.getOIDCMetadata().setScope(Scope.parse("openid"));
+				info.getOIDCMetadata().setScope(Scope.parse(Arrays.asList("openid", "name","email", "preferred_username")));
 
 				if (type == OPType.HONEST) {
 					suiteCtx.put(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST, info);
@@ -187,7 +176,7 @@ public class DefaultOP extends AbstractOPImplementation {
 				}
 
 				// answer the response
-				OIDCClientInformationResponse regResp = new OIDCClientInformationResponse(info);
+				OIDCClientInformationResponse regResp = new OIDCClientInformationResponse (info, true);
 				HTTPResponse httpRes = regResp.toHTTPResponse();
 				ServletUtils.applyHTTPResponse(httpRes, resp);
 
@@ -197,7 +186,7 @@ public class DefaultOP extends AbstractOPImplementation {
 			} else {
 				// client is already registered
 				// answer the response
-				OIDCClientInformationResponse regResp = new OIDCClientInformationResponse(info);
+				OIDCClientInformationResponse regResp = new OIDCClientInformationResponse(info, false);
 				HTTPResponse httpRes = regResp.toHTTPResponse();
 				ServletUtils.applyHTTPResponse(httpRes, resp);
 
@@ -236,6 +225,8 @@ public class DefaultOP extends AbstractOPImplementation {
 			ResponseMode responseMode = authReq.getResponseMode();
 
 			try {
+				checkRpTestStepPreconditions(authReq);
+
 				AuthorizationCode code = null;
 				CodeHash cHash = null;
 				if (responseType.contains("code")) {
@@ -274,8 +265,8 @@ public class DefaultOP extends AbstractOPImplementation {
 					sb.append("<head><title>PrOfESSOS form post</title></head>");
 					sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
 					sb.append("<form method=\"post\" action=\"" + authRes.getRedirectionURI().toString() + "\">");
-					for (Map.Entry<String, String> entry : authRes.toParameters().entrySet()) {
-						String entryValue = StringEscapeUtils.escapeHtml(entry.getValue());
+					for (Map.Entry<String, List<String>> entry : authRes.toParameters().entrySet()) {
+						String entryValue = StringEscapeUtils.escapeHtml4(entry.getValue().get(0));
 						sb.append("<input type=\"hidden\" name=\"" + entry.getKey() + "\" value=\"" + entryValue + "\"/>");
 					}
 					sb.append("</form>");
@@ -300,13 +291,14 @@ public class DefaultOP extends AbstractOPImplementation {
 				resp.flushBuffer();
 				logger.log("Returning default Authorization Response.");
 				logger.logHttpResponse(resp, httpRes.getContent());
-			} catch (GeneralSecurityException | JOSEException ex) {
+			} catch (GeneralSecurityException | JOSEException | TestNotApplicableException ex) {
 				ErrorObject errorCode = OAuth2Error.SERVER_ERROR;
 				AuthenticationErrorResponse error = new AuthenticationErrorResponse(redirectUri, errorCode, state, ResponseMode.QUERY);
 				HTTPResponse httpResp = error.toHTTPResponse();
 				ServletUtils.applyHTTPResponse(httpResp, resp);
 
 				resp.flushBuffer();
+				logger.logCodeBlock("Authentication Request processing resulted in:", ex.toString());
 				logger.log("Returning Authorization Error Response.");
 				logger.logHttpResponse(resp, httpResp.getContent());
 			}
@@ -366,6 +358,9 @@ public class DefaultOP extends AbstractOPImplementation {
 		OIDCTokens tokens = new OIDCTokens(idToken, at, null);
 		OIDCTokenResponse tokenRes = new OIDCTokenResponse(tokens);
 
+		// save the token request target (Honest OP or Evil OP)
+		stepCtx.put(OPContextConstants.TOKEN_REQ_RECEIVED_AT_OP_TYPE, type);
+
 		return tokenRes;
 	}
 
@@ -378,7 +373,7 @@ public class DefaultOP extends AbstractOPImplementation {
 			HTTPRequest httpReq = ServletUtils.createHTTPRequest(req);
 			UserInfoRequest userReq = UserInfoRequest.parse(httpReq);
 			logger.logHttpRequest(req, httpReq.getQuery());
-			
+
 			UserInfoSuccessResponse uiResp = userInfoRequestInt(userReq, resp);
 			if (uiResp != null) {
 				sendResponse("User Info", uiResp, resp);
@@ -392,6 +387,7 @@ public class DefaultOP extends AbstractOPImplementation {
 		}
 	}
 
+
 	@Nullable
 	protected UserInfoSuccessResponse userInfoRequestInt(UserInfoRequest userReq, HttpServletResponse resp)
 			throws IOException {
@@ -404,9 +400,21 @@ public class DefaultOP extends AbstractOPImplementation {
 		//AccessTokenHash atHash = AccessTokenHash.compute(at, JWSAlgorithm.RS256);
 
 		UserInfo ui = getUserInfo();
-
 		UserInfoSuccessResponse uiResp = new UserInfoSuccessResponse(ui);
+
+		// save request target
+		stepCtx.put(OPContextConstants.USERINFO_REQ_RECEIVED_AT_OP_TYPE, type);
+
 		return uiResp;
+	}
+
+	@Override
+	public void untrustedKeyRequest(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		logger.log("Unexpected untrustedKeyRequest received");
+		HTTPRequest httpReq = ServletUtils.createHTTPRequest(req);
+		logger.logHttpRequest(req, httpReq.getQuery());
+
+		resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED);
 	}
 
 }

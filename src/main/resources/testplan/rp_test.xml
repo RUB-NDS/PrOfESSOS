@@ -3,7 +3,7 @@
 		  Name="RP-Test-Plan">
 
 	<SuiteParameters>
-		<Parameter Key="RP_grant_not_needed">false</Parameter>
+		<Parameter Key="grant_not_needed">false</Parameter>
 	</SuiteParameters>
 
 	<LearningStep Name="LearningStep">
@@ -12,30 +12,45 @@
 		</BrowserSimulator>
 		<OPConfig-1>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+			<!-- Example scripts -->
+			<!--Parameter Key="honest_idtoken_iss" Type="JS">
+				var ei = impl.getHonestOrEvilIssuer();
+				ei;
+			</Parameter-->
+			<!-- Note the variable which is needed as pure object definitions are not allowed on the top level -->
+			<!--Parameter Key="script_user_info" Type="JS">
+				var obj = {
+					"sub": impl.getTokenSubject(),
+					"name": impl.getTokenName(),
+					"preferred_username": impl.getTokenUsername(),
+					"email": impl.getTokenEmail()
+				};
+				obj;
+			</Parameter-->
 		</OPConfig-1>
 		<OPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 		</OPConfig-2>
 	</LearningStep>
 
-	<TestStep Name="ID Spoofing 1">
+	<TestStep Name="ID Spoofing 1 - ID Token (sub)" DisplayGroup="ID Spoofing">
 		<Description><![CDATA[
-			<h1>ID Spoofing Attack</h1>
-			In this test we use the Attacker OP and create an ID Token containing the identity (sub) of the victim,
+			<h3>ID Spoofing Attack</h3>
+			In this test we use the Attacker OP and create an ID Token containing the identity (<code>sub</code>) of the victim,
 			which is controlled by another OP: Honest OP.
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow. 
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow. 
 
-			<h2>Execution.</h2>
-			PrOfESSOS issues an invalid ID token containing the victim's identity in the "sub".
+			<h4>Execution.</h4>
+			PrOfESSOS issues an invalid ID Token containing the victim's identity in the <code>sub</code> claim.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the Client accepts and ID Token AND logs the attacker into the victim's account.
-			
-			<h2>Mitigation</h2>
-			The identity of an user is represented by the combination of "iss" 
-			and "sub". Thus, both values MUST be used to authenticate the user.
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the client accepts an ID Token AND logs the attacker into the victim's account.
+
+			<h4>Mitigation</h4>
+			The identity of an user is represented by the combination of the <code>iss</code> and <code>sub</code> claims. 
+			Therefore, both values MUST be used to authenticate the user.
 		]]>
 		</Description>
 		<TestParameters>
@@ -52,7 +67,7 @@
 		<OPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 
-			<!-- gets the "sub" configured in the Honest OP" -->
+			<!-- gets the <code>sub</code> configured in the Honest OP" -->
 			<Parameter Key="force_honest_idtoken_iss">false</Parameter>
 			<Parameter Key="force_honest_idtoken_sub">true</Parameter>
 			<Parameter Key="force_honest_idtoken_name">false</Parameter>
@@ -61,26 +76,26 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ID Spoofing 2">
+	<TestStep Name="ID Spoofing 2 - ID Token (sub+iss)" DisplayGroup="ID Spoofing">
 		<Description><![CDATA[
-			<h1>ID Spoofing Attack</h1>
-			In this test we use the Attacker OP and create an ID Token containing the identity (iss+sub) of the victim,
-			which is controlled by another OP: Honest OP.
+			<h3>ID Spoofing Attack</h3>
+			In this test we use the Attacker OP and create an ID Token containing the identity 
+			(<code>iss</code>+<code>sub</code>) of the victim, which is controlled by another OP: Honest OP.
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
 
-			<h2>Execution.</h2>
-			PrOfESSOS issues an invalid ID token containing the victim's identity in the "sub" and the Honest OP as "iss".
+			<h4>Execution.</h4>
+			PrOfESSOS issues an invalid ID Token containing the victim's identity in the <code>sub</code> claim and the 
+			Honest OP as <code>iss</code>.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the Client accepts and ID Token AND logs the attacker into the victim's account.
-			
-			<h2>Mitigation</h2>
-			Step 2 in Section 3.1.3.7. 
-			OpenIDConnect-Core: " The Issuer Identifier for the OpenID Provider 
-			(which is typically obtained during Discovery) MUST exactly match 
-			the value of the iss (issuer) Claim." within the ID Token.
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the client accepts an ID Token AND logs the attacker into the victim's account.
+
+			<h4>Mitigation</h4>
+			Step 2 in <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation" target="_blank">Section 3.1.3.7. 
+			OpenIDConnect-Core:</a></cite> <q>The Issuer Identifier for the OpenID Provider 
+			(which is typically obtained during Discovery) MUST exactly match the value of the iss (issuer) Claim.</q> within the ID Token.
 		]]>
 		</Description>
 		<TestParameters>
@@ -97,7 +112,7 @@
 		<OPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
 
-			<!-- gets the "iss" and "sub" configured in the Honest OP" -->
+			<!-- gets the <code>iss</code> and <code>sub</code> configured in the Honest OP" -->
 			<Parameter Key="force_honest_idtoken_iss">true</Parameter>
 			<Parameter Key="force_honest_idtoken_sub">true</Parameter>
 			<Parameter Key="force_honest_idtoken_name">false</Parameter>
@@ -106,24 +121,27 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="ID Spoofing 3">
+
+	<TestStep Name="ID Spoofing 3 - ID Token (name+username+email)" DisplayGroup="ID Spoofing">
 		<Description><![CDATA[
-			<h1>ID Spoofing Attack</h1>
-			In this test we use the Attacker OP and create an ID Token containing the identity (name+username+email) of
-			the victim, which is controlled by another OP: Honest OP.
+			<h3>ID Spoofing Attack</h3>
+			In this test we use the Attacker OP and create an ID  client accepts an ID Token containing the identity 
+			(<code>name</code>+<code>username</code>+<code>email</code>) of the victim, which is controlled by another OP: Honest OP.
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
 
-			<h2>Execution.</h2>
-			PrOfESSOS issues valid ID token containing victim's identity as subclaims (name, username and email).
+			<h4>Execution.</h4>
+			PrOfESSOS issues a valid ID Token containing victim's identity in the standard claims <code>name</code>, 
+			<code>preferred_username</code>, and <code>email</code>. The <code>sub</code> claim, which is part of the 
+			ID Token validation, is not spoofed and contains an identity controlled by the Attacker OP.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the Client accepts and ID Token AND logs the attacker into the victim's account.
-			
-			<h2>Mitigation</h2>
-			The identity of an user is represented by the combination of "iss" 
-			and "sub". Thus, subclaims can be used only to retrieve 
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the client accepts the ID Token AND logs the attacker into the victim's account.
+
+			<h4>Mitigation</h4>
+			The identity of an user is represented by the combination of <code>iss</code> 
+			and <code>sub</code>. Thus, subclaims can be used only to retrieve 
 			further information regarding the user, but NOT for 
 			authentication. Currently, OpenID Connect does not provide 
 			any mechanisms to verify these statements.
@@ -151,33 +169,545 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Issuer Confusion">
+
+	<TestStep Name="ID Spoofing 4 - ID Token (sub, no iss)" DisplayGroup="ID Spoofing">
 		<Description><![CDATA[
-			<h1>Issuer Confusion</h1>
-			In this test we use the Attacker OP to return maliciously crafted Discovery document (containing the issuer of the Honest OP) and afterwards to create an ID Token containing the identity (iss+sub) of the victim, which is controlled by another OP: Honest OP.
+			<h3>ID Spoofing Attack</h3>
+			In this test we use the Attacker OP to create an (invalid) ID Token containing the <code>sub</code> of the victim and
+			no <code>iss</code> claim.
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
 
-			<h2>Execution.</h2>
-				Step 1: PrOfESSOS returns invalid "issuer" parameter during Discovery. The "iss" is set to the value of the Honest OP.
-				Step 2: PrOfESSOS issues an invalid ID token containing the victim's identity in the "sub" and the Honest OP as "iss". 
+			<h4>Execution.</h4>
+			PrOfESSOS issues an invalid ID Token containing the victim's identity in the <code>sub</code> claim. The ID Token 
+			does not include an <code>iss</code> claim. If a UserInfo request is received, the victim's issuer identifier 
+			will be returned within the UserInfo response.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the Client accepts and ID Token AND logs the attacker into the victim's account.
-			
-			<h2>Mitigation</h2>
-			Step 1 in Section 3. 
-			OpenIDConnect-Discovery: "If Issuer discovery is supported (see 
-			Section 2), this value MUST be identical to the issuer value returned by WebFinger. This also MUST be identical to the iss Claim value in ID Tokens issued from this Issuer."
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the client accepts the ID Token AND logs the attacker into the victim's account.
+
+			<h4>Mitigation</h4>
+			Step 2 in <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDTokenvalidation" target="_blank">Section 3.1.3.7. 
+			OpenIDConnect-Core:</a></cite> <q>The Issuer Identifier for the OpenID Provider 
+			(which is typically obtained during Discovery) MUST exactly match the value of the iss (issuer) Claim.</q> within the ID Token.
 		]]>
 		</Description>
 		<TestParameters>
-			<Parameter Key="discovery_support_needed">true</Parameter>
+			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="use_evil_needle">false</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+
+			<Parameter Key="force_idtoken_iss_excluded">true</Parameter>
+			<Parameter Key="force_honest_idtoken_sub">true</Parameter>
+			<!-- do not include name, username, and email claims in idtoken-->
+			<Parameter Key="force_token_userclaims_excluded">true</Parameter>
+
+			<Parameter Key="include_honest_sub_in_userinfo">true</Parameter>
+			<Parameter Key="include_honest_iss_in_userinfo">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="ID Spoofing 5 - ID Token (sub, empty iss)" DisplayGroup="ID Spoofing">
+		<Description><![CDATA[
+			<h3>ID Spoofing Attack</h3>
+			In this test we use the Attacker OP to create an (invalid) ID Token containing the <code>sub</code> of the 
+			victim but an empty string as the value of the <code>iss</code> claim.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an invalid ID Token containing the victim's identity in the <code>sub</code> and an empty
+			string as the value of the <code>iss</code> claim. If a UserInfo request is received, the victim's issuer 
+			identifier will be returned	within the UserInfo response.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the client accepts an ID Token AND logs the attacker into the victim's account.
+
+			<h4>Mitigation</h4>
+			Step 2 in <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation" target="_blank">Section 3.1.3.7. 
+			OpenIDConnect-Core:</a></cite> <q>The Issuer Identifier for the OpenID Provider 
+			(which is typically obtained during Discovery) MUST exactly match the value of the iss (issuer) Claim.</q> within the ID Token.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="use_evil_needle">false</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+
+			<Parameter Key="force_idtoken_iss_empty_string">true</Parameter>
+			<Parameter Key="force_honest_idtoken_sub">true</Parameter>
+			<Parameter Key="force_token_userclaims_excluded">true</Parameter>
+
+			<Parameter Key="include_honest_sub_in_userinfo">true</Parameter>
+			<Parameter Key="include_honest_iss_in_userinfo">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+
+
+	<TestStep Name="ID Spoofing 6 - UserInfo (sub+iss)" DisplayGroup="ID Spoofing">
+		<Description><![CDATA[
+			<h3>ID Spoofing</h3>
+			PrOfESSOS tests the validation of the <code>sub</code> parameter on the client by returning a maliciously crafted 
+			UserInfo response. The UserInfo response includes <code>sub</code> and <code>iss</code> claims of another OP - HonestOP.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.and processes the UserInfo response.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token that contains a <code>sub</code> claim initialized with the identity of an entity 
+			controlled by the Evil OP. When the client requests UserInfo, a different <code>sub</code> value is returned along 
+			with UserInfo parameters belonging to a subject identifier registered with the Honest OP.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the attacker is logged into the victim's account (registered with Honest OP).
+
+			<h4>Mitigation</h4>
+			<p>As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfoResponse" target="_blank">Section 5.3.2 of 
+			OpenID-Connect Core</a></cite>, <q>The sub Claim in the UserInfo Response MUST be verified 
+			to exactly match the sub Claim in the ID Token; if they do not match, the UserInfo Response 
+			values MUST NOT be used.</q></p>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.IDSpoofingRPBrowser</ImplementationClass>
+			<Parameter Key="use_evil_needle">false</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.UserInfoIDSpoofingOP</ImplementationClass>
+
+			<Parameter Key="force_token_userclaims_excluded">true</Parameter>
+			<Parameter Key="include_honest_sub_in_userinfo">true</Parameter>
+			<Parameter Key="include_honest_iss_in_userinfo">true</Parameter>
+			<Parameter Key="force_honest_userinfo_name">true</Parameter>
+			<Parameter Key="force_honest_userinfo_email">true</Parameter>
+
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="ID Spoofing 7 - UserInfo (name+username+email)" DisplayGroup="ID Spoofing">
+		<Description><![CDATA[
+			<h3>ID Spoofing</h3>
+			<p>PrOfESSOS tests the validation of the <code>sub</code> parameter on the client by returning a maliciously crafted 
+			UserInfo response.</p>
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow and processes the UserInfo response.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token, which contains <code>sub</code> initialized with the <code>client_id</code> of the client 
+			registered at the Evil OP. The provided UserInfo response does not include a <code>sub</code> claim but the claims 
+			<code>name</code>, <code>preferred_username</code> and <code>email</code> contain identifiers of the victim. 
+			Additionally, an <code>iss</code> claim is added that contains the issuer identifier of the victim's OP - Honest OP..
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the attacker is logged in the victim's account (registered with Honest OP) or if
+			 claims from the UserInfo response are processed.
+
+			<h4>Mitigation</h4>
+			<p>As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfoResponse" target="_blank">Section 5.3.2 of 
+			OpenID-Connect Core</a></cite>, <q>The sub Claim in the UserInfo Response MUST be verified 
+			to exactly match the sub Claim in the ID Token; if they do not match, the UserInfo Response 
+			values MUST NOT be used.</q></p>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.IDSpoofingRPBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">false</Parameter>
+			<Parameter Key="use_evil_needle">false</Parameter>
+
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.UserInfoIDSpoofingOP</ImplementationClass>
+
+			<Parameter Key="force_token_userclaims_excluded">true</Parameter>
+			<Parameter Key="include_honest_iss_in_userinfo">true</Parameter>
+			<Parameter Key="force_honest_userinfo_name">true</Parameter>
+			<Parameter Key="force_honest_userinfo_username">true</Parameter>
+			<Parameter Key="force_honest_userinfo_email">true</Parameter>
+
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="ID Spoofing 8 - UserInfo (multiple sub)" DisplayGroup="ID Spoofing">
+		<Description><![CDATA[
+			<h3>ID Spoofing</h3>
+			<p>PrOfESSOS tests the validation of the <code>sub</code> claim on the client by returning a maliciously crafted 
+			UserInfo response. The provided UserInfo response includes two different <code>sub</code> claims: the first 
+			<code>sub</code> claim contains the identity that was contained in the ID Token while the second 
+			<code>sub</code> claim contains the identity of the victim (which is controlled by another Issuer - Honest OP)</p>
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow and processes the UserInfo response.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token, which contains <code>sub</code> initialized with the <code>client_id</code> of the client 
+			registered at the Evil OP. When the client requests UserInfo, a different <code>sub</code> value is returned along 
+			with UserInfo parameters belonging to a subject registered with Honest OP.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the attacker is logged in the victim's account (registered with Honest OP).
+
+			<h4>Mitigation</h4>
+			<p>As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfoResponse" target="_blank">Section 5.3.2 of 
+			OpenID-Connect Core</a></cite>, <q>The sub Claim in the UserInfo Response MUST be verified 
+			to exactly match the sub Claim in the ID Token; if they do not match, the UserInfo Response 
+			values MUST NOT be used.</q></p>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.IDSpoofingRPBrowser</ImplementationClass>
+			<Parameter Key="use_evil_needle">false</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.UserInfoIDSpoofingOP</ImplementationClass>
+
+			<Parameter Key="force_token_userclaims_excluded">true</Parameter>
+
+			<Parameter Key="include_evil_sub_in_userinfo">true</Parameter>
+			<Parameter Key="include_honest_sub_in_userinfo">true</Parameter>
+
+			<Parameter Key="include_honest_iss_in_userinfo">true</Parameter>
+			<Parameter Key="force_honest_userinfo_name">true</Parameter>
+			<Parameter Key="force_honest_userinfo_username">true</Parameter>
+			<Parameter Key="force_honest_userinfo_email">true</Parameter>
+
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="ID Spoofing 9 - UserInfo (multiple sub)" DisplayGroup="ID Spoofing">
+		<Description><![CDATA[
+			<h3>ID Spoofing</h3>
+			<p>PrOfESSOS tests the validation of the <code>sub</code> claim on the client by returning a maliciously crafted 
+			UserInfo response. The provided UserInfo response includes two different <code>sub</code> claims: the first 
+			<code>sub</code> claim contains the identity of the victim (which is controlled by another Issuer) and the 
+			second contains the identity that was contained in the ID Token.</p>
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow and processes the UserInfo response.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token, which contains <code>sub</code> initialized with the client_id of the client 
+			registered at the Evil OP. When the client requests UserInfo, a different <code>sub</code> value is returned along 
+			with UserInfo parameters belonging to a subject registered with HonestOP.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the attacker is logged in the victim's account (registered with Honest OP).
+
+			<h4>Mitigation</h4>
+			<p>As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfoResponse" target="_blank">Section 5.3.2 of 
+			OpenID-Connect Core</a></cite>, <q>The sub Claim in the UserInfo Response MUST be verified 
+			to exactly match the sub Claim in the ID Token; if they do not match, the UserInfo Response 
+			values MUST NOT be used.</q></p>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.IDSpoofingRPBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">false</Parameter>
+			<Parameter Key="use_evil_needle">false</Parameter>
+
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.UserInfoIDSpoofingOP</ImplementationClass>
+
+			<Parameter Key="force_token_userclaims_excluded">true</Parameter>
+
+			<Parameter Key="include_honest_sub_in_userinfo">true</Parameter>
+			<Parameter Key="include_evil_sub_in_userinfo">true</Parameter>
+
+			<Parameter Key="include_honest_iss_in_userinfo">true</Parameter>
+			<Parameter Key="force_honest_userinfo_name">true</Parameter>
+			<Parameter Key="force_honest_userinfo_email">true</Parameter>
+			<Parameter Key="force_honest_userinfo_username">true</Parameter>
+
+
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="ID Spoofing 10 - UserInfo (sub array)" DisplayGroup="ID Spoofing">
+		<Description><![CDATA[
+			<h3>ID Spoofing</h3>
+			<p>PrOfESSOS tests the validation of the <code>sub</code> claim on the client by returning a maliciously crafted 
+			UserInfo response.</p>
+
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow and processes the UserInfo response.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token, which contains a <code>sub</code> claim initialized with the <code>client_id</code> 
+			of the client registered at the Evil OP. When the client requests UserInfo, the provided UserInfo response 
+			includes a JSON-Array as value of the <code>sub</code> claim. This array contains two entries: the identity 
+			that was contained in the ID Token in the first position and the identity of the victim (which is controlled 
+			by another Issuer - Honest OP) in the second position.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the attacker is logged in the victim's account (registered with Honest OP).
+
+			<h4>Mitigation</h4>
+			<p>As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfoResponse" target="_blank">Section 5.3.2 of 
+			OpenID-Connect Core</a></cite>, <q>The sub Claim in the UserInfo Response MUST be verified 
+			to exactly match the sub Claim in the ID Token; if they do not match, the UserInfo Response 
+			values MUST NOT be used.</q></p>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.IDSpoofingRPBrowser</ImplementationClass>
+			<Parameter Key="use_evil_needle">false</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.UserInfoIDSpoofingOP</ImplementationClass>
+
+			<Parameter Key="force_token_userclaims_excluded">true</Parameter>
+
+			<Parameter Key="include_sub_claims_as_json_array">true</Parameter>
+			<Parameter Key="include_evil_sub_in_userinfo">true</Parameter>
+			<Parameter Key="include_honest_sub_in_userinfo">true</Parameter>
+
+			<Parameter Key="include_honest_iss_in_userinfo">true</Parameter>
+			<Parameter Key="force_honest_userinfo_name">true</Parameter>
+			<Parameter Key="force_honest_userinfo_username">true</Parameter>
+			<Parameter Key="force_honest_userinfo_email">true</Parameter>
+
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="ID Spoofing 11 - UserInfo (sub array reverse)" DisplayGroup="ID Spoofing">
+		<Description><![CDATA[
+			<h3>ID Spoofing</h3>
+			<p>PrOfESSOS tests the validation of the <code>sub</code> claim on the client by returning a maliciously crafted 
+			UserInfo response. </p>
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow and processes the UserInfo response.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token, which contains <code>sub</code> claim initialized with the client_id of the client 
+			registered at the Evil OP. When the client requests UserInfo, provided UserInfo response includes a 
+			JSON-Array as value of the <code>sub</code> claim. This array contains two entries: the identity of the 
+			victim (which is controlled by another Issuer - Honest OP) in the first position and the identity that was 
+			contained in the ID Token in the second position.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the attacker is logged in the victim's account (registered with Honest OP).
+
+			<h4>Mitigation</h4>
+			<p>As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfoResponse" target="_blank">Section 5.3.2 of 
+			OpenID-Connect Core</a></cite>, <q>The sub Claim in the UserInfo Response MUST be verified 
+			to exactly match the sub Claim in the ID Token; if they do not match, the UserInfo Response 
+			values MUST NOT be used.</q></p>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.IDSpoofingRPBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">false</Parameter>
+			<Parameter Key="use_evil_needle">false</Parameter>
+
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.UserInfoIDSpoofingOP</ImplementationClass>
+
+			<Parameter Key="force_token_userclaims_excluded">true</Parameter>
+
+			<Parameter Key="include_sub_claims_as_json_array">true</Parameter>
+			<Parameter Key="include_honest_sub_in_userinfo">true</Parameter>
+			<Parameter Key="include_evil_sub_in_userinfo">true</Parameter>
+
+			<Parameter Key="include_honest_iss_in_userinfo">true</Parameter>
+			<Parameter Key="force_honest_userinfo_name">true</Parameter>
+			<Parameter Key="force_honest_userinfo_email">true</Parameter>
+			<Parameter Key="force_honest_userinfo_username">true</Parameter>
+
+
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="ID Spoofing 12 - ID Token Header" DisplayGroup="ID Spoofing">
+		<Description><![CDATA[
+			<h3>Sub Claim Spoofing (ID Token Header)</h3>
+			PrOfESSOS tests the validation of the <code>sub</code> claim on the client by returning a maliciously crafted 
+			ID Token. RFC 7519, Section 5.3, allows to replicate the JWT claims <code>iss, sub, aud</code> within the 
+			JWT header with the intention of facilitating the processing of encrypted JWT bodys. 
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token with a malicious Header. The JWT header contains the victim's identity in a 
+			<code>sub</code> claim and the issuer identifier of the Honest OP in the <code>iss</code> claim. The unencrypted, 
+			signed body of the ID Token does not contain invalid data and should verify successfully.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the attacker is logged in the victim's account (registered with Honest OP).
+
+			<h4>Mitigation</h4>
+			A client receiving a JWT that includes header claims should not process claims from the unprotected header 
+			without proper verification: only the claims found in the protected (and succesfully verified) JWT payload 
+			are to be processed.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="use_evil_needle">false</Parameter>
+			<!--<Parameter Key="force_success_url_fails">true</Parameter>-->
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.UserInfoIDSpoofingOP</ImplementationClass>
+
+			<Parameter Key="force_token_userclaims_excluded">true</Parameter>
+			<Parameter Key="token_header_add_claims">true</Parameter>
+			<Parameter Key="force_token_header_honest_iss">true</Parameter>
+			<Parameter Key="force_token_header_honest_sub">true</Parameter>
+			<Parameter Key="force_token_header_honest_email">true</Parameter>
+			<!--<Parameter Key="force_honest_userinfo_iss">true</Parameter>-->
+
+		</OPConfig-2>
+	</TestStep>
+
+	<!--TODO: FutureWork. Same as "Same as ID Spoofing 12 - ID Token Header", but actually ENCRYPT the JWT Payload-->
+	<!--<TestStep Name="Same as ID Spoofing 11 - ID Token Header">-->
+	<!--<Description><![CDATA[-->
+			<!--<h3>Sub Claim Spoofing (ID Token Header)</h3>-->
+			<!--PrOfESSOS tests the validation of the <code>sub</code> claim on the client by returning a maliciously crafted -->
+			<!--ID Token. RFC 7519, Section 5.3, allows to replicate the JWT claims <code>iss, sub, aud</code> within the -->
+			<!--JWT header with the intention of facilitating processing of encrypted JWT bodys. -->
+			<!---->
+			<!--<h4>Prerequisites.</h4>-->
+			<!--The target client supports the implicit flow or the code flow.-->
+			<!---->
+			<!--<h4>Execution.</h4>-->
+			<!--PrOfESSOS issues an ID Token with a malicious Header. The JWT header contains the victim's identity in a -->
+			<!--<code>sub</code> claim and the issuer identifier of the Honest OP in the <code>iss</code>. The ID Token -->
+			<!--payload is encrypted and signed, does not contain invalid data, and should verify successfully.-->
+			<!--<h4>Result Evaluation.</h4>-->
+			<!--The attack is successful if the attacker is logged in the victim's account (registered with Honest OP).-->
+			<!---->
+			<!--<h4>Mitigation</h4>-->
+			<!--A client receiving a JWT that includes header claims should not process claims from the unprotected header -->
+			<!--without proper verification: only the claims found in the protected (and succesfully verified) JWT payload -->
+			<!--are to be processed.-->
+			<!---->
+		<!--]]>-->
+	<!--</Description>-->
+	<!--<TestParameters>-->
+	<!--<Parameter Key="discovery_support_needed">false</Parameter>-->
+	<!--<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>-->
+	<!--</TestParameters>-->
+	<!--<BrowserSimulator>-->
+	<!--<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>-->
+	<!--<Parameter Key="use_evil_needle">false</Parameter>-->
+	<!--&lt;!&ndash;<Parameter Key="force_success_url_fails">true</Parameter>&ndash;&gt;-->
+	<!--</BrowserSimulator>-->
+	<!--<OPConfig-1>-->
+	<!--<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>-->
+	<!--</OPConfig-1>-->
+	<!--<OPConfig-2>-->
+	<!--<ImplementationClass>de.rub.nds.oidc.server.op.UserInfoIDSpoofingOPOP</ImplementationClass>-->
+
+	<!--<Parameter Key="token_header_add_claims">true</Parameter>-->
+	<!--<Parameter Key="token_encrypt_payload">true</Parameter>--> <!-- TODO: not yet implemented -->
+	<!--<Parameter Key="force_token_header_honest_iss">true</Parameter>-->
+	<!--<Parameter Key="force_token_header_honest_sub">true</Parameter>-->
+	<!--<Parameter Key="force_token_header_honest_email">true</Parameter>-->
+	<!--&lt;!&ndash;<Parameter Key="force_honest_userinfo_iss">true</Parameter>&ndash;&gt;-->
+
+	<!--</OPConfig-2>-->
+	<!--</TestStep>-->
+
+	<TestStep Name="Issuer Confusion">
+		<Description><![CDATA[
+			<h3>Issuer Confusion</h3>
+			In this test we use the Attacker OP to return maliciously crafted Discovery document (containing the issuer of the Honest OP) and afterwards to create an ID Token containing the identity (iss+sub) of the victim, which is controlled by another OP: Honest OP.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+				<ul><li>Step 1: PrOfESSOS returns an invalid <code>issuer</code> parameter during Discovery. The <code>issuer</code> is set to the value of the Honest OP.</li>
+				<li>Step 2: PrOfESSOS issues an invalid ID Token containing the victim's identity in the <code>sub</code> and the Honest OP as <code>iss</code>.</li></ul>
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the client accepts the ID Token AND logs the attacker into the victim's account.
+
+			<h4>Mitigation</h4>
+			According to the description of the <code>issuer</code> value in <cite><a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata" target="_blank">Section 3. OpenIDConnect-Discovery:</a> <q>If Issuer discovery is supported (see Section 2), this value MUST be identical to the issuer value returned by WebFinger. This also MUST be identical to the iss Claim value in ID Tokens issued from this Issuer.</q>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">true</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.IssuerConfusionRPBrowser</ImplementationClass>
 			<Parameter Key="use_evil_needle">false</Parameter>
 		</BrowserSimulator>
 		<OPConfig-1>
@@ -190,19 +720,24 @@
 			<Parameter Key="force_honest_idtoken_sub">true</Parameter>
 		</OPConfig-2>
 	</TestStep>
-<!--
-	<TestStep Name="Key Confusion 1 (future work)">
+
+	<TestStep Name="Key Confusion 1 - jwk Spoofing" DisplayGroup="Key Confusion">
 		<Description><![CDATA[
-			<h1>Key Confusion</h1>
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token containing valid signature signed with an untrusted key.
-			The key is referenced by the "kid" parameter.
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the ID token is accepted by the Client.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing valid signature signed with an untrusted key.
+			The key is included in the ID Token as <code>jwk</code> member and referenced by the <code>kid</code> parameter.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 1.0, Section 2</a></cite>, <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters.</q>
 		]]>
 		</Description>
 		<TestParameters>
@@ -211,173 +746,6 @@
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
-		</BrowserSimulator>
-		<OPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
-		</OPConfig-1>
-		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
-			<Parameter Key="force_idtoken_header_kid_untrusted_key">true</Parameter>
-			<Parameter Key="include_signing_certificate">true</Parameter>
-		</OPConfig-2>
-	</TestStep>
-
-	<TestStep Name="Key Confusion 2 (future work)">
-		<Description><![CDATA[
-			<h1>Key Confusion</h1>
-
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token containing valid signature signed with untrusted key.
-			The key is referenced by the "x5u" parameter.
-
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
-		]]>
-		</Description>
-		<TestParameters>
-			<Parameter Key="discovery_support_needed">false</Parameter>
-			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
-		</TestParameters>
-		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
-		</BrowserSimulator>
-		<OPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
-		</OPConfig-1>
-		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
-
-			<Parameter Key="force_idtoken_header_x5u_untrusted_key">true</Parameter>
-			<Parameter Key="include_signing_certificate">true</Parameter>
-		</OPConfig-2>
-	</TestStep>
-
-	<TestStep Name="Key Confusion 3 (future work)">
-		<Description><![CDATA[
-			<h1>Key Confusion</h1>
-
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token containing valid signature signed with untrusted key.
-			The key is referenced by the "x5c" parameter.
-
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
-		]]>
-		</Description>
-		<TestParameters>
-			<Parameter Key="discovery_support_needed">false</Parameter>
-			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
-		</TestParameters>
-		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
-		</BrowserSimulator>
-		<OPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
-		</OPConfig-1>
-		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
-
-			<Parameter Key="force_idtoken_header_x5c_untrusted_key">true</Parameter>
-			<Parameter Key="include_signing_certificate">true</Parameter>
-		</OPConfig-2>
-	</TestStep>
-
-	<TestStep Name="Key Confusion 4 (future work)">
-		<Description><![CDATA[
-			<h1>Key Confusion</h1>
-
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token containing valid signature signed with untrusted key.
-			The key is referenced by the "jku" parameter.
-
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
-		]]>
-		</Description>
-		<TestParameters>
-			<Parameter Key="discovery_support_needed">false</Parameter>
-			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
-		</TestParameters>
-		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
-		</BrowserSimulator>
-		<OPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
-		</OPConfig-1>
-		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
-
-			<Parameter Key="force_idtoken_header_jku_untrusted_key">true</Parameter>
-			<Parameter Key="include_signing_certificate">true</Parameter>
-		</OPConfig-2>
-	</TestStep>
-
-	<TestStep Name="Key Confusion 5 (future work)">
-		<Description><![CDATA[
-			<h1>Key Confusion</h1>
-
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token containing valid signature signed with untrusted key.
-			The key is referenced by the "jwk" parameter.
-
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
-		]]>
-		</Description>
-		<TestParameters>
-			<Parameter Key="discovery_support_needed">false</Parameter>
-			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
-		</TestParameters>
-		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
-		</BrowserSimulator>
-		<OPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
-		</OPConfig-1>
-		<OPConfig-2>
-			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
-
-			<Parameter Key="force_idtoken_header_jwk_untrusted_key">true</Parameter>
-			<Parameter Key="include_signing_certificate">true</Parameter>
-		</OPConfig-2>
-	</TestStep>
-
-	<TestStep Name="Key Confusion 6 ">
-		<Description><![CDATA[
-			<h1>Key Confusion</h1>
-
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			The Client has the same "client_id" on the Honest and Malicious OP.
-
-			<h2>Execution.</h2>
-			Session Overwriting attack in order to confuse the client to use the wrong key.
-
-			Test desciption
-				Step 1: starts authentication with Malicious OP
-				Step 2: pause before sending the Authentication Response (code or idtoken/access token) to the SP
-				Step 3: start authentication with Honest OP within the same HTTP session as Step 1 (i.e., use the same Cookies)
-				Step 4: abort Step 3 after the Honest IdP has been contacted by the Browser from Step 3.
-				Step 5: continue with Step 2 (break the pause) and sends the Authentication Response (code or idtoken/access token)
-
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
-		]]>
-		</Description>
-		<TestParameters>
-			<Parameter Key="discovery_support_needed">true</Parameter>
-			<Parameter Key="dynamic_client_registration_support_needed">true</Parameter>
-		</TestParameters>
-		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowser</ImplementationClass>
 			<Parameter Key="force_success_url_fails">true</Parameter>
 		</BrowserSimulator>
 		<OPConfig-1>
@@ -385,38 +753,1328 @@
 		</OPConfig-1>
 		<OPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
-			<Parameter Key="registration_clientid">de.rub.nds.oidc.server.op.DefaultOP.IDToken.audience</Parameter>
+			<Parameter Key="idtoken_spoofed_jwk">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jwk">true</Parameter>-->
+		</OPConfig-2>
+	</TestStep>
 
+	<TestStep Name="Key Confusion 1.1 - JWK Spoofing (jwk: URI)" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a valid signature signed with an untrusted key.
+			The ID Token's <code>jwk</code> member is (invalidly) set to a JWKS URI that returns the signing key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 1.0, Section 2</a></cite>, <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters.</q>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_jku_as_jwk">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jwk">true</Parameter>-->
+			<Parameter Key="request_to_untrusted_key_uri_fails_test">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 2 - jku Spoofing" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing valid signature signed with an untrusted key.
+			The key is referenced by the <code>jku</code> parameter.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 1.0, Section 2</a></cite>, <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters.</q>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_jku">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jku">true</Parameter>-->
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 2.1 - jku returns [untrusted, trusted]" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing valid signature signed with an untrusted key.
+			The key is referenced by the <code>jku</code> parameter.
+			The resource referenced in the jku member returns a JWKS which contains the signing key as the
+			first member and the (trusted) key from OP's JWKS endpoint as the second member.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 1.0, Section 2</a></cite>, <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters.</q>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_jku">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<Parameter Key="jku_return_untrusted-trusted_jwks">true</Parameter>
+			<Parameter Key="idtoken_crit_jku">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 2.2 - jku returns [trusted, untrusted]" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing valid signature signed with an untrusted key.
+			The key is referenced by the <code>jku</code> parameter.
+			The resource referenced in the jku member returns a JWKS which contains the signing key as the
+			second member and the (trusted) key from OP's JWKS endpoint as the first member.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 1.0, Section 2</a></cite>, <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters.</q>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_jku">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<Parameter Key="jku_return_trusted-untrusted_jwks">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jku">true</Parameter>-->
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 2.3 - jwk contains spoofed jku" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing valid signature signed with an untrusted key.
+			The signing key is included in the jwk parameter. To lure the client into trustin the key,
+			the JWK's <code>jku</code> parameter points to an URL that responds with the signing key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.or if the jku URI is contacted.
+
+			<h4>Mitigation</h4>
+			As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 1.0, Section 2</a></cite>, <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters.</q>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_jku_in_jwk">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<Parameter Key="idtoken_crit_jwk">true</Parameter>
+			<Parameter Key="request_to_untrusted_key_uri_fails_test">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 2.4 - jwk contains spoofed x5u" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+		   <h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+		   <h4>Prerequisites.</h4>
+		   The target client supports the implicit flow or the code flow.
+
+		   <h4>Execution.</h4>
+		   PrOfESSOS issues an ID Token containing valid signature signed with an untrusted key.
+		   The signing key is included in the jwk parameter. To lure the client into trusting the key,
+		   the JWK's <code>x5u</code> member points to an URL that responds with the signing key.
+
+		   <h4>Result Evaluation.</h4>
+		   The attack is successful if the ID Token is accepted by the client.or if the x5u URI is contacted.
+
+		   <h4>Mitigation</h4>
+		   As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 1.0, Section 2</a></cite>, <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters.</q>
+				   ]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_x5u_in_jwk">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<Parameter Key="idtoken_crit_jwk">true</Parameter>
+			<Parameter Key="request_to_untrusted_key_uri_fails_test">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 2.5 - jwk contains spoofed x5c" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+                       <h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+                       <h4>Prerequisites.</h4>
+                       The target client supports the implicit flow or the code flow.
+
+                       <h4>Execution.</h4>
+                       PrOfESSOS issues an ID Token containing valid signature signed with an untrusted key.
+                       The signing key is included in the JWK's <code>x5c</code> member.
+
+                       <h4>Result Evaluation.</h4>
+                       The attack is successful if the ID Token is accepted by the client.
+
+                       <h4>Mitigation</h4>
+                       As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 1.0, Section 2</a></cite>, <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters.</q>
+               ]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_x5c_in_jwk">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<Parameter Key="idtoken_crit_jwk">true</Parameter>
+			<Parameter Key="request_to_untrusted_key_uri_fails_test">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 3 - x5u Spoofing" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing valid signature signed with an untrusted key.
+			The key is referenced by the <code>x5u</code> parameter in the ID Token header.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 1.0, Section 2</a></cite>, <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters.</q>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_x5u">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jwk">true</Parameter>-->
+			<Parameter Key="idtoken_crit_x5u">true</Parameter>
+			<!--<Parameter Key="idtoken_spoofed_jku">true</Parameter>-->
+			<Parameter Key="request_to_untrusted_key_uri_fails_test">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 4 - x5c Spoofing" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing valid signature signed with untrusted key.
+			The key is included in the ID Token as the <code>x5c</code> member.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 1.0, Section 2</a></cite>, <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters.</q>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_x5c">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<Parameter Key="request_to_untrusted_key_uri_fails_test">true</Parameter>
+
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 4.1 - x5c: [trusted, untrusted]" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing valid signature signed with untrusted key.
+			The signing key is included in the second position of the <code>x5c</code> parameter.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 1.0, Section 2</a></cite>, <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters.</q>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_x5c">true</Parameter>
+			<Parameter Key="idtoken_x5c_trusted-untrusted">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<!--<Parameter Key="request_to_untrusted_key_uri_fails_test">true</Parameter>-->
+
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 4.2 - x5c: [untrusted, trusted]" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing valid signature signed with untrusted key.
+			The signing key is included in the first position of the <code>x5c</code> parameter, whereas the OP's (trusted)
+			key is in the first position of the <code>x5c</code> list.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 1.0, Section 2</a></cite>, <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters.</q>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_x5c">true</Parameter>
+			<Parameter Key="idtoken_x5c_untrusted-trusted">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_x5c">true</Parameter>-->
+
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 5 - kid Spoofing (kid: URI)" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token that has been signed with an untrusted key.
+			The signing key is hinted at in the ID Token by the <code>kid</code> parameter. However, in this test, the value
+			of the <code>kid</code> is an (untrusted) URI that, upon request, responds with the signing key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the token is accepted by the client or if the untrusted URI is requested.
+
+			<h4>Mitigation</h4>
+			As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 1.0, Section 2</a></cite>, <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters.</q>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="force_spoofed_jku_as_kid">true</Parameter>
+			<Parameter Key="idtoken_crit_kid">true</Parameter>
+			<Parameter Key="request_to_untrusted_key_uri_fails_test">true</Parameter>
+
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 5.1 - kid Spoofing (kid: jwk)" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing valid signature created with an untrusted key.
+			The signing key is hinted at in the ID Token by the <code>kid</code> parameter. However, in this test, the (invalid)
+			value of the <code>kid</code> is a JWK representation of the signing key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			As per <cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 1.0, Section 2</a></cite>, <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters.</q>
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="force_spoofed_jwk_as_kid">true</Parameter>
+			<Parameter Key="idtoken_crit_kid">true</Parameter>
+
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 6 - Session Overwriting" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+			This test applies a Session Overwriting attack in order to confuse the client to use the wrong key.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			The client has the same <code>client_id</code> on the Honest and Malicious OP.
+
+			<h4>Execution.</h4>	
+			<ul>
+				<li>Step 1: starts authentication with Malicious OP</li>
+				<li>Step 2: pause before sending the Authentication Response to the SP</li>
+				<li>Step 3: start authentication with Honest OP within the same HTTP session as Step 1 (i.e., use the same Cookies)</li>
+				<li>Step 4: abort Step 3 after the Honest IdP has been contacted by the Browser from Step 3.</li>
+				<li>Step 5: continue with Step 2 (break the pause) and sends the Authentication Response (code or idtoken/access token)</li>
+			</ul>
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			The client must ensure to choose the correct verification key (<code>client_secret</code>) when validating the received ID Token. The validation key must correspond to the <code>client_id</code> <em>AND</em> the <code>issuer</code> contained in the ID Token.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">true</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.KeyConfusionRPBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="force_register_honest_client_id">true</Parameter>
 			<Parameter Key="force_idtoken_header_alg_hmac">true</Parameter>
 			<Parameter Key="force_honest_idtoken_iss">true</Parameter>
 			<Parameter Key="force_honest_idtoken_sub">true</Parameter>
 			<Parameter Key="include_signing_certificate">true</Parameter>
 		</OPConfig-2>
 	</TestStep>
--->
+
+	<TestStep Name="Key Confusion 7.1 - MAC from PKCS1 RSA Key 1" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the PEM string of
+			the PKCS1 encoded RSA public key as MAC key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">ORIGINAL</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.2 - MAC from PKCS1 RSA Key 2" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the stripped PEM string of
+			the PKCS1 encoded RSA public key as MAC key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">ORIGINAL_NO_HEADER_FOOTER</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.3 - MAC from PKCS1 RSA Key 3" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the PEM string of
+			the PKCS1 encoded RSA public key as MAC key, after removing the line feeds.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">ORIGINAL_NO_LF</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.4 - MAC from PKCS1 RSA Key 4" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a variation of the PEM string of
+			the PKCS1 encoded RSA public key as MAC key. The first an last line feeds are removed from the PEM string.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">ORIGINAL_NO_HEADER_FOOTER_LF</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.5 - MAC from PKCS1 RSA Key 5" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a variation of the PEM string of
+			the PKCS1 encoded RSA public key as MAC key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">ORIGINAL_ADDITIONAL_LF</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.6 - MAC from PKCS1 RSA Key 6" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the Base64 encoded ASN.1 RSA
+			Public Key as MAC key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">PKCS1</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.7 - MAC from PKCS1 RSA Key 7" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the stripped Base64 encoded ASN.1 RSA
+			Public Key as MAC key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">PKCS1_NO_HEADER_FOOTER</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.8 - MAC from PKCS1 RSA Key 8" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the linefeed free
+			Base64 encoded ASN.1 RSA Public Key as MAC key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">PKCS1_NO_LF</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.9 - MAC from PKCS1 RSA Key 9" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a variation of the
+			Base64 encoded ASN.1 RSA Public Key as MAC key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs1_pubkey">true</Parameter>
+			<Parameter Key="pkcs1_keyconfusion_payload_type">PKCS1_NO_HEADER_FOOTER_LF</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.10 - MAC from PKCS8 RSA Key 1" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the
+			PKCS8 formatted RSA public Key as MAC key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs8_pubkey">true</Parameter>
+			<Parameter Key="pkcs8_keyconfusion_payload_type">PKCS8</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.11 - MAC from PKCS8 RSA Key 2" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the
+			PKCS8 formatted RSA public Key as MAC key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs8_pubkey">true</Parameter>
+			<Parameter Key="pkcs8_keyconfusion_payload_type">PKCS8_WITH_HEADER_FOOTER</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.12 - MAC from PKCS8 RSA Key 3" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a variation of the 
+			PKCS8 formatted RSA public Key as MAC key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs8_pubkey">true</Parameter>
+			<Parameter Key="pkcs8_keyconfusion_payload_type">PKCS8_WITH_LF</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.13 - MAC from PKCS8 RSA Key 4" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a variation of the 
+			PKCS8 formatted RSA public Key as MAC key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs8_pubkey">true</Parameter>
+			<Parameter Key="pkcs8_keyconfusion_payload_type">PKCS8_WITH_HEADER_FOOTER_LF</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 7.14 - MAC from PKCS8 RSA Key 5" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a variation of the 
+			PKCS8 formatted RSA public Key as MAC key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pkcs8_pubkey">true</Parameter>
+			<Parameter Key="pkcs8_keyconfusion_payload_type">PKCS8_WITH_HEADER_FOOTER_LF_ENDING_LF</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 8 - Spoofed MAC Key" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a key that is 
+			contained in the token's JWK member as encoded octet string.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="idtoken_spoofed_secret_key_in_jwk">true</Parameter>
+			<Parameter Key="idtoken_crit_jwk">true</Parameter>
+			<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>
+			<Parameter Key="op_configuration_include_jws_algorithm_hs256">true</Parameter>
+
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 9 - MAC using public Exponent" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a the JWK representation of 
+			the public exponent of the trusted public RSA key as MAC key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pubkey_e">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jwk">true</Parameter>-->
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 10 - MAC using RSA Modulus" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a the JWK representation of 
+			the RSA modul as MAC key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pubkey_n">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jwk">true</Parameter>-->
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 11 - MAC using kty JWK field" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using a the JWK field <code>kty</code> 
+			(keyType) of the trusted public RSA key as MAC key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pubkey_kty">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jwk">true</Parameter>-->
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 12 - MAC using alg JWK field" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			In a Key Confusion attack, the attacker attempts to induce the client to use a key of the attacker's choice to validate the ID Token.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the JWK field <code>alg</code> 
+			(algorithm) of the trusted public RSA key as MAC key - <em>"RS256"</em>.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_pubkey_alg">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jwk">true</Parameter>-->
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Key Confusion 13 - MAC using JWK JSONString" DisplayGroup="Key Confusion">
+		<Description><![CDATA[
+			<h3>Key Confusion</h3>
+			PrOfESSOS tests the validation of the ID Token on the client.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing a HS256 signature created using the JSON String representation
+			of the trusted public RSA key as MAC key.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			Clients must perform ID Token validation as defined <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" target="_blank">OpenID Connect Core 10.0, Section 2 and Section 3.1.3.7</a>. In particular, the specification states in Section 2, that <q>ID Tokens SHOULD NOT use the JWS or JWE x5u, x5c, jku, or jwk Header Parameter fields. Instead, references to keys used are communicated in advance using Discovery and Registration parameters [...]</q>. Furthermore, Section 3.1.3.7 requires that <q>The alg value SHOULD be the default of RS256 or the algorithm sent by the Client in the <code>id_token_signed_response_alg</code> parameter during Registration.</q>. With regards to MAC based ID Token signatures: <q>If the JWT alg Header Parameter uses a MAC based algorithm such as HS256, HS384, or HS512, the octets of the UTF-8 representation of the client_secret corresponding to the client_id contained in the aud (audience) Claim are used as the key to validate the signature. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.KeyConfusionOP</ImplementationClass>
+			<Parameter Key="hmac_jsonstring_jwk">true</Parameter>
+			<!--<Parameter Key="idtoken_crit_jwk">true</Parameter>-->
+			<!--<Parameter Key="include_fresh_keyid_in_jwt_and_jwk">true</Parameter>-->
+		</OPConfig-2>
+	</TestStep>
+
+
 	<TestStep Name="IdP Confusion">
 		<Description><![CDATA[
-			<h1>IdP Confusion</h1>
-			In this test we use the Attacker OP to enforce the Client to send valid "code" issued by the Honest OP to the Attacker OP.
+			<h3>IdP Confusion</h3>
+			In this test we use the Attacker OP to enforce the client to send a valid <code>code</code> issued by the Honest OP to the Attacker OP.
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the code flow.
-			The attacker OP returns the same "client_id" during the registration as the one registered at the Honest OP.
-			In other words, the Client has same client_id on both OPs.
+			<h4>Prerequisites.</h4>
+			The target client supports the code flow.
+			The attacker OP returns the same <code>client_id</code> during the registration as the one registered at the Honest OP.
+			In other words, the client has same <code>client_id</code> on both OPs.
 
-			<h2>Execution.</h2>
-				Step 1: PrOfESSOS starts an authentication on the Client with the Honest OP. PrOfESSOS caches the received "state" and "nonce" parameters sent to the Authentication Request.
-				Step 2: PrOfESSOS starts an authentication on the Client with the Malicious OP.
-				Step 3: PrOfESSOS receives the Authentication Request and responds with a HTTP 302 Redirect to the Honest OP. The redirect URL contains the same parameters received in the Authentication Request except the "nonce" parameter, which is replaced by the value from Step 1.
+			<h4>Execution.</h4>
+			<ul><li>Step 1: PrOfESSOS triggers an authentication on the client with the Honest OP. PrOfESSOS caches the received <code>state</code> and <code>nonce</code> parameters sent in the Authentication Request.</li>
+				<li>Step 2: PrOfESSOS starts an authentication on the client with the Malicious OP.</li>
+				<li>Step 3: PrOfESSOS receives the Authentication Request and responds with a HTTP 302 Redirect to the Honest OP. The redirect URL contains the same parameters as received in the Authentication Request except for the <code>nonce</code> parameter, which is replaced by the value from Step 1.</li></ul>
 
-			In case that the Client does not use the "nonce" parameter, no parameter exchange in step 3 is needed.
+			In case that the client does not use the <code>nonce</code> parameter, no parameter exchange in step 3 is needed.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the Malicious OP receives the "code" generated by the Honest OP in the Token Request. 
-			
-			<h2>Mitigation</h2>
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the Malicious OP receives the <code>code</code> generated by the Honest OP in the Token Request. 
+
+			<h4>Mitigation</h4>
 			The mitigation is currently discussed by the working groups.
-		]]>
+]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="discovery_support_needed">false</Parameter>
@@ -435,33 +2093,33 @@
 
 	<TestStep Name="Malicious Endpoint Attack">
 		<Description><![CDATA[
-			<h1>Malicious Endpoint Attacks</h1>
-			In this test we use the Attacker OP to return maliciously crafted Discovery document and afterwards to
+			<h3>Malicious Endpoint Attacks</h3>
+			In this test we use the Attacker OP to return a maliciously crafted Discovery document and afterwards to
 			create an ID Token containing the identity of the victim, which is controlled by another OP – Honest OP.
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
 			The Attacker OP returns the following configuration during the Discovery phase.
-			<pre>
-			 {
-				"issuer": "https://opivAttackerOP.com",
-				"registration_endpoint": "https://opivHonestOP.com/register",
-				"authorization_endpoint": "https://opivHonestOP.com/auth",
-				"token_endpoint": "https://opivAttackerOP.com/token",
-				"userinfo_endpoint": "https://opivAttackerOP.com/userinfo"
-				...
-			 }
-			</pre>
+			<pre><code>{
+	"issuer": "https://opivAttackerOP.com",
+	"registration_endpoint": "https://opivHonestOP.com/register",
+	"authorization_endpoint": "https://opivHonestOP.com/auth",
+	"token_endpoint": "https://opivAttackerOP.com/token",
+	"userinfo_endpoint": "https://opivAttackerOP.com/userinfo"
+	...
+}</code></pre>
 
-			<h2>Result Evaluation.</h2>
+			<h4>Result Evaluation.</h4>
 			The goal of this test is to verify whether the End-User authentication can
 			be broken. The attack is successful if the Attacker OP receives any secret information, for example,
-			client_id, client_secret, code or access token, generated by the Honest OP.
+			<code>client_id</code>, <code>client_secret</code>, <code>code</code> or <code>access token</code>, generated by the Honest OP.
 			Injection and DoS attacks are considered out of scope for the tests provided by PrOfESSOS.
-			
-			<h2>Mitigation</h2>
-			The mitigation of the attack is not officially specifyed yet, but currently discussed.
+
+			<h4>Mitigation</h4>
+			The mitigation of the attack is not officially specified yet, but currently discussed. The RFC drafts <a href="https://tools.ietf.org/html/draft-ietf-oauth-mix-up-mitigation-01" target="_blank">draft-ietf-oauth-mix-up-mitigation-01</a> and <a href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-12#section-4.4.1" target="_blank">draft-ietf-oauth-security-topics-12</a> discuss 
+			in detail how clients can ensure that they <q>only process redirect responses of the OAuth authorization server they sent the
+   respective request to and from the same user agent this authorization request was initiated with.</q>		
 		]]>
 		</Description>
 		<TestParameters>
@@ -485,22 +2143,21 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Replay Attack 1">
+	<TestStep Name="Replay Attack 1" DisplayGroup="Replay Attacks">
 		<Description><![CDATA[
-			<h1>Replay Attack</h1>
+			<h3>Replay Attack</h3>
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token containing expired "exp" timestamp.
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing expired <code>exp</code> timestamp.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the ID token is accepted by the Client.
-			
-			<h2>Mitigation</h2>
-			The "exp" value MUST be validated, see Step 9 in Section 
-			3.1.3.7 in OpenIDConnect-Core. A satisfying value is 
-			30 minutes.
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			The <code>exp</code> value MUST be validated, see Step 9 in Section 
+			3.1.3.7 in OpenIDConnect-Core. A reasonable value is 30 minutes.
 		]]>
 		</Description>
 		<TestParameters>
@@ -520,21 +2177,22 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Replay Attack 2">
+	<TestStep Name="Replay Attack 2" DisplayGroup="Replay Attacks">
 		<Description><![CDATA[
-			<h1>Replay Attack</h1>
+			<h3>Replay Attack</h3>
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token containing expired "exp" timestamp.
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
-			
-			<h2>Mitigation</h2>
-			The "exp" value MUST be validated, see Step 9 in Section 
-			3.1.3.7 in OpenIDConnect-Core. A satisfying value is 
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing expired <code>exp</code>timestamp.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			The <code>exp</code> value MUST be validated, see Step 9 in Section 
+			3.1.3.7 in OpenIDConnect-Core. A reasonable value is 
 			30 minutes.
 		]]>
 		</Description>
@@ -555,20 +2213,20 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Replay Attack 3">
+	<TestStep Name="Replay Attack 3" DisplayGroup="Replay Attacks">
 		<Description><![CDATA[
-			<h1>Replay Attack</h1>
+			<h3>Replay Attack</h3>
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token containing invalid "iat" timestamp.
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing invalid <code>iat</code> timestamp.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
-			
-			<h2>Mitigation</h2>
-			The "iat" value MUST be validated, see Step 10 in Section 
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			The <code>iat</code> value MUST be validated, see Step 10 in Section
 			3.1.3.7 in OpenIDConnect-Core. ID Tokens created in 
 			the future should not be accepted.
 		]]>
@@ -590,20 +2248,20 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Replay Attack 4">
+	<TestStep Name="Replay Attack 4" DisplayGroup="Replay Attacks">
 		<Description><![CDATA[
-			<h1>Replay Attack</h1>
+			<h3>Replay Attack</h3>
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token containing invalid "iat" timestamp.
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing invalid <code>iat</code> timestamp.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the ID token is accepted by the Client.
-			
-			<h2>Mitigation</h2>
-			The "iat" value MUST be validated, see Step 10 in Section 
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			The <code>iat</code> value MUST be validated, see Step 10 in Section 
 			3.1.3.7 in OpenIDConnect-Core. ID Tokens created in 
 			the future should not be accepted.
 		]]>
@@ -625,22 +2283,22 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Replay Attack 5">
+	<TestStep Name="Replay Attack 5" DisplayGroup="Replay Attacks">
 		<Description><![CDATA[
-			<h1>Replay Attack</h1>
+			<h3>Replay Attack</h3>
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token containing constant “nonce” value.
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
-			
-			<h2>Mitigation</h2>
-			The "nonce" value MUST be validated, see Step 11 in Section 
-			3.1.3.7 in OpenIDConnect-Core. ID Tokens with invalid "nonce" values must not be accepted.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing constant <code>nonce</code> value.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			The <code>nonce</code> value MUST be validated, see Step 11 in Section 
+			3.1.3.7 in OpenIDConnect-Core. ID Tokens with invalid <code>nonce</code> values must not be accepted.
 		]]>
 		</Description>
 		<TestParameters>
@@ -660,22 +2318,22 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Replay Attack 6">
+	<TestStep Name="Replay Attack 6" DisplayGroup="Replay Attacks">
 		<Description><![CDATA[
-			<h1>Replay Attack</h1>
+			<h3>Replay Attack</h3>
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token without a “nonce” parameter.
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token without a <code>nonce</code> parameter.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the ID token is accepted by the Client.
-			
-			<h2>Mitigation</h2>
-			The "nonce" value MUST be validated, see Step 11 in Section 
-			3.1.3.7 in OpenIDConnect-Core. ID Tokens, which does not contain a "nonce" value must not be accepted.
-			Despite the fact that the "nonce" value is optional, we advice to use it in order to mitigate CSRF attacks.
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			The <code>nonce</code> value MUST be validated, see Step 11 in Section 
+			3.1.3.7 in OpenIDConnect-Core. ID Tokens that do not contain a <code>nonce</code> value must not be accepted.
+			Despite the fact that the <code>nonce</code> value is optional, we advice to use it in order to mitigate CSRF attacks.
 		]]>
 		</Description>
 		<TestParameters>
@@ -696,28 +2354,26 @@
 		</OPConfig-2>
 	</TestStep>
 
-<!--
-	<TestStep Name="Session Overwriting">
+	<TestStep Name="Session Overwriting 1" DisplayGroup="Session Overwriting">
 		<Description><![CDATA[
-			<h1>Session Overwriting</h1>
+			<h3>Session Overwriting 1</h3>
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
 
 			The Session Overwriting test consists of five steps and requires the participation of the Attacker OP and the Honest OP.
-				Step 1: starts authentication with Honest OP
-				Step 2: pause before sending the Authentication Response (code or idtoken/access token) to the SP
-				Step 3: start authentication with Malicious OP within the same HTTP session as Step 1 (i.e., use the same Cookies)
-				Step 4: abort Step 3 after the Malicious IdP has been contacted by the Browser from Step 3.
-				Step 5: continue with Step 2 (break the pause) and sends the Authentication Response (code or idtoken/access token)
+				<ul><li>Step 1: starts authentication with Honest OP</li>
+				<li>Step 2: pause before sending the Authentication Response (code or idtoken/access token) to the SP</li>
+				<li>Step 3: start authentication with Malicious OP within the same HTTP session as Step 1 (i.e., use the same Cookies)</li>
+				<li>Step 4: abort Step 3 after the Malicious IdP has been contacted by the Browser from Step 3.</li>
+				<li>Step 5: continue with Step 2 (break the pause) and sends the Authentication Response (code or idtoken/access token)</li></ul>
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the ID token is accepted by the Client and the attacks is logged on the victim's account.
-			
-			<h2>Mitigation</h2>
-			The proper usage of the "state" parameter hamper the attack, but not prevent it.
-			A complete mitigation of the attack is not officially specifyed yet, but currently discussed. 
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client and the attacker is logged into the victim's account.
+
+			<h4>Mitigation</h4>
+			A complete mitigation of the attack is not officially specifyed yet, but currently discussed. The proper usage of the <code>state</code> parameter hampers the attack, but does not prevent it. We recommend binding the <code>state</code> parameter to the session AND the corresponding IdP. Usage of <code>client_secret_jwt</code> or <code>private_key_jwt</code> can help to prevent leakage of client credentials. In addition, appropriate CSRF countermeasures should be implemented by the client.
 		]]>
 		</Description>
 		<TestParameters>
@@ -725,32 +2381,81 @@
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
-			<ImplementationClass>de.rub.nds.oidc.browser.SessionOverwritingOPBrowser</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.browser.SessionOverwritingRPBrowser</ImplementationClass>
+			<Parameter Key="browser.input.op_url">HONEST</Parameter>
 			<Parameter Key="use_evil_needle">false</Parameter>
 		</BrowserSimulator>
 		<OPConfig-1>
-			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+			<ImplementationClass>de.rub.nds.oidc.server.op.SessionOverwritingOP</ImplementationClass>
 		</OPConfig-1>
 		<OPConfig-2>
 			<ImplementationClass>de.rub.nds.oidc.server.op.SessionOverwritingOP</ImplementationClass>
 
 		</OPConfig-2>
 	</TestStep>
--->
 
-	<TestStep Name="Signature Manipulation 1">
+	<TestStep Name="Session Overwriting 2" DisplayGroup="Session Overwriting">
 		<Description><![CDATA[
-			<h1>Signature Manipulation</h1>
+			<h3>Session Overwriting 2</h3>
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token containing wrong signature.
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
-			
-			<h2>Mitigation</h2>
+			<h4>Execution.</h4>
+
+			The Session Overwriting test consists of five steps and requires the participation of the Attacker OP and the Honest OP.
+				<ul>
+					<li>Step 1: starts authentication with Malicious OP</li>
+					<li>Step 2: pause before sending the Authentication Response (code or idtoken/access token) to the SP</li>
+					<li>Step 3: start authentication with Honest OP within the same HTTP session as Step 1 (i.e., use the same Cookies)</li>
+					<li>Step 4: abort Step 3 after the Honest OP has been contacted by the Browser from Step 3.</li>
+					<li>Step 5: continue with Step 2 (break the pause) and sends the Authentication Response (code or idtoken/access token). 
+							The ID Token's <code>iss</code> claim is set to the issuer value of the Honest OP, even though the ID Token 
+							is generated by the Malicious OP.</li>
+				</ul>
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the ID Token is accepted by the client and the attacker is logged on the victim's account.
+
+			<h4>Mitigation</h4>
+			When verifying the received ID Token, the client must take care to use the correct key material, which has 
+			been established with Honest OP during registration. 
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">true</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.SessionOverwritingRPBrowser</ImplementationClass>
+			<Parameter Key="browser.input.op_url">EVIL</Parameter> <!-- default -->
+			<Parameter Key="use_evil_needle">false</Parameter>
+			<!--<Parameter Key="force_success_url_fails">true</Parameter>-->
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.SessionOverwritingOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.SessionOverwritingOP</ImplementationClass>
+			<Parameter Key="force_honest_idtoken_iss">true</Parameter>
+			<Parameter Key="force_honest_idtoken_sub">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Signature Manipulation 1" DisplayGroup="Signature Manipulation">
+		<Description><![CDATA[
+			<h3>Signature Manipulation</h3>
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing wrong signature.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the token is accepted by the client.
+
+			<h4>Mitigation</h4>
 			The signature MUST be validated, see Step 6 in Section 
 			3.1.3.7 in OpenIDConnect-Core.
 		]]>
@@ -772,21 +2477,21 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="Signature Manipulation 2">
+	<TestStep Name="Signature Manipulation 2" DisplayGroup="Signature Manipulation">
 		<Description><![CDATA[
-			<h1>Signature Manipulation</h1>
+			<h3>Signature Manipulation</h3>
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token containing invalid signature and "none" algorithm.
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing invalid signature and "none" algorithm.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client.
-			
-			<h2>Mitigation</h2>
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the token is accepted by the client.
+
+			<h4>Mitigation</h4>
 			The signature MUST be validated, see Step 6 in Section 
-			3.1.3.7 in OpenIDConnect-Core. The usage of the "nonce" algorithm is allowed in "code" flow. However, in implicit flow its usage is not allowed and the ID token MUST NOT be accepted.
+			3.1.3.7 in OpenIDConnect-Core. The usage of the "nonce" algorithm is allowed in <code>code</code> flow. However, in implicit flow its usage is not allowed and the ID Token MUST NOT be accepted.
 		]]>
 		</Description>
 		<TestParameters>
@@ -808,31 +2513,102 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="CSRF 1">
+	<TestStep Name="Signature Manipulation 3" DisplayGroup="Signature Manipulation">
 		<Description><![CDATA[
-			<h1>CSRF Protection via the "state" parameter</h1>
-			PrOfESSOS tests the Validation of the "state" parameter on the Client.
+			<h3>Signature Manipulation</h3>
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			
-			<h2>Execution.</h2>
-			PrOfESSOS returns invalid "state" parameter.
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing "none" algorithm and no signature.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the Authentication Response is accepted despite the fact the the "state" parameter is missing or invalid and the next protocol steps are executed.
-				Code flow: A token request containing the "code" is sent to the Attacker OP
-				Implicit flow: The attacker is successfully logged on his account.
-			
-			<h2>Mitigation</h2>
-			The "state" parameter MUST be validated, see Section 3.2.2.5. in OpenIDConnect-Core.
-				1) The "state" must be bound to the End-User Session (e.g. cookies)
-				2) The "state" must be bound to the sent Authentication Request.
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			The signature MUST be validated, see Step 6 in Section
+			3.1.3.7 in OpenIDConnect-Core. The usage of the "nonce" algorithm is allowed in <code>code</code> flow. However, in implicit flow its usage is not allowed and the ID Token MUST NOT be accepted.
 		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.SignatureManipulationOP</ImplementationClass>
+
+			<Parameter Key="force_idtoken_header_alg_none">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+		<TestStep Name="Signature Manipulation 4" DisplayGroup="Signature Manipulation">
+		<Description><![CDATA[
+			<h3>Signature Manipulation</h3>
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing "none" algorithm in a mixed-case writing ("NoNe") and no signature. This may circumvent naive blacklisting of the "none" algorithm.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the token is accepted by the client.
+
+			<h4>Mitigation</h4>
+			The signature MUST be validated, see Step 6 in Section
+			3.1.3.7 in OpenIDConnect-Core. The usage of the "nonce" algorithm is allowed in <code>code</code> flow. However, in implicit flow its usage is not allowed and the ID Token MUST NOT be accepted.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="use_evil_needle">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.SignatureManipulationOP</ImplementationClass>
+
+			<Parameter Key="force_idtoken_header_alg_none2">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="CSRF 1" DisplayGroup="CSRF">
+		<Description><![CDATA[
+			<h3>CSRF Protection via the <code>state</code> parameter</h3>
+			PrOfESSOS tests the validation of the <code>state</code> parameter on the client.
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS returns invalid <code>state</code> parameter.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the Authentication Response is accepted despite the fact the the <code>state</code> parameter is missing or invalid and the next protocol steps are executed.
+				Code flow: A token request containing the <code>code</code> is sent to the Attacker OP
+				Implicit flow: The attacker is successfully logged on his account.
+
+			<h4>Mitigation</h4>
+			The <code>state</code> parameter MUST be validated, see Section 3.2.2.5. in OpenIDConnect-Core.
+				1) The <code>state</code> must be bound to the End-User Session (e.g. cookies)
+				2) The <code>state</code> must be bound to the sent Authentication Request.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+			<Parameter Key="step-condition-scope-openid-not-needed">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
@@ -848,34 +2624,35 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="CSRF 2">
+	<TestStep Name="CSRF 2" DisplayGroup="CSRF">
 		<Description><![CDATA[
-			<h1>CSRF Protection via the “state” parameter</h1>
-			PrOfESSOS tests the Validation of the "state" parameter on the Client.
+			<h3>CSRF Protection via the <code>state</code> parameter</h3>
+			PrOfESSOS tests the validation of the <code>state</code> parameter on the client.
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			
-			<h2>Execution.</h2>
-			PrOfESSOS returns "state" parameter issued in another browser session.
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS returns <code>state</code> parameter issued in another browser session.
 				Step 1: The browser is startet, the authentication with the MaliciousOP is initiated and the received parameter is cached. Then, the connection is dropped.
 				Step 2: A new session in the browser is started and the authentication with the MaliciousOP is initiated.
-				After receiving the Authentication Request, the Authentication Response is generated. But, now the received "state" parameter from step 1 is sent back to the Client.
-			
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the Authentication Response is accepted despite the fact the the "state" parameter is missing or invalid and the next protocol steps are executed.
-				Code flow: A token request containing the "code" is sent to the Attacker OP and afterwards the attacker is successfully logged on his account.
+				After receiving the Authentication Request, the Authentication Response is generated. But, now the received <code>state</code> parameter from step 1 is sent back to the client.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the Authentication Response is accepted despite the fact the the <code>state</code> parameter is missing or invalid and the next protocol steps are executed.
+				Code flow: A token request containing the <code>code</code> is sent to the Attacker OP and afterwards the attacker is successfully logged on his account.
 				Implicit flow: The attacker is successfully logged on his account.
-			
-			<h2>Mitigation</h2>
-			The "state" parameter MUST be validated, see Section 3.2.2.5. in OpenIDConnect-Core.
-				1) The "state" must be bound to the End-User Session (e.g. cookies)
-				2) The "state" must be bound to the sent Authentication Request.
+
+			<h4>Mitigation</h4>
+			The <code>state</code> parameter MUST be validated, see Section 3.2.2.5. in OpenIDConnect-Core.
+				1) The <code>state</code> must be bound to the End-User Session (e.g. cookies)
+				2) The <code>state</code> must be bound to the sent Authentication Request.
 		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+			<Parameter Key="step-condition-scope-openid-not-needed">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.InvalidStateRPTestBrowser</ImplementationClass>
@@ -891,29 +2668,30 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="CSRF 3">
+	<TestStep Name="CSRF 3" DisplayGroup="CSRF">
 		<Description><![CDATA[
-			<h1>CSRF Protection via the “state” parameter</h1>
-			PrOfESSOS tests the Validation of the "state" parameter on the Client.
-			PrOfESSOS does not return the "state" parameter.
+			<h3>CSRF Protection via the <code>state</code> parameter</h3>
+			PrOfESSOS tests the validation of the <code>state</code> parameter on the client.
+			PrOfESSOS does not return the <code>state</code> parameter.
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the Authentication Response is accepted despite the fact the the "state" parameter is missing or invalid and the next protocol steps are executed.
-				Code flow: A token request containing the "code" is sent to the Attacker OP and afterwards the attacker is successfully logged on his account.
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the Authentication Response is accepted despite the fact the the <code>state</code> parameter is missing or invalid and the next protocol steps are executed.
+				Code flow: A token request containing the <code>code</code> is sent to the Attacker OP and afterwards the attacker is successfully logged on his account.
 				Implicit flow: The attacker is successfully logged on his account.
-			
-			<h2>Mitigation</h2>
-			The "state" parameter MUST be validated, see Section 3.2.2.5. in OpenIDConnect-Core.
-				1) The "state" must be bound to the End-User Session (e.g. cookies)
-				2) The "state" must be bound to the sent Authentication Request.
+
+			<h4>Mitigation</h4>
+			The <code>state</code> parameter MUST be validated, see Section 3.2.2.5. in OpenIDConnect-Core.
+				1) The <code>state</code> must be bound to the End-User Session (e.g. cookies)
+				2) The <code>state</code> must be bound to the sent Authentication Request.
 		]]>
 		</Description>
 		<TestParameters>
 			<Parameter Key="discovery_support_needed">false</Parameter>
 			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+			<Parameter Key="step-condition-scope-openid-not-needed">true</Parameter>
 		</TestParameters>
 		<BrowserSimulator>
 			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
@@ -929,24 +2707,24 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="TRC 1">
+	<TestStep Name="TRC 1" DisplayGroup="Token Recipient Confusion">
 		<Description><![CDATA[
-			<h1>Token Recipient Confusion Attack</h1>
-			PrOfESSOS tests the Validation of the "audience" parameter on the Client by issuing maliciously crafted ID tokens.
+			<h3>Token Recipient Confusion Attack</h3>
+			PrOfESSOS tests the validation of the <code>aud</code> (audience) parameter on the client by issuing maliciously crafted ID Tokens.
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token, which does not contain an "audience" parameter.
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client and the attacker is logged in his account.
-			
-			<h2>Mitigation</h2>
-			The "aud" value MUST be validated, see Step 3 in Section 
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token that does not contain an <code>aud</code> claim.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the token is accepted by the client and the attacker is logged in his account.
+
+			<h4>Mitigation</h4>
+			The <code>aud</code> value MUST be validated, see Step 3 in Section 
 			3.1.3.7 in OpenIDConnect-Core.
-			
+
 		]]>
 		</Description>
 		<TestParameters>
@@ -967,21 +2745,21 @@
 		</OPConfig-2>
 	</TestStep>
 
-	<TestStep Name="TRC 2">
+	<TestStep Name="TRC 2" DisplayGroup="Token Recipient Confusion">
 		<Description><![CDATA[
-			<h1>Token Recipient Confusion Attack</h1>
-			PrOfESSOS tests the Validation of the "audience" parameter on the Client by issuing maliciously crafted ID tokens.
+			<h3>Token Recipient Confusion Attack</h3>
+			PrOfESSOS tests the validation of the "audience" parameter on the client by issuing maliciously crafted ID Tokens.
 
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token, which contains invalid "aud" parameter.
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token that contains an invalid <code>aud</code> parameter.
 
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client and the attacker is logged in his account.
-			
-			<h2>Mitigation</h2>
-			The "aud" value MUST be validated, see Step 3 in Section 
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the token is accepted by the client and the attacker is logged in his account.
+
+			<h4>Mitigation</h4>
+			The <code>aud</code> value MUST be validated, see Step 3 in Section 
 			3.1.3.7 in OpenIDConnect-Core.
 		]]>
 		</Description>
@@ -1005,23 +2783,23 @@
 	</TestStep>
 
 
-	<TestStep Name="TRC 3">
+	<TestStep Name="TRC 3" DisplayGroup="Token Recipient Confusion">
 		<Description><![CDATA[
-			<h1>Token Recipient Confusion Attack</h1>
-			PrOfESSOS tests the Validation of the "audience" parameter on the Client by issuing maliciously crafted ID tokens.
-			The value of the "aud" is set to the "aud" value of the Client registered at the Honest OP. 
-			
-			<h2>Prerequisites.</h2>
-			The target Client supports the implicit or the code flow.
-			
-			<h2>Execution.</h2>
-			PrOfESSOS issues an ID token, which contains "aud" initialized with the client_id of the Client registered at the Honest OP.
-			
-			<h2>Result Evaluation.</h2>
-			The attack is successful if the token is accepted by the Client and the attacker is logged in his account.
-			
-			<h2>Mitigation</h2>
-			The "aud" value MUST be validated, see Step 3 in Section 
+			<h3>Token Recipient Confusion Attack</h3>
+			PrOfESSOS tests the validation of the "audience" parameter on the client by issuing maliciously crafted ID Tokens.
+			The value of the <code>aud</code> claim is set to the audience value of the client registered at the Honest OP. 
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing an <code>aud</code> claim initialized with the Client ID of the client registered at the Honest OP.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the token is accepted by the client and the attacker is logged into his account.
+
+			<h4>Mitigation</h4>
+			The <code>aud</code> value MUST be validated, see Step 3 in Section 
 			3.1.3.7 in OpenIDConnect-Core.
 		]]>
 		</Description>
@@ -1044,4 +2822,134 @@
 		</OPConfig-2>
 	</TestStep>
 
+	<TestStep Name="Token Substitution - AccessToken" DisplayGroup="Token Substitution">
+		<Description><![CDATA[
+			<h3>Token Substitution Attack</h3>
+			A client using an implicit grant may be subject to a Token Substitution Attack.
+			This is a <em>Cut and Paste</em> attack, in which a malicious user copies a code or token from one session and
+			places it inside a message that belongs to another session, e.g., of a legitimate user. 
+
+
+			PrOfESSOS tests the validation of Access Token on the client by issuing maliciously crafted ID Tokens. In this 
+			test, the Access Token is not bound to the ID Token, i.e., the value of the <code>at_hash</code> claim contained 
+			in the ID Token does not match. 
+
+			<h4>Prerequisites.</h4>
+			The target client supports the implicit flow or the code flow. Note that validation of the Access Token Hash 
+			is optional (<q>MAY</q>) when using the code flow and recommended (<q>SHOULD</q>) when using implicit grants.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing an <code>at_hash</code> claim initialized with a random value.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the Access Token is accepted by the client and submitted to the UserInfo endpoint.
+
+			<h4>Mitigation</h4>
+			As per <cite><a href="https://tools.ietf.org/html/rfc6749#page-61" target="_blank">RFC 6749, Section 10.16</a></cite>
+			 <q>Any specification that uses the authorization process
+   as a form of delegated end-user authentication to the client (e.g.,
+   third-party sign-in service) MUST NOT use the implicit flow without
+   additional security mechanisms that would enable the client to
+   determine if the access token was issued for its use (e.g., audience-
+   restricting the access token).</q>
+
+			OpenID Connect clients SHOULD validate Access Tokens and Authorization Codes retrieved with implicit grants 
+			using the binding to the ID Token provided in the <code>at_hash</code> and <code>c_hash</code> claims, according to 
+			<cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#ImplicitTokenValidation" target="_blank">OpenID Connect-Core 1.0, Sections 3.2.2.9 and 3.3.2.10</a></cite>.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="step-condition-response-type-contains-token">true</Parameter>
+			<Parameter Key="step-condition-response-type-contains-idtoken">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.TokenSubstRPBrowser</ImplementationClass>
+			<Parameter Key="force_userinfo_requested_fails">true</Parameter>
+			<Parameter Key="use_evil_needle">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+
+			<Parameter Key="force_idtoken_at_hash_invalid">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Token Substitution - Authorization Code" DisplayGroup="Token Substitution">
+		<Description><![CDATA[
+			<h3>Token Substitution Attack</h3>
+			A client using an implicit grant may be subject to a Token Substitution Attack.
+			This is a <em>Cut and Paste</em> attack, in which a malicious user copies a code or token from one session and
+			places it inside a message that belongs to another session, e.g., of a legitimate user. 
+
+			PrOfESSOS tests the validation of the Authorization Code on the client by issuing a maliciously crafted 
+			ID Token. In this test, the Authorization Code is not bound to the ID Token, i.e., the value of the 
+			<code>c_hash</code> claim contained in the ID Token does not match the actual hash value of the code. 
+
+			<h4>Prerequisites.</h4>
+			The target client supports the hybrid flow. Note that validation of the Authorization Code Hash 
+			is optional (<q>MAY</q>) when using the code flow or the implicit flow and recommended (<q>SHOULD</q>) 
+			when using the hybrid flow.
+
+			<h4>Execution.</h4>
+			PrOfESSOS issues an ID Token containing an <code>at_hash</code> claim initialized with a random value.
+
+			<h4>Result Evaluation.</h4>
+			The attack is successful if the Auhtorization Code is accepted by the client and submitted to the Token endpoint.
+
+			<h4>Mitigation</h4>   
+			OpenID Connect clients SHOULD validate Access Tokens and Authorization Codes retrieved with implicit grants 
+			using the binding to the ID Token provided in the <code>at_hash</code> and <code>c_hash</code> claims, according to 
+			<cite><a href="https://openid.net/specs/openid-connect-core-1_0.html#ImplicitTokenValidation" target="_blank">OpenID Connect-Core 1.0, Sections 3.2.2.9 and 3.3.2.10</a></cite>.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="step-condition-response-type-contains-code">true</Parameter>
+			<Parameter Key="step-condition-response-type-contains-idtoken">true</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.TokenSubstRPBrowser</ImplementationClass>
+			<Parameter Key="force_userinfo_requested_fails">true</Parameter>
+			<Parameter Key="use_evil_needle">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+
+			<Parameter Key="force_idtoken_code_hash_invalid">true</Parameter>
+		</OPConfig-2>
+	</TestStep>
+
+	<TestStep Name="Custom Script 1 - Default OP" DisplayGroup="Custom">
+		<Description><![CDATA[
+			<h3>Custom Script</h3>
+		 	PrOfESSOS provides a default OP which could be used for manipulations via MitM-Proxy scripts.
+
+		 	<h4>Result Evaluation</h4>
+		 	It is expected that this test will FAIL with no MitM-Proxy script!
+		 	In cases a MitM-Proxy script was used the tester must take a closer look. PrOfESSOS does not have any
+		 	information about this tests.
+		]]>
+		</Description>
+		<TestParameters>
+			<Parameter Key="discovery_support_needed">false</Parameter>
+			<Parameter Key="dynamic_client_registration_support_needed">false</Parameter>
+		</TestParameters>
+		<BrowserSimulator>
+			<ImplementationClass>de.rub.nds.oidc.browser.DefaultRPTestBrowser</ImplementationClass>
+			<Parameter Key="force_success_url_fails">true</Parameter>
+		</BrowserSimulator>
+		<OPConfig-1>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-1>
+		<OPConfig-2>
+			<ImplementationClass>de.rub.nds.oidc.server.op.DefaultOP</ImplementationClass>
+		</OPConfig-2>
+	</TestStep>
 </TestPlan>

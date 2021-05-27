@@ -16,45 +16,45 @@
 
 package de.rub.nds.oidc.server.op;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JOSEObjectType;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSSigner;
+import com.google.common.base.Strings;
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.oauth2.sdk.ErrorResponse;
-import com.nimbusds.oauth2.sdk.GrantType;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.Response;
-import com.nimbusds.oauth2.sdk.ResponseMode;
-import com.nimbusds.oauth2.sdk.ResponseType;
-import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
+import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.http.ServletUtils;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.Display;
 import com.nimbusds.openid.connect.sdk.Nonce;
-import com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue;
 import com.nimbusds.openid.connect.sdk.SubjectType;
 import com.nimbusds.openid.connect.sdk.claims.AccessTokenHash;
 import com.nimbusds.openid.connect.sdk.claims.CodeHash;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
+import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import de.rub.nds.oidc.log.TestStepLogger;
 import de.rub.nds.oidc.server.OPIVConfig;
-import static de.rub.nds.oidc.server.op.OPParameterConstants.*;
+import de.rub.nds.oidc.server.TestNotApplicableException;
 import de.rub.nds.oidc.test_model.OPConfigType;
 import de.rub.nds.oidc.test_model.ParameterType;
 import de.rub.nds.oidc.utils.InstanceParameters;
 import de.rub.nds.oidc.utils.SaveFunction;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.mail.internet.InternetAddress;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.security.GeneralSecurityException;
@@ -71,14 +71,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.mail.internet.InternetAddress;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.UriBuilder;
+
+import static com.nimbusds.jose.jwk.KeyUse.SIGNATURE;
+import static de.rub.nds.oidc.server.TestStepParameterConstants.*;
+import static de.rub.nds.oidc.server.op.OPParameterConstants.*;
+import de.rub.nds.oidc.utils.ParamScriptExecutor;
+import de.rub.nds.oidc.utils.Script;
+import net.minidev.json.JSONObject;
+
 
 /**
- *
  * @author Tobias Wich
  */
 public abstract class AbstractOPImplementation implements OPImplementation {
@@ -92,6 +94,13 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	protected Map<String, Object> suiteCtx;
 	protected Map<String, Object> stepCtx;
 	protected InstanceParameters params;
+
+	protected ParamScriptExecutor exec;
+
+	public AbstractOPImplementation() {
+		this.exec = new ParamScriptExecutor();
+	}
+
 
 	@Override
 	public void setOPConfig(OPConfigType cfg) {
@@ -124,14 +133,22 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 	@Override
+	public OPType getOPType() {
+		return type;
+	}
+
+	@Override
 	public void setContext(Map<String, Object> suiteCtx, Map<String, Object> stepCtx) {
 		this.suiteCtx = suiteCtx;
 		this.stepCtx = stepCtx;
+		this.exec.setImpl(this);
+		this.exec.setContext(suiteCtx, stepCtx);
 	}
 
 	@Override
 	public void setParameters(List<ParameterType> params) {
 		this.params = new InstanceParameters(params);
+		this.exec.setInstanceParams(this.params);
 	}
 
 
@@ -140,7 +157,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		ServletUtils.applyHTTPResponse(httpResp, resp);
 
 		resp.flushBuffer();
-		logger.log("Returning " + typeName + " Response.");
+		logger.log(type + "OP is returning " + typeName + " Response.");
 		logger.logHttpResponse(resp, httpResp.getContent());
 	}
 
@@ -149,20 +166,22 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		ServletUtils.applyHTTPResponse(httpResp, resp);
 
 		resp.flushBuffer();
-		logger.log("Returning " + typeName + " Error Response.");
+		logger.log(type + "OP is returning " + typeName + " Error Response.");
 		logger.logHttpResponse(resp, httpResp.getContent());
 	}
 
 
-	protected Issuer getHonestIssuer() {
+	public Issuer getHonestIssuer() {
 		return new Issuer(UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).build());
 	}
 
-	protected Issuer getEvilIssuer() {
-		return new Issuer(UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).build());
+	public Issuer getEvilIssuer() {
+		return new Issuer(UriBuilder.fromUri(opivCfg.getEvilOPUri())
+				.path((String) stepCtx.getOrDefault(OPContextConstants.REGISTRATION_ENFORCING_PATH_FRAGMENT, ""))
+				.path(testId).build());
 	}
 
-	protected Issuer getMetadataIssuer() {
+	public Issuer getMetadataIssuer() {
 		Issuer issuer;
 		if (params.getBool(FORCE_HONEST_DISCOVERY_ISS)) {
 			issuer = getHonestIssuer();
@@ -172,27 +191,43 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return issuer;
 	}
 
-	protected Issuer getTokenIssuer() {
-		Issuer issuer;
-		if (params.getBool(FORCE_HONEST_TOKEN_ISS)) {
-			issuer = getHonestIssuer();
-		} else {
-			issuer = supplyHonestOrEvil(this::getHonestIssuer, this::getEvilIssuer);
-		}
-		return issuer;
+
+	public String getTokenIssuerString() {
+		logger.log("Executing getTokenIssuerString");
+		return exec.<String>getScript(SCRIPT_HONEST_TOKEN_ISS)
+				.map(f -> {logger.log("Executing script");return f.execSafe();})
+				.orElseGet(() -> {
+					if (params.getBool(FORCE_TOKEN_ISS_EXCL)) {
+						return null;
+					}
+					if (params.getBool(FORCE_TOKEN_ISS_EMPTY)) {
+						return "";
+					}
+
+					Issuer issuer;
+					if (params.getBool(FORCE_HONEST_TOKEN_ISS)) {
+						issuer = getHonestIssuer();
+					} else {
+						issuer = supplyHonestOrEvil(this::getHonestIssuer, this::getEvilIssuer);
+					}
+					return issuer.getValue();
+				});
 	}
 
-
-	protected Subject getHonestSubject() {
-		return new Subject("honest-op-test-subject");
+	public String getHonestOrEvilIssuer() {
+		return supplyHonestOrEvil(this::getHonestIssuer, this::getEvilIssuer).getValue();
 	}
 
-	protected Subject getEvilSubject() {
-		return new Subject("evil-op-test-subject");
+	public String getHonestSubject() {
+		return "honest-op-test-subject";
 	}
 
-	protected Subject getTokenSubject() {
-		Subject sub;
+	public String getEvilSubject() {
+		return "evil-op-test-subject";
+	}
+
+	public String getTokenSubject() {
+		String sub;
 		if (params.getBool(FORCE_HONEST_TOKEN_SUB)) {
 			sub = getHonestSubject();
 		} else {
@@ -202,15 +237,15 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected String getHonestName() {
+	public String getHonestName() {
 		return "Honest User";
 	}
 
-	protected String getEvilName() {
+	public String getEvilName() {
 		return "Evil User";
 	}
 
-	protected String getTokenName() {
+	public String getTokenName() {
 		String name;
 		if (params.getBool(FORCE_HONEST_TOKEN_NAME)) {
 			name = getHonestName();
@@ -221,15 +256,15 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected String getHonestUsername() {
+	public String getHonestUsername() {
 		return "honest-user-name";
 	}
 
-	protected String getEvilUsername() {
+	public String getEvilUsername() {
 		return "evil-user-name";
 	}
 
-	protected String getTokenUsername() {
+	public String getTokenUsername() {
 		String name;
 		if (params.getBool(FORCE_HONEST_TOKEN_USERNAME)) {
 			name = getHonestUsername();
@@ -240,15 +275,15 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected URI getHonestRegistrationEndpoint() {
+	public URI getHonestRegistrationEndpoint() {
 		return UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).path(REGISTER_CLIENT_PATH).build();
 	}
 
-	protected URI getEvilRegistrationEndpoint() {
+	public URI getEvilRegistrationEndpoint() {
 		return UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).path(REGISTER_CLIENT_PATH).build();
 	}
 
-	protected URI getMetadataRegistrationEndpoint() {
+	public URI getMetadataRegistrationEndpoint() {
 		URI uri;
 		if (params.getBool(FORCE_HONEST_DISCOVERY_REG_EP)) {
 			uri = getHonestRegistrationEndpoint();
@@ -259,15 +294,15 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected URI getHonestAuthorizationEndpoint() {
+	public URI getHonestAuthorizationEndpoint() {
 		return UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).path(AUTH_REQUEST_PATH).build();
 	}
 
-	protected URI getEvilAuthorizationEndpoint() {
+	public URI getEvilAuthorizationEndpoint() {
 		return UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).path(AUTH_REQUEST_PATH).build();
 	}
 
-	protected URI getMetadataAuthorizationEndpoint() {
+	public URI getMetadataAuthorizationEndpoint() {
 		URI uri;
 		if (params.getBool(FORCE_HONEST_DISCOVERY_AUTH_EP)) {
 			uri = getHonestAuthorizationEndpoint();
@@ -278,15 +313,15 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected URI getHonestTokenEndpoint() {
+	public URI getHonestTokenEndpoint() {
 		return UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).path(TOKEN_REQUEST_PATH).build();
 	}
 
-	protected URI getEvilTokenEndpoint() {
+	public URI getEvilTokenEndpoint() {
 		return UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).path(TOKEN_REQUEST_PATH).build();
 	}
 
-	protected URI getMetadataTokenEndpoint() {
+	public URI getMetadataTokenEndpoint() {
 		URI uri;
 		if (params.getBool(FORCE_HONEST_DISCOVERY_TOKEN_EP)) {
 			uri = getHonestTokenEndpoint();
@@ -297,15 +332,15 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected URI getHonestUserinfoEndpoint() {
+	public URI getHonestUserinfoEndpoint() {
 		return UriBuilder.fromUri(opivCfg.getHonestOPUri()).path(testId).path(USER_INFO_REQUEST_PATH).build();
 	}
 
-	protected URI getEvilUserinfoEndpoint() {
+	public URI getEvilUserinfoEndpoint() {
 		return UriBuilder.fromUri(opivCfg.getEvilOPUri()).path(testId).path(USER_INFO_REQUEST_PATH).build();
 	}
 
-	protected URI getMetadataUserinfoEndpoint() {
+	public URI getMetadataUserinfoEndpoint() {
 		URI uri;
 		if (params.getBool(FORCE_HONEST_DISCOVERY_AUTH_EP)) {
 			uri = getHonestUserinfoEndpoint();
@@ -316,20 +351,19 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-
-	protected InternetAddress getHonestEmail() {
+	public InternetAddress getHonestEmail() {
 		InternetAddress mail = new InternetAddress();
 		mail.setAddress("user@honest.com");
 		return mail;
 	}
 
-	protected InternetAddress getEvilEmail() {
+	public InternetAddress getEvilEmail() {
 		InternetAddress mail = new InternetAddress();
 		mail.setAddress("user@evil.com");
 		return mail;
 	}
 
-	protected InternetAddress getTokenEmail() {
+	public InternetAddress getTokenEmail() {
 		InternetAddress mail;
 		if (params.getBool(FORCE_HONEST_TOKEN_EMAIL)) {
 			mail = getHonestEmail();
@@ -339,8 +373,39 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return mail;
 	}
 
+	public OIDCClientInformation getHonestRegisteredClientInfo() {
+		// Note that ClientInfo @ Honest OP is stored in suite context and does not depend on test step setup
+		OIDCClientInformation ci = (OIDCClientInformation) suiteCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST);
+		return ci;
+	}
 
-	protected Date getTokenIssuedAt() {
+	public OIDCClientInformation getEvilRegisteredClientInfo() {
+		OIDCClientInformation ci = (OIDCClientInformation) stepCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_EVIL);
+		return ci;
+	}
+
+	public OIDCClientInformation getRegisteredClientInfo() {
+		OIDCClientInformation ci = supplyHonestOrEvil(this::getHonestRegisteredClientInfo, this::getEvilRegisteredClientInfo);
+		return ci;
+	}
+
+	public ClientID getRegistrationClientId() {
+		OIDCClientInformation ci;
+		if (params.getBool(OPParameterConstants.FORCE_REGISTER_HONEST_CLIENTID)) {
+			ci = getHonestRegisteredClientInfo();
+			if (ci != null && !Strings.isNullOrEmpty(ci.getID().toString())) {
+				ClientID id = ci.getID();
+				logger.log(String.format("Re-using client ID: %s", id.toString()));
+				return id;
+			} else {
+				logger.log("ClientId at Honest OP could not be found.");
+			}
+		}
+		logger.log("Generating random ClientID");
+		return new ClientID();
+	}
+
+	public Date getTokenIssuedAt() {
 		Date date = new Date();
 		if (params.getBool(FORCE_TOKEN_IAT_DAY)) {
 			logger.log("Setting iat to 1 day.");
@@ -352,7 +417,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return date;
 	}
 
-	protected Date getTokenExpiration() {
+	public Date getTokenExpiration() {
 		Date date = Date.from(Instant.now().plus(Duration.ofMinutes(15)));
 		if (params.getBool(FORCE_TOKEN_EXP_DAY)) {
 			logger.log("Setting exp to -1 day + 15min.");
@@ -365,7 +430,7 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 	}
 
 
-	protected OIDCProviderMetadata getDefaultOPMetadata() throws ParseException {
+	public OIDCProviderMetadata getDefaultOPMetadata() throws ParseException {
 		Issuer issuer = getMetadataIssuer();
 		List<SubjectType> subjectTypes = Arrays.asList(SubjectType.PUBLIC);
 		URI jwksUri = UriBuilder.fromUri(baseUri).path(JWKS_PATH).build();
@@ -383,9 +448,9 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		md.setRegistrationEndpointURI(registrationEndpt);
 
 		// , ResponseType.parse("id_token"), ResponseType.parse("token id_token"));
-		Scope scopes = new Scope("openid");
+		Scope scopes = new Scope("openid", "name", "preferred_username", "email");
 		List<ResponseType> responseTypes = Arrays.asList(ResponseType.parse("code"), ResponseType.parse("id_token"),
-				ResponseType.parse("token id_token"));
+				ResponseType.parse("token id_token"), ResponseType.parse("code id_token token"));
 		List<ResponseMode> responseModes = Arrays.asList(ResponseMode.QUERY, ResponseMode.FRAGMENT, ResponseMode.FORM_POST);
 		List<GrantType> grantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.IMPLICIT);
 		md.setScopes(scopes);
@@ -406,16 +471,23 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return md;
 	}
 
-	protected UserInfo getUserInfo() {
-		UserInfo ui = new UserInfo(getTokenSubject());
-		ui.setName(getTokenName());
-		ui.setPreferredUsername(getTokenUsername());
-		ui.setEmail(getTokenEmail());
 
-		return ui;
+	public UserInfo getUserInfo() {
+		var userInfo = exec.<Map<String, Object>>getScript(SCRIPT_USER_INFO)
+				.map(Script::execSafe)
+				.map(o -> new JSONObject(o))
+				.map(jo -> new UserInfo(jo))
+				.orElseGet(() -> {
+					UserInfo ui = new UserInfo(new Subject(getTokenSubject()));
+					ui.setName(getTokenName());
+					ui.setPreferredUsername(getTokenUsername());
+					ui.setEmailAddress(getTokenEmail().getAddress());
+					return ui;
+				});
+		return userInfo;
 	}
 
-	protected String getTokenAudience(ClientID clientId) {
+	public String getTokenAudience(ClientID clientId) {
 		if (params.getBool(FORCE_TOKEN_AUD_EXCL)) {
 			return null;
 		} else if (params.getBool(FORCE_TOKEN_AUD_INVALID)) {
@@ -425,13 +497,19 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		}
 	}
 
-	protected JWTClaimsSet getIdTokenClaims(@Nonnull ClientID clientId, @Nullable Nonce nonce,
-			@Nullable AccessTokenHash atHash, @Nullable CodeHash cHash) throws ParseException {
+	public JWTClaimsSet getIdTokenClaims(@Nonnull ClientID clientId, @Nullable Nonce nonce,
+											@Nullable AccessTokenHash atHash, @Nullable CodeHash cHash) throws ParseException {
 		UserInfo ui = getUserInfo();
+		if (params.getBool(FORCE_TOKEN_USERCLAIMS_EXCL)) {
+			// reset all user claims except "sub"
+			ui.setName(null);
+			ui.setPreferredUsername(null);
+			ui.setEmailAddress(null);
+		}
 
 		JWTClaimsSet.Builder cb = new JWTClaimsSet.Builder(ui.toJWTClaimsSet());
 
-		cb.issuer(getTokenIssuer().getValue());
+		cb.issuer(getTokenIssuerString());
 		cb.audience(getTokenAudience(clientId));
 		cb.issueTime(getTokenIssuedAt());
 		cb.expirationTime(getTokenExpiration());
@@ -440,20 +518,37 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 			cb.claim("nonce", nonce.getValue());
 		}
 		if (atHash != null) {
-			cb.claim("at_hash", atHash.getValue());
+			String tokenHash = params.getBool(FORCE_TOKEN_AT_HASH_INVALID) ? "invalid_at_hash" : atHash.getValue();
+			cb.claim("at_hash", tokenHash);
 		}
 		if (cHash != null) {
-			cb.claim("c_hash", cHash.getValue());
+			String codeHash = params.getBool(FORCE_TOKEN_CODE_HASH_INVALID) ? "invalid_code_hash" : cHash.getValue();
+			cb.claim("c_hash", codeHash);
 		}
 
 		JWTClaimsSet claims = cb.build();
 		return claims;
 	}
 
-	protected JWT getIdToken(@Nonnull ClientID clientId, @Nullable Nonce nonce, @Nullable AccessTokenHash atHash,
-			@Nullable CodeHash cHash) throws GeneralSecurityException, JOSEException, ParseException {
+	public JWT getIdToken(@Nonnull ClientID clientId, @Nullable Nonce nonce, @Nullable AccessTokenHash atHash,
+							 @Nullable CodeHash cHash) throws GeneralSecurityException, JOSEException, ParseException {
 		JWTClaimsSet claims = getIdTokenClaims(clientId, nonce, atHash, cHash);
 
+		// HMAC with client secret
+		if (params.getBool(OPParameterConstants.FORCE_IDTOKEN_SIGNING_ALG_HS256)) {
+			OIDCClientInformation ci = getRegisteredClientInfo();
+			Secret clientSecret = ci.getSecret();
+			JWSSigner signer = new MACSigner(clientSecret.getValueBytes());
+
+			JWSHeader.Builder headerBuilder = new JWSHeader.Builder(JWSAlgorithm.HS256).type(JOSEObjectType.JWT);
+			JWSHeader header = headerBuilder.build();
+
+			SignedJWT signedJwt = new SignedJWT(header, claims);
+			signedJwt.sign(signer);
+			return signedJwt;
+		}
+
+		// (Default) apply RSA Signature
 		RSAKey key = getSigningJwk();
 
 		JWSHeader.Builder headerBuilder = new JWSHeader.Builder(JWSAlgorithm.RS256)
@@ -471,9 +566,13 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		return signedJwt;
 	}
 
-	protected RSAKey getSigningJwk() {
+	public RSAKey getSigningJwk() {
 		KeyStore.PrivateKeyEntry keyEntry = supplyHonestOrEvil(opivCfg::getHonestOPSigningEntry, opivCfg::getEvilOPSigningEntry);
 
+		return getSigningJwk(keyEntry);
+	}
+
+	public RSAKey getSigningJwk(KeyStore.PrivateKeyEntry keyEntry) {
 		RSAPublicKey pubKey = (RSAPublicKey) keyEntry.getCertificate().getPublicKey();
 		RSAPrivateKey privKey = (RSAPrivateKey) keyEntry.getPrivateKey();
 		List<Base64> chain = Arrays.stream(keyEntry.getCertificateChain()).map(c -> {
@@ -484,11 +583,20 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 			}
 		}).collect(Collectors.toList());
 
-		RSAKey key = new RSAKey.Builder(pubKey)
+		/* angular oauth needs kid and key use definition.
+		 * Both should be optional only!
+		 * Hopefully this will not affect other tests */
+		String keyID = (String) stepCtx.getOrDefault(OPContextConstants.SIGNING_JWK_KEYID, "professos");
+		keyID = Strings.emptyToNull(keyID);
+
+		RSAKey.Builder kb = new RSAKey.Builder(pubKey)
 				.privateKey(privKey)
 				.x509CertChain(chain)
 				.algorithm(JWSAlgorithm.RS256)
-				.build();
+				.keyID(keyID)
+				.keyUse(SIGNATURE);
+
+		RSAKey key = kb.build();
 
 		return key;
 	}
@@ -513,4 +621,57 @@ public abstract class AbstractOPImplementation implements OPImplementation {
 		}
 	}
 
+	protected void checkRpTestStepPreconditions(@Nullable AuthenticationRequest authnReq) throws TestNotApplicableException {
+		checkDiscoveryPrecondition();
+		if (authnReq != null) {
+			checkResponseTypePrecondition(authnReq.getResponseType());
+			checkScopePrecondition(authnReq.getScope());
+		}
+	}
+
+	protected void checkResponseTypePrecondition(ResponseType respType)  throws TestNotApplicableException {
+		boolean codeRequired = Boolean.parseBoolean((String) stepCtx.get(RESPONSE_TYPE_CONDITION_CODE));
+		boolean tokenRequired = Boolean.parseBoolean((String) stepCtx.get(RESPONSE_TYPE_CONDITION_TOKEN));
+		boolean idTokenRequired = Boolean.parseBoolean((String) stepCtx.get(RESPONSE_TYPE_CONDITION_IDTOKEN));
+
+		StringBuilder sb = new StringBuilder();
+		if (codeRequired && !respType.contains("code")) {
+			sb.append("code ");
+		}
+		if (idTokenRequired && !respType.contains("id_token")) {
+			sb.append("id_token ");
+		}
+		if (tokenRequired && !respType.contains("token")) {
+			sb.append("token ");
+		}
+
+		String missingRTs = sb.toString().trim();
+		if (!Strings.isNullOrEmpty(missingRTs)) {
+			String msg = String.format("Test not applicable for requested response type. Expected response_type to " +
+					"contain \"%s\"", missingRTs);
+			logger.log("Test precondition not fulfilled, test aborted.");
+			stepCtx.put(OPContextConstants.TEST_RUN_NOT_FINISHED, msg);
+			throw new TestNotApplicableException("Requested response_type not Supported");
+		}
+	}
+
+	protected void checkDiscoveryPrecondition() throws TestNotApplicableException {
+		boolean discoRequired = Boolean.parseBoolean((String) stepCtx.get(DISCOVERY_REQUEST_REQUIRED));
+		OPType discoReceivedAt = (OPType) stepCtx.get(OPContextConstants.DISCOVERY_REQUESTED_AT_OP_TYPE);
+		if (discoRequired && discoReceivedAt == null) {
+			logger.log("TestStep prerequisites not fulfilled: No discovery request was received but is required " +
+					"before the first Authentication Request.");
+			throw new TestNotApplicableException("Discovery Support required to run this test.");
+		}
+	}
+
+	protected void checkScopePrecondition(Scope scope) throws TestNotApplicableException {
+		boolean openIDRequired = !Boolean.parseBoolean((String) stepCtx.get(SCOPE_CONDITION_OPENID_NOT_NEEDED));
+		if (openIDRequired && !scope.contains("openid")) {
+			logger.log("TestStep prerequisites not fulfilled: Scope 'openid' not requested by client but ID Token validation" +
+					"required for test execution and evaluation.");
+			throw new TestNotApplicableException("OpenID Connect requires 'scope' to contain 'openid'.");
+		}
+
+	}
 }

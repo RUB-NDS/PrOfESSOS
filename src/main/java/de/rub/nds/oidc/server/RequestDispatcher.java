@@ -18,7 +18,11 @@ package de.rub.nds.oidc.server;
 
 import de.rub.nds.oidc.server.op.OPImplementation;
 import de.rub.nds.oidc.server.op.OPInstance;
+import de.rub.nds.oidc.server.op.OPType;
+import de.rub.nds.oidc.server.rp.RPImplementation;
 import de.rub.nds.oidc.server.rp.RPInstance;
+import de.rub.nds.oidc.server.rp.RPType;
+import de.rub.nds.oidc.utils.LogUtils;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -30,15 +34,19 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.UriBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Tobias Wich
  */
 @WebServlet(name = "dispatcher", urlPatterns = {
-	"/dispatch/*"
+	"/dispatch/*", "/.well-known/webfinger"
 })
 public class RequestDispatcher extends HttpServlet {
+
+	private static final Logger LOG = LoggerFactory.getLogger(RequestDispatcher.class);
 
 	private TestInstanceRegistry registry;
 	private OPIVConfig opivCfg;
@@ -49,14 +57,15 @@ public class RequestDispatcher extends HttpServlet {
 	}
 
 	@Inject
-	public void setOPIVConfig(OPIVConfig opivCfg) {
-		this.opivCfg = opivCfg;
+	public void setConfig(ProfConfig opivCfg) {
+		this.opivCfg = opivCfg.getEndpointCfg();
 	}
 
 
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String serverName = req.getScheme() + "://" + req.getHeader("Host");
+
 		RequestPath path = new RequestPath(req);
 
 		if (path.getFullResource().startsWith(OPImplementation.WEBFINGER_PATH)) {
@@ -65,14 +74,17 @@ public class RequestDispatcher extends HttpServlet {
 		}
 
 		String testId = path.getTestId(); // may not be the
+//		System.out.println("The Id " + testId);
 
 		try {
 			if ((opivCfg.getHonestOPScheme() + "://" + opivCfg.getHonestOPHost()).equals(serverName)) {
 				handleOP(path, () -> registry.getOP1Supplier().apply(testId), req, resp);
 			} else if ((opivCfg.getEvilOPScheme() + "://" + opivCfg.getEvilOPHost()).equals(serverName)) {
 				handleOP(path, () -> registry.getOP2Supplier().apply(testId), req, resp);
-			} else if ((opivCfg.getRPScheme() + "://" + opivCfg.getRPHost()).equals(serverName)) {
-				handleRP(path, () -> registry.getRPSupplier().apply(testId), req, resp);
+			} else if ((opivCfg.getHonestRPScheme() + "://" + opivCfg.getHonestRPHost()).equals(serverName)) {
+				handleRP(path, () -> registry.getRP1Supplier().apply(testId), req, resp);
+			} else if ((opivCfg.getEvilRPScheme() + "://" + opivCfg.getEvilRPHost()).equals(serverName)) {
+				handleRP(path, () -> registry.getRP2Supplier().apply(testId), req, resp);
 			} else {
 				String msg = "Servername (" + serverName + ") is not handled by the dispatcher.";
 				throw new UnknownEndpointException(msg);
@@ -97,8 +109,12 @@ public class RequestDispatcher extends HttpServlet {
 			throw new ServerInstanceMissingException(msg);
 		} else {
 			OPImplementation impl = inst.getInst().getImpl();
-			impl.setBaseUri(path.getServerHostAndTestId());
+//			impl.setBaseUri(path.getServerHostAndTestId());
+			impl.setBaseUri(path.getDispatchUriAndTestId());
 			impl.setOPIVConfig(opivCfg);
+
+			OPType type = impl.getOPType();
+			LogUtils.addSenderHeader(resp, type);
 
 			try {
 				if (resource.startsWith(OPImplementation.WEBFINGER_PATH)) {
@@ -115,11 +131,14 @@ public class RequestDispatcher extends HttpServlet {
 					impl.tokenRequest(path, req, resp);
 				} else if (resource.startsWith(OPImplementation.USER_INFO_REQUEST_PATH)) {
 					impl.userInfoRequest(path, req, resp);
+				} else if (resource.startsWith(OPImplementation.UNTRUSTED_KEY_PATH)) {
+					impl.untrustedKeyRequest(path, req, resp);
 				} else {
 					// TODO: match resources and call impl functions
 					notFound(resource, resp);
 				}
 			} catch (Exception ex) {
+				LOG.error("Error processing OP request.", ex);
 				inst.getLogger().log("Failed to process request.", ex);
 				serverError(resource, resp);
 			}
@@ -128,7 +147,7 @@ public class RequestDispatcher extends HttpServlet {
 
 	private void handleRP(RequestPath path, Supplier<ServerInstance<RPInstance>> instSupplier, HttpServletRequest req,
 			HttpServletResponse resp)
-			throws ServerInstanceMissingException {
+			throws ServerInstanceMissingException, IOException {
 		// let the dispatcher handle everything else
 		String testId = path.getTestId();
 		String resource = path.getStrippedResource();
@@ -138,7 +157,22 @@ public class RequestDispatcher extends HttpServlet {
 			String msg = String.format("RP instance for id %s is missing in the registry.", testId);
 			throw new ServerInstanceMissingException(msg);
 		} else {
+			RPImplementation impl = inst.getInst().getImpl();
+			impl.setBaseUri(path.getDispatchUriAndTestId());
+			impl.setOPIVConfig(opivCfg);
 
+			RPType type = impl.getRPType();
+			LogUtils.addSenderHeader(resp, type);
+
+			try {
+				if (resource.startsWith(RPImplementation.REDIRECT_PATH)) {
+					impl.callback(path, req, resp);
+				}
+			} catch (Exception ex) {
+				LOG.error("Error processing RP request.", ex);
+				inst.getLogger().log("Failed to process request.", ex);
+				serverError(resource, resp);
+			}
 		}
 	}
 
@@ -166,7 +200,7 @@ public class RequestDispatcher extends HttpServlet {
 						.build();
 				resp.sendRedirect(redirect.toString());
 			} catch (NullPointerException | URISyntaxException ex) {
-				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid r3esource parameter specified.");
+				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid resource parameter specified.");
 			}
 		} else {
 			String msg = String.format("rel=%s is not handled by this server.", rel);

@@ -1,0 +1,34 @@
+version: '3.6'
+
+services:
+  prof-apache:
+    build:
+      context: ./apache
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      profnet: 
+
+  prof:
+    build:
+      context: ./professos
+    ports:
+      - "8787:8787"
+    networks:
+      profnet:
+
+  test-rp:
+    build:
+      context: ./mitreid-client
+    networks:
+      profnet:
+
+  test-op:
+    build:
+      context: ./mitreid-server
+    networks:
+      profnet:
+
+networks:
+  profnet:

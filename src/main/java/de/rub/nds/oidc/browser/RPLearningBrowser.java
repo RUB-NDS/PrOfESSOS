@@ -19,14 +19,12 @@ package de.rub.nds.oidc.browser;
 import de.rub.nds.oidc.server.op.OPParameterConstants;
 import de.rub.nds.oidc.server.op.OPType;
 import de.rub.nds.oidc.test_model.TestStepResult;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.apache.velocity.context.Context;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.stringtemplate.v4.ST;
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -43,7 +41,7 @@ public class RPLearningBrowser extends BrowserSimulator {
 			return resultHonest;
 		}
 		// run with evil OP with fresh browser, when honest OP passed
-		loadDriver(true);
+		reloadDriver();
 		TestStepResult resultEvil = runEvil();
 		return resultEvil;
 	}
@@ -65,7 +63,10 @@ public class RPLearningBrowser extends BrowserSimulator {
 
 		String startUrl = rpConfig.getUrlClientTarget();
 		logger.log(String.format("Opening browser with URL '%s'.", startUrl));
-		driver.get(startUrl);
+		driver1.get(startUrl);
+		driver1.executeScript(getFormSubmitDelayScript());
+
+//		logScreenshot();
 
 		// if we have a script skip the form detection
 		if (rpConfig.getSeleniumScript() == null || rpConfig.getSeleniumScript().isEmpty()) {
@@ -79,8 +80,8 @@ public class RPLearningBrowser extends BrowserSimulator {
 			} else {
 				// try to detect form
 				String xpath = String.format("//input[%s]", containsIgnoreCase("@name", "openid"));
-				xpath += String.format("\n | //input[%s]", containsIgnoreCase("@id", "openid"));
-				xpath += String.format("\n | //form[@*[%s or %s or %s]]//input[%s or %s]",
+				xpath += String.format("%n | //input[%s]", containsIgnoreCase("@id", "openid"));
+				xpath += String.format("%n | //form[@*[%s or %s or %s]]//input[%s or %s]",
 						containsIgnoreCase(".", "openid"),
 						containsIgnoreCase(".", "open-id"),
 						containsIgnoreCase(".", "oidc"),
@@ -89,7 +90,7 @@ public class RPLearningBrowser extends BrowserSimulator {
 				logger.log("Trying to find login form on the target url.");
 				logger.log(xpath);
 
-				List<WebElement> inputs = driver.findElements(By.xpath(xpath));
+				List<WebElement> inputs = driver1.findElements(By.xpath(xpath));
 				// filter out duplicate elements
 				inputs = inputs.stream().distinct().collect(Collectors.toList());
 
@@ -118,14 +119,14 @@ public class RPLearningBrowser extends BrowserSimulator {
 		// execute JS to start authentication
 		String submitScriptRaw = rpConfig.getSeleniumScript();
 		String submitScript = te.eval(createRPContext(), submitScriptRaw);
-		//waitForPageLoad(() -> driver.executeScript(js));
+		//waitForPageLoad(() -> driver1.executeScript(js));
 
 		// wait until a new html element appears, indicating a page load
-		waitForPageLoad(() -> {
-			driver.executeScript(submitScript);
+		waitForDocumentReadyAndJsReady1(() -> {
+			driver1.executeScript(submitScript);
 			// capture state where the text is entered
 			logger.log("Webfinger identity entered into the login form.");
-			logScreenshot();
+			logScreenshot1();
 			return null;
 		});
 		logger.log("HTML element found in Browser.");
@@ -133,34 +134,35 @@ public class RPLearningBrowser extends BrowserSimulator {
 		waitMillis(5000);
 
 		// take a screenshot again to show the finished site
-		logger.log("Last URL seen in Browser: " + driver.getCurrentUrl());
+		logger.log("Last URL seen in Browser: " + driver1.getCurrentUrl());
 		logger.log("Finished login procedure, please check if it succeeded and correct the success URL and the user needle accordingly.");
-		logScreenshot();
+		logScreenshot1();
 
 		// save the location of the finished state
-		rpConfig.setFinalValidUrl(driver.getCurrentUrl());
+		rpConfig.setFinalValidUrl(driver1.getCurrentUrl());
 
 		// see if we need to go to another URL
 		String profileUrl = rpConfig.getProfileUrl();
 		if (profileUrl != null && ! profileUrl.isEmpty()) {
 			logger.log("Loading profile URL page.");
-			waitForPageLoad(() -> {
-				driver.get(profileUrl);
+			waitForDocumentReadyAndJsReady1(() -> {
+				driver1.get(profileUrl);
 				return null;
 			});
 			// wait a bit more in case we have an angular app or some other JS heavy application
 			waitMillis(400);
 			logger.log("Loaded profile URL page.");
-			logScreenshot();
+			logScreenshot1();
 		}
 
+		//TODO: allow searching for multiple strings on the whole page (e.g., if sub and iss are not contained in the same element)?
 		String needle = type == OPType.HONEST ? rpConfig.getHonestUserNeedle() : rpConfig.getEvilUserNeedle();
 		if (needle != null && ! needle.isEmpty()) {
 			needle = te.eval(createRPContext(), needle);
 			needle = needle.replace("\"", "\\\""); // escape quotation marks
 			String xpath = String.format("//*[contains(., \"%s\")]", needle);
 			// search string
-			boolean needleFound = withSearchTimeout(() -> ! driver.findElements(By.xpath(xpath)).isEmpty());
+			boolean needleFound = withSearchTimeout1(() -> ! driver1.findElements(By.xpath(xpath)).isEmpty());
 
 			logger.log("User needle search result: needle-found=" + needleFound);
 			return needleFound ? TestStepResult.PASS : TestStepResult.FAIL;
@@ -179,16 +181,19 @@ public class RPLearningBrowser extends BrowserSimulator {
 	private String evalSubmitFormTemplate(String inputName) {
 		logger.log("Found input field with name '" + inputName + "'.");
 
-		// eval template
-		Reader r = new InputStreamReader(getClass().getResourceAsStream("/submit-form.vlt"), StandardCharsets.UTF_8);
-		Context ctx = createRPContext();
-		ctx.put("input-field", inputName);
-		String result = te.eval(ctx, r);
+		try {
+			String templateString = new String(getClass().getResourceAsStream("/submit-form.st").readAllBytes(), "UTF-8");
+			ST st = new ST(templateString, '§','§');
+			st.add("input-field", inputName);
+			String result = st.render();
+			logger.log("Created Selenium script based on found input field '" + inputName + "'.");
+			logger.log(result);
 
-		logger.log("Created Selenium script based on found input field '" + inputName + "'.");
-		logger.log(result);
-
-		return result;
+			return result;
+		} catch (IOException e) {
+			logger.log("Could not read resource file 'submit-form.st'");
+			throw new RuntimeException( new InterruptedException(e.getMessage()));
+		}
 	}
 
 }

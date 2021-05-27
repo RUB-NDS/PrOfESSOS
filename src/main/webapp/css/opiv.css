@@ -13,12 +13,23 @@ body {
 	height: 20px;
 }
 
-#learn-log img {
+.log-entry img:not(.hide-image) {
 	border: 2px;
 	border-style: groove;
 	border-radius: 5px;
 	margin: 2px;
 	padding: 5px;
+}
+
+.hide-image {
+	border : none;
+	padding : 5px;
+	margin-right: 3px;
+}
+
+.learn-controls .tab-content form {
+	margin-top: 2em;
+	margin-bottom: 1em;
 }
 
 .log-entry-wrapper {
@@ -41,6 +52,11 @@ body {
 	border-radius: 15px;
 }
 
+.log-entry-ts {
+	font-size: smaller;
+	color: lightslategray;
+}
+
 .log-entry {
 	padding-left: 15px;
 }
@@ -54,6 +70,10 @@ body {
 	border-radius: 5px;
 	padding: 2px;
 	color: #fff;
+}
+
+.log-entry div pre {
+	white-space: pre-wrap;
 }
 
 mark.err {
@@ -116,4 +136,19 @@ mark.err {
 
 .step-description h1 {
 	margin-top: 2px;
+}
+
+code {
+	font-family: monospace, monospace;
+	color: inherit;
+	background: inherit;
+	font-size: inherit;
+}
+
+#config-accordion {
+	padding-right: unset;
+}
+
+.panel-default .panel-heading {
+	background-image: none;
 }

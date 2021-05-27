@@ -17,12 +17,7 @@
 package de.rub.nds.oidc.server.op;
 
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.oauth2.sdk.AuthorizationCode;
-import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
-import com.nimbusds.oauth2.sdk.AuthorizationGrant;
-import com.nimbusds.oauth2.sdk.GrantType;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
@@ -32,13 +27,13 @@ import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 import de.rub.nds.oidc.test_model.TestStepResult;
 import de.rub.nds.oidc.utils.Misc;
+
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.CompletableFuture;
-import javax.servlet.http.HttpServletResponse;
 
 /**
- *
  * @author Tobias Wich
  */
 public class MaliciousEndpointOP extends DefaultOP {
@@ -57,7 +52,7 @@ public class MaliciousEndpointOP extends DefaultOP {
 		}
 
 		// get values from honest OP for comparison
-		OIDCClientInformation info = (OIDCClientInformation) suiteCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST);
+		OIDCClientInformation info = getHonestRegisteredClientInfo();
 		ClientID refClientId = info.getID();
 		AuthorizationCode refCode = (AuthorizationCode) stepCtx.get(OPContextConstants.HONEST_CODE);
 
@@ -70,7 +65,7 @@ public class MaliciousEndpointOP extends DefaultOP {
 				logger.log("Detected Honest ClientID in Evil OP.");
 				result = TestStepResult.FAIL;
 			} else if (clientId != null) {
-				logger.log("Detected unknown ClientID in Evil OP.");
+				logger.log(String.format("Detected unknown ClientID %s in Evil OP.", clientId.toString()));
 				result = TestStepResult.UNDETERMINED;
 			}
 			if (refCode != null && refCode.equals(code)) {
@@ -105,11 +100,10 @@ public class MaliciousEndpointOP extends DefaultOP {
 				f.complete(TestStepResult.FAIL);
 			} else if (at != null) {
 				logger.log("Detected unknown AccessToken in Evil OP.");
-				f.complete(TestStepResult.FAIL);
+				f.complete(TestStepResult.UNDETERMINED);
 			}
 		}
 
 		return super.userInfoRequestInt(userReq, resp);
 	}
-
 }

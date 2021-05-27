@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2016 Ruhr-Universität Bochum.
+ * Copyright 2016-2019 Ruhr-Universität Bochum.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,54 +16,111 @@
 
 package de.rub.nds.oidc.server;
 
+import com.typesafe.config.Config;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.util.Properties;
-import javax.enterprise.context.ApplicationScoped;
+import java.util.Optional;
+import javax.ws.rs.core.UriBuilder;
+
 
 /**
  *
  * @author Tobias Wich
  */
-@ApplicationScoped
 public class OPIVConfig {
-
-	public OPIVConfig() throws IOException, URISyntaxException, GeneralSecurityException {
-		InputStream hostsFile = OPIVConfig.class.getResourceAsStream("/servernames.properties");
-		Properties p = new Properties();
-		p.load(hostsFile);
-
-		CONTROLLER_URI = new URI(p.getProperty("controller"));
-		HONEST_OP_URL = new URI(p.getProperty("honest-op"));
-		EVIL_OP_URL = new URI(p.getProperty("evil-op"));
-		RP_URL = new URI(p.getProperty("rp"));
-
-		InputStream keystoreFile = OPIVConfig.class.getResourceAsStream("/keystore.jks");
-		keyStore = KeyStore.getInstance("JKS");
-		keyStore.load(keystoreFile, keystorePass.toCharArray());
-	}
 
 	private final URI CONTROLLER_URI;
 	private final URI HONEST_OP_URL;
 	private final URI EVIL_OP_URL;
-	private final URI RP_URL;
+	private final URI HONEST_RP_URL;
+	private final URI EVIL_RP_URL;
+
+	private final Optional<URI> TEST_RP_URL;
+	private final Optional<URI> TEST_OP_URL;
 
 	// TODO: read from config
-	private final String honestSigAlias = "opiv honest token signer";
-	private final String evilSigAlias = "opiv evil token signer";
-	private final String keystorePass = "pass";
+	private String honestSigAlias = "opiv honest token signer";
+	private String evilSigAlias = "opiv evil token signer";
+	private String untrustedAlias = "opiv untrusted token signer";
+	private String keystorePass = "pass";
 	private final KeyStore keyStore;
+
+	private final boolean printTestIdPath;
+
+	private final boolean allowCustomTestIDs;
+	private final boolean allowTestWithoutRemotePermission;
+	private final boolean disableTlsTrustCheck;
+
+	public OPIVConfig(Config profCfg) throws IOException, URISyntaxException, GeneralSecurityException {
+		var endpointCfg = profCfg.getConfig("endpoints");
+
+		CONTROLLER_URI = new URI(endpointCfg.getString("controller"));
+		HONEST_OP_URL = new URI(endpointCfg.getString("honest-op"));
+		EVIL_OP_URL = new URI(endpointCfg.getString("evil-op"));
+		HONEST_RP_URL = new URI(endpointCfg.getString("honest-rp"));
+		EVIL_RP_URL = new URI(endpointCfg.getString("evil-rp"));
+
+		if (endpointCfg.hasPath("test-rp")) {
+			TEST_RP_URL = Optional.of(new URI(endpointCfg.getString("test-rp")));
+		} else {
+			TEST_RP_URL = Optional.empty();
+		}
+		if (endpointCfg.hasPath("test-op")) {
+			TEST_OP_URL = Optional.of(new URI(endpointCfg.getString("test-op")));
+		} else {
+			TEST_OP_URL = Optional.empty();
+		}
+
+		InputStream ksStream = null;
+		// TODO: load keystore from file if specified
+		if (endpointCfg.hasPath("keystore-file")) {
+			String ksFileStr = endpointCfg.getString("keystore-file");
+			// correct path if it is absolute or relative to config file
+			File ksFile = new File(ksFileStr);
+			if (! ksFile.isAbsolute()) {
+				String basePath = endpointCfg.getValue("keystore-file").origin().filename();
+				ksFile = new File(basePath, ksFileStr);
+			}
+
+			// only load if file is readable
+			if (ksFile.isFile() && ksFile.canRead()) {
+				ksStream = new FileInputStream(ksFile);
+				// load alias and so on
+				honestSigAlias = endpointCfg.getString("honest-sig-alias");
+				evilSigAlias = endpointCfg.getString("evil-sig-alias");
+				untrustedAlias = endpointCfg.getString("untrusted-alias");
+				keystorePass = endpointCfg.getString("keystore-pass");
+			}
+		}
+
+		// fallback to integrated keystore
+		if (ksStream == null) {
+			ksStream = OPIVConfig.class.getResourceAsStream("/keystore.jks");
+		}
+
+		this.keyStore = KeyStore.getInstance("JKS");
+		this.keyStore.load(ksStream, keystorePass.toCharArray());
+
+		printTestIdPath = profCfg.getBoolean("print-testid-path");
+
+		allowCustomTestIDs = profCfg.getBoolean("allow-custom-test-ids");
+		allowTestWithoutRemotePermission = profCfg.getBoolean("skip-target-grant");
+		disableTlsTrustCheck = profCfg.getBoolean("disable-tls-trust-check");
+	}
+
 
 	public URI getControllerUri() {
 		return CONTROLLER_URI;
 	}
 
 	public URI getHonestOPUri() {
-		return HONEST_OP_URL;
+		return UriBuilder.fromUri(HONEST_OP_URL).path("/").build();
 	}
 
 	public String getHonestOPScheme() {
@@ -77,7 +134,7 @@ public class OPIVConfig {
 	}
 
 	public URI getEvilOPUri() {
-		return EVIL_OP_URL;
+		return UriBuilder.fromUri(EVIL_OP_URL).path("/").build();
 	}
 
 	public String getEvilOPScheme() {
@@ -90,31 +147,67 @@ public class OPIVConfig {
 		return host + (port == -1 ? "" : ":" + port);
 	}
 
-	public String getRPScheme() {
-		return RP_URL.getScheme();
+	public URI getHonestRPUri() {
+		return UriBuilder.fromUri(HONEST_RP_URL).path("/").build();
 	}
 
-	public String getRPHost() {
-		String host = RP_URL.getHost();
-		int port = RP_URL.getPort();
+	public String getHonestRPScheme() {
+		return HONEST_RP_URL.getScheme();
+	}
+
+	public String getHonestRPHost() {
+		String host = HONEST_RP_URL.getHost();
+		int port = HONEST_RP_URL.getPort();
 		return host + (port == -1 ? "" : ":" + port);
 	}
 
-
-	public KeyStore.PrivateKeyEntry getHonestOPSigningEntry() {
-		try {
-			KeyStore.ProtectionParameter pp = new KeyStore.PasswordProtection(keystorePass.toCharArray());
-			KeyStore.PrivateKeyEntry entry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(honestSigAlias, pp);
-			return entry;
-		} catch (GeneralSecurityException ex) {
-			throw new IllegalArgumentException("Failed to access keystore.", ex);
-		}
+	public URI getEvilRPUri() {
+		return UriBuilder.fromUri(EVIL_RP_URL).path("/").build();
+	}
+	public String getEvilRPScheme() {
+		return EVIL_RP_URL.getScheme();
 	}
 
-	public KeyStore.PrivateKeyEntry getEvilOPSigningEntry() {
+	public String getEvilRPHost() {
+		String host = EVIL_RP_URL.getHost();
+		int port = EVIL_OP_URL.getPort();
+		return host + (port == -1 ? "" : ":" + port);
+	}
+
+	public Optional<URI> getTestOPUri() {
+		return TEST_OP_URL;
+	}
+
+	public Optional<URI> getTestRPUri() {
+		return TEST_RP_URL;
+	}
+
+	public boolean isPrintTestIdPath() {
+		return printTestIdPath;
+	}
+
+	public boolean isAllowCustomTestIDs() {
+		return allowCustomTestIDs;
+	} 
+
+	public boolean isGrantNotNeededOverride() {
+		return allowTestWithoutRemotePermission;
+	}
+
+	public boolean isDisableTlsTrustCheck() {
+		return disableTlsTrustCheck;
+	}
+
+	public KeyStore.PrivateKeyEntry getHonestOPSigningEntry() {	return getSigningEntry(honestSigAlias);	}
+
+	public KeyStore.PrivateKeyEntry getEvilOPSigningEntry() { return getSigningEntry(evilSigAlias);	}
+
+	public KeyStore.PrivateKeyEntry getUntrustedSigningEntry() { return getSigningEntry(untrustedAlias); }
+
+	public KeyStore.PrivateKeyEntry getSigningEntry(String entryAlias) {
 		try {
 			KeyStore.ProtectionParameter pp = new KeyStore.PasswordProtection(keystorePass.toCharArray());
-			KeyStore.PrivateKeyEntry entry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(evilSigAlias, pp);
+			KeyStore.PrivateKeyEntry entry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(entryAlias, pp);
 			return entry;
 		} catch (GeneralSecurityException ex) {
 			throw new IllegalArgumentException("Failed to access keystore.", ex);

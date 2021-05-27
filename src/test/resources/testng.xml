@@ -1,0 +1,26 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="integration-tests">
+
+	<parameter name="rpTestConfigs"  value="src/test/resources/rp_testconfigs.json"/>
+	<parameter name="opTestConfigs"  value="src/test/resources/op_testconfigs.json"/>
+
+	<test name="it">
+		<packages>
+			<package name="de.rub.nds.oidc.it"/>
+		</packages>
+	</test>
+
+	<test name="unit-tests">
+		<groups>
+			<run>
+				<include name="unittests" />
+				<exclude name="docker-[or]p*" />
+				<exclude name="[ro]p-it" />
+			</run>
+		</groups>
+		<packages>
+			<package name="de.rub.nds.oidc.utils"/>
+		</packages>
+	</test>
+
+</suite>

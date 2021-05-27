@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2016 Ruhr-Universität Bochum.
+ * Copyright 2016-2019 Ruhr-Universität Bochum.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,41 +16,44 @@
 
 package de.rub.nds.oidc.learn;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import de.rub.nds.oidc.TestPlanList;
-import de.rub.nds.oidc.server.OPIVConfig;
-import de.rub.nds.oidc.test_model.TestObjectType;
-import de.rub.nds.oidc.test_model.TestPlanType;
-import de.rub.nds.oidc.test_model.TestRPConfigType;
-import de.rub.nds.oidc.test_model.TestReportType;
-import de.rub.nds.oidc.test_model.TestStepResult;
-import de.rub.nds.oidc.test_model.TestStepResultType;
-import de.rub.nds.oidc.test_model.TestStepType;
-import java.util.HashMap;
-import java.util.Map;
+import de.rub.nds.oidc.server.ProfConfig;
+import de.rub.nds.oidc.test_model.*;
+
 import javax.annotation.Nonnull;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.PostConstruct;
+
 
 /**
- *
  * @author Tobias Wich
  */
 @ApplicationScoped
 public class TestRunnerRegistry {
 
-	private final Map<String, TestRunner> testObjects;
+	private Cache<String, TestRunner> testObjects;
 
-	private OPIVConfig hosts;
+	private ProfConfig cfg;
 	private TestPlanList planList;
 	private TemplateEngine te;
 
-	public TestRunnerRegistry() {
-		this.testObjects = new HashMap<>();
+	@PostConstruct
+	void init() {
+		int maxAge = cfg.getSessionLifetime();
+		TimeUnit maxAgeUnit = TimeUnit.MINUTES;
+		testObjects = CacheBuilder.newBuilder()
+				.expireAfterAccess(maxAge, maxAgeUnit)
+				.build();
 	}
 
+
 	@Inject
-	public void setHosts(OPIVConfig hosts) {
-		this.hosts = hosts;
+	public void setConfig(ProfConfig cfg) {
+		this.cfg = cfg;
 	}
 
 	@Inject
@@ -66,11 +69,21 @@ public class TestRunnerRegistry {
 	public TestRunner createRPTestObject(String testId) {
 		// load plan
 		TestPlanType plan = planList.getRPTestPlan();
+		return registerTestObject(testId, plan);
+	}
+
+	public TestRunner createOPTestObject(String testId) {
+		// load plan
+		TestPlanType plan = planList.getOPTestPlan();
+		return registerTestObject(testId, plan);
+	}
+
+	private TestRunner registerTestObject(String testId, TestPlanType plan) {
 		// create test object
 		TestObjectType to = createTestObject(testId, plan);
 
 		// set both in a testobject instance and save it
-		TestRunner toi = new TestRunner(hosts, to, plan, te);
+		TestRunner toi = new TestRunner(cfg, to, plan, te);
 		testObjects.put(testId, toi);
 
 		return toi;
@@ -80,7 +93,12 @@ public class TestRunnerRegistry {
 		// create empty test object
 		TestObjectType to = new TestObjectType();
 		to.setTestId(testId);
-		to.setTestRPConfig(createTestRPConfig(testId));
+
+		if (plan.getName().equals("RP-Test-Plan")) {
+			to.setTestConfig(createTestRPConfig(testId));
+		} else if (plan.getName().equals("OP-Test-Plan")) {
+			to.setTestConfig(createTestOPConfig(testId));
+		}
 
 		// load plan
 		to.setTestPlanReference(plan.getName());
@@ -106,7 +124,7 @@ public class TestRunnerRegistry {
 
 	@Nonnull
 	public TestRunner getTestObject(@Nonnull String testId) throws NoSuchTestObject {
-		TestRunner inst = testObjects.get(testId);
+		TestRunner inst = testObjects.getIfPresent(testId);
 		if (inst == null) {
 			throw new NoSuchTestObject("Failed to retrieve TestObject for testId " + testId + ".");
 		} else {
@@ -114,12 +132,27 @@ public class TestRunnerRegistry {
 		}
 	}
 
+	protected void deleteTestObject(@Nonnull String testId) {
+		testObjects.invalidate(testId);
+	}
+
+	public boolean isAllowCustomTestIds() {
+		return cfg.getEndpointCfg().isAllowCustomTestIDs();
+	} 
+
 	private TestRPConfigType createTestRPConfig(String testId) {
 		TestRPConfigType testCfg = new TestRPConfigType();
-		testCfg.setHonestWebfingerResourceId(hosts.getHonestOPScheme() + "://" + hosts.getHonestOPHost() + "/" + testId);
-		testCfg.setEvilWebfingerResourceId(hosts.getEvilOPScheme() + "://" + hosts.getEvilOPHost() + "/" + testId);
-
+		testCfg.setType(TestRPConfigType.class.getName());
+		testCfg.setHonestWebfingerResourceId(cfg.getEndpointCfg().getHonestOPUri() + testId);
+		testCfg.setEvilWebfingerResourceId(cfg.getEndpointCfg().getEvilOPUri() + testId);
 		return testCfg;
 	}
 
+	private TestOPConfigType createTestOPConfig(String testId) {
+		TestOPConfigType testCfg = new TestOPConfigType();
+		testCfg.setType(TestOPConfigType.class.getName());
+		testCfg.setHonestRpResourceId(cfg.getEndpointCfg().getHonestRPUri() + testId);
+		testCfg.setEvilRpResourceId(cfg.getEndpointCfg().getEvilRPUri() + testId);
+		return testCfg;
+	}
 }

@@ -13,3 +13,5 @@ nb-configuration.xml
 /npm-debug.log
 /node_modules
 /bower_components
+/docker/professos/build/
+/docker/config/cloudflare.conf

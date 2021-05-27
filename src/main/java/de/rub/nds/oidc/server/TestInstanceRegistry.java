@@ -33,12 +33,14 @@ public class TestInstanceRegistry {
 
 	private final Map<String, ServerInstance<OPInstance>> op1s;
 	private final Map<String, ServerInstance<OPInstance>> op2s;
-	private final Map<String, ServerInstance<RPInstance>> rps;
+	private final Map<String, ServerInstance<RPInstance>> rp1s;
+	private final Map<String, ServerInstance<RPInstance>> rp2s;
 
 	public TestInstanceRegistry() {
 		this.op1s = new TreeMap<>();
 		this.op2s = new TreeMap<>();
-		this.rps = new TreeMap<>();
+		this.rp1s = new TreeMap<>();
+		this.rp2s = new TreeMap<>();
 	}
 
 	public void addOP1(String testId, ServerInstance<OPInstance> inst) {
@@ -51,8 +53,13 @@ public class TestInstanceRegistry {
 		inst.getInst().getImpl().setTestId(testId);
 	}
 
-	public void addRP(String testId, ServerInstance<RPInstance> inst) {
-		rps.put(testId, inst);
+	public void addRP1(String testId, ServerInstance<RPInstance> inst) {
+		inst.getInst().getImpl().setTestId(testId);
+		rp1s.put(testId, inst);
+	}
+	public void addRP2(String testId, ServerInstance<RPInstance> inst) {
+		inst.getInst().getImpl().setTestId(testId);
+		rp2s.put(testId, inst);
 	}
 
 	public void removeOP1(String testId) {
@@ -63,8 +70,12 @@ public class TestInstanceRegistry {
 		op2s.remove(testId);
 	}
 
-	public void removeRP(String testId) {
-		rps.remove(testId);
+	public void removeRP1(String testId) {
+		rp1s.remove(testId);
+	}
+
+	public void removeRP2(String testId) {
+		rp2s.remove(testId);
 	}
 
 	private <T> Supplier<ServerInstance<T>> getInstance(Map<String, ServerInstance<T>> reg, String testId) {
@@ -101,17 +112,30 @@ public class TestInstanceRegistry {
 		return getInstances(op2s);
 	}
 
-	public ServerInstance<RPInstance> getRP(String testId) throws ServerInstanceMissingException {
-		ServerInstance<RPInstance> result = getRPSupplier().apply(testId);
+	public ServerInstance<RPInstance> getRP1(String testId) throws ServerInstanceMissingException {
+		ServerInstance<RPInstance> result = getRP1Supplier().apply(testId);
 		if (result == null) {
-			throw createException("RP", testId);
+			throw createException("RP-1", testId);
 		} else {
 			return result;
 		}
 	}
 
-	public Function<String, ServerInstance<RPInstance>> getRPSupplier() {
-		return getInstances(rps);
+	public ServerInstance<RPInstance> getRP2(String testId) throws ServerInstanceMissingException {
+		ServerInstance<RPInstance> result = getRP2Supplier().apply(testId);
+		if (result == null) {
+			throw createException("RP-2", testId);
+		} else {
+			return result;
+		}
+	}
+
+	public Function<String, ServerInstance<RPInstance>> getRP1Supplier() {
+		return getInstances(rp1s);
+	}
+
+	public Function<String, ServerInstance<RPInstance>> getRP2Supplier() {
+		return getInstances(rp2s);
 	}
 
 	private ServerInstanceMissingException createException(String name, String testId) {

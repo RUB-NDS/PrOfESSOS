@@ -16,10 +16,60 @@
 
 package de.rub.nds.oidc.server.rp;
 
-/**
- *
- * @author Tobias Wich
- */
+import com.nimbusds.oauth2.sdk.ParseException;
+import de.rub.nds.oidc.log.TestStepLogger;
+import de.rub.nds.oidc.server.InvalidConfigurationException;
+import de.rub.nds.oidc.server.OPIVConfig;
+import de.rub.nds.oidc.server.RequestPath;
+import de.rub.nds.oidc.server.TestNotApplicableException;
+import de.rub.nds.oidc.test_model.ParameterType;
+import de.rub.nds.oidc.test_model.RPConfigType;
+import de.rub.nds.oidc.test_model.TestOPConfigType;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
+
 public interface RPImplementation {
+
+	String REDIRECT_PATH = "/callback";
+	String JWKS_PATH = "/jwks";
+
+
+	void setRPConfig(RPConfigType cfg);
+
+	void setOPIVConfig(OPIVConfig cfg);
+
+	void setLogger(TestStepLogger logger);
+
+	void setTestId(String testId);
+
+	void setBaseUri(URI baseUri);
+
+	void setRPType(RPType type);
+	RPType getRPType();
+
+	void setContext(Map<String, Object> suiteCtx, Map<String, Object> stepCtx);
+
+	void setParameters(List<ParameterType> params);
+
+	void setTestOPConfig(TestOPConfigType cfg);
+
+	void runTestStepSetup() throws ParseException, IOException, InvalidConfigurationException, TestNotApplicableException;
+
+	void prepareAuthnReq();
+
+	// serve redirect_uri
+	void callback(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException, URISyntaxException, ParseException;
+
+	void jwks(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+
+	// TODO: add endpoints for request_uri, sector_identifier_uri, ?
+//	void requestUri(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
+//	void sectorIdentifierUri(RequestPath path, HttpServletRequest req, HttpServletResponse resp) throws IOException;
 
 }

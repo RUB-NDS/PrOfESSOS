@@ -1,0 +1,50 @@
+version: '3.6'
+
+services:
+  prof-apache:
+    networks:
+      profnet:
+        aliases:
+          - controller.org
+          - honestop.org
+          - honestrp.org
+          - evilop.org
+          - evilrp.org
+          - testop.org
+          - testrp.org
+    build:
+      args:
+        CONTROLLER_HOST: controller.org
+        HONEST_OP_HOST: honestop.org
+        EVIL_OP_HOST: evilop.org
+        HONEST_RP_HOST: honestrp.org
+        EVIL_RP_HOST: evilrp.org
+        TEST_RP_HOST: testrp.org
+        TEST_OP_HOST: testop.org
+
+  prof:
+    build:
+      args:
+        CONTROLLER_HOST: controller.org
+        HONEST_OP_HOST: honestop.org
+        EVIL_OP_HOST: evilop.org
+        HONEST_RP_HOST: honestrp.org
+        EVIL_RP_HOST: evilrp.org
+        TEST_RP_HOST: testrp.org
+        TEST_OP_HOST: testop.org
+
+  test-rp:
+    build:
+      args:
+        CONTROLLER_URL: https://controller.org
+        TEST_RP_HOST: testrp.org
+
+  test-op:
+    build:
+      args:
+        ISSUER: testop.org
+        CONTROLLER_URL: https://controller.org
+        TEST_OP_HOST: testop.org
+
+networks:
+  profnet:

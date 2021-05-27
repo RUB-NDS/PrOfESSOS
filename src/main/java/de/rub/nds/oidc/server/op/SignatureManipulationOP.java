@@ -37,18 +37,21 @@ import net.minidev.json.JSONObject;
 public class SignatureManipulationOP extends DefaultOP {
 
 	@Override
-	protected JWT getIdToken(ClientID clientId, Nonce nonce, AccessTokenHash atHash, CodeHash cHash)
+	public JWT getIdToken(ClientID clientId, Nonce nonce, AccessTokenHash atHash, CodeHash cHash)
 			throws GeneralSecurityException, JOSEException, ParseException {
 		JWT jwt = super.getIdToken(clientId, nonce, atHash, cHash);
 		SignedJWT origJwt = (SignedJWT) jwt;
 
 		boolean sigInvalid = params.getBool(OPParameterConstants.FORCE_TOKEN_SIG_INVALID);
-		boolean sigNone = params.getBool(OPParameterConstants.FORCE_TOKEN_SIG_NONE);
+		boolean sigNone = params.getBool(OPParameterConstants.FORCE_TOKEN_SIG_NONE)
+					|| params.getBool(OPParameterConstants.FORCE_TOKEN_SIG_NONE_MIXEDCASE);
+
+		String noneKey = params.getBool(OPParameterConstants.FORCE_TOKEN_SIG_NONE_MIXEDCASE) ? "NoNe" : "none";
 
 		try {
 			if (sigInvalid && sigNone) {
 				JSONObject newHdr = origJwt.getHeader().toJSONObject();
-				newHdr.replace("alg", "none");
+				newHdr.replace("alg", noneKey);
 				Base64URL newHdr64 = Base64URL.encode(newHdr.toString());
 
 				Base64URL newSig64 = origJwt.getSignature();
@@ -71,7 +74,7 @@ public class SignatureManipulationOP extends DefaultOP {
 				return newJwt;
 			} else if (sigNone) {
 				JSONObject newHdr = origJwt.getHeader().toJSONObject();
-				newHdr.replace("alg", "none");
+				newHdr.replace("alg", noneKey);
 				newHdr.remove("jwk");
 				Base64URL newHdr64 = Base64URL.encode(newHdr.toString());
 

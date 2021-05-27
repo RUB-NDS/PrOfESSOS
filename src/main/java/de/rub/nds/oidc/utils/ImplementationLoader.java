@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright 2016 Ruhr-Universität Bochum.
+ * Copyright 2016-2019 Ruhr-Universität Bochum.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package de.rub.nds.oidc.utils;
 
+import java.lang.reflect.InvocationTargetException;
+
+
 /**
  *
  * @author Tobias Wich
@@ -25,9 +28,11 @@ public class ImplementationLoader {
 	public static <T> T loadClassInstance(String clazz, Class<T> iface) throws ImplementationLoadException {
 		try {
 			Class<?> classInst = ImplementationLoader.class.getClassLoader().loadClass(clazz);
-			Object newInstance = classInst.newInstance();
+			Object newInstance = classInst.getConstructor().newInstance();
 			return iface.cast(newInstance);
-		} catch (ClassNotFoundException | IllegalAccessException | InstantiationException ex) {
+		} catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException ex) {
+			throw new ImplementationLoadException("Failed to load class and constructor.", ex);
+		} catch (InvocationTargetException | InstantiationException ex) {
 			throw new ImplementationLoadException("Failed to instantiate class.", ex);
 		}
 	}

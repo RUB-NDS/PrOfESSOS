@@ -1,0 +1,16 @@
+[
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Obtaining permission to perform test from url 'http:\/\/honestidp.de:8080\/.professos'.","Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"${json-unit.regex}Storing generated CodeVerifier: [\\p{Alnum}-_]+","Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Redirect URI Manipulation Browser started","Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":{"Description":"Authentication Request URL:","Content":"${json-unit.regex}http:\/\/honestidp.de:8080\/oidc-server\/authorize\\?scope=openid\\+profile\\+email&response_type=code&redirect_uri=[\\p{Alnum}-_/:=&%\\.]+"},"Screenshot":null,"HttpResponse":null,"Text":null,"Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Login Credentials entered","Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Callback received","Date":"${json-unit.any-number}"},
+  {"HttpRequest":{"RequestLine":"${json-unit.any-string}","Header":"${json-unit.ignore}","Body":"${json-unit.ignore}"},"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":null,"Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"No consent page encountered in browser","Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":{"Description":"Final URL as seen in Browser:","Content":"${json-unit.regex}http:\/\/rp.oidc.honest-sso.de:8080\/[\\p{Alnum}-_]+\/callback\\?code=[\\p{Alnum}-_/:=&%\\.]+"},"Screenshot":null,"HttpResponse":null,"Text":null,"Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Token request prepared.","Date":"${json-unit.any-number}"},
+  {"HttpRequest":{"RequestLine":"${json-unit.any-string}","Header":"${json-unit.ignore}","Body":"${json-unit.ignore}"},"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":null,"Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":null,"Text":"Code redemption failed","Date":"${json-unit.any-number}"},
+  {"HttpRequest":null,"CodeBlock":null,"Screenshot":null,"HttpResponse":{"Status":400,"Header":"${json-unit.ignore}","Body":"${json-unit.ignore}"},"Text":null,"Date":"${json-unit.any-number}"}
+]
+  

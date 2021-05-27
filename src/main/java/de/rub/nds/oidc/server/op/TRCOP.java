@@ -26,7 +26,7 @@ import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 public class TRCOP extends DefaultOP {
 
 	@Override
-	protected String getTokenAudience(ClientID clientId) {
+	public String getTokenAudience(ClientID clientId) {
 		if (params.getBool(OPParameterConstants.FORCE_TOKEN_HONEST_AUD)) {
 			OIDCClientInformation info;
 			info = (OIDCClientInformation) suiteCtx.get(OPContextConstants.REGISTERED_CLIENT_INFO_HONEST);

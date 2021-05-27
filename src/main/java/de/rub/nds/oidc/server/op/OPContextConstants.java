@@ -22,23 +22,39 @@ package de.rub.nds.oidc.server.op;
  */
 public class OPContextConstants {
 
+	public static final String REGISTRATION_NEEDED = "dynamic_client_registration_support_needed";
+	public static final String REGISTRATION_ENFORCING_PATH_FRAGMENT = "registration_enforcing_random_path";
+	public static final String TEST_COMPLETED_IN_SUITE_CTX = "at-least-one-test-has-been-completed-in-suite";
+	public static final String TEST_RUN_NOT_FINISHED = "test-not-run-or-step-requirements-not-met";
+	
 	private static final String PFX = "op.";
 
 	public static final String REGISTERED_CLIENT_INFO_HONEST = PFX + "registered-client-info-honest";
 	public static final String REGISTERED_CLIENT_INFO_EVIL = PFX + "registered-client-info-evil";
 
+	public static final String STORED_ID_TOKEN_HONEST = PFX + "stored-honest-idtoken";
+	public static final String STORED_ID_TOKEN_EVIL = PFX + "stored-evil-idtoken";
+
+	public static final String STORED_USERINFO_RESPONSE_HONEST = PFX + "stored-honest-userinfo-responser";
+	public static final String STORED_USERINFO_RESPONSE_EVIL = PFX + "stored-evil-userinfo-responser";
+	
 	public static final String AUTH_REQ_NONCE = PFX + "auth-reg-nonce";
 
+	public static final String TOKEN_REQ_RECEIVED_AT_OP_TYPE = PFX + "token-request-received-at-op-type";
+	public static final String USERINFO_REQ_RECEIVED_AT_OP_TYPE = PFX + "userinfo-request-received-at-op-type";
+	public static final String DISCOVERY_REQUESTED_AT_OP_TYPE = PFX + "discover-request-received-at-op-type";
+	
 	public static final String TOKEN_INFORMATIONLEAK_FUTURE = PFX + "token-information-leak-future";
 	public static final String USERINFO_INFORMATIONLEAK_FUTURE = PFX + "userinfo-information-leak-future";
 
 	public static final String HONEST_CODE = PFX + "honest-code";
-	public static final String HONEST_ACCESSTOKEN = PFX + "honest-code";
+	public static final String HONEST_ACCESSTOKEN = PFX + "honest-accesstoken";
 
 	public static final String BLOCK_OP_FUTURE = PFX + "block-op-future";
+	public static final String BLOCK_BROWSER_FUTURE = PFX + "block-browser-future";
 	public static final String RELOAD_BROWSER_FUTURE = PFX + "reload-browser-future";
 
-	public static final String BLOCK_HONEST_OP_FUTURE = PFX + "block-honest-op-future";
+//	public static final String BLOCK_HONEST_OP_FUTURE = PFX + "block-honest-op-future";
 	public static final String BLOCK_EVIL_OP_FUTURE = PFX + "block-evil-op-future";
 	
 	// confusion
@@ -47,4 +63,8 @@ public class OPContextConstants {
 	public static final String AUTH_REQ_HONEST_NONCE = PFX + "auth-reg-honest-nonce";
 	public static final String AUTH_REQ_HONEST_STATE = PFX + "auth-reg-honest-state";
 
+	// key confusion
+	public static final String UNTRUSTED_KEY_REQUESTED = PFX + "untrusted-key-request-received";
+
+	public static final String SIGNING_JWK_KEYID = PFX + "enforced_kid_for_jwks_signing_key";
 }

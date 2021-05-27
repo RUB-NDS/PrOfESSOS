@@ -22,4 +22,37 @@ limitations under the License.
 
 	<display-name>OpenID Verifier</display-name>
 
+	<servlet>
+        <servlet-name>RPVerifierPage</servlet-name>
+        <jsp-file>/rp-verifier.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RPVerifierPage</servlet-name>
+        <url-pattern>/rp-verifier.html</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>OPVerifierPage</servlet-name>
+        <jsp-file>/op-verifier.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>OPVerifierPage</servlet-name>
+        <url-pattern>/op-verifier.html</url-pattern>
+    </servlet-mapping>
+
+	<servlet>
+        <servlet-name>VerifierJS</servlet-name>
+        <jsp-file>/js/verify-controller.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>VerifierJS</servlet-name>
+        <url-pattern>/js/verify-controller.js</url-pattern>
+    </servlet-mapping>
+
+	<session-config>
+		<session-timeout>60</session-timeout>
+		<cookie-config>
+			<http-only>true</http-only>
+		</cookie-config>
+	</session-config>
+
 </web-app>
